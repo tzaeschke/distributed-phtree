@@ -1,0 +1,19 @@
+# Maven
+target/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Intellij Idea
+.idea/
+*.iml
+
+# Eclipse
+.project
+.metadata
+.bin/
+.tmp/
+.settings 
