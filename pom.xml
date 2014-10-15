@@ -11,7 +11,7 @@
     <modules>
         <module>client</module>
         <module>middleware</module>
+        <module>codec</module>
+        <module>distributed-index-phtree</module>
     </modules>
-
-
 </project>
