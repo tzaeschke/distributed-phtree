@@ -17,13 +17,13 @@ import java.util.List;
 public class DefaultIndexServerHandler<K, V> extends ChannelInboundHandlerAdapter {
 
     /** The backing index*/
-    private Index<K, V> index;
+    protected Index<K, V> index;
 
     /** Encoder for responses */
-    private ResponseEncoder<K, V> encoder;
+    protected ResponseEncoder<K, V> encoder;
 
     /** Decoder for requests. */
-    private RequestDecoder<K, V> decoder;
+    protected RequestDecoder<K, V> decoder;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {

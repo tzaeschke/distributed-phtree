@@ -9,8 +9,8 @@ public class DistributedPHTreeTest {
     @Test
     public void testPutAndGet() {
         String host = "localhost";
-        int port = 2000;
-        DistributedPHTree<String> phTree = new DistributedPHTree<>(host, port);
+        int port = 8080;
+        DistributedPHTree<String> phTree = new DistributedPHTree<>(host, port, String.class);
 
         long[] key = new long[] {1, 2};
         String value = "hello";

@@ -16,8 +16,6 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
     protected MessageService service;
     protected KeyMapping<K> keyMapping;
 
-    public DistributedIndexProxy() {}
-
     @Override
     public void put(K key, V value) {
         byte[] payload = encoder.encodePut(key, value);

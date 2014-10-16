@@ -42,7 +42,8 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
 
     @Override
     public byte[] encode(V value) {
-        Output output = new Output();
+        //ToDo make the serializing buffer configurable.
+        Output output = new Output(1024);
         kryo.writeObject(output, value);
         return output.getBuffer();
     }

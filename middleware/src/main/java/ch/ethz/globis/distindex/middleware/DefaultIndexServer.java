@@ -53,6 +53,12 @@ public class DefaultIndexServer implements DistributedIndexServer {
         closeEventLoops();
     }
 
+    public static void main(String[] args) {
+        int port = 8080;
+        DefaultIndexServer server = new DefaultIndexServer(port);
+        server.run();
+    }
+
     private ServerBootstrap initServerBoostrap() {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
