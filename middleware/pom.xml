@@ -13,8 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>middleware-api</module>
-        <module>ph-tree-middleware</module>
+        <module>middleware-impl</module>
     </modules>
-
 
 </project>
