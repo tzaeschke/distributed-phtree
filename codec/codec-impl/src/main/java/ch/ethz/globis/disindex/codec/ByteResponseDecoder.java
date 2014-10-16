@@ -1,31 +1,36 @@
 package ch.ethz.globis.disindex.codec;
 
+import ch.ethz.globis.distindex.codec.FieldDecoder;
+import ch.ethz.globis.distindex.codec.FieldEncoder;
 import ch.ethz.globis.distindex.codec.ResponseDecoder;
 
 import java.util.List;
 
-/**
- * Created by bvancea on 15.10.14.
- */
 public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
+
+    FieldDecoder<V> valueDecoder;
+
+    public ByteResponseDecoder(FieldDecoder<V> valueDecoder) {
+        this.valueDecoder = valueDecoder;
+    }
 
     @Override
     public V decodePut(byte[] payload) {
-        return null;
+        return valueDecoder.decode(payload);
     }
 
     @Override
     public V decodeGet(byte[] payload) {
-        return null;
+        return valueDecoder.decode(payload);
     }
 
     @Override
     public List<V> decodeGetRange(List<byte[]> payload) {
-        return null;
+        throw new UnsupportedOperationException("Operation not yet implemented");
     }
 
     @Override
     public List<V> decodeGetKNN(List<byte[]> payload) {
-        return null;
+        throw new UnsupportedOperationException("Operation not yet implemented");
     }
 }
