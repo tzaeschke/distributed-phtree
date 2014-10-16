@@ -9,23 +9,29 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>distributed-index-phtree</artifactId>
+    <artifactId>codec-impl</artifactId>
+
+    <properties>
+        <kryo.version>2.24.0</kryo.version>
+        <boon.version>0.28</boon.version>
+        <junit.version>4.11</junit.version>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>codec</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo</artifactId>
+            <version>${kryo.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>client-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>middleware-impl</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.fastjson</groupId>
+            <artifactId>boon</artifactId>
+            <version>${boon.version}</version>
         </dependency>
     </dependencies>
 </project>

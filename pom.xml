@@ -9,9 +9,9 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>client</module>
-        <module>middleware</module>
-        <module>codec</module>
+        <module>client-core</module>
+        <module>middleware-impl</module>
+        <module>codec-impl</module>
         <module>distributed-index-phtree</module>
     </modules>
 </project>
