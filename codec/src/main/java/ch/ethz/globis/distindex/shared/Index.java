@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.client;
+package ch.ethz.globis.distindex.shared;
 
 import java.util.Iterator;
 import java.util.List;

@@ -1,5 +1,6 @@
-package ch.ethz.globis.distindex.server;
+package ch.ethz.globis.distindex.middleware;
 
+import ch.ethz.globis.distindex.middleware.api.DistributedIndexServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;

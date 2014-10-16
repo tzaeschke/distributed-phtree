@@ -1,13 +1,29 @@
-package ch.ethz.globis.distindex.server;
+package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.disindex.codec.RequestCode;
+import ch.ethz.globis.disindex.codec.api.RequestDecoder;
+import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
+import ch.ethz.globis.disindex.codec.util.Pair;
+import ch.ethz.globis.distindex.shared.Index;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class DefaultIndexServerHandler extends ChannelInboundHandlerAdapter {
+import java.util.List;
+
+public class DefaultIndexServerHandler<K, V> extends ChannelInboundHandlerAdapter {
+
+    /** The backing index*/
+    private Index<K, V> index;
+
+    /** Encoder for responses */
+    private ResponseEncoder<K, V> encoder;
+
+    /** Decoder for requests. */
+    private RequestDecoder<K, V> decoder;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -18,7 +34,7 @@ public class DefaultIndexServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
-        int messageCode = getMessageCode(buf);
+        byte messageCode = getMessageCode(buf);
 
         ByteBuf response;
         switch (messageCode) {
@@ -41,19 +57,37 @@ public class DefaultIndexServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private ByteBuf handleGetRequest(ByteBuf buf) {
-        return emptyBuffer();
+        K key = decoder.decodeGet(buf.nioBuffer());
+        V value = index.get(key);
+
+        byte[] response = encoder.encodeGet(value);
+        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleGetRangeRequest(ByteBuf buf) {
-        return emptyBuffer();
+        Pair<K, K> range = decoder.decodeGetRange(buf.nioBuffer());
+        List<V> values = index.getRange(range.getFirst(), range.getSecond());
+
+        byte[] response = encoder.encodeGetRange(values);
+        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleGetKNNRequest(ByteBuf buf) {
-        return emptyBuffer();
+        Pair<K, Integer> range = decoder.decodeGetKNN(buf.nioBuffer());
+        List<V> values = index.getNearestNeighbors(range.getFirst(), range.getSecond());
+
+        byte[] response = encoder.encodeGetRange(values);
+        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handlePutRequest(ByteBuf buf) {
-        return emptyBuffer();
+        Pair<K, V> entry = decoder.decodePut(buf.nioBuffer());
+        K key = entry.getFirst();
+        V value = entry.getSecond();
+        index.put(key, value);
+
+        byte[] response = encoder.encodePut(key, value);
+        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleErroneousRequest(ByteBuf buf) {
@@ -71,7 +105,7 @@ public class DefaultIndexServerHandler extends ChannelInboundHandlerAdapter {
         cause.printStackTrace();
     }
 
-    private int getMessageCode(ByteBuf buf) {
-        return 0;
+    private byte getMessageCode(ByteBuf buf) {
+        return buf.getByte(0);
     }
 }

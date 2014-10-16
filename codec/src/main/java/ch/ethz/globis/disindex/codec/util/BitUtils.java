@@ -1,4 +1,4 @@
-package util;
+package ch.ethz.globis.disindex.codec.util;
 
 /**
  * Utilities for processing bits.
@@ -17,6 +17,13 @@ public class BitUtils {
         }
     }
 
+    /**
+     * Convert an integer to a byte[] array. The byte[] array is composed of the
+     * bytes backing the integer, in big ending notation.
+     *
+     * @param value                 The input integer.
+     * @return                      The array of bytes representing the integer.
+     */
     public static byte[] toByteArray(int value) {
         int intByteSize = 4;
         byte[] byteArray = new byte[intByteSize];

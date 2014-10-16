@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.server;
+package ch.ethz.globis.distindex.middleware;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

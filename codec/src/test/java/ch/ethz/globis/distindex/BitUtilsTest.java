@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex;
 
-import util.BitUtils;
+import ch.ethz.globis.disindex.codec.util.BitUtils;
 import org.junit.Test;
 
 import java.util.Arrays;

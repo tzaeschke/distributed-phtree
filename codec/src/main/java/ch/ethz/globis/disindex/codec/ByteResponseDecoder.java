@@ -5,6 +5,12 @@ import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 
 import java.util.List;
 
+/**
+ * Decodes response messages sent by the server to the client.
+ *
+ * @param <K>                   The type of the key.
+ * @param <V>                   The type of the value.
+ */
 public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
 
     FieldDecoder<V> valueDecoder;

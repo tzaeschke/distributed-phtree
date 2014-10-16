@@ -4,18 +4,19 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.client.mapping.KeyMapping;
 import ch.ethz.globis.distindex.client.service.MessageService;
+import ch.ethz.globis.distindex.shared.Index;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class DistributedIndex<K, V> implements Index<K, V> {
+public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
     protected MessageService service;
     protected KeyMapping<K> keyMapping;
 
-    public DistributedIndex() {}
+    public DistributedIndexProxy() {}
 
     @Override
     public void put(K key, V value) {

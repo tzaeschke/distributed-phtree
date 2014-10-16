@@ -5,6 +5,12 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Encodes request messages from the client.
+ *
+ * @param <K>                   The type of the key.
+ * @param <V>                   The type of the value.
+ */
 public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
 
     private FieldEncoder<K> keyEncoder;
