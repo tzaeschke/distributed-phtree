@@ -9,11 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>codec-impl</artifactId>
+    <artifactId>codec</artifactId>
+    <name>Codec library</name>
 
     <properties>
         <kryo.version>2.24.0</kryo.version>
-        <boon.version>0.28</boon.version>
         <junit.version>4.11</junit.version>
     </properties>
 
@@ -27,11 +27,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.fastjson</groupId>
-            <artifactId>boon</artifactId>
-            <version>${boon.version}</version>
         </dependency>
     </dependencies>
 </project>

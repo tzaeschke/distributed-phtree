@@ -8,10 +8,24 @@
     <artifactId>distributed-index</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
+    <name>Distributed PH-Tree Multi-Dimension Index</name>
+    <description>
+        This is a Master's Thesis project. It consists in the distribution and parallelization of the PHTree Multidimensional Index
+    </description>
+
     <modules>
         <module>client</module>
         <module>middleware</module>
         <module>codec</module>
         <module>phtree-integration</module>
     </modules>
+
+    <developers>
+        <developer>
+            <id>bvancea</id>
+            <name>Bogdan Vancea</name>
+            <email>bvancea at student.ethz.ch</email>
+        </developer>
+    </developers>
 </project>

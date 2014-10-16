@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>distributed-index-phtree</artifactId>
+    <name>PHTree Integration</name>
 
     <dependencies>
         <dependency>
@@ -19,12 +20,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>client-core</artifactId>
+            <artifactId>client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>middleware-impl</artifactId>
+            <artifactId>middleware</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

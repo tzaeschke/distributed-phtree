@@ -9,12 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>client-core</artifactId>
+    <artifactId>client</artifactId>
+    <name>Client library</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>codec-impl</artifactId>
+            <artifactId>codec</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
