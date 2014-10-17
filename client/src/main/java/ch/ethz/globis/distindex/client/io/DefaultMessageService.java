@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation of the message service using java sockets.
@@ -15,6 +17,7 @@ import java.util.List;
 public class DefaultMessageService implements MessageService {
 
     private int port;
+    private Map<String, Socket> connections = new HashMap<>();
 
     public DefaultMessageService(int port) {
         this.port = port;
@@ -22,11 +25,13 @@ public class DefaultMessageService implements MessageService {
 
     @Override
     public byte[] sendAndReceive(String host, byte[] payload) {
-        Socket socket = null;
+        Socket socket = connections.get(host);
         byte[] response = new byte[1024];
         try {
-            socket = new Socket(host, port);
-
+            if (socket == null) {
+                socket = new Socket(host, port);
+                connections.put(host, socket);
+            }
             OutputStream out = socket.getOutputStream();
             out.write(payload);
 
@@ -34,8 +39,10 @@ public class DefaultMessageService implements MessageService {
             in.read(response);
         } catch (IOException e) {
             System.err.format("Failed to send message to remote host: %s", host);
-        } finally {
+            e.printStackTrace();
             closeSocketGracefully(socket);
+        } finally {
+            //closeSocketGracefully(socket);
         }
         return response;
     }

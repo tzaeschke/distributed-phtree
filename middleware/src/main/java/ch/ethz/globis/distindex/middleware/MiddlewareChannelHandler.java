@@ -4,6 +4,7 @@ import ch.ethz.globis.disindex.codec.RequestCode;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.Pair;
+import ch.ethz.globis.distindex.middleware.pht.PHTreeIndexAdaptor;
 import ch.ethz.globis.distindex.shared.Index;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -13,8 +14,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.util.List;
+import java.util.Properties;
 
-public class DefaultIndexServerHandler<K, V> extends ChannelInboundHandlerAdapter {
+public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandlerAdapter {
 
     /** The backing index*/
     protected Index<K, V> index;
@@ -24,6 +26,14 @@ public class DefaultIndexServerHandler<K, V> extends ChannelInboundHandlerAdapte
 
     /** Decoder for requests. */
     protected RequestDecoder<K, V> decoder;
+
+    protected MiddlewareChannelHandler(Index<K, V> index,
+                                       ResponseEncoder<K, V> encoder,
+                                       RequestDecoder<K, V> decoder) {
+        this.index = index;
+        this.encoder = encoder;
+        this.decoder = decoder;
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -106,6 +116,6 @@ public class DefaultIndexServerHandler<K, V> extends ChannelInboundHandlerAdapte
     }
 
     private byte getMessageCode(ByteBuf buf) {
-        return buf.getByte(0);
+        return buf.readByte();
     }
 }

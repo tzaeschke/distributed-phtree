@@ -30,10 +30,10 @@ public class ByteResponseEncoder<K, V> implements ResponseEncoder<K, V>{
 
         int keyBytesSize = keyBytes.length;
         int valueBytesSize = valueBytes.length;
-        ByteBuffer buffer = ByteBuffer.allocate(keyBytesSize + valueBytesSize + 8);
-        buffer.putInt(keyBytesSize);
-        buffer.put(keyBytes);
-        buffer.putInt(valueBytesSize);
+        ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
+//        buffer.putInt(keyBytesSize);
+//        buffer.put(keyBytes);
+//        buffer.putInt(valueBytesSize);
         buffer.put(valueBytes);
 
         return buffer.array();
@@ -43,8 +43,8 @@ public class ByteResponseEncoder<K, V> implements ResponseEncoder<K, V>{
     public byte[] encodeGet(V value) {
         byte[] valueBytes = valueEncoder.encode(value);
         int valueBytesSize = valueBytes.length;
-        ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize + 4);
-        buffer.putInt(valueBytesSize);
+        ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
+//        buffer.putInt(valueBytesSize);
         buffer.put(valueBytes);
 
         return buffer.array();

@@ -2,10 +2,13 @@ package ch.ethz.globis.disindex.codec.field;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.ByteBufferOutput;
+import com.esotericsoftware.kryo.io.FastOutput;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Generic Encoder - Decoder for any type of fields. The encoding/decoding is done using
@@ -45,6 +48,8 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
         //ToDo make the serializing buffer configurable.
         Output output = new Output(1024);
         kryo.writeObject(output, value);
-        return output.getBuffer();
+        int position = output.position();
+
+        return Arrays.copyOf(output.getBuffer(), position);
     }
 }

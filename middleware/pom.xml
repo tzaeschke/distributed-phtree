@@ -6,15 +6,12 @@
         <artifactId>distributed-index</artifactId>
         <groupId>ch.ethz.globis</groupId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>middleware</artifactId>
     <name>Middleware library</name>
-
-    <properties>
-        <netty.version>4.0.23.Final</netty.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -27,5 +24,36 @@
             <artifactId>netty-all</artifactId>
             <version>${netty.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ch.ethz.globis.pht</groupId>
+            <artifactId>phtree</artifactId>
+            <version>${phtree.version}</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Install the phtree jar directly into the m2 repository when compiling -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>ch.ethz.globis.pht</groupId>
+                            <artifactId>phtree</artifactId>
+                            <version>${phtree.version}</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/phtree-${phtree.version}.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

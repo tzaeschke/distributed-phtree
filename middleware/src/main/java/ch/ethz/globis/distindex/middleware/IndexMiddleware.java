@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware;
 
-import ch.ethz.globis.distindex.middleware.api.DistributedIndexServer;
+import ch.ethz.globis.distindex.middleware.api.Middleware;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -9,12 +9,18 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
+import java.util.Properties;
+
 /**
  * Distributed Index Server implemented using Netty.io
  */
-public class DefaultIndexServer implements DistributedIndexServer {
+public class IndexMiddleware<V> implements Middleware, Runnable {
 
     private int port;
+
+    private boolean isRunning = false;
+
+    private Properties properties;
 
     /** The thread pool dealing with receiving data over network */
     private EventLoopGroup bossGroup;
@@ -22,8 +28,9 @@ public class DefaultIndexServer implements DistributedIndexServer {
     /** The thread pool dealing with handling the data received */
     private EventLoopGroup workerGroup;
 
-    public DefaultIndexServer(int port) {
+    public IndexMiddleware(int port, Properties properties) {
         this.port = port;
+        this.properties = properties;
     }
 
     @Override
@@ -32,9 +39,11 @@ public class DefaultIndexServer implements DistributedIndexServer {
         workerGroup = new NioEventLoopGroup();
 
         try {
-            ServerBootstrap b = initServerBoostrap();
+            ServerBootstrap b = initServerBootstrap(properties);
 
             ChannelFuture f = b.bind(port).sync();
+
+            isRunning = true;
 
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
@@ -53,18 +62,17 @@ public class DefaultIndexServer implements DistributedIndexServer {
         closeEventLoops();
     }
 
-    public static void main(String[] args) {
-        int port = 8080;
-        DefaultIndexServer server = new DefaultIndexServer(port);
-        server.run();
+    @Override
+    public boolean isRunning() {
+        return isRunning;
     }
 
-    private ServerBootstrap initServerBoostrap() {
+    private ServerBootstrap initServerBootstrap(Properties properties) {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new DefaultServerChannelInitializer());
+                .childHandler(new MiddlewareChannelInitializer<V>(properties));
         return b;
     }
 

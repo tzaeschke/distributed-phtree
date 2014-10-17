@@ -3,6 +3,7 @@ package ch.ethz.globis.disindex.codec;
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**

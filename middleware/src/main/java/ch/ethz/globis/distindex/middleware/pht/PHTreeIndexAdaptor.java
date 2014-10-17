@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.phtree.middleware;
+package ch.ethz.globis.distindex.middleware.pht;
 
 
 import ch.ethz.globis.distindex.shared.MultiDimVIndex;
@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PHTreeIndex<V> implements MultiDimVIndex<V> {
+public class PHTreeIndexAdaptor<V> implements MultiDimVIndex<V> {
 
     private PhTreeV<V> tree;
 
-    public PHTreeIndex(int dim, int depth) {
+    public PHTreeIndexAdaptor(int dim, int depth) {
         tree = new PhTree3<>(dim, depth);
     }
 
