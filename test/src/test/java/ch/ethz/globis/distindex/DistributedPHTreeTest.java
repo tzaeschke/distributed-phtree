@@ -75,9 +75,7 @@ public class DistributedPHTreeTest {
                 key = new long[]{random.nextLong(), random.nextLong(), random.nextLong()};
                 value = new BigInteger(50, random);
                 phTree.put(key, value);
-                try {
-                    assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
-                } catch (Exception e) {}
+                assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
             }
 
         } finally {
