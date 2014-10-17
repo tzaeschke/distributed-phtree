@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.middleware;
+package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import io.netty.bootstrap.ServerBootstrap;
@@ -16,10 +16,13 @@ import java.util.Properties;
  */
 public class IndexMiddleware<V> implements Middleware, Runnable {
 
+    /** The port on which the middleware is running*/
     private int port;
 
+    /** A flag determining if the middleware is running or not.*/
     private boolean isRunning = false;
 
+    /** The properties used to initialize the middleware. */
     private Properties properties;
 
     /** The thread pool dealing with receiving data over network */

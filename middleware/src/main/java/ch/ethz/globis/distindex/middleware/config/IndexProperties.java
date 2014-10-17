@@ -1,5 +1,8 @@
 package ch.ethz.globis.distindex.middleware.config;
 
+/**
+ * Contains all property keys that are used to configure the index.
+ */
 public class IndexProperties {
 
     public static final String INDEX_TYPE = "index.type";

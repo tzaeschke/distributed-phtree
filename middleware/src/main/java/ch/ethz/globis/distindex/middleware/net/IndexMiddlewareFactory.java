@@ -1,9 +1,12 @@
-package ch.ethz.globis.distindex.middleware;
+package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.middleware.config.IndexProperties;
 
 import java.util.Properties;
 
+/**
+ * Utility class for creating middleware nodes programatically.
+ */
 public class IndexMiddlewareFactory {
 
     public static <V> IndexMiddleware<V> newPHTreeMiddleware(int port, int dim, int depth, Class<V> valueClass) {

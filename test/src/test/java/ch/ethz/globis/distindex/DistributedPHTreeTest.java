@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex;
 
 import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
-import ch.ethz.globis.distindex.middleware.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

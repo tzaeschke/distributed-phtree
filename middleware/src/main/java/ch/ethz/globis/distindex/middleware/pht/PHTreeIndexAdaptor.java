@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * An adaptor to the PHTree functionality.
+ *
+ * @param <V>
+ */
 public class PHTreeIndexAdaptor<V> implements MultiDimVIndex<V> {
 
     private PhTreeV<V> tree;

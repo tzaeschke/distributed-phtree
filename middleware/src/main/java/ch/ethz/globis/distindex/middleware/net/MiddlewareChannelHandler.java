@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.middleware;
+package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.disindex.codec.RequestCode;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
