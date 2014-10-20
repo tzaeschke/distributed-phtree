@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
-import ch.ethz.globis.distindex.client.mapping.KeyMapping;
+import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.client.service.MessageService;
 import ch.ethz.globis.distindex.shared.Index;
 

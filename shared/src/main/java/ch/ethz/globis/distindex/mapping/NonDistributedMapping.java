@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.client.mapping;
+package ch.ethz.globis.distindex.mapping;
 
 import java.util.ArrayList;
 import java.util.List;

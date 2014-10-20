@@ -6,7 +6,7 @@ import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.distindex.client.DistributedIndexProxy;
 import ch.ethz.globis.distindex.client.io.DefaultMessageService;
-import ch.ethz.globis.distindex.client.mapping.NonDistributedMapping;
+import ch.ethz.globis.distindex.mapping.NonDistributedMapping;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 
 public class DistributedPHTree<V> extends DistributedIndexProxy<long[], V> {

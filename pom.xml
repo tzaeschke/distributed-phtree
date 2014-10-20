@@ -32,6 +32,7 @@
         <module>middleware</module>
         <module>codec</module>
         <module>test</module>
+        <module>shared</module>
     </modules>
 
     <build>
