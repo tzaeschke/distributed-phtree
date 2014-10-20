@@ -28,4 +28,9 @@ public class NonDistributedMapping implements KeyMapping<long[]> {
     public List<String> getHostIds() {
         return hostList;
     }
+
+    @Override
+    public void add(String host) {
+        
+    }
 }

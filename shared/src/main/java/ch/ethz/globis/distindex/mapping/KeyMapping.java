@@ -26,4 +26,6 @@ public interface KeyMapping<K> {
      * @return
      */
     public List<String> getHostIds();
+
+    public void add(String host);
 }
