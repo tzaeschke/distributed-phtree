@@ -64,6 +64,7 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
                 response = handleErroneousRequest(buf);
         }
         ctx.writeAndFlush(response);
+        buf.release();
     }
 
     private ByteBuf handleGetRequest(ByteBuf buf) {
