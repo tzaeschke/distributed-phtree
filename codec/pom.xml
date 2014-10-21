@@ -14,7 +14,6 @@
 
     <properties>
         <kryo.version>2.24.0</kryo.version>
-        <junit.version>4.11</junit.version>
     </properties>
 
     <dependencies>
@@ -26,7 +25,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -22,12 +22,10 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.ethz.globis.pht</groupId>
             <artifactId>phtree</artifactId>
-            <version>${phtree.version}</version>
         </dependency>
     </dependencies>
 

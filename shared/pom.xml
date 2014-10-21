@@ -12,12 +12,11 @@
     <artifactId>shared</artifactId>
     <name>Shared Resources</name>
     <description>This module contains shared resources between the client library and the middleware</description>
+
     <properties>
         <zookeeper.version>3.4.6</zookeeper.version>
-        <junit.version>4.11</junit.version>
-        <logback.version>1.1.2</logback.version>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
@@ -37,12 +36,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
     </dependencies>
 </project>
