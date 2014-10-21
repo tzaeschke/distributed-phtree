@@ -10,4 +10,5 @@ public class IndexProperties {
     public static final String INDEX_DEPTH = "index.depth";
 
     public static final String INDEX_VALUE_CLASS = "index.value.class";
+    public static final String ZK_CONNECTION_STRING = "zk.connectionString";
 }

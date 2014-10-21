@@ -2,6 +2,8 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
+import ch.ethz.globis.distindex.ClusterService;
+import ch.ethz.globis.distindex.mapping.KeryMappingLocator;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.client.service.MessageService;
 import ch.ethz.globis.distindex.shared.Index;
@@ -14,10 +16,12 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
     protected MessageService service;
-    protected KeyMapping<K> keyMapping;
+    protected ClusterService clusterService;
 
     @Override
     public void put(K key, V value) {
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+
         byte[] payload = encoder.encodePut(key, value);
         String hostId = keyMapping.getHostId(key);
 
@@ -27,6 +31,8 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public V get(K key) {
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+
         byte[] payload = encoder.encodeGet(key);
         String hostId = keyMapping.getHostId(key);
 
@@ -36,6 +42,8 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public List<V> getRange(K start, K end) {
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+
         byte[] payload = encoder.encodeGetRange(start, end);
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
@@ -45,6 +53,8 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public List<V> getNearestNeighbors(K key, int k) {
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+
         byte[] payload = encoder.encodeGetKNN(key, k);
         List<String> hostIds = keyMapping.getHostIds();
 

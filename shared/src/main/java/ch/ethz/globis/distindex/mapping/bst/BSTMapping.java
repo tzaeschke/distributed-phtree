@@ -15,6 +15,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
         this.bst = new BST();
     }
 
+    public BSTMapping(KeyConverter<K> converter, String[] hosts) {
+        this.converter = converter;
+        this.bst = BST.fromArray(hosts);
+    }
+
     @Override
     public String getHostId(K key) {
         BSTNode node = find(key);

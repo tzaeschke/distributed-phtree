@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
+import ch.ethz.globis.distindex.ClusterService;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -8,7 +9,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 /**
@@ -16,7 +21,12 @@ import java.util.Properties;
  */
 public class IndexMiddleware<V> implements Middleware, Runnable {
 
-    /** The port on which the middleware is running*/
+    private static final Logger LOG = LoggerFactory.getLogger(IndexMiddleware.class);
+
+    /** The host on which the middleware is running */
+    private String host;
+
+    /** The port on which the middleware is running */
     private int port;
 
     /** A flag determining if the middleware is running or not.*/
@@ -31,9 +41,14 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
     /** The thread pool dealing with handling the data received */
     private EventLoopGroup workerGroup;
 
-    public IndexMiddleware(int port, Properties properties) {
+    /** The cluster service used to notify */
+    private ClusterService clusterService;
+
+    public IndexMiddleware(String host, int port, ClusterService clusterService, Properties properties) {
+        this.clusterService = clusterService;
         this.port = port;
         this.properties = properties;
+        this.host = host;
     }
 
     @Override
@@ -42,18 +57,24 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
         workerGroup = new NioEventLoopGroup();
 
         try {
+            //initialize the server channels
             ServerBootstrap b = initServerBootstrap(properties);
-
             ChannelFuture f = b.bind(port).sync();
 
+            //register as a viable host to the cluster service
+            clusterService.connect();
+            clusterService.registerHost(getHostId());
             isRunning = true;
 
             f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            System.err.format("An error occurred while operating on the channel");
-            e.printStackTrace();
+        } catch (InterruptedException ie) {
+            LOG.error("An error occurred while operating on the channel.", ie);
+            ie.printStackTrace();
         } finally {
             closeEventLoops();
+            isRunning = false;
+            //disconnect the cluster service
+            clusterService.disconnect();
         }
     }
 
@@ -62,7 +83,9 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
         if (bossGroup == null || workerGroup == null) {
             throw new IllegalStateException("The thread pools are not properly initialized");
         }
+        clusterService.disconnect();
         closeEventLoops();
+        LOG.info("Shutting down middleware {} {} ", host, port);
     }
 
     @Override
@@ -80,7 +103,15 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
     }
 
     private void closeEventLoops() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        try {
+            bossGroup.shutdownGracefully().sync();
+            workerGroup.shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getHostId() {
+        return host + ":" + port;
     }
 }

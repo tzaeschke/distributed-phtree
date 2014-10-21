@@ -37,7 +37,6 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        //ToDo send the data structure containing intervals
         super.channelActive(ctx);
     }
 

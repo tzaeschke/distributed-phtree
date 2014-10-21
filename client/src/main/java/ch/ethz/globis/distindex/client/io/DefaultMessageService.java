@@ -16,12 +16,7 @@ import java.util.Map;
  */
 public class DefaultMessageService implements MessageService {
 
-    private int port;
     private Map<String, Socket> connections = new HashMap<>();
-
-    public DefaultMessageService(int port) {
-        this.port = port;
-    }
 
     @Override
     public byte[] sendAndReceive(String host, byte[] payload) {
@@ -29,7 +24,11 @@ public class DefaultMessageService implements MessageService {
         byte[] response = new byte[1024];
         try {
             if (socket == null) {
-                socket = new Socket(host, port);
+                String[] tokens = host.split(":");
+                String hostAddress = tokens[0];
+                int port = Integer.parseInt(tokens[1]);
+
+                socket = new Socket(hostAddress, port);
                 connections.put(host, socket);
             }
             OutputStream out = socket.getOutputStream();
