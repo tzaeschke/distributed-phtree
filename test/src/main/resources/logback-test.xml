@@ -1,0 +1,20 @@
+<!--
+    Special log configuration for the integration tests
+    Ideally, all tests pass and there is no output generated when running them.
+
+    If some tests fail, the log levels can be changed to debug.
+-->
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache.zookeeper" level="ERROR" />
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
