@@ -25,8 +25,4 @@ public class DistributedPHTree<V> extends DistributedIndexProxy<long[], V> {
         clusterService = new ZKClusterService(host + ":" + port);
         clusterService.connect();
     }
-
-    public void close() {
-        clusterService.disconnect();
-    }
 }

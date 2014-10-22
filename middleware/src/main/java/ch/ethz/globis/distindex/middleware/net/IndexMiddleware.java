@@ -79,7 +79,7 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
     }
 
     @Override
-    public void shutdown() {
+    public void close() {
         if (bossGroup == null || workerGroup == null) {
             throw new IllegalStateException("The thread pools are not properly initialized");
         }

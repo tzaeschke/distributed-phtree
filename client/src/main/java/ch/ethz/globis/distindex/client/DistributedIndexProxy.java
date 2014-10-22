@@ -7,10 +7,12 @@ import ch.ethz.globis.distindex.client.service.MessageService;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.shared.Index;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-public class DistributedIndexProxy<K, V> implements Index<K, V> {
+public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable{
 
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
@@ -65,5 +67,12 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
     public Iterator<V> iterator() {
         //ToDo implement the iterator
         throw new UnsupportedOperationException("Operation is not yet implemented");
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (clusterService != null) {
+            clusterService.disconnect();
+        }
     }
 }

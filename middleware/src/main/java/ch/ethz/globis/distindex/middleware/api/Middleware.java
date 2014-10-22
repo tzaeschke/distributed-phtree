@@ -1,13 +1,13 @@
 package ch.ethz.globis.distindex.middleware.api;
 
+import java.io.Closeable;
+
 /**
  * Represents a Middleware node.
  */
-public interface Middleware {
+public interface Middleware extends Closeable, AutoCloseable {
 
     public void run();
-
-    public void shutdown();
 
     public boolean isRunning();
 }

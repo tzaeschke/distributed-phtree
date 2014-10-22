@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
+import org.apache.curator.test.TestingServer;
 import org.junit.*;
 
 import java.math.BigInteger;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 
 public class DistributedPHTreeTest {
 
-    private static final int PORT = 2181;
+    private static final int ZK_PORT = 2181;
     private static ExecutorService threadPool;
 
     @Before
@@ -30,21 +31,20 @@ public class DistributedPHTreeTest {
     }
 
     @Test
-    public void testPutAndGet2D() {
-        Middleware middleware = null;
-        Middleware second = null;
-        try {
-            int dim = 2;
-            int depth = 64;
-            String host = "localhost";
-            middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth, String.class);
-            startMiddleware(middleware);
+    public void testPutAndGet2D() throws Exception {
+        int dim = 2;
+        int depth = 64;
+        String host = "localhost";
 
-            second = IndexMiddlewareFactory.newPHTreeMiddleware(7080, dim, depth, String.class);
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth, String.class);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080, dim, depth, String.class)
+        ) {
+            zkServer.start();
+            startMiddleware(middleware);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, PORT, String.class);
-
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
             long[] key = new long[]{1L, 2L};
             String value = "hello";
             phTree.put(key, value);
@@ -56,29 +56,21 @@ public class DistributedPHTreeTest {
             phTree.put(key, value);
             retrieved = phTree.get(key);
             assertEquals("Wrong value retrieval", value, retrieved);
-
             phTree.close();
-        } finally {
-            if (middleware != null) {
-                middleware.shutdown();
-            }
-            if (second != null) {
-                second.shutdown();
-            }
         }
     }
 
     @Test
-    public void testPutAndGet3D() {
+    public void testPutAndGet3D() throws Exception {
+        int dim = 3;
+        int depth = 64;
+        String host = "localhost";
 
-        Middleware middleware = null;
-        try {
-            int dim = 3;
-            int depth = 64;
-            String host = "localhost";
-            middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth, BigInteger.class);
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+            Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth, BigInteger.class)) {
+            zkServer.start();
             startMiddleware(middleware);
-            DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, PORT, BigInteger.class);
+            DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, ZK_PORT, BigInteger.class);
 
             int nrEntries = 100000;
             Random random = new Random();
@@ -93,10 +85,6 @@ public class DistributedPHTreeTest {
             }
 
             phTree.close();
-        } finally {
-            if (middleware != null) {
-                middleware.shutdown();
-            }
         }
     }
 

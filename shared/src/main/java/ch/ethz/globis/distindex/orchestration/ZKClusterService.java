@@ -58,6 +58,8 @@ public class ZKClusterService implements ClusterService {
             List<String> children = zk.getChildren(HOSTS_PATH, mappingChangedWatcher);
             String[] hosts = children.toArray(new String[children.size()]);
             mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
+        } catch (KeeperException.NoNodeException nne) {
+            mapping = new BSTMapping<>(new LongArrayKeyConverter(), new String[] {});
         } catch (KeeperException.ConnectionLossException cle) {
             //retry
             LOG.error("Connection loss exception.", cle);
