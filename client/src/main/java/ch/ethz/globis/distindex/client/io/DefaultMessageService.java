@@ -39,7 +39,6 @@ public class DefaultMessageService implements MessageService {
         } catch (IOException e) {
             System.err.format("Failed to send message to remote host: %s", host);
             e.printStackTrace();
-            closeSocketGracefully(socket);
         } finally {
             //closeSocketGracefully(socket);
         }
