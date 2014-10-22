@@ -19,7 +19,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public void put(K key, V value) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
 
         byte[] payload = encoder.encodePut(key, value);
         String hostId = keyMapping.getHostId(key);
@@ -30,7 +30,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public V get(K key) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
 
         byte[] payload = encoder.encodeGet(key);
         String hostId = keyMapping.getHostId(key);
@@ -41,7 +41,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public List<V> getRange(K start, K end) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
 
         byte[] payload = encoder.encodeGetRange(start, end);
         List<String> hostIds = keyMapping.getHostIds(start, end);
@@ -52,7 +52,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V> {
 
     @Override
     public List<V> getNearestNeighbors(K key, int k) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.readCurrentMapping();
+        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
 
         byte[] payload = encoder.encodeGetKNN(key, k);
         List<String> hostIds = keyMapping.getHostIds();

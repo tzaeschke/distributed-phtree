@@ -31,22 +31,29 @@ public class ZKClusterService implements ClusterService {
     /** The connection string used to connect to Zookeeper. */
     private String hostPort;
 
+    /** The current mapping */
+    private KeyMapping<long[]> mapping;
+
+    private boolean isRunning = false;
+
     public ZKClusterService(String hostPort) {
         this.hostPort = hostPort;
     }
 
-    @Override
-    public KeyMapping<long[]> readCurrentMapping() {
+    public KeyMapping<long[]> getMapping() {
+        return mapping;
+    }
+
+    public void readCurrentMapping() {
         Watcher mappingChangedWatcher = new Watcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
-                if (Event.EventType.NodeChildrenChanged == watchedEvent.getType()) {
+                if (isRunning && Event.EventType.NodeChildrenChanged == watchedEvent.getType()) {
                     readCurrentMapping();
                 }
             }
         };
 
-        KeyMapping<long[]> mapping = null;
         try {
             List<String> children = zk.getChildren(HOSTS_PATH, mappingChangedWatcher);
             String[] hosts = children.toArray(new String[children.size()]);
@@ -54,12 +61,13 @@ public class ZKClusterService implements ClusterService {
         } catch (KeeperException.ConnectionLossException cle) {
             //retry
             LOG.error("Connection loss exception.", cle);
+        } catch (KeeperException.SessionExpiredException se) {
+            LOG.error("Session 0x{} is expired.", Long.toHexString(zk.getSessionId()));
         } catch (InterruptedException ie) {
             LOG.error("Connection to Zookeeper interrupted.", ie);
         } catch (KeeperException ke) {
             LOG.error("Error during communication with Zookeeper.", ke);
         }
-        return mapping;
     }
 
     @Override
@@ -103,12 +111,18 @@ public class ZKClusterService implements ClusterService {
 
     @Override
     public void connect() {
+        isRunning = true;
+
         startZK();
+
+        readCurrentMapping();
     }
 
     @Override
     public void disconnect() {
+        isRunning = false;
         stopZK();
+        LOG.info("Cluster service with zk session id 0x{} was disconnected.", Long.toHexString(zk.getSessionId()));
     }
 
     private void startZK() {

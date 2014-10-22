@@ -8,7 +8,7 @@ public interface ClusterService {
      * Reads the current key-to-machine mapping from the distributed cluster configuration.
      * @return                              The current cluster configuration.
      */
-    public KeyMapping<long[]> readCurrentMapping();
+    public KeyMapping<long[]> getMapping();
 
     /**
      * Register the host with the hostId as an index peer.
