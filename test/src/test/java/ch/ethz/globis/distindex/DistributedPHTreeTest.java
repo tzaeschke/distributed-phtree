@@ -80,7 +80,7 @@ public class DistributedPHTreeTest {
             startMiddleware(middleware);
             DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, PORT, BigInteger.class);
 
-            int nrEntries = 1000;
+            int nrEntries = 100000;
             Random random = new Random();
 
             long[] key;
