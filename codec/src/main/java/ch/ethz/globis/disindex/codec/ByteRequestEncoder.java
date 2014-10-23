@@ -29,7 +29,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         int outputSize = keyBytes.length + valueBytes.length + 9;
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(MessageCode.PUT);
+        buffer.put(OpCode.PUT);
         buffer.putInt(keyBytes.length);
         buffer.put(keyBytes);
         buffer.putInt(valueBytes.length);
@@ -44,7 +44,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
 
         int outputSize = keyBytes.length + 5;
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(MessageCode.GET);
+        buffer.put(OpCode.GET);
         buffer.putInt(keyBytes.length);
         buffer.put(keyBytes);
 
@@ -59,7 +59,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         int outputSize = startKeyBytes.length + endKeyBytes.length + 9;
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(MessageCode.GET_RANGE);
+        buffer.put(OpCode.GET_RANGE);
         buffer.putInt(startKeyBytes.length);
         buffer.put(startKeyBytes);
         buffer.putInt(endKeyBytes.length);
@@ -74,7 +74,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
 
         int outputSize = keyBytes.length + 5;
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(MessageCode.GET_KNN);
+        buffer.put(OpCode.GET_KNN);
         buffer.putInt(keyBytes.length);
         buffer.put(keyBytes);
 
@@ -85,7 +85,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     public byte[] encodeCreate(int dim, int depth) {
         int bufferSize = 9;
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        buffer.put(MessageCode.CREATE_INDEX);
+        buffer.put(OpCode.CREATE_INDEX);
         buffer.putInt(dim);
         buffer.putInt(depth);
 

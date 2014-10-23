@@ -41,6 +41,6 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
 
     @Override
     public boolean decodeCreate(byte[] payload) {
-        return (payload.length == 1 && payload[0] == MessageCode.SUCCESS);
+        return (payload.length == 1 && payload[0] == OpCode.SUCCESS);
     }
 }

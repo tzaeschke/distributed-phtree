@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 /**
  * Decodes request messages from the client.
  *
+ * The value is not decode on the server side and is inserted in the tree as is.
+ *
  * @param <K>                   The type of the key.
  */
 public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {

@@ -52,7 +52,7 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
 
     @Override
     public byte[] encoderCreate() {
-        byte[] response = new byte[] { MessageCode.CREATE_INDEX};
+        byte[] response = new byte[] { OpCode.CREATE_INDEX};
         return response;
     }
 }

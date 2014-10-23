@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.disindex.codec.MessageCode;
+import ch.ethz.globis.disindex.codec.OpCode;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.Pair;
@@ -46,19 +46,19 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
 
         ByteBuf response;
         switch (messageCode) {
-            case MessageCode.GET:
+            case OpCode.GET:
                 response = handleGetRequest(buf);
                 break;
-            case MessageCode.GET_KNN:
+            case OpCode.GET_KNN:
                 response = handleGetKNNRequest(buf);
                 break;
-            case MessageCode.GET_RANGE:
+            case OpCode.GET_RANGE:
                 response = handleGetRangeRequest(buf);
                 break;
-            case MessageCode.PUT:
+            case OpCode.PUT:
                 response = handlePutRequest(buf);
                 break;
-            case MessageCode.CREATE_INDEX:
+            case OpCode.CREATE_INDEX:
                 response = handleCreateRequest(buf);
                 break;
             default:
