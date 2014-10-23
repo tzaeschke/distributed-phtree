@@ -8,7 +8,6 @@
     <artifactId>distributed-index</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-
     <name>Distributed PH-Tree Multi-Dimension Index</name>
     <description>
         This is a Master's Thesis project. It consists in the distribution and parallelization of the PHTree Multidimensional Index
@@ -23,6 +22,10 @@
     </developers>
 
     <properties>
+        <!--Source encoding-->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--Dependency versions-->
         <netty.version>4.0.23.Final</netty.version>
         <logback.version>1.1.2</logback.version>
         <phtree.version>0.2.1-SNAPSHOT</phtree.version>
