@@ -33,11 +33,11 @@ public class MiddlewareChannelInitializer extends ChannelInitializer<SocketChann
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
 
-        if (index == null) {
-            int dim = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DIM));
-            int depth = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DEPTH));
-            index = new PHTreeIndexAdaptor<>(dim, depth);
-        }
+//        if (index == null) {
+//            int dim = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DIM));
+//            int depth = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DEPTH));
+//            index = new PHTreeIndexAdaptor<>(dim, depth);
+//        }
 
         ByteRequestDecoder<long[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
         ByteResponseEncoder<long[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());

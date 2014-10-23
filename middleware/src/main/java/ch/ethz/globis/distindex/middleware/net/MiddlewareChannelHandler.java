@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.disindex.codec.RequestCode;
+import ch.ethz.globis.disindex.codec.MessageCode;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.Pair;
@@ -14,7 +14,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.util.List;
-import java.util.Properties;
 
 public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandlerAdapter {
 
@@ -47,23 +46,33 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
 
         ByteBuf response;
         switch (messageCode) {
-            case RequestCode.GET:
+            case MessageCode.GET:
                 response = handleGetRequest(buf);
                 break;
-            case RequestCode.GET_KNN:
+            case MessageCode.GET_KNN:
                 response = handleGetKNNRequest(buf);
                 break;
-            case RequestCode.GET_RANGE:
+            case MessageCode.GET_RANGE:
                 response = handleGetRangeRequest(buf);
                 break;
-            case RequestCode.PUT:
+            case MessageCode.PUT:
                 response = handlePutRequest(buf);
+                break;
+            case MessageCode.CREATE_INDEX:
+                response = handleCreateRequest(buf);
                 break;
             default:
                 response = handleErroneousRequest(buf);
         }
         ctx.writeAndFlush(response);
         buf.release();
+    }
+
+    private ByteBuf handleCreateRequest(ByteBuf buf) {
+        Pair<Integer, Integer> pair = decoder.decodeCreate(buf.nioBuffer());
+        index = (Index<K, V>) new PHTreeIndexAdaptor<V>(pair.getFirst(), pair.getSecond());
+        byte[] response = encoder.encoderCreate();
+        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handlePutRequest(ByteBuf buf) {

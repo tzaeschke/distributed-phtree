@@ -21,4 +21,6 @@ public interface RequestDecoder<K, V> {
     public Pair<K, K> decodeGetRange(ByteBuffer buffer);
 
     public Pair<K, Integer> decodeGetKNN(ByteBuffer buffer);
+
+    public Pair<Integer, Integer> decodeCreate(ByteBuffer buffer);
 }

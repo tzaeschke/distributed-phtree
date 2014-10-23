@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Implementation of the cluster service using Zookeeper.
  */
-public class ZKClusterService implements ClusterService {
+public class ZKClusterService implements ClusterService<long[]> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZKClusterService.class);
 

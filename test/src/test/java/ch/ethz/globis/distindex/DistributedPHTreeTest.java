@@ -37,14 +37,16 @@ public class DistributedPHTreeTest {
         String host = "localhost";
 
         try (TestingServer zkServer = new TestingServer(ZK_PORT);
-             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth);
-             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080, dim, depth)
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080)
         ) {
             zkServer.start();
             startMiddleware(middleware);
             startMiddleware(second);
 
             DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
             long[] key = new long[]{1L, 2L};
             String value = "hello";
             phTree.put(key, value);
@@ -67,10 +69,11 @@ public class DistributedPHTreeTest {
         String host = "localhost";
 
         try (TestingServer zkServer = new TestingServer(ZK_PORT);
-            Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070, dim, depth)) {
+            Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
             zkServer.start();
             startMiddleware(middleware);
             DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, ZK_PORT, BigInteger.class);
+            phTree.create(dim, depth);
 
             int nrEntries = 100000;
             Random random = new Random();

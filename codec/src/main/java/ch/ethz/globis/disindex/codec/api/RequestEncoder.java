@@ -18,4 +18,6 @@ public interface RequestEncoder<K, V> {
     public byte[] encodeGetRange(K start, K end);
 
     public byte[] encodeGetKNN(K key, int k);
+
+    public byte[] encodeCreate(int dim, int depth);
 }

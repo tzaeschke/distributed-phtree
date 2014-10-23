@@ -19,4 +19,6 @@ public interface ResponseDecoder<K, V> {
     public List<V> decodeGetRange(List<byte[]> payload);
 
     public List<V> decodeGetKNN(List<byte[]> payload);
+
+    public boolean decodeCreate(byte[] payload);
 }

@@ -19,4 +19,6 @@ public interface ResponseEncoder<K, V> {
     public byte[] encodeGetRange(List<V> values);
 
     public byte[] encodeGetKNN(List<V> values);
+
+    public byte[] encoderCreate();
 }

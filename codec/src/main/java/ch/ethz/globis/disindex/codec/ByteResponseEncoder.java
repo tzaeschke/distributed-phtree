@@ -46,4 +46,10 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
     public byte[] encodeGetKNN(List<byte[]> values) {
         throw new UnsupportedOperationException("Operation is not yet implemented!");
     }
+
+    @Override
+    public byte[] encoderCreate() {
+        byte[] response = new byte[] { MessageCode.CREATE_INDEX};
+        return response;
+    }
 }

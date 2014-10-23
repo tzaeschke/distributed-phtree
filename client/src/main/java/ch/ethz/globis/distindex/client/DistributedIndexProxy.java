@@ -17,11 +17,24 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
     protected MessageService service;
-    protected ClusterService clusterService;
+    protected ClusterService<K> clusterService;
+
+    public boolean create(int dim, int depth) {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        List<String> hostIds = keyMapping.getHostIds();
+        byte[] message = encoder.encodeCreate(dim, depth);
+        List<byte[]> responses = service.sendAndReceive(hostIds, message);
+        for (byte[] response : responses) {
+            if (!decoder.decodeCreate(response)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public void put(K key, V value) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
+        KeyMapping<K> keyMapping = clusterService.getMapping();
 
         byte[] payload = encoder.encodePut(key, value);
         String hostId = keyMapping.getHostId(key);
@@ -32,7 +45,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
 
     @Override
     public V get(K key) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
+        KeyMapping<K> keyMapping = clusterService.getMapping();
 
         byte[] payload = encoder.encodeGet(key);
         String hostId = keyMapping.getHostId(key);
@@ -43,7 +56,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
 
     @Override
     public List<V> getRange(K start, K end) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
+        KeyMapping<K> keyMapping = clusterService.getMapping();
 
         byte[] payload = encoder.encodeGetRange(start, end);
         List<String> hostIds = keyMapping.getHostIds(start, end);
@@ -54,7 +67,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
 
     @Override
     public List<V> getNearestNeighbors(K key, int k) {
-        KeyMapping<K> keyMapping = (KeyMapping<K>) clusterService.getMapping();
+        KeyMapping<K> keyMapping = clusterService.getMapping();
 
         byte[] payload = encoder.encodeGetKNN(key, k);
         List<String> hostIds = keyMapping.getHostIds();

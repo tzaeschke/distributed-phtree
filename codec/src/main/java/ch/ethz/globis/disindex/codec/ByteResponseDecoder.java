@@ -2,6 +2,7 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -38,5 +39,10 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
     @Override
     public List<V> decodeGetKNN(List<byte[]> payload) {
         throw new UnsupportedOperationException("Operation not yet implemented");
+    }
+
+    @Override
+    public boolean decodeCreate(byte[] payload) {
+        return (payload.length == 1 && payload[0] == MessageCode.SUCCESS);
     }
 }

@@ -78,6 +78,13 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         return new Pair<>(key, k);
     }
 
+    @Override
+    public Pair<Integer, Integer> decodeCreate(ByteBuffer buffer) {
+        int dim = buffer.getInt();
+        int depth = buffer.getInt();
+        return new Pair<>(dim, depth);
+    }
+
     /**
      * Decode a key from the current ByteBuffer.
      *
