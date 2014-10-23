@@ -2,7 +2,10 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
+import ch.ethz.globis.distindex.shared.IndexEntry;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -55,4 +58,30 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         byte[] response = new byte[] { OpCode.CREATE_INDEX};
         return response;
     }
+
+    public ByteBuffer encode(byte opcode, List<IndexEntry<K, byte[]>> entries) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        buffer.write(opcode);
+        buffer.write(OpStatus.SUCCESS);
+        for (IndexEntry<K, byte[]> entry : entries) {
+            write(keyEncoder.encode(entry.getKey()), buffer);
+            write(entry.getValue(), buffer);
+        }
+        return ByteBuffer.wrap(buffer.toByteArray());
+    }
+
+    public ByteBuffer encodeFailure(byte opcode) {
+        int outputBufferSize = 2;
+        ByteBuffer buffer = ByteBuffer.allocate(outputBufferSize);
+        buffer.put(opcode);
+        buffer.put(OpStatus.FAILURE);
+        return buffer;
+    }
+
+    private void write(byte[] source, ByteArrayOutputStream dest) {
+        for (byte b : source) {
+            dest.write(b);
+        }
+    }
+
 }

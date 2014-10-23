@@ -17,6 +17,7 @@ public class MultiLongEncoderDecoder implements FieldEncoderDecoder<long[]>{
 
     @Override
     public long[] decode(ByteBuffer payload) {
+        //FIXME this might not work properly
         return decode(payload.array());
     }
 
