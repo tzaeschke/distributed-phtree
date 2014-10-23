@@ -66,6 +66,16 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         buf.release();
     }
 
+    private ByteBuf handlePutRequest(ByteBuf buf) {
+        Pair<K, V> entry = decoder.decodePut(buf.nioBuffer());
+        K key = entry.getFirst();
+        V value = entry.getSecond();
+        index.put(key, value);
+
+        byte[] response = encoder.encodePut(key, value);
+        return Unpooled.wrappedBuffer(response);
+    }
+
     private ByteBuf handleGetRequest(ByteBuf buf) {
         K key = decoder.decodeGet(buf.nioBuffer());
         V value = index.get(key);
@@ -87,16 +97,6 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         List<V> values = index.getNearestNeighbors(range.getFirst(), range.getSecond());
 
         byte[] response = encoder.encodeGetRange(values);
-        return Unpooled.wrappedBuffer(response);
-    }
-
-    private ByteBuf handlePutRequest(ByteBuf buf) {
-        Pair<K, V> entry = decoder.decodePut(buf.nioBuffer());
-        K key = entry.getFirst();
-        V value = entry.getSecond();
-        index.put(key, value);
-
-        byte[] response = encoder.encodePut(key, value);
         return Unpooled.wrappedBuffer(response);
     }
 

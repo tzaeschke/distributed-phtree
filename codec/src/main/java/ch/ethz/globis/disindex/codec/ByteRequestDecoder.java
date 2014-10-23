@@ -10,19 +10,14 @@ import java.nio.ByteBuffer;
  * Decodes request messages from the client.
  *
  * @param <K>                   The type of the key.
- * @param <V>                   The type of the value.
  */
-public class ByteRequestDecoder<K, V> implements RequestDecoder<K, V> {
+public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
 
     /** The decoder used for the key.*/
     private FieldDecoder<K> keyDecoder;
 
-    /** The decoder used for the value.*/
-    private FieldDecoder<V> valueDecoder;
-
-    public ByteRequestDecoder(FieldDecoder<K> keyDecoder, FieldDecoder<V> valueDecoder) {
+    public ByteRequestDecoder(FieldDecoder<K> keyDecoder) {
         this.keyDecoder = keyDecoder;
-        this.valueDecoder = valueDecoder;
     }
 
     /**
@@ -50,9 +45,9 @@ public class ByteRequestDecoder<K, V> implements RequestDecoder<K, V> {
      * @return                          The key and value that have to be added to the index.
      */
     @Override
-    public Pair<K, V> decodePut(ByteBuffer buffer) {
+    public Pair<K, byte[]> decodePut(ByteBuffer buffer) {
         K key = decodeKey(buffer);
-        V value = decodeValue(buffer);
+        byte[] value = decodeValue(buffer);
         return new Pair<>(key, value);
     }
 
@@ -110,10 +105,10 @@ public class ByteRequestDecoder<K, V> implements RequestDecoder<K, V> {
      * @param buffer                        The ByteBuffer containing the key.
      * @return                              The decoded key.
      */
-    private V decodeValue(ByteBuffer buffer) {
+    private byte[] decodeValue(ByteBuffer buffer) {
         int valueBytesSize = buffer.getInt();
         byte[] valueBytes = new byte[valueBytesSize];
         buffer.get(valueBytes);
-        return valueDecoder.decode(valueBytes);
+        return valueBytes;
     }
 }

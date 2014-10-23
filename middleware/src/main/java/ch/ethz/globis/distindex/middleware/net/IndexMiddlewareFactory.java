@@ -13,13 +13,12 @@ public class IndexMiddlewareFactory {
 
     private static final String DEFAULT_ZK_CONNECTION = "localhost:2181";
 
-    public static <V> IndexMiddleware<V> newPHTreeMiddleware(int port, int dim, int depth, Class<V> valueClass) {
+    public static IndexMiddleware newPHTreeMiddleware(int port, int dim, int depth) {
         Properties properties = new Properties();
         properties.setProperty(IndexProperties.INDEX_DIM, String.valueOf(dim));
         properties.setProperty(IndexProperties.INDEX_DEPTH, String.valueOf(depth));
-        properties.setProperty(IndexProperties.INDEX_VALUE_CLASS, valueClass.getName());
 
         ClusterService clusterService = new ZKClusterService(DEFAULT_ZK_CONNECTION);
-        return new IndexMiddleware<>("localhost", port, clusterService, properties);
+        return new IndexMiddleware("localhost", port, clusterService, properties);
     }
 }

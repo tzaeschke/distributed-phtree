@@ -18,9 +18,8 @@ import java.util.Properties;
 /**
  * Initialize the handler for a new accepted connection.
  *
- * @param <V>
  */
-public class MiddlewareChannelInitializer<V> extends ChannelInitializer<SocketChannel> {
+public class MiddlewareChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private Properties properties;
 
@@ -28,9 +27,7 @@ public class MiddlewareChannelInitializer<V> extends ChannelInitializer<SocketCh
         this.properties = properties;
     }
 
-    private Index<long[], V> index;
-
-    private Class<V> clazz;
+    private Index<long[], byte[]> index;
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
@@ -39,16 +36,13 @@ public class MiddlewareChannelInitializer<V> extends ChannelInitializer<SocketCh
         if (index == null) {
             int dim = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DIM));
             int depth = Integer.parseInt(properties.getProperty(IndexProperties.INDEX_DEPTH));
-            String valueClass = properties.getProperty(IndexProperties.INDEX_VALUE_CLASS);
-
-            clazz = (Class<V>) Class.forName(valueClass);
             index = new PHTreeIndexAdaptor<>(dim, depth);
         }
 
-        RequestDecoder<long[], V> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>(clazz));
-        ResponseEncoder<long[], V> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>(clazz));
+        ByteRequestDecoder<long[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
+        ByteResponseEncoder<long[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
 
-        pipeline.addLast(new MultidimMiddlewareChannelHandler<>(index, responseEncoder, requestDecoder));
+        pipeline.addLast(new MultidimMiddlewareChannelHandler(index, responseEncoder, requestDecoder));
     }
 
 }

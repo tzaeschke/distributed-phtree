@@ -1,13 +1,14 @@
 package ch.ethz.globis.distindex.middleware.net;
 
+import ch.ethz.globis.disindex.codec.ByteResponseEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.distindex.shared.Index;
 
-public class MultidimMiddlewareChannelHandler<V> extends MiddlewareChannelHandler<long[], V> {
+public class MultidimMiddlewareChannelHandler extends MiddlewareChannelHandler<long[], byte[]> {
 
-    protected MultidimMiddlewareChannelHandler(Index<long[], V> index, ResponseEncoder<long[], V> encoder,
-                                               RequestDecoder<long[], V> decoder) {
+    protected MultidimMiddlewareChannelHandler(Index<long[], byte[]> index, ByteResponseEncoder<long[]> encoder,
+                                               RequestDecoder<long[], byte[]> decoder) {
         super(index, encoder, decoder);
     }
 }

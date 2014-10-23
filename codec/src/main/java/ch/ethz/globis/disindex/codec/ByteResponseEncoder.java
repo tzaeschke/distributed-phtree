@@ -10,53 +10,40 @@ import java.util.List;
  * Encodes response messages sent by the server to the client.
  *
  * @param <K>                   The type of the key.
- * @param <V>                   The type of the value.
  */
-public class ByteResponseEncoder<K, V> implements ResponseEncoder<K, V>{
+public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
 
     private FieldEncoder<K> keyEncoder;
 
-    private FieldEncoder<V> valueEncoder;
-
-    public ByteResponseEncoder(FieldEncoder<K> keyEncoder, FieldEncoder<V> valueEncoder) {
+    public ByteResponseEncoder(FieldEncoder<K> keyEncoder) {
         this.keyEncoder = keyEncoder;
-        this.valueEncoder = valueEncoder;
     }
 
     @Override
-    public byte[] encodePut(K key, V value) {
-        byte[] keyBytes = keyEncoder.encode(key);
-        byte[] valueBytes = valueEncoder.encode(value);
-
-        int keyBytesSize = keyBytes.length;
-        int valueBytesSize = valueBytes.length;
+    public byte[] encodePut(K key, byte[] value) {
+        int valueBytesSize = value.length;
         ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
-//        buffer.putInt(keyBytesSize);
-//        buffer.put(keyBytes);
-//        buffer.putInt(valueBytesSize);
-        buffer.put(valueBytes);
+        buffer.put(value);
 
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeGet(V value) {
-        byte[] valueBytes = valueEncoder.encode(value);
-        int valueBytesSize = valueBytes.length;
+    public byte[] encodeGet(byte[] value) {
+        int valueBytesSize = value.length;
         ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
-//        buffer.putInt(valueBytesSize);
-        buffer.put(valueBytes);
+        buffer.put(value);
 
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeGetRange(List<V> values) {
+    public byte[] encodeGetRange(List<byte[]> values) {
         throw new UnsupportedOperationException("Operation is not yet implemented!");
     }
 
     @Override
-    public byte[] encodeGetKNN(List<V> values) {
+    public byte[] encodeGetKNN(List<byte[]> values) {
         throw new UnsupportedOperationException("Operation is not yet implemented!");
     }
 }

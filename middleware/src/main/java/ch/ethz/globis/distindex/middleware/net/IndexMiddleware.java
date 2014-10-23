@@ -19,7 +19,7 @@ import java.util.Properties;
 /**
  * Distributed Index Server implemented using Netty.io
  */
-public class IndexMiddleware<V> implements Middleware, Runnable {
+public class IndexMiddleware implements Middleware, Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexMiddleware.class);
 
@@ -98,7 +98,7 @@ public class IndexMiddleware<V> implements Middleware, Runnable {
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new MiddlewareChannelInitializer<V>(properties));
+                .childHandler(new MiddlewareChannelInitializer(properties));
         return b;
     }
 
