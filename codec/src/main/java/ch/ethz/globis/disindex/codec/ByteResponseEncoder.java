@@ -30,6 +30,9 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
 
     @Override
     public byte[] encodeGet(byte[] value) {
+        if (value == null) {
+            return new byte[] { -1 };
+        }
         int valueBytesSize = value.length;
         ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
         buffer.put(value);

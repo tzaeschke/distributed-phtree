@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class DistributedPHTreeTest {
 
@@ -28,6 +29,28 @@ public class DistributedPHTreeTest {
     public void shutdownExecutor() throws InterruptedException {
         threadPool.shutdownNow();
         threadPool.awaitTermination(10, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void testGet() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+
+        try (TestingServer zkServer  = new TestingServer(ZK_PORT);
+            Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
+            zkServer.start();
+            startMiddleware(middleware);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            String retrieved = phTree.get(new long[] { 1L, 2L});
+
+            assertNull("Retrieved value should be null as it is not in the tree.", retrieved);
+            phTree.close();
+        }
     }
 
     @Test
