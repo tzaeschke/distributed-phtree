@@ -2,9 +2,7 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
