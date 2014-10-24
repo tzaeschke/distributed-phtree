@@ -32,6 +32,30 @@ public class DistributedPHTreeTest {
     }
 
     @Test
+    public void testLargeValues() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+
+        try (TestingServer zkServer  = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
+            zkServer.start();
+            startMiddleware(middleware);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            long[] key = {1L, 2L};
+            String veryLargeString = new BigInteger(1024 * 1024, new Random()).toString();
+
+            phTree.put(key, veryLargeString);
+            assertEquals(veryLargeString, phTree.get(key));
+            phTree.close();
+        }
+    }
+
+    @Test
     public void testGet() throws Exception {
         int dim = 2;
         int depth = 64;
