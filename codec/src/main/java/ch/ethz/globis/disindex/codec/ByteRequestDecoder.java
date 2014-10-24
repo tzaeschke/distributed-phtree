@@ -3,6 +3,8 @@ package ch.ethz.globis.disindex.codec;
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.util.Pair;
+import ch.ethz.globis.distindex.operation.*;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.nio.ByteBuffer;
 
@@ -30,14 +32,15 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
      * @return                          The key for which the get operation has to be executed.
      */
     @Override
-    public K decodeGet(ByteBuffer buffer) {
-        int keyBytesSize = buffer.getInt();
-        byte[] keyBytes = new byte[keyBytesSize];
-        buffer.get(keyBytes);
+    public GetRequest<K> decodeGet(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
 
+        K key = decodeKey(buffer);
         assert !buffer.hasRemaining();
 
-        return keyDecoder.decode(keyBytes);
+        return new GetRequest<>(requestId, opCode, indexName, key);
     }
 
     /**
@@ -47,10 +50,14 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
      * @return                          The key and value that have to be added to the index.
      */
     @Override
-    public Pair<K, byte[]> decodePut(ByteBuffer buffer) {
+    public PutRequest<K, byte[]> decodePut(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
         K key = decodeKey(buffer);
-        byte[] value = decodeValue(buffer);
-        return new Pair<>(key, value);
+        byte[] value = readValue(buffer);
+        return new PutRequest<>(requestId, opCode, indexName, key, value);
     }
 
     /**
@@ -60,10 +67,14 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
      * @return                          The keys containing the range for the request.
      */
     @Override
-    public Pair<K, K> decodeGetRange(ByteBuffer buffer) {
+    public GetRangeRequest<K> decodeGetRange(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
         K start = decodeKey(buffer);
         K end = decodeKey(buffer);
-        return new Pair<>(start, end);
+        return new GetRangeRequest<>(requestId, opCode, indexName, start, end);
     }
 
     /**
@@ -74,17 +85,25 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
      *                                  of neighbours.
      */
     @Override
-    public Pair<K, Integer> decodeGetKNN(ByteBuffer buffer) {
+    public GetKNNRequest<K> decodeGetKNN(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
         K key = decodeKey(buffer);
-        Integer k = buffer.getInt();
-        return new Pair<>(key, k);
+        int k = buffer.getInt();
+        return new GetKNNRequest<>(requestId, opCode, indexName, key, k);
     }
 
     @Override
-    public Pair<Integer, Integer> decodeCreate(ByteBuffer buffer) {
+    public CreateRequest decodeCreate(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
         int dim = buffer.getInt();
         int depth = buffer.getInt();
-        return new Pair<>(dim, depth);
+        return new CreateRequest(requestId, opCode, indexName, dim, depth);
     }
 
     /**
@@ -114,7 +133,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
      * @param buffer                        The ByteBuffer containing the key.
      * @return                              The decoded key.
      */
-    private byte[] decodeValue(ByteBuffer buffer) {
+    private byte[] readValue(ByteBuffer buffer) {
         int valueBytesSize = buffer.getInt();
         byte[] valueBytes = new byte[valueBytesSize];
         buffer.get(valueBytes);

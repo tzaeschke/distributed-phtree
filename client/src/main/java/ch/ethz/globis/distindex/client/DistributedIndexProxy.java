@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
+import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.client.service.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
@@ -22,7 +23,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     public boolean create(int dim, int depth) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds();
-        byte[] message = encoder.encodeCreate(dim, depth);
+
+        CreateRequest request = Requests.newCreate(dim, depth);
+        byte[] message = encoder.encodeCreate(request);
         List<byte[]> responses = service.sendAndReceive(hostIds, message);
         for (byte[] response : responses) {
             if (!decoder.decodeCreate(response)) {
@@ -35,8 +38,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     @Override
     public void put(K key, V value) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
+        PutRequest<K, V> request = Requests.newPut(key, value);
 
-        byte[] payload = encoder.encodePut(key, value);
+        byte[] payload = encoder.encodePut(request);
         String hostId = keyMapping.getHostId(key);
 
         byte[] response = service.sendAndReceive(hostId, payload);
@@ -46,8 +50,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     @Override
     public V get(K key) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
+        GetRequest<K> request = Requests.newGet(key);
 
-        byte[] payload = encoder.encodeGet(key);
+        byte[] payload = encoder.encodeGet(request);
         String hostId = keyMapping.getHostId(key);
 
         byte[] response = service.sendAndReceive(hostId, payload);
@@ -57,8 +62,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     @Override
     public List<V> getRange(K start, K end) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
+        GetRangeRequest<K> request = Requests.newGetRange(start, end);
 
-        byte[] payload = encoder.encodeGetRange(start, end);
+        byte[] payload = encoder.encodeGetRange(request);
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         List<byte[]> response = service.sendAndReceive(hostIds, payload);
@@ -68,8 +74,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     @Override
     public List<V> getNearestNeighbors(K key, int k) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
+        GetKNNRequest<K> request = Requests.newGetKNN(key, k);
 
-        byte[] payload = encoder.encodeGetKNN(key, k);
+        byte[] payload = encoder.encodeGetKNN(request);
         List<String> hostIds = keyMapping.getHostIds();
 
         List<byte[]> response = service.sendAndReceive(hostIds, payload);

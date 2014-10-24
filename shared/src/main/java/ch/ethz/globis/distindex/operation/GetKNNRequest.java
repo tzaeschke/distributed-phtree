@@ -1,0 +1,21 @@
+package ch.ethz.globis.distindex.operation;
+
+public class GetKNNRequest<K> extends Request {
+
+    private K key;
+    private int k;
+
+    public GetKNNRequest(int id, byte opCode, String indexId, K key, int k) {
+        super(id, opCode, indexId);
+        this.key = key;
+        this.k = k;
+    }
+
+    public K getKey() {
+        return key;
+    }
+
+    public int getK() {
+        return k;
+    }
+}

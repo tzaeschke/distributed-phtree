@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.Pair;
@@ -69,16 +69,16 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     }
 
     private ByteBuf handleCreateRequest(ByteBuf buf) {
-        Pair<Integer, Integer> pair = decoder.decodeCreate(buf.nioBuffer());
-        index = (Index<K, V>) new PHTreeIndexAdaptor<V>(pair.getFirst(), pair.getSecond());
+        CreateRequest request = decoder.decodeCreate(buf.nioBuffer());
+        index = (Index<K, V>) new PHTreeIndexAdaptor<V>(request.getDim(), request.getDepth());
         byte[] response = encoder.encoderCreate();
         return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handlePutRequest(ByteBuf buf) {
-        Pair<K, V> entry = decoder.decodePut(buf.nioBuffer());
-        K key = entry.getFirst();
-        V value = entry.getSecond();
+        PutRequest<K, V> request = decoder.decodePut(buf.nioBuffer());
+        K key = request.getKey();
+        V value = request.getValue();
         index.put(key, value);
 
         byte[] response = encoder.encodePut(key, value);
@@ -86,24 +86,24 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     }
 
     private ByteBuf handleGetRequest(ByteBuf buf) {
-        K key = decoder.decodeGet(buf.nioBuffer());
-        V value = index.get(key);
+        GetRequest<K> request = decoder.decodeGet(buf.nioBuffer());
+        V value = index.get(request.getKey());
 
         byte[] response = encoder.encodeGet(value);
         return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleGetRangeRequest(ByteBuf buf) {
-        Pair<K, K> range = decoder.decodeGetRange(buf.nioBuffer());
-        List<V> values = index.getRange(range.getFirst(), range.getSecond());
+        GetRangeRequest<K> request = decoder.decodeGetRange(buf.nioBuffer());
+        List<V> values = index.getRange(request.getStart(), request.getEnd());
 
         byte[] response = encoder.encodeGetRange(values);
         return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleGetKNNRequest(ByteBuf buf) {
-        Pair<K, Integer> range = decoder.decodeGetKNN(buf.nioBuffer());
-        List<V> values = index.getNearestNeighbors(range.getFirst(), range.getSecond());
+        GetKNNRequest<K> request = decoder.decodeGetKNN(buf.nioBuffer());
+        List<V> values = index.getNearestNeighbors(request.getKey(), request.getK());
 
         byte[] response = encoder.encodeGetRange(values);
         return Unpooled.wrappedBuffer(response);
@@ -125,6 +125,6 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     }
 
     private byte getMessageCode(ByteBuf buf) {
-        return buf.readByte();
+        return buf.getByte(0);
     }
 }

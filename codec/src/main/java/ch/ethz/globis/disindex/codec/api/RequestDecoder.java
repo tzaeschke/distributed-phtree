@@ -1,6 +1,6 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import ch.ethz.globis.disindex.codec.util.Pair;
+import ch.ethz.globis.distindex.operation.*;
 
 import java.nio.ByteBuffer;
 
@@ -14,13 +14,13 @@ import java.nio.ByteBuffer;
  */
 public interface RequestDecoder<K, V> {
 
-    public K decodeGet(ByteBuffer buffer);
+    public GetRequest<K> decodeGet(ByteBuffer buffer);
 
-    public Pair<K, V> decodePut(ByteBuffer buffer);
+    public PutRequest<K, V> decodePut(ByteBuffer buffer);
 
-    public Pair<K, K> decodeGetRange(ByteBuffer buffer);
+    public GetRangeRequest<K> decodeGetRange(ByteBuffer buffer);
 
-    public Pair<K, Integer> decodeGetKNN(ByteBuffer buffer);
+    public GetKNNRequest<K> decodeGetKNN(ByteBuffer buffer);
 
-    public Pair<Integer, Integer> decodeCreate(ByteBuffer buffer);
+    public CreateRequest decodeCreate(ByteBuffer buffer);
 }

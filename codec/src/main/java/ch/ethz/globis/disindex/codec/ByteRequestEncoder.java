@@ -2,8 +2,9 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
-import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.*;
 
+import java.io.BufferedReader;
 import java.nio.ByteBuffer;
 
 /**
@@ -22,74 +23,124 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         this.valueEncoder = valueEncoder;
     }
 
-    @Override
-    public byte[] encodePut(K key, V value) {
+    public byte[] encodePut(PutRequest<K, V> request) {
+        K key = request.getKey();
+        V value = request.getValue();
         byte[] keyBytes = keyEncoder.encode(key);
         byte[] valueBytes = valueEncoder.encode(value);
 
-        int outputSize = keyBytes.length + valueBytes.length + 9;
+        int outputSize = keyBytes.length + 4
+                        + valueBytes.length + 4
+                        + request.metadataSize();
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(OpCode.PUT);
-        buffer.putInt(keyBytes.length);
-        buffer.put(keyBytes);
-        buffer.putInt(valueBytes.length);
-        buffer.put(valueBytes);
-
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
+        writeByteArray(buffer, valueBytes);
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeGet(K key) {
+    public byte[] encodeGet(GetRequest<K> request) {
+        K key = request.getKey();
         byte[] keyBytes = keyEncoder.encode(key);
 
-        int outputSize = keyBytes.length + 5;
-        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(OpCode.GET);
-        buffer.putInt(keyBytes.length);
-        buffer.put(keyBytes);
+        int outputSize = keyBytes.length + 4
+                        + request.metadataSize();
 
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeGetRange(K start, K end) {
+    public byte[] encodeGetRange(GetRangeRequest<K> request) {
+        K start = request.getStart();
+        K end = request.getEnd();
+
         byte[] startKeyBytes = keyEncoder.encode(start);
         byte[] endKeyBytes = keyEncoder.encode(end);
 
-        int outputSize = startKeyBytes.length + endKeyBytes.length + 9;
+        int outputSize = startKeyBytes.length + 4
+                        + endKeyBytes.length + 4
+                        + request.metadataSize();
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(OpCode.GET_RANGE);
-        buffer.putInt(startKeyBytes.length);
-        buffer.put(startKeyBytes);
-        buffer.putInt(endKeyBytes.length);
-        buffer.put(endKeyBytes);
-
+        writeMeta(buffer, request);
+        writeByteArray(buffer, startKeyBytes);
+        writeByteArray(buffer, endKeyBytes);
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeGetKNN(K key, int k) {
+    public byte[] encodeGetKNN(GetKNNRequest<K> request) {
+        K key = request.getKey();
+        int k = request.getK();
         byte[] keyBytes = keyEncoder.encode(key);
 
-        int outputSize = keyBytes.length + 5;
-        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        buffer.put(OpCode.GET_KNN);
-        buffer.putInt(keyBytes.length);
-        buffer.put(keyBytes);
+        int outputSize = keyBytes.length + 4
+                + 4 + request.metadataSize();
 
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
+        buffer.putInt(k);
         return buffer.array();
     }
 
     @Override
-    public byte[] encodeCreate(int dim, int depth) {
-        int bufferSize = 9;
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        buffer.put(OpCode.CREATE_INDEX);
+    public byte[] encodeCreate(CreateRequest request) {
+        int dim = request.getDim();
+        int depth = request.getDepth();
+        int outputSize = 4 + 4 + request.metadataSize();
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
         buffer.putInt(dim);
         buffer.putInt(depth);
-
         return buffer.array();
     }
+
+    /**
+     * Shorthand method to encode the request metadata into the buffer.
+     * @param buffer                The output buffer used to encode the data.
+     * @param request               The request being encoded.
+     * @return                      The buffer after the write operation was completed.
+     */
+    private ByteBuffer writeMeta(ByteBuffer buffer, Request request) {
+        buffer.put(request.getOpCode());
+        buffer.putInt(request.getId());
+        writeString(buffer, request.getIndexId());
+        return buffer;
+    }
+
+    /**
+     * Write a string to a byte buffer. To allow easy decoding, the length of the byte array that
+     * backs the string is first written, followed by the byte array itself.
+     * @param buffer                The output buffer used to encode the data.
+     * @param data                  The String data to be written.
+     * @return                      The buffer after the write operation was completed.
+     */
+    private ByteBuffer writeString(ByteBuffer buffer, String data) {
+        byte[] indexNameBytes = data.getBytes();
+        buffer.putInt(indexNameBytes.length);
+        buffer.put(indexNameBytes);
+        return buffer;
+    }
+
+    /**
+     * Write a byte array to the byte buffer. To allow an easy decoding, the length of the byte array
+     * is first written to the buffer, followed by the array itself.
+     *
+     * @param buffer                The output buffer used to encode the data.
+     * @param data                  The byte array to be written.
+     * @return                      The buffer after the write operation was completed.
+     */
+    private ByteBuffer writeByteArray(ByteBuffer buffer, byte[] data) {
+        buffer.putInt(data.length);
+        buffer.put(data);
+        return buffer;
+    }
+
 }

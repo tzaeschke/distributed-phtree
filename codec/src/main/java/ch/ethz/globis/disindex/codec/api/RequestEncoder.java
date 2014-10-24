@@ -1,5 +1,7 @@
 package ch.ethz.globis.disindex.codec.api;
 
+import ch.ethz.globis.distindex.operation.*;
+
 /**
  * Contains operations corresponding to encoding requests send by the client library
  * to the middleware nodes..
@@ -11,13 +13,13 @@ package ch.ethz.globis.disindex.codec.api;
  */
 public interface RequestEncoder<K, V> {
 
-    public byte[] encodePut(K key, V value);
+    public byte[] encodePut(PutRequest<K, V> request);
 
-    public byte[] encodeGet(K key);
+    public byte[] encodeGet(GetRequest<K> request);
 
-    public byte[] encodeGetRange(K start, K end);
+    public byte[] encodeGetRange(GetRangeRequest<K> request);
 
-    public byte[] encodeGetKNN(K key, int k);
+    public byte[] encodeGetKNN(GetKNNRequest<K> request);
 
-    public byte[] encodeCreate(int dim, int depth);
+    public byte[] encodeCreate(CreateRequest request);
 }
