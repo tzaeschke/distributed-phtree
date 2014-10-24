@@ -1,5 +1,7 @@
 package ch.ethz.globis.distindex;
 
+import ch.ethz.globis.distindex.api.IndexEntry;
+import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
@@ -12,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -73,6 +76,91 @@ public class DistributedPHTreeTest {
             String retrieved = phTree.get(new long[] { 1L, 2L});
 
             assertNull("Retrieved value should be null as it is not in the tree.", retrieved);
+            phTree.close();
+        }
+    }
+
+    @Test
+    public void testGetRange() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+        try (TestingServer zkServer  = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
+            zkServer.start();
+            startMiddleware(middleware);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            phTree.put(new long[] {10, 10}, "foo");
+            phTree.put(new long[] {11, 10}, "foo");
+            phTree.put(new long[]{9, 10}, "foo");
+            phTree.put(new long[]{10, 9}, "foo");
+            phTree.put(new long[]{10, 11}, "foo");
+            phTree.put(new long[]{10, 12}, "foo");
+            phTree.put(new long[]{9, 7}, "foo");
+            phTree.put(new long[]{10, 9}, "foo");
+            phTree.put(new long[]{100000000, -1}, "foo");
+            phTree.put(new long[]{-1, 100000000}, "foo");
+
+            IndexEntryList<long[], String> result = phTree.getRange(new long[]{9, 9}, new long[]{11, 11});
+            IndexEntryList<long[], String> expected = new IndexEntryList<>();
+            expected.add(new IndexEntry<>(new long[] { 9L, 10L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 10L, 9L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 10L, 10L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 10L, 11L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 11L, 10L}, "foo"));
+
+            assertEquals(result.size(), expected.size());
+            for (int i = 0; i < result.size(); i++) {
+                assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
+                assertEquals(expected.get(i).getValue(), result.get(i).getValue());
+            }
+            phTree.close();
+        }
+    }
+
+    @Test
+    public void testGetRange2Mid() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080)
+        ) {
+            zkServer.start();
+            startMiddleware(middleware);
+            startMiddleware(second);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            phTree.put(new long[] {0, 0}, "foo");
+            phTree.put(new long[] {1, 0}, "foo");
+            phTree.put(new long[]{1, 1}, "foo");
+            phTree.put(new long[]{-1, 0}, "foo");
+            phTree.put(new long[]{0, 2}, "foo");
+            phTree.put(new long[]{-2, 3}, "foo");
+            phTree.put(new long[]{-2, 2}, "foo");
+
+            IndexEntryList<long[], String> result = phTree.getRange(new long[]{-2, -2}, new long[]{2, 2});
+            IndexEntryList<long[], String> expected = new IndexEntryList<>();
+            expected.add(new IndexEntry<>(new long[] { 0L, 0L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 1L, 0L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 1L, 1L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { 0L, 2L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { -1L, 0L}, "foo"));
+            expected.add(new IndexEntry<>(new long[] { -2L, 2L}, "foo"));
+
+            assertEquals(result.size(), expected.size());
+            for (int i = 0; i < result.size(); i++) {
+                assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
+                assertEquals(expected.get(i).getValue(), result.get(i).getValue());
+            }
             phTree.close();
         }
     }
