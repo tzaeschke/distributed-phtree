@@ -2,10 +2,10 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
-import ch.ethz.globis.distindex.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.client.service.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.shared.Index;
+import ch.ethz.globis.distindex.api.Index;
 
 import java.io.Closeable;
 import java.io.IOException;

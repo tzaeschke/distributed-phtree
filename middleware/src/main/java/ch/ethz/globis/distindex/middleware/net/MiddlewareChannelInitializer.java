@@ -2,13 +2,8 @@ package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.disindex.codec.ByteRequestDecoder;
 import ch.ethz.globis.disindex.codec.ByteResponseEncoder;
-import ch.ethz.globis.disindex.codec.api.RequestDecoder;
-import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
-import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
-import ch.ethz.globis.distindex.middleware.config.IndexProperties;
-import ch.ethz.globis.distindex.middleware.pht.PHTreeIndexAdaptor;
-import ch.ethz.globis.distindex.shared.Index;
+import ch.ethz.globis.distindex.api.Index;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;

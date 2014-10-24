@@ -2,7 +2,9 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
-import ch.ethz.globis.distindex.shared.IndexEntry;
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.Response;
+import ch.ethz.globis.distindex.api.IndexEntry;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
 
     public Response<K, V> decode(ByteBuffer buffer) {
         byte opCode = buffer.get();
+        int requestId = buffer.get();
         byte status = buffer.get();
         int nrEntries = buffer.getInt();
 
@@ -52,7 +55,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
             entries.add(new IndexEntry<>(key, value));
         }
 
-        return new Response<>(opCode, status, nrEntries, entries);
+        return new Response<>(opCode, requestId, status, nrEntries, entries);
     }
 
     @Override

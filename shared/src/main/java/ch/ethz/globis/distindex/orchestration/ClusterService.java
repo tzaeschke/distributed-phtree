@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex;
+package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 

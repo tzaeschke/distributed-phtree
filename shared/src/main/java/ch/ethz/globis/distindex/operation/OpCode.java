@@ -1,4 +1,4 @@
-package ch.ethz.globis.disindex.codec;
+package ch.ethz.globis.distindex.operation;
 
 public class OpCode {
 

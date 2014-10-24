@@ -2,13 +2,12 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
-import ch.ethz.globis.distindex.shared.Index;
-import ch.ethz.globis.distindex.shared.IndexEntry;
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.OpStatus;
+import ch.ethz.globis.distindex.api.IndexEntry;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

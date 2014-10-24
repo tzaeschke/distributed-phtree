@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -12,8 +12,6 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 /**

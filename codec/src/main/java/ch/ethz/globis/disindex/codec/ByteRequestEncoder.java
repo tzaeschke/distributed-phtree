@@ -2,6 +2,7 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
+import ch.ethz.globis.distindex.operation.OpCode;
 
 import java.nio.ByteBuffer;
 

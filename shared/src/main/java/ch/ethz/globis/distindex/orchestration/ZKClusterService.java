@@ -1,6 +1,5 @@
 package ch.ethz.globis.distindex.orchestration;
 
-import ch.ethz.globis.distindex.ClusterService;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;

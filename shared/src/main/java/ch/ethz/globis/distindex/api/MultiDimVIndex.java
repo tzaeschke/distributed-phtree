@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.shared;
+package ch.ethz.globis.distindex.api;
 
 public interface MultiDimVIndex<V> extends Index<long[], V> {
 }

@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.shared;
+package ch.ethz.globis.distindex.api;
 
 public class IndexEntry<K, V> {
     private K key;

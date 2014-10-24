@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.middleware.pht;
 
 
-import ch.ethz.globis.distindex.shared.MultiDimVIndex;
+import ch.ethz.globis.distindex.api.MultiDimVIndex;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
 

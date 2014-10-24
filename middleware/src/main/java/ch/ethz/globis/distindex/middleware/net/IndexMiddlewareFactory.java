@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.middleware.config.IndexProperties;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 
