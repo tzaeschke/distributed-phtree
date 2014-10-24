@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.client.io;
 
-import ch.ethz.globis.distindex.client.service.MessageService;
+import ch.ethz.globis.distindex.client.service.Transport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Default implementation of the message service using java sockets.
  */
-public class DefaultMessageService implements MessageService {
+public class TCPTransport implements Transport {
 
     private Map<String, Socket> connections = new HashMap<>();
 

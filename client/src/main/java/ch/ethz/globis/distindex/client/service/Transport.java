@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.client.service;
 
 import java.util.List;
 
-public interface MessageService {
+public interface Transport {
 
     public byte[] sendAndReceive(String host, byte[] payload);
 

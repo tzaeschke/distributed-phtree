@@ -3,7 +3,7 @@ package ch.ethz.globis.distindex.client;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.ClusterService;
-import ch.ethz.globis.distindex.client.service.MessageService;
+import ch.ethz.globis.distindex.client.service.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.shared.Index;
 
@@ -16,7 +16,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
 
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
-    protected MessageService service;
+    protected Transport service;
     protected ClusterService<K> clusterService;
 
     public boolean create(int dim, int depth) {
