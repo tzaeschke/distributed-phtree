@@ -1,8 +1,7 @@
 package ch.ethz.globis.distindex.operation;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
-
-import java.util.List;
+import ch.ethz.globis.distindex.api.IndexEntryList;
 
 public class Response<K, V> {
 
@@ -10,21 +9,21 @@ public class Response<K, V> {
     private int requestId;
     private byte status;
     private int nrEntries;
-    private List<IndexEntry<K, V>> entries;
+    private IndexEntryList<K, V> entries;
 
-    public Response(byte opCode, int requestId, byte status, int nrEntries, List<IndexEntry<K, V>> entries) {
+    public Response(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries) {
         this.opCode = opCode;
         this.requestId = requestId;
         this.status = status;
-        this.nrEntries = nrEntries;
+        this.nrEntries = (entries == null ) ? 0 : entries.size();
         this.entries = entries;
     }
 
-    public int getOpCode() {
+    public byte getOpCode() {
         return opCode;
     }
 
-    public int getStatus() {
+    public byte getStatus() {
         return status;
     }
 
@@ -36,7 +35,11 @@ public class Response<K, V> {
         return requestId;
     }
 
-    public List<IndexEntry<K, V>> getEntries() {
+    public IndexEntryList<K, V> getEntries() {
         return entries;
+    }
+
+    public IndexEntry<K, V> singleEntry() {
+        return (entries == null ) ? null : entries.get(0);
     }
 }

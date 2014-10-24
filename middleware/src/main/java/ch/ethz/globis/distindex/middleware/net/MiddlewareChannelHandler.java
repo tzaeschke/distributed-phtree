@@ -1,9 +1,9 @@
 package ch.ethz.globis.distindex.middleware.net;
 
+import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
-import ch.ethz.globis.disindex.codec.util.Pair;
 import ch.ethz.globis.distindex.middleware.pht.PHTreeIndexAdaptor;
 import ch.ethz.globis.distindex.api.Index;
 import io.netty.buffer.ByteBuf;
@@ -12,8 +12,6 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-
-import java.util.List;
 
 public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandlerAdapter {
 
@@ -71,8 +69,10 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     private ByteBuf handleCreateRequest(ByteBuf buf) {
         CreateRequest request = decoder.decodeCreate(buf.nioBuffer());
         index = (Index<K, V>) new PHTreeIndexAdaptor<V>(request.getDim(), request.getDepth());
-        byte[] response = encoder.encoderCreate();
-        return Unpooled.wrappedBuffer(response);
+        Response<K, V> response = new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, new IndexEntryList<K,V>());
+
+        byte[] responseBytes = encoder.encode(response);
+        return Unpooled.wrappedBuffer(responseBytes);
     }
 
     private ByteBuf handlePutRequest(ByteBuf buf) {
@@ -80,36 +80,37 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         K key = request.getKey();
         V value = request.getValue();
         index.put(key, value);
-
-        byte[] response = encoder.encodePut(key, value);
-        return Unpooled.wrappedBuffer(response);
+        return createResult(request, new IndexEntryList<>(key, value));
     }
 
     private ByteBuf handleGetRequest(ByteBuf buf) {
         GetRequest<K> request = decoder.decodeGet(buf.nioBuffer());
-        V value = index.get(request.getKey());
+        K key = request.getKey();
+        V value = index.get(key);
+        if (value == null) {
+            return createResult(request, new IndexEntryList<K, V>());
+        } else {
+            return createResult(request, new IndexEntryList<>(key, value));
+        }
 
-        byte[] response = encoder.encodeGet(value);
-        return Unpooled.wrappedBuffer(response);
     }
 
     private ByteBuf handleGetRangeRequest(ByteBuf buf) {
         GetRangeRequest<K> request = decoder.decodeGetRange(buf.nioBuffer());
-        List<V> values = index.getRange(request.getStart(), request.getEnd());
+        IndexEntryList<K, V> values = index.getRange(request.getStart(), request.getEnd());
 
-        byte[] response = encoder.encodeGetRange(values);
-        return Unpooled.wrappedBuffer(response);
+        return createResult(request, values);
     }
 
     private ByteBuf handleGetKNNRequest(ByteBuf buf) {
         GetKNNRequest<K> request = decoder.decodeGetKNN(buf.nioBuffer());
-        List<V> values = index.getNearestNeighbors(request.getKey(), request.getK());
+        IndexEntryList<K, V> values = index.getNearestNeighbors(request.getKey(), request.getK());
 
-        byte[] response = encoder.encodeGetRange(values);
-        return Unpooled.wrappedBuffer(response);
+        return createResult(request, values);
     }
 
     private ByteBuf handleErroneousRequest(ByteBuf buf) {
+        //ToDo need better handling
         return emptyBuffer();
     }
 
@@ -122,6 +123,12 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         System.err.format("Exception!");
         cause.printStackTrace();
+    }
+
+    private ByteBuf createResult(Request request, IndexEntryList<K, V> values) {
+        Response<K, V> response = new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, values);
+        byte[] responseBytes = encoder.encode(response);
+        return Unpooled.wrappedBuffer(responseBytes);
     }
 
     private byte getMessageCode(ByteBuf buf) {

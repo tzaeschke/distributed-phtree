@@ -1,6 +1,6 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import java.util.List;
+import ch.ethz.globis.distindex.operation.Response;
 
 /**
  * Contains operations corresponding to encoding responses send by the middleware node to the client library.
@@ -12,13 +12,5 @@ import java.util.List;
  */
 public interface ResponseEncoder<K, V> {
 
-    public byte[] encodePut(K key, V value);
-
-    public byte[] encodeGet(V value);
-
-    public byte[] encodeGetRange(List<V> values);
-
-    public byte[] encodeGetKNN(List<V> values);
-
-    public byte[] encoderCreate();
+    public byte[] encode(Response<K, V> response);
 }

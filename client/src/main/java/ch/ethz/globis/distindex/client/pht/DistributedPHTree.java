@@ -15,7 +15,7 @@ public class DistributedPHTree<V> extends DistributedIndexProxy<long[], V> {
         FieldEncoderDecoder<long[]> keyEncoder = new MultiLongEncoderDecoder();
         FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>(clazz);
         encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
-        decoder = new ByteResponseDecoder<>(valueEncoder);
+        decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
 
         service = new TCPTransport();
         clusterService = new ZKClusterService(host + ":" + port);

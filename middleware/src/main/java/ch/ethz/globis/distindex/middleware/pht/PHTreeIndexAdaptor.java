@@ -1,6 +1,8 @@
 package ch.ethz.globis.distindex.middleware.pht;
 
 
+import ch.ethz.globis.distindex.api.IndexEntry;
+import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.MultiDimVIndex;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
@@ -33,34 +35,36 @@ public class PHTreeIndexAdaptor<V> implements MultiDimVIndex<V> {
     }
 
     @Override
-    public List<V> getRange(long[] start, long[] end) {
+    public IndexEntryList<long[], V> getRange(long[] start, long[] end) {
         PhKVIterator<V> it = tree.query(start, end);
         return iteratorToList(it);
     }
 
     @Override
-    public List<V> getNearestNeighbors(long[] key, int k) {
+    public IndexEntryList<long[], V> getNearestNeighbors(long[] key, int k) {
         ArrayList<PhEntry<V>> list = tree.nearestNeighbour(k, key);
         return entriesToList(list);
     }
 
     @Override
-    public Iterator<V> iterator() {
-        return tree.queryExtent();
+    public Iterator<IndexEntry<long[], V>> iterator() {
+        //FIXME implement iterator properly
+        return iteratorToList(tree.queryExtent()).iterator();
     }
 
-    private List<V> iteratorToList(PhKVIterator<V> iterator) {
-        List<V> entries = new ArrayList<>();
+    private IndexEntryList<long[], V> iteratorToList(PhKVIterator<V> iterator) {
+        IndexEntryList<long[], V> entries = new IndexEntryList<>();
         while (iterator.hasNext()) {
-            entries.add(iterator.nextValue());
+            PhEntry<V> entry = iterator.nextEntry();
+            entries.add(new IndexEntry<>(entry.getKey(), entry.getValue()));
         }
         return entries;
     }
 
-    private List<V> entriesToList(List<PhEntry<V>> list) {
-        List<V> entries = new ArrayList<>();
+    private IndexEntryList<long[], V> entriesToList(List<PhEntry<V>> list) {
+        IndexEntryList<long[], V> entries = new IndexEntryList<>();
         for (PhEntry<V> entry : list) {
-            entries.add(entry.getValue());
+            entries.add(new IndexEntry<>(entry.getKey(), entry.getValue()));
         }
         return entries;
     }

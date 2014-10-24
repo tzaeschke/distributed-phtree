@@ -2,13 +2,15 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
-import ch.ethz.globis.distindex.operation.OpCode;
-import ch.ethz.globis.distindex.operation.OpStatus;
+import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
+import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.OpStatus;
+import ch.ethz.globis.distindex.operation.Response;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.List;
 
 /**
  * Encodes response messages sent by the server to the client.
@@ -24,59 +26,20 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
     }
 
     @Override
-    public byte[] encodePut(K key, byte[] value) {
-        int valueBytesSize = value.length;
-        ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
-        buffer.put(value);
-
-        return buffer.array();
-    }
-
-    @Override
-    public byte[] encodeGet(byte[] value) {
-        if (value == null) {
-            return new byte[] { -1 };
-        }
-        int valueBytesSize = value.length;
-        ByteBuffer buffer = ByteBuffer.allocate(valueBytesSize);
-        buffer.put(value);
-
-        return buffer.array();
-    }
-
-    @Override
-    public byte[] encodeGetRange(List<byte[]> values) {
-        throw new UnsupportedOperationException("Operation is not yet implemented!");
-    }
-
-    @Override
-    public byte[] encodeGetKNN(List<byte[]> values) {
-        throw new UnsupportedOperationException("Operation is not yet implemented!");
-    }
-
-    @Override
-    public byte[] encoderCreate() {
-        byte[] response = new byte[] { OpCode.CREATE_INDEX};
-        return response;
-    }
-
-    public ByteBuffer encode(byte opCode, List<IndexEntry<K, byte[]>> entries) {
+    public byte[] encode(Response<K, byte[]> response) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        buffer.write(opCode);
-        buffer.write(OpStatus.SUCCESS);
+        buffer.write(response.getOpCode());
+        writeInt(response.getRequestId(), buffer);
+        buffer.write(response.getStatus());
+        writeInt(response.getNrEntries(), buffer);
+        return encode(buffer, response.getEntries()).array();
+    }
+
+    public ByteBuffer encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {
         for (IndexEntry<K, byte[]> entry : entries) {
             write(keyEncoder.encode(entry.getKey()), buffer);
             write(entry.getValue(), buffer);
         }
-        return ByteBuffer.wrap(buffer.toByteArray());
-    }
-
-    public ByteBuffer encode(byte opCode, IndexEntry<K, byte[]> entry) {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        buffer.write(opCode);
-        buffer.write(OpStatus.SUCCESS);
-        write(keyEncoder.encode(entry.getKey()), buffer);
-        write(entry.getValue(), buffer);
         return ByteBuffer.wrap(buffer.toByteArray());
     }
 
@@ -88,9 +51,23 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         return buffer;
     }
 
-    private void write(byte[] source, ByteArrayOutputStream dest) {
-        for (byte b : source) {
+    private void writeInt(int value, ByteArrayOutputStream dest) {
+        byte[] bytes = BitUtils.toByteArray(value);
+        for (byte b : bytes) {
             dest.write(b);
+        }
+    }
+
+    private void write(byte[] source, ByteArrayOutputStream dest) {
+        if (source == null) {
+            writeInt(0, dest);
+            return;
+        }
+        writeInt(source.length, dest);
+        try {
+            dest.write(source);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

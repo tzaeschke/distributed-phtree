@@ -1,7 +1,6 @@
 package ch.ethz.globis.distindex.api;
 
 import java.util.Iterator;
-import java.util.List;
 
 public interface Index<K, V> {
 
@@ -9,9 +8,9 @@ public interface Index<K, V> {
 
     public V get(K key);
 
-    public List<V> getRange(K start, K end);
+    public IndexEntryList<K, V> getRange(K start, K end);
 
-    public List<V> getNearestNeighbors(K key, int k);
+    public IndexEntryList<K, V> getNearestNeighbors(K key, int k);
 
-    public Iterator<V> iterator();
+    public Iterator<IndexEntry<K, V>> iterator();
 }
