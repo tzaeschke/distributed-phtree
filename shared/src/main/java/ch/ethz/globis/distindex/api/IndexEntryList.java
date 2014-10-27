@@ -16,4 +16,8 @@ public class IndexEntryList<K, V> extends ArrayList<IndexEntry<K, V>> {
         super();
         add(new IndexEntry<>(key, value));
     }
+
+    public void add(K key, V value) {
+        add(new IndexEntry<>(key, value));
+    }
 }

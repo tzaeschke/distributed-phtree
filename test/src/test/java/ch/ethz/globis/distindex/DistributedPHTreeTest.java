@@ -82,6 +82,33 @@ public class DistributedPHTreeTest {
     }
 
     @Test
+    public void testGetMore() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+            Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
+            zkServer.start();
+            startMiddleware(middleware);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            IndexEntryList<long[], String> entries = new IndexEntryList<>();
+
+            entries.add(k(-1, -1), "fuz");
+            entries.add(k(0, 1), "foo");
+            entries.add(k(1, 2), "bar");
+
+            IndexEntryList<long[], String> retrieved = phTree.getBatch(null, 3);
+
+            assertEquals(entries, retrieved);
+        }
+    }
+
+    @Test
     public void testGetRange() throws Exception {
         int dim = 2;
         int depth = 64;
@@ -237,5 +264,9 @@ public class DistributedPHTreeTest {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static long[] k(long... keys) {
+        return keys;
     }
 }

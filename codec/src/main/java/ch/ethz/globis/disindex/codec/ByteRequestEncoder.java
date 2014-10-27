@@ -29,9 +29,9 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         byte[] keyBytes = keyEncoder.encode(key);
         byte[] valueBytes = valueEncoder.encode(value);
 
-        int outputSize = keyBytes.length + 4
-                        + valueBytes.length + 4
-                        + request.metadataSize();
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                        + valueBytes.length + 4     // value bytes + number of value bytes
+                        + request.metadataSize();   // metadata
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
@@ -45,8 +45,8 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         K key = request.getKey();
         byte[] keyBytes = keyEncoder.encode(key);
 
-        int outputSize = keyBytes.length + 4
-                        + request.metadataSize();
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                        + request.metadataSize();   // metadata
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
@@ -62,9 +62,9 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         byte[] startKeyBytes = keyEncoder.encode(start);
         byte[] endKeyBytes = keyEncoder.encode(end);
 
-        int outputSize = startKeyBytes.length + 4
-                        + endKeyBytes.length + 4
-                        + request.metadataSize();
+        int outputSize = startKeyBytes.length + 4   // start key bytes + number of start key bytes
+                        + endKeyBytes.length + 4    // end key bytes + number of end key bytes
+                        + request.metadataSize();   // metadata size
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
@@ -79,13 +79,33 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         int k = request.getK();
         byte[] keyBytes = keyEncoder.encode(key);
 
-        int outputSize = keyBytes.length + 4
-                + 4 + request.metadataSize();
+        int outputSize = keyBytes.length + 4 // key bytes + number of key bytes
+                + 4                          // k
+                + request.metadataSize();    // metadata size
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
         writeByteArray(buffer, keyBytes);
         buffer.putInt(k);
+        return buffer.array();
+    }
+
+    @Override
+    public byte[] encodeGetBatch(GetBatchRequest<K> request) {
+        K key = request.getKey();
+        int size = request.getSize();
+
+        byte[] keyBytes = keyEncoder.encode(key);
+
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                        + 4                         // size
+                        + request.metadataSize();   // metadata
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
+        buffer.putInt(size);
+
         return buffer.array();
     }
 

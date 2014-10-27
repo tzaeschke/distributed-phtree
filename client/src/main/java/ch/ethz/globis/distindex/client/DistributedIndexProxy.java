@@ -6,7 +6,7 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.client.service.Transport;
+import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.api.Index;
 
@@ -71,7 +71,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         List<byte[]> responses = service.sendAndReceive(hostIds, payload);
-        IndexEntryList<K, V> results = decodeAndcombineResults(responses);
+        IndexEntryList<K, V> results = decodeAndCombineResults(responses);
         return results;
     }
 
@@ -84,8 +84,20 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         List<String> hostIds = keyMapping.getHostIds();
 
         List<byte[]> responses = service.sendAndReceive(hostIds, payload);
-        IndexEntryList<K, V> results = decodeAndcombineResults(responses);
+        IndexEntryList<K, V> results = decodeAndCombineResults(responses);
         return results;
+    }
+
+    public IndexEntryList<K, V> getBatch(K startKey, int size) {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        GetBatchRequest<K> request = Requests.newGetBatch(startKey, size);
+
+        byte[] payload = encoder.encodeGetBatch(request);
+        String hostId = keyMapping.getHostId(startKey);
+        byte[] responseBytes = service.sendAndReceive(hostId, payload);
+        Response<K, V> response = decoder.decode(responseBytes);
+
+        return response.getEntries();
     }
 
     @Override
@@ -94,7 +106,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         throw new UnsupportedOperationException("Operation is not yet implemented");
     }
 
-    private IndexEntryList<K, V> decodeAndcombineResults(List<byte[]> responses) {
+    private IndexEntryList<K, V> decodeAndCombineResults(List<byte[]> responses) {
         IndexEntryList<K, V> results = new IndexEntryList<>();
         Response<K, V> currentResponse;
         for (byte[] response : responses) {

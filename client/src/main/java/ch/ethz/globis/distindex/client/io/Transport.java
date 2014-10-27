@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.client.service;
+package ch.ethz.globis.distindex.client.io;
 
 import java.util.List;
 

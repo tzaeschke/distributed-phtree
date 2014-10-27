@@ -1,7 +1,5 @@
 package ch.ethz.globis.distindex.client.io;
 
-import ch.ethz.globis.distindex.client.service.Transport;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
