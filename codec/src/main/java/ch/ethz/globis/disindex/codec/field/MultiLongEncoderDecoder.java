@@ -23,6 +23,9 @@ public class MultiLongEncoderDecoder implements FieldEncoderDecoder<long[]>{
 
     @Override
     public byte[] encode(long[] value) {
+        if (value == null) {
+            return new byte[0];
+        }
         return BitUtils.toByteArray(value);
     }
 }

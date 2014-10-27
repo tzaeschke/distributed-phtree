@@ -15,24 +15,24 @@ public class BST<K> {
         this.root = root;
     }
 
-    public static BST fromArray(String[] array) {
+    public static <K> BST<K> fromArray(String[] array) {
         BSTNode node = fromArray(array, 0, array.length - 1);
-        BST bst =  new BST();
+        BST<K> bst =  new BST<>();
         bst.setRoot(node);
         return bst;
     }
 
-    private static BSTNode fromArray(String[] array, int start, int end) {
+    private static <K> BSTNode fromArray(String[] array, int start, int end) {
         if (start > end) {
             return null;
         }
         if (start == end) {
-            BSTNode current = new BSTNode();
+            BSTNode<K> current = new BSTNode<>();
             current.setContent(array[start]);
             return current;
         }
         int mid = start + (end - start) / 2;
-        BSTNode current = new BSTNode();
+        BSTNode<K> current = new BSTNode<>();
         current.setLeft(fromArray(array, start, mid));
         current.setRight(fromArray(array, mid + 1, end));
         return current;

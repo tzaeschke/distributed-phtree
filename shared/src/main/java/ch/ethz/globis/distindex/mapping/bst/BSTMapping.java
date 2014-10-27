@@ -3,21 +3,25 @@ package ch.ethz.globis.distindex.mapping.bst;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BSTMapping<K> implements KeyMapping<K> {
 
-    private BST bst;
+    private BST<K> bst;
     private KeyConverter<K> converter;
+    private List<String> intervals;
 
     public BSTMapping(KeyConverter<K> converter) {
         this.converter = converter;
-        this.bst = new BST();
+        this.bst = new BST<K>();
+        this.intervals = bst.leafs();
     }
 
     public BSTMapping(KeyConverter<K> converter, String[] hosts) {
         this.converter = converter;
         this.bst = BST.fromArray(hosts);
+        this.intervals = bst.leafs();
     }
 
     @Override
@@ -43,6 +47,17 @@ public class BSTMapping<K> implements KeyMapping<K> {
             return new ArrayList<>();
         }
         return bst.leafs();
+    }
+
+    @Override
+    public String getFirst() {
+        return intervals.get(0);
+    }
+
+    @Override
+    public String getNext(String hostId) {
+        int index = Collections.binarySearch(intervals, hostId);
+        return intervals.get(index + 1);
     }
 
     @Override

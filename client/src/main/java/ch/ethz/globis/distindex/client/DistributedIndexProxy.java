@@ -93,9 +93,11 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         GetBatchRequest<K> request = Requests.newGetBatch(startKey, size);
 
         byte[] payload = encoder.encodeGetBatch(request);
-        String hostId = keyMapping.getHostId(startKey);
+        String hostId = (startKey == null) ? keyMapping.getFirst() : keyMapping.getHostId(startKey);
         byte[] responseBytes = service.sendAndReceive(hostId, payload);
         Response<K, V> response = decoder.decode(responseBytes);
+
+        checkStatus(response);
 
         return response.getEntries();
     }
@@ -114,6 +116,12 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
             results.addAll(currentResponse.getEntries());
         }
         return results;
+    }
+
+    private void checkStatus(Response response) {
+        if (response.getStatus() != OpStatus.SUCCESS) {
+            throw new RuntimeException("Error on server side");
+        }
     }
 
     @Override
