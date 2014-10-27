@@ -12,8 +12,12 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandlerAdapter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MiddlewareChannelHandler.class);
 
     /** The backing index*/
     protected Index<K, V> index;
@@ -43,24 +47,28 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         byte messageCode = getMessageCode(buf);
 
         ByteBuf response;
-        switch (messageCode) {
-            case OpCode.GET:
-                response = handleGetRequest(buf);
-                break;
-            case OpCode.GET_KNN:
-                response = handleGetKNNRequest(buf);
-                break;
-            case OpCode.GET_RANGE:
-                response = handleGetRangeRequest(buf);
-                break;
-            case OpCode.PUT:
-                response = handlePutRequest(buf);
-                break;
-            case OpCode.CREATE_INDEX:
-                response = handleCreateRequest(buf);
-                break;
-            default:
-                response = handleErroneousRequest(buf);
+        try {
+            switch (messageCode) {
+                case OpCode.GET:
+                    response = handleGetRequest(buf);
+                    break;
+                case OpCode.GET_KNN:
+                    response = handleGetKNNRequest(buf);
+                    break;
+                case OpCode.GET_RANGE:
+                    response = handleGetRangeRequest(buf);
+                    break;
+                case OpCode.PUT:
+                    response = handlePutRequest(buf);
+                    break;
+                case OpCode.CREATE_INDEX:
+                    response = handleCreateRequest(buf);
+                    break;
+                default:
+                    response = handleErroneousRequest(buf);
+            }
+        } catch (Exception e) {
+            response = handleErroneousRequest(buf);
         }
         ctx.writeAndFlush(response);
         buf.release();
@@ -110,19 +118,14 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     }
 
     private ByteBuf handleErroneousRequest(ByteBuf buf) {
-        //ToDo need better handling
-        return emptyBuffer();
-    }
-
-    private ByteBuf emptyBuffer() {
-        ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
-        return alloc.buffer();
+        Response<K, V> response = new Response<>((byte) 0, 0, OpStatus.FAILURE, new IndexEntryList<K, V>());
+        byte[] responseBytes = encoder.encode(response);
+        return Unpooled.wrappedBuffer(responseBytes);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.err.format("Exception!");
-        cause.printStackTrace();
+        LOG.error("Exception occurred on the channel: " + ctx, cause);
     }
 
     private ByteBuf createResult(Request request, IndexEntryList<K, V> values) {
