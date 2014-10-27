@@ -16,4 +16,32 @@ public class IndexEntry<K, V> {
     public V getValue() {
         return value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof IndexEntry)) return false;
+
+        IndexEntry that = (IndexEntry) o;
+
+        if (key != null ? !key.equals(that.key) : that.key != null) return false;
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = key != null ? key.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "IndexEntry{" +
+                "key=" + key +
+                ", value=" + value +
+                '}';
+    }
 }

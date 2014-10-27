@@ -12,5 +12,7 @@ public interface Index<K, V> {
 
     public IndexEntryList<K, V> getNearestNeighbors(K key, int k);
 
+    public IndexEntryList<K, V> getBatch(K startKey, int size);
+
     public Iterator<IndexEntry<K, V>> iterator();
 }

@@ -47,6 +47,23 @@ public class PHTreeIndexAdaptor<V> implements MultiDimVIndex<V> {
     }
 
     @Override
+    public IndexEntryList<long[], V> getBatch(long[] startKey, int size) {
+        if (startKey.length == 0) {
+            startKey = minKey();
+        }
+        long[] endKey = maxKey();
+
+        IndexEntryList<long[], V> results = new IndexEntryList<>();
+        PhKVIterator<V> it = tree.query(startKey, endKey);
+        while (size > 0 && it.hasNext()) {
+            PhEntry<V> entry = it.nextEntry();
+            results.add(entry.getKey(), entry.getValue());
+            size--;
+        }
+        return results;
+    }
+
+    @Override
     public Iterator<IndexEntry<long[], V>> iterator() {
         //FIXME implement iterator properly
         return iteratorToList(tree.queryExtent()).iterator();
@@ -67,5 +84,23 @@ public class PHTreeIndexAdaptor<V> implements MultiDimVIndex<V> {
             entries.add(new IndexEntry<>(entry.getKey(), entry.getValue()));
         }
         return entries;
+    }
+
+    private long[] maxKey() {
+        int dim = tree.getDIM();
+        long[] endKey = new long[dim];
+        for (int i = 0; i < dim; i++) {
+            endKey[i] = Long.MAX_VALUE;
+        }
+        return endKey;
+    }
+
+    private long[] minKey() {
+        int dim = tree.getDIM();
+        long[] endKey = new long[dim];
+        for (int i = 0; i < dim; i++) {
+            endKey[i] = Long.MIN_VALUE;
+        }
+        return endKey;
     }
 }

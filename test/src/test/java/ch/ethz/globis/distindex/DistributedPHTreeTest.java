@@ -82,7 +82,7 @@ public class DistributedPHTreeTest {
     }
 
     @Test
-    public void testGetMore() throws Exception {
+    public void testGetBatch() throws Exception {
         int dim = 2;
         int depth = 64;
 
@@ -96,15 +96,23 @@ public class DistributedPHTreeTest {
             DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
-            IndexEntryList<long[], String> entries = new IndexEntryList<>();
+            IndexEntryList<long[], String> expected = new IndexEntryList<>();
 
-            entries.add(k(-1, -1), "fuz");
-            entries.add(k(0, 1), "foo");
-            entries.add(k(1, 2), "bar");
+            expected.add(k(0, 1), "foo");
+            expected.add(k(1, 2), "bar");
+            expected.add(k(-1, -1), "fuz");
 
-            IndexEntryList<long[], String> retrieved = phTree.getBatch(null, 3);
+            for (IndexEntry<long[], String> entry : expected) {
+                phTree.put(entry.getKey(), entry.getValue());
+            }
 
-            assertEquals(entries, retrieved);
+            IndexEntryList<long[], String> result = phTree.getBatch(null, 3);
+
+            assertEquals(result.size(), expected.size());
+            for (int i = 0; i < result.size(); i++) {
+                assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
+                assertEquals(expected.get(i).getValue(), result.get(i).getValue());
+            }
         }
     }
 

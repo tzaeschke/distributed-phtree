@@ -96,6 +96,17 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     @Override
+    public GetBatchRequest<K> decodeGetBatch(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        K key = decodeKey(buffer);
+        int size = buffer.getInt();
+
+        return new GetBatchRequest<>(requestId, opCode, indexName, key, size);
+    }
+
+    @Override
     public CreateRequest decodeCreate(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();

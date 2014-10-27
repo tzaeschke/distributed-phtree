@@ -1,14 +1,12 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
-import ch.ethz.globis.distindex.middleware.pht.PHTreeIndexAdaptor;
 import ch.ethz.globis.distindex.api.Index;
+import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.middleware.pht.PHTreeIndexAdaptor;
+import ch.ethz.globis.distindex.operation.*;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -58,6 +56,9 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
                 case OpCode.GET_RANGE:
                     response = handleGetRangeRequest(buf);
                     break;
+                case OpCode.GET_BATCH:
+                    response = handleGetBatchRequest(buf);
+                    break;
                 case OpCode.PUT:
                     response = handlePutRequest(buf);
                     break;
@@ -68,10 +69,20 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
                     response = handleErroneousRequest(buf);
             }
         } catch (Exception e) {
+            LOG.error("Error processing request", e);
             response = handleErroneousRequest(buf);
         }
         ctx.writeAndFlush(response);
         buf.release();
+    }
+
+    private ByteBuf handleGetBatchRequest(ByteBuf buf) {
+        GetBatchRequest<K> request = decoder.decodeGetBatch(buf.nioBuffer());
+        K startKey = request.getKey();
+        int size = request.getSize();
+        IndexEntryList<K, V> entries = index.getBatch(startKey, size);
+
+        return createResult(request, entries);
     }
 
     private ByteBuf handleCreateRequest(ByteBuf buf) {
@@ -100,7 +111,6 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         } else {
             return createResult(request, new IndexEntryList<>(key, value));
         }
-
     }
 
     private ByteBuf handleGetRangeRequest(ByteBuf buf) {
