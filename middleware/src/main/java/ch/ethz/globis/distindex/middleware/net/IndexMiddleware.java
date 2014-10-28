@@ -1,7 +1,8 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.middleware.IOHandler;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -12,12 +13,10 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
 /**
  * Distributed Index Server implemented using Netty.io
  */
-public class IndexMiddleware implements Middleware, Runnable {
+public class IndexMiddleware<K, V>  implements Middleware, Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexMiddleware.class);
 
@@ -31,7 +30,7 @@ public class IndexMiddleware implements Middleware, Runnable {
     private boolean isRunning = false;
 
     /** The properties used to initialize the middleware. */
-    private Properties properties;
+    private IOHandler<K, V> handler;
 
     /** The thread pool dealing with receiving data over network */
     private EventLoopGroup bossGroup;
@@ -42,11 +41,11 @@ public class IndexMiddleware implements Middleware, Runnable {
     /** The cluster service used to notify */
     private ClusterService clusterService;
 
-    public IndexMiddleware(String host, int port, ClusterService clusterService, Properties properties) {
+    public IndexMiddleware(String host, int port, ClusterService clusterService, IOHandler<K, V> handler) {
         this.clusterService = clusterService;
         this.port = port;
-        this.properties = properties;
         this.host = host;
+        this.handler = handler;
     }
 
     @Override
@@ -56,7 +55,7 @@ public class IndexMiddleware implements Middleware, Runnable {
 
         try {
             //initialize the server channels
-            ServerBootstrap b = initServerBootstrap(properties);
+            ServerBootstrap b = initServerBootstrap(handler);
             ChannelFuture f = b.bind(port).sync();
 
             //register as a viable host to the cluster service
@@ -91,12 +90,12 @@ public class IndexMiddleware implements Middleware, Runnable {
         return isRunning;
     }
 
-    private ServerBootstrap initServerBootstrap(Properties properties) {
+    private <K, V> ServerBootstrap initServerBootstrap(IOHandler<K, V> handler) {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new MiddlewareChannelInitializer(properties));
+                .childHandler(new MiddlewareChannelHandler<K, V>(handler) {});
         return b;
     }
 

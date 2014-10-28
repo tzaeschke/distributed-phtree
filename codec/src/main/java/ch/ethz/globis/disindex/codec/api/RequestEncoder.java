@@ -21,7 +21,7 @@ public interface RequestEncoder<K, V> {
 
     public byte[] encodeGetKNN(GetKNNRequest<K> request);
 
-    public byte[] encodeGetBatch(GetBatchRequest<K> request);
+    public byte[] encodeGetBatch(GetIteratorBatch request);
 
     public byte[] encodeCreate(CreateRequest request);
 }

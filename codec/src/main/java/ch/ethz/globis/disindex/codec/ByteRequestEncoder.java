@@ -4,7 +4,6 @@ import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.*;
 
-import java.io.BufferedReader;
 import java.nio.ByteBuffer;
 
 /**
@@ -91,19 +90,18 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     }
 
     @Override
-    public byte[] encodeGetBatch(GetBatchRequest<K> request) {
-        K key = request.getKey();
+    public byte[] encodeGetBatch(GetIteratorBatch request) {
+        String iteratorId = request.getIteratorId();
+
         int size = request.getSize();
 
-        byte[] keyBytes = keyEncoder.encode(key);
-
-        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+        int outputSize = iteratorId.getBytes().length + 4
                         + 4                         // size
                         + request.metadataSize();   // metadata
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
-        writeByteArray(buffer, keyBytes);
+        writeString(buffer, iteratorId);
         buffer.putInt(size);
 
         return buffer.array();

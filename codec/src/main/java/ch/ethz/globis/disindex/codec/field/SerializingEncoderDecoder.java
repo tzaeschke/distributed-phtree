@@ -33,7 +33,7 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
 
     @Override
     public V decode(byte[] payload) {
-        if (payload[0] == -1) {
+        if (payload.length == 0) {
             return null;
         }
         Input input = new Input(payload);

@@ -35,6 +35,10 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     private boolean isRunning = false;
 
+    public ZKClusterService(String host, int port) {
+        this.hostPort = host + ":" + port;
+    }
+
     public ZKClusterService(String hostPort) {
         this.hostPort = hostPort;
     }

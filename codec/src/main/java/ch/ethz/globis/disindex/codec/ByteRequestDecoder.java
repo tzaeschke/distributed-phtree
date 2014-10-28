@@ -2,9 +2,7 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
-import ch.ethz.globis.disindex.codec.util.Pair;
 import ch.ethz.globis.distindex.operation.*;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.nio.ByteBuffer;
 
@@ -96,14 +94,14 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     @Override
-    public GetBatchRequest<K> decodeGetBatch(ByteBuffer buffer) {
+    public GetIteratorBatch decodeGetBatch(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-        K key = decodeKey(buffer);
+        String key = new String(readValue(buffer));
         int size = buffer.getInt();
 
-        return new GetBatchRequest<>(requestId, opCode, indexName, key, size);
+        return new GetIteratorBatch(requestId, opCode, indexName, key, size);
     }
 
     @Override

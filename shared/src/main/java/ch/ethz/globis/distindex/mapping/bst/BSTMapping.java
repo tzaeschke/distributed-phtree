@@ -57,7 +57,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
     @Override
     public String getNext(String hostId) {
         int index = Collections.binarySearch(intervals, hostId);
-        return intervals.get(index + 1);
+        if (index + 1 < intervals.size()) {
+            return intervals.get(index + 1);
+        } else {
+            return null;
+        }
     }
 
     @Override

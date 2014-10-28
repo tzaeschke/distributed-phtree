@@ -38,7 +38,7 @@ public class ResponseEncodeDecodeTest {
         int requestId = random.nextInt();
         IndexEntryList<long[], byte[]> generatedEntries = generateEntries(100);
 
-        Response<long[], byte[]> response = new Response<>(opCode, requestId, opStatus, generatedEntries);
+        Response<long[], byte[]> response = new Response<>(opCode, requestId, opStatus, generatedEntries, null);
 
         byte[] encodedResponse = encoder.encode(response);
 

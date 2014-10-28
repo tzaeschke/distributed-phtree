@@ -53,7 +53,7 @@ public class TCPConnector<K, V> implements Connector<K, V> {
                 encodedRequest = encoder.encodeGetKNN(gknn);
                 break;
             case OpCode.GET_BATCH:
-                GetBatchRequest<K> gb = (GetBatchRequest<K>) request;
+                GetIteratorBatch gb = (GetIteratorBatch) request;
                 encodedRequest = encoder.encodeGetBatch(gb);
                 break;
             case OpCode.PUT:

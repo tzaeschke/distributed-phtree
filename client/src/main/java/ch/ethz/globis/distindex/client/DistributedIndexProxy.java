@@ -88,24 +88,33 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return results;
     }
 
-    public IndexEntryList<K, V> getBatch(K startKey, int size) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        GetBatchRequest<K> request = Requests.newGetBatch(startKey, size);
+    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size) {
+
+        GetIteratorBatch request = Requests.newGetBatch(iteratorId, size);
 
         byte[] payload = encoder.encodeGetBatch(request);
-        String hostId = (startKey == null) ? keyMapping.getFirst() : keyMapping.getHostId(startKey);
         byte[] responseBytes = service.sendAndReceive(hostId, payload);
         Response<K, V> response = decoder.decode(responseBytes);
 
         checkStatus(response);
 
-        return response.getEntries();
+//        while (hostId != null ) {
+//            hostId = keyMapping.getNext(hostId);
+//            responseBytes = service.sendAndReceive(hostId, payload);
+//            response = decoder.decode(responseBytes);
+//            if (response.getNrEntries() > 0) {
+//                return response;
+//            }
+//        }
+        return response;
     }
 
     @Override
     public Iterator<IndexEntry<K, V>> iterator() {
-        //ToDo implement the iterator
-        throw new UnsupportedOperationException("Operation is not yet implemented");
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+
+        return new DistributedIndexIterator<>(this, keyMapping);
+        //throw new UnsupportedOperationException("Operation is not yet implemented");
     }
 
     private IndexEntryList<K, V> decodeAndCombineResults(List<byte[]> responses) {

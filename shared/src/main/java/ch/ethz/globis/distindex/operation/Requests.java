@@ -22,8 +22,8 @@ public class Requests {
         return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, "", key, k);
     }
 
-    public static <K> GetBatchRequest<K> newGetBatch(K start, int size) {
-        return new GetBatchRequest<>(nextId(), OpCode.GET_BATCH, "", start, size);
+    public static GetIteratorBatch newGetBatch(String iteratorId, int size) {
+        return new GetIteratorBatch(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
     }
 
     public static CreateRequest newCreate(int dim, int depth) {

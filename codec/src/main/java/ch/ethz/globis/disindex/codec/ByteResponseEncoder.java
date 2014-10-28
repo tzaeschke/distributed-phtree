@@ -32,23 +32,16 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         writeInt(response.getRequestId(), buffer);
         buffer.write(response.getStatus());
         writeInt(response.getNrEntries(), buffer);
-        return encode(buffer, response.getEntries()).array();
+        encode(buffer, response.getEntries());
+        writeString(response.getIteratorId(), buffer);
+        return buffer.toByteArray();
     }
 
-    public ByteBuffer encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {
+    public void encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {
         for (IndexEntry<K, byte[]> entry : entries) {
             write(keyEncoder.encode(entry.getKey()), buffer);
             write(entry.getValue(), buffer);
         }
-        return ByteBuffer.wrap(buffer.toByteArray());
-    }
-
-    public ByteBuffer encodeFailure(byte opcode) {
-        int outputBufferSize = 2;
-        ByteBuffer buffer = ByteBuffer.allocate(outputBufferSize);
-        buffer.put(opcode);
-        buffer.put(OpStatus.FAILURE);
-        return buffer;
     }
 
     private void writeInt(int value, ByteArrayOutputStream dest) {
@@ -56,6 +49,14 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         for (byte b : bytes) {
             dest.write(b);
         }
+    }
+
+    private void writeString(String str, ByteArrayOutputStream dest) {
+        if (str == null) {
+            return;
+        }
+        byte[] bytes = str.getBytes();
+        write(bytes, dest);
     }
 
     private void write(byte[] source, ByteArrayOutputStream dest) {

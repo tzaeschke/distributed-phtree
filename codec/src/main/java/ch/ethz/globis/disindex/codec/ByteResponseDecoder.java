@@ -49,7 +49,15 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
             entries.add(new IndexEntry<>(key, value));
         }
 
-        return new Response<>(opCode, requestId, status, entries);
+        String iteratorId = readString(buffer);
+        return new Response<>(opCode, requestId, status, entries, iteratorId);
+    }
+
+    private String readString(ByteBuffer buffer) {
+        int strBytesNr = buffer.getInt();
+        byte[] strBytes = new byte[strBytesNr];
+        buffer.get(strBytes);
+        return new String(strBytes);
     }
 
     @Override

@@ -1,10 +1,14 @@
 package ch.ethz.globis.distindex.middleware.net;
 
+import ch.ethz.globis.disindex.codec.ByteRequestDecoder;
+import ch.ethz.globis.disindex.codec.ByteResponseEncoder;
+import ch.ethz.globis.disindex.codec.api.RequestDecoder;
+import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
+import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
+import ch.ethz.globis.distindex.middleware.IOHandler;
+import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.middleware.config.IndexProperties;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
-
-import java.util.Properties;
 
 /**
  * Utility class for creating middleware nodes programatically.
@@ -13,20 +17,25 @@ public class IndexMiddlewareFactory {
 
     private static final String DEFAULT_ZK_CONNECTION = "localhost:2181";
 
-    @Deprecated
-    public static IndexMiddleware newPHTreeMiddleware(int port, int dim, int depth) {
-        Properties properties = new Properties();
-        properties.setProperty(IndexProperties.INDEX_DIM, String.valueOf(dim));
-        properties.setProperty(IndexProperties.INDEX_DEPTH, String.valueOf(depth));
-
-        ClusterService clusterService = new ZKClusterService(DEFAULT_ZK_CONNECTION);
-        return new IndexMiddleware("localhost", port, clusterService, properties);
+    public static IndexMiddleware newPHTreeMiddleware(int port) {
+        return newPhTree("localhost", port, "localhost", 2181);
     }
 
-    public static IndexMiddleware newPHTreeMiddleware(int port) {
-        Properties properties = new Properties();
+    public static <K, V> IndexMiddleware newMiddleware(String host, int port, String zkHost, int zkPort, IOHandler<K, V> ioHandler) {
+        ClusterService clusterService = new ZKClusterService(zkHost, zkPort);
+        return new IndexMiddleware<>(host, port, clusterService, ioHandler);
+    }
 
-        ClusterService clusterService = new ZKClusterService(DEFAULT_ZK_CONNECTION);
-        return new IndexMiddleware("localhost", port, clusterService, properties);
+    public static IndexMiddleware newPhTree(String host, int port, String zkHost, int zkPort) {
+        RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler();
+        RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
+        ResponseEncoder<long[], byte[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
+
+        IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, requestDecoder, responseEncoder);
+        return newMiddleware(host, port, zkHost, zkPort, ioHandler);
+    }
+
+    public static IndexMiddleware newLocalPhTree(int port) {
+        return newPhTree("localhost", port, "localhost", 2181);
     }
 }
