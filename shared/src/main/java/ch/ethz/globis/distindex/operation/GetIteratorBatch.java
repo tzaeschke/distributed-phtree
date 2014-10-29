@@ -8,7 +8,7 @@ public class GetIteratorBatch<K> extends Request {
     /** The batch batchSize.*/
     int batchSize;
 
-    /** Weather the request is made for a ranged iterator or not. */
+    /** Whether the request is made for a ranged iterator or not. */
     boolean ranged;
 
     /** The start of the query range, if the iterator is ranged.*/
