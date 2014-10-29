@@ -10,6 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Handles the incoming data on the channel opened by a client.
+ *
+ * @param <K>
+ * @param <V>
+ */
 public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(MiddlewareChannelHandler.class);
