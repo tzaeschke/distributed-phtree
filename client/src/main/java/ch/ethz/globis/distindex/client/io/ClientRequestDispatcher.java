@@ -4,16 +4,17 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.operation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TCPConnector<K, V> implements Connector<K, V> {
+public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
 
     private Transport transport;
     protected RequestEncoder<K, V> encoder;
     protected ResponseDecoder<K, V> decoder;
 
-    public TCPConnector(Transport transport, RequestEncoder<K, V> encoder, ResponseDecoder<K, V> decoder) {
+    public ClientRequestDispatcher(Transport transport, RequestEncoder<K, V> encoder, ResponseDecoder<K, V> decoder) {
         this.transport = transport;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -68,5 +69,13 @@ public class TCPConnector<K, V> implements Connector<K, V> {
                 throw new RuntimeException("Unknown command type");
         }
         return encodedRequest;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (transport == null) {
+            throw new IllegalStateException("Transport was not properly initialized.");
+        }
+        transport.close();
     }
 }

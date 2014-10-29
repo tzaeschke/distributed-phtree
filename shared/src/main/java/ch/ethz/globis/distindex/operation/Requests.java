@@ -22,7 +22,7 @@ public class Requests {
         return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, "", key, k);
     }
 
-    public static GetIteratorBatch newGetBatch(String iteratorId, int size) {
+    public static <K> GetIteratorBatch<K> newGetBatch(String iteratorId, int size) {
         return new GetIteratorBatch(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
     }
 

@@ -16,7 +16,7 @@ import java.util.Map;
  * To properly handle large messages, this class adds a simple header containing the size of the message being sent.
  * Furthermore, when reading the reply from the server, it expects a similar header to be present. *
  */
-public class TCPTransport implements Transport {
+public class TCPClient implements Transport {
 
     /** A map of host id's and open sockets*/
     private Map<String, Socket> connections = new HashMap<>();
@@ -134,5 +134,13 @@ public class TCPTransport implements Transport {
             responses.add(sendAndReceive(host, payload));
         }
         return responses;
+    }
+
+    @Override
+    public void close() throws IOException {
+        for (Socket socket : connections.values()) {
+            socket.close();
+        }
+        connections.clear();
     }
 }
