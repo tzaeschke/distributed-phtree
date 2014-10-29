@@ -1,9 +1,10 @@
 package ch.ethz.globis.distindex.client.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import ch.ethz.globis.disindex.codec.util.BitUtils;
+
+import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,9 @@ public class TCPTransport implements Transport {
     @Override
     public byte[] sendAndReceive(String host, byte[] payload) {
         Socket socket = connections.get(host);
-        byte[] response = new byte[1024];
+        byte[] initial = new byte[4];
+        byte[] data = null;
+        int bytesRead = 0;
         try {
             if (socket == null) {
                 String[] tokens = host.split(":");
@@ -29,18 +32,30 @@ public class TCPTransport implements Transport {
                 socket = new Socket(hostAddress, port);
                 connections.put(host, socket);
             }
-            OutputStream out = socket.getOutputStream();
-            out.write(payload);
+            BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
 
-            InputStream in = socket.getInputStream();
-            in.read(response);
+            out.write(BitUtils.toByteArray(payload.length));
+            out.write(payload);
+            out.flush();
+
+            InputStream in = new BufferedInputStream(socket.getInputStream());
+            while (bytesRead < 4) {
+                bytesRead = in.read(initial, bytesRead, 4 - bytesRead);
+            }
+            int dataSize = ByteBuffer.wrap(initial).getInt();
+            data = new byte[dataSize];
+
+            bytesRead = 0;
+            while (bytesRead < dataSize) {
+                bytesRead += in.read(data, bytesRead, dataSize - bytesRead);
+            }
         } catch (IOException e) {
             System.err.format("Failed to send message to remote host: %s", host);
             e.printStackTrace();
         } finally {
             //closeSocketGracefully(socket);
         }
-        return response;
+        return data;
     }
 
     @Override

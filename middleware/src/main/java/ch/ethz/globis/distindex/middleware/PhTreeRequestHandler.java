@@ -118,7 +118,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     private Response<long[], byte[]> createResponse(Request request, IndexEntryList<long[], byte[]> results) {
-        return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results, null);
+        return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
     }
 
     private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it) {

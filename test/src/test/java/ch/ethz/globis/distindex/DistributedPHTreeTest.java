@@ -37,7 +37,6 @@ public class DistributedPHTreeTest {
     }
 
     @Test
-    @Ignore
     public void testLargeValues() throws Exception {
         int dim = 2;
         int depth = 64;

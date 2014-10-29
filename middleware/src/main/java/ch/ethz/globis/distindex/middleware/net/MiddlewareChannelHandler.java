@@ -30,7 +30,11 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         ByteBuf buf = (ByteBuf) msg;
         ByteBuffer response = ioHandler.handle(buf.nioBuffer());
         ByteBuf nettyBuf = Unpooled.wrappedBuffer(response);
-        ctx.writeAndFlush(nettyBuf);
+        ByteBuf sizeBuf = Unpooled.copyInt(nettyBuf.readableBytes());
+
+        ctx.write(sizeBuf);
+        ctx.write(nettyBuf);
+        ctx.flush();
         buf.release();
     }
 }
