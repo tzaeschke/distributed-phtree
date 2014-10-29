@@ -3,7 +3,6 @@ target/
 
 # Java
 *.class
-*.jar
 *.war
 *.ear
 
