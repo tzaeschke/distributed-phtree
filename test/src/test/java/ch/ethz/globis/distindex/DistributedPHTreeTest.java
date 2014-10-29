@@ -117,7 +117,6 @@ public class DistributedPHTreeTest {
             while (it.hasNext()) {
                 IndexEntry<long[], String> entry = it.next();
                 received.add(entry);
-                System.out.println("{" + Arrays.toString(entry.getKey()) + " , " + entry.getValue() + "}" );
             }
 
             assertEquals(expected.size(), received.size());
@@ -162,7 +161,6 @@ public class DistributedPHTreeTest {
                 while (it.hasNext()) {
                     IndexEntry<long[], String> entry = it.next();
                     received.add(entry);
-                    System.out.println("{" + Arrays.toString(entry.getKey()) + " , " + entry.getValue() + "}" );
                 }
 
                 assertEquals(expected.size(), received.size());
@@ -171,7 +169,6 @@ public class DistributedPHTreeTest {
                     assertEquals(expected.get(i).getValue(), received.get(i).getValue());
                 }
         }
-
     }
 
      @Test
