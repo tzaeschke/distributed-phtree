@@ -3,13 +3,13 @@ package ch.ethz.globis.distindex.middleware;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.*;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhKVIterator;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
 import ch.ethz.globis.pht.v3.PhTree3;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     PhTreeV<byte[]> tree;
 
-    private Map<String, PhKVIterator<byte[]>> iterators = new HashMap<>();
+    private Map<String, PVIterator<byte[]>> iterators = new HashMap<>();
 
     @Override
     public Response<long[], byte[]> handleCreate(CreateRequest request) {
@@ -49,8 +49,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] key = request.getKey();
         int k = request.getK();
 
-        IndexEntryList<long[], byte[]> results = createList(tree.nearestNeighbour(k, key));
-        return createResponse(request, results);
+        //IndexEntryList<long[], byte[]> results = createList(tree.nearestNeighbour(k, key));
+        //return createResponse(request, results);
+        throw new UnsupportedOperationException("Operation not currently supported");
     }
 
     @Override
@@ -58,7 +59,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         String iteratorId = request.getIteratorId();
         int batchSize= request.getSize();
 
-        PhKVIterator<byte[]> it;
+        PVIterator<byte[]> it;
         if ("".equals(iteratorId)) {
             iteratorId = UUID.randomUUID().toString();
             it = tree.queryExtent();
@@ -71,7 +72,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         while (batchSize > 0 && it.hasNext()) {
-            PhEntry<byte[]> entry = it.nextEntry();
+            PVEntry<byte[]> entry = it.nextEntry();
 
             results.add(entry.getKey(), entry.getValue());
             batchSize--;
@@ -116,18 +117,18 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results, null);
     }
 
-    private IndexEntryList<long[], byte[]> createList(PhKVIterator<byte[]> it) {
+    private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         while (it.hasNext()) {
-            PhEntry<byte[]> entry = it.nextEntry();
+            PVEntry<byte[]> entry = it.nextEntry();
             results.add(entry.getKey(), entry.getValue());
         }
         return results;
     }
 
-    private IndexEntryList<long[], byte[]> createList(ArrayList<PhEntry<byte[]>> input) {
+    private IndexEntryList<long[], byte[]> createList(List<PVEntry<byte[]>> input) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
-        for (PhEntry<byte[]> entry : input) {
+        for (PVEntry<byte[]> entry : input) {
             results.add(entry.getKey(), entry.getValue());
         }
         return results;

@@ -9,9 +9,17 @@ public class Response<K, V> {
     private int requestId;
     private byte status;
     private int nrEntries;
-    private String iteratorId;
+    private String iteratorId = "";
 
     private IndexEntryList<K, V> entries;
+
+    public Response(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries) {
+        this.opCode = opCode;
+        this.requestId = requestId;
+        this.status = status;
+        this.nrEntries = entries.size();
+        this.entries = entries;
+    }
 
     public Response(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries, String iteratorId) {
         this.opCode = opCode;
