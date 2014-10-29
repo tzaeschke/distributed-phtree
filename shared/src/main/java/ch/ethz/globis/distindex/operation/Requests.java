@@ -26,6 +26,10 @@ public class Requests {
         return new GetIteratorBatch(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
     }
 
+    public static <K> GetIteratorBatch<K> newGetBatch(String iteratorId, int size, K start, K end) {
+        return new GetIteratorBatch<>(nextId(), OpCode.GET_BATCH, "", iteratorId, size, start, end);
+    }
+
     public static CreateRequest newCreate(int dim, int depth) {
         return new CreateRequest(nextId(), OpCode.CREATE_INDEX, "", dim, depth);
     }

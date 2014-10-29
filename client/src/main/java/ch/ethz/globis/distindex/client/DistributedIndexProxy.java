@@ -88,24 +88,27 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return results;
     }
 
-    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size) {
+    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
 
-        GetIteratorBatch request = Requests.newGetBatch(iteratorId, size);
+        GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size, start, end);
 
         byte[] payload = encoder.encodeGetBatch(request);
         byte[] responseBytes = service.sendAndReceive(hostId, payload);
         Response<K, V> response = decoder.decode(responseBytes);
 
         checkStatus(response);
+        return response;
+    }
 
-//        while (hostId != null ) {
-//            hostId = keyMapping.getNext(hostId);
-//            responseBytes = service.sendAndReceive(hostId, payload);
-//            response = decoder.decode(responseBytes);
-//            if (response.getNrEntries() > 0) {
-//                return response;
-//            }
-//        }
+    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size) {
+
+        GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size);
+
+        byte[] payload = encoder.encodeGetBatch(request);
+        byte[] responseBytes = service.sendAndReceive(hostId, payload);
+        Response<K, V> response = decoder.decode(responseBytes);
+
+        checkStatus(response);
         return response;
     }
 
@@ -114,7 +117,12 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
         return new DistributedIndexIterator<>(this, keyMapping);
-        //throw new UnsupportedOperationException("Operation is not yet implemented");
+    }
+
+    public Iterator<IndexEntry<K, V>> query(K start, K end) {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+
+        return new DistributedIndexRangedIterator<>(this, keyMapping, start, end);
     }
 
     private IndexEntryList<K, V> decodeAndCombineResults(List<byte[]> responses) {

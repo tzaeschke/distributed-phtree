@@ -55,16 +55,20 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGetIteratorBatch(GetIteratorBatch request) {
+    public Response<long[], byte[]> handleGetIteratorBatch(GetIteratorBatch<long[]> request) {
         String iteratorId = request.getIteratorId();
-        int batchSize= request.getSize();
+        int batchSize= request.getBatchSize();
 
         PVIterator<byte[]> it;
         if ("".equals(iteratorId)) {
             iteratorId = UUID.randomUUID().toString();
-            it = tree.queryExtent();
+            if (request.isRanged()) {
+                it = tree.query(request.getStart(), request.getEnd());
+            } else {
+                it = tree.queryExtent();
+            }
         } else {
-            it = iterators.get(iteratorId);
+            it = iterators.remove(iteratorId);
         }
         if (it == null) {
             return createError(request);

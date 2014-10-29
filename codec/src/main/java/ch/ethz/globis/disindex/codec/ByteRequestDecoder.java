@@ -94,14 +94,20 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     @Override
-    public GetIteratorBatch decodeGetBatch(ByteBuffer buffer) {
+    public GetIteratorBatch<K> decodeGetBatch(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-        String key = new String(readValue(buffer));
+        String iteratorId = new String(readValue(buffer));
         int size = buffer.getInt();
 
-        return new GetIteratorBatch(requestId, opCode, indexName, key, size);
+        boolean isRanged = (buffer.getInt() != 0);
+        if (isRanged) {
+            K start = decodeKey(buffer);
+            K end = decodeKey(buffer);
+            return new GetIteratorBatch<>(requestId, opCode, indexName, iteratorId, size, start, end);
+        }
+        return new GetIteratorBatch<>(requestId, opCode, indexName, iteratorId, size);
     }
 
     @Override

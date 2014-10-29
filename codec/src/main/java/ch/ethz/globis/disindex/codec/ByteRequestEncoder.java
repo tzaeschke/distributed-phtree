@@ -90,20 +90,35 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     }
 
     @Override
-    public byte[] encodeGetBatch(GetIteratorBatch request) {
+    public byte[] encodeGetBatch(GetIteratorBatch<K> request) {
         String iteratorId = request.getIteratorId();
 
-        int size = request.getSize();
+        int size = request.getBatchSize();
 
         int outputSize = iteratorId.getBytes().length + 4
-                        + 4                         // size
+                        + 4                         // batch size
                         + request.metadataSize();   // metadata
+
+        byte[] startBytes = null, endBytes = null;
+        if (request.isRanged()) {
+            startBytes = keyEncoder.encode(request.getStart());
+            endBytes = keyEncoder.encode(request.getEnd());
+            outputSize += 4 + startBytes.length + 4 + endBytes.length + 4;
+        } else {
+            outputSize += 4;
+        }
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
         writeString(buffer, iteratorId);
         buffer.putInt(size);
-
+        if (request.isRanged()) {
+            buffer.putInt(1);
+            writeByteArray(buffer, startBytes);
+            writeByteArray(buffer, endBytes);
+        } else {
+            buffer.putInt(0);
+        }
         return buffer.array();
     }
 

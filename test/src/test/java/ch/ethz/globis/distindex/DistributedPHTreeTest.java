@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.DistributedIndexIterator;
+import ch.ethz.globis.distindex.client.DistributedIndexRangedIterator;
 import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
@@ -83,6 +84,51 @@ public class DistributedPHTreeTest {
     }
 
     @Test
+    public void testRangedIterator() throws Exception {
+        int dim = 2;
+        int depth = 64;
+        String host = "localhost";
+        try (TestingServer zkServer  = new TestingServer(ZK_PORT);
+             Middleware first = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(8080)) {
+            zkServer.start();
+            startMiddleware(first);
+            startMiddleware(second);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            IndexEntryList<long[], String> expected = new IndexEntryList<>();
+            IndexEntryList<long[], String> toInsert = new IndexEntryList<>();
+            toInsert.add(k(0, 1), "foo");
+            expected.add(k(0, 1), "foo");
+            toInsert.add(k(1, 2), "bar");
+            toInsert.add(k(-1, -2), "fuzz");
+            toInsert.add(k(-1, -1), "fuz");
+            expected.add(k(-1, -1), "fuz");
+
+            for (IndexEntry<long[], String> entry : toInsert) {
+                phTree.put(entry.getKey(), entry.getValue());
+            }
+
+            Iterator<IndexEntry<long[], String>> it = phTree.query(k(-1, -1), k(1, 1));
+
+            IndexEntryList<long[], String> received = new IndexEntryList<>();
+            while (it.hasNext()) {
+                IndexEntry<long[], String> entry = it.next();
+                received.add(entry);
+                System.out.println("{" + Arrays.toString(entry.getKey()) + " , " + entry.getValue() + "}" );
+            }
+
+            assertEquals(expected.size(), received.size());
+            for (int i = 0; i < received.size(); i++) {
+                assertArrayEquals(expected.get(i).getKey(), received.get(i).getKey());
+                assertEquals(expected.get(i).getValue(), received.get(i).getValue());
+            }
+        }
+    }
+
+    @Test
     public void testIterator() throws Exception {
         int dim = 2;
         int depth = 64;
@@ -99,7 +145,9 @@ public class DistributedPHTreeTest {
 
                 IndexEntryList<long[], String> expected = new IndexEntryList<>();
 
+                expected.add(k(0, 0), "foo1");
                 expected.add(k(0, 1), "foo");
+                expected.add(k(1, 1), "foo");
                 expected.add(k(1, 2), "bar");
                 expected.add(k(-1, -2), "fuzz");
                 expected.add(k(-1, -1), "fuz");
