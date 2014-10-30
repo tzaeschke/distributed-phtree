@@ -15,8 +15,6 @@ import ch.ethz.globis.distindex.orchestration.ZKClusterService;
  */
 public class IndexMiddlewareFactory {
 
-    private static final String DEFAULT_ZK_CONNECTION = "localhost:2181";
-
     public static IndexMiddleware newPHTreeMiddleware(int port) {
         return newPhTree("localhost", port, "localhost", 2181);
     }
