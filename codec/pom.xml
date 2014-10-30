@@ -20,7 +20,7 @@
         <dependency>
             <groupId>ch.ethz.globis</groupId>
             <artifactId>shared</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>

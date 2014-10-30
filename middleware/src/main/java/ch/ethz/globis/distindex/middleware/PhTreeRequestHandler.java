@@ -49,9 +49,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] key = request.getKey();
         int k = request.getK();
 
-        //IndexEntryList<long[], byte[]> results = createList(tree.nearestNeighbour(k, key));
-        //return createResponse(request, results);
-        throw new UnsupportedOperationException("Operation not currently supported");
+        IndexEntryList<long[], byte[]> results = createKeyList(tree.nearestNeighbour(k, key));
+        return createResponse(request, results);
     }
 
     @Override
@@ -119,6 +118,15 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     private Response<long[], byte[]> createResponse(Request request, IndexEntryList<long[], byte[]> results) {
         return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
+    }
+
+    private IndexEntryList<long[], byte[]> createKeyList(List<long[]> keyList) {
+        IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
+        for (long[] key : keyList) {
+            results.add(key, null);
+        }
+
+        return results;
     }
 
     private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it) {

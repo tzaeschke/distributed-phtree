@@ -10,8 +10,6 @@ public interface Index<K, V> {
 
     public IndexEntryList<K, V> getRange(K start, K end);
 
-    public IndexEntryList<K, V> getNearestNeighbors(K key, int k);
-
     public Iterator<IndexEntry<K, V>> iterator();
 
     public Iterator<IndexEntry<K, V>> query(K start, K end);

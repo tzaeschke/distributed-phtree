@@ -7,6 +7,7 @@ import ch.ethz.globis.distindex.client.DistributedIndexRangedIterator;
 import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import org.apache.curator.test.TestingServer;
 import org.junit.*;
 
@@ -16,9 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class DistributedPHTreeTest {
 
@@ -276,6 +275,51 @@ public class DistributedPHTreeTest {
 
             assertNull(phTree.get(key));
 
+            phTree.close();
+        }
+    }
+
+    @Test
+    public void testGetKNN() throws Exception {
+        int dim = 2;
+        int depth = 64;
+
+        String host = "localhost";
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080)
+        ) {
+            zkServer.start();
+            startMiddleware(middleware);
+            startMiddleware(second);
+
+            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            List<long[]> expected = new ArrayList<long[]>() {{
+                add(new long[] { 0, 0});
+                add(new long[] { 1, 2});
+                add(new long[] { -1, -1});
+            }};
+            List<long[]> inserted = new ArrayList<>();
+            inserted.addAll(expected);
+            inserted.add(new long[] { -1000, 1000});
+            inserted.add(new long[] { -1000, -1000});
+            inserted.add(new long[] { 1000, -1000});
+            inserted.add(new long[] { 1000, 1000});
+            for (long[] key : inserted) {
+                phTree.put(key, null);
+            }
+
+            List<long[]> nearestNeighbors = phTree.getNearestNeighbors(new long[]{0, 0}, 3);
+
+            expected = MultidimUtil.sort(expected);
+            nearestNeighbors = MultidimUtil.sort(nearestNeighbors);
+
+            assertEquals(expected.size(), nearestNeighbors.size());
+            for (int i = 0; i < expected.size(); i++) {
+                assertArrayEquals(expected.get(i), nearestNeighbors.get(i));
+            }
             phTree.close();
         }
     }

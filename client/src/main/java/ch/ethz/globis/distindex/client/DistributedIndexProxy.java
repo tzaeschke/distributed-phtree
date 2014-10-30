@@ -9,9 +9,11 @@ import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -84,16 +86,6 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return combine(responses);
     }
 
-    @Override
-    public IndexEntryList<K, V> getNearestNeighbors(K key, int k) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds();
-
-        GetKNNRequest<K> request = Requests.newGetKNN(key, k);
-        List<Response<K, V>> responses = requestDispatcher.send(hostIds, request);
-        return combine(responses);
-    }
-
     public Response<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
         GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size, start, end);
         Response<K, V> response = requestDispatcher.send(hostId, request);
@@ -121,6 +113,16 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
         return new DistributedIndexRangedIterator<>(this, keyMapping, start, end);
+    }
+
+    protected List<K> combineKeys(List<Response<K, V>> responses) {
+        List<K> results = new ArrayList<>();
+        for (Response<K,V> response : responses) {
+            for (IndexEntry<K, V> entry : response.getEntries()) {
+                results.add(entry.getKey());
+            }
+        }
+        return results;
     }
 
     private IndexEntryList<K, V> combine(List<Response<K, V>> responses) {
