@@ -3,6 +3,8 @@ package ch.ethz.globis.distindex.client;
 import ch.ethz.globis.distindex.api.Index;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.client.exception.InvalidResponseException;
+import ch.ethz.globis.distindex.client.exception.ServerErrorException;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
@@ -27,6 +29,14 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     protected RequestDispatcher<K, V> requestDispatcher;
     protected ClusterService<K> clusterService;
 
+    protected DistributedIndexProxy() { }
+
+    public DistributedIndexProxy(RequestDispatcher<K, V> requestDispatcher,
+                                 ClusterService<K> clusterService) {
+        this.requestDispatcher = requestDispatcher;
+        this.clusterService = clusterService;
+    }
+
     public boolean create(int dim, int depth) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds();
@@ -42,12 +52,14 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     }
 
     @Override
-    public void put(K key, V value) {
+    public V put(K key, V value) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         String hostId = keyMapping.getHostId(key);
 
         PutRequest<K, V> request = Requests.newPut(key, value);
-        requestDispatcher.send(hostId, request);
+        Response<K, V> response = requestDispatcher.send(hostId, request);
+        check(request, response);
+        return getSingleEntryValue(response);
     }
 
     @Override
@@ -58,7 +70,8 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         GetRequest<K> request = Requests.newGet(key);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
-        return (response.getNrEntries() == 0) ? null :  response.singleEntry().getValue();
+        check(request, response);
+        return getSingleEntryValue(response);
     }
 
     @Override
@@ -85,7 +98,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size, start, end);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
-        checkStatus(response);
+        check(request, response);
         return response;
     }
 
@@ -93,7 +106,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
-        checkStatus(response);
+        check(request, response);
         return response;
     }
 
@@ -118,10 +131,20 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return results;
     }
 
-    private void checkStatus(Response response) {
-        if (response.getStatus() != OpStatus.SUCCESS) {
-            throw new RuntimeException("Error on server side");
+    private <K, V> void check(Request request, Response<K, V> response) {
+        if (response == null) {
+            throw new NullPointerException("Response should not be null");
         }
+        if (request.getId() != response.getRequestId()) {
+            throw new InvalidResponseException("Response received was not intended for this request.");
+        }
+        if (response.getStatus() != OpStatus.SUCCESS) {
+            throw new ServerErrorException("Error on server side.");
+        }
+    }
+
+    private V getSingleEntryValue(Response<K, V> response) {
+        return (response.getNrEntries() == 0) ? null :  response.singleEntry().getValue();
     }
 
     @Override
@@ -133,4 +156,5 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
             clusterService.disconnect();
         }
     }
+
 }

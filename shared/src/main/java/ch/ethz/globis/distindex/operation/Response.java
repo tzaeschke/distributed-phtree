@@ -65,4 +65,32 @@ public class Response<K, V> {
     public IndexEntry<K, V> singleEntry() {
         return (entries == null ) ? null : entries.get(0);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Response)) return false;
+
+        Response response = (Response) o;
+
+        if (nrEntries != response.nrEntries) return false;
+        if (opCode != response.opCode) return false;
+        if (requestId != response.requestId) return false;
+        if (status != response.status) return false;
+        if (entries != null ? !entries.equals(response.entries) : response.entries != null) return false;
+        if (iteratorId != null ? !iteratorId.equals(response.iteratorId) : response.iteratorId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) opCode;
+        result = 31 * result + requestId;
+        result = 31 * result + (int) status;
+        result = 31 * result + nrEntries;
+        result = 31 * result + (iteratorId != null ? iteratorId.hashCode() : 0);
+        result = 31 * result + (entries != null ? entries.hashCode() : 0);
+        return result;
+    }
 }

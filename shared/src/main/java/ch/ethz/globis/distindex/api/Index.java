@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 public interface Index<K, V> {
 
-    public void put(K key, V value);
+    public V put(K key, V value);
 
     public V get(K key);
 

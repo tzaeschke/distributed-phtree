@@ -30,6 +30,7 @@
         <logback.version>1.1.2</logback.version>
         <phtree.version>0.2.1-SNAPSHOT</phtree.version>
         <junit.version>4.11</junit.version>
+        <mockito.version>1.10.8</mockito.version>
         <curator.version>2.6.0</curator.version>
     </properties>
 
@@ -91,6 +92,11 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
             </dependency>
 
             <!--Logging-->

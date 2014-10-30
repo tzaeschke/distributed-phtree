@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NonDistributedMapping implements KeyMapping<long[]> {
+public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     private final String host;
     private final List<String> hostList;
@@ -16,12 +16,12 @@ public class NonDistributedMapping implements KeyMapping<long[]> {
     }
 
     @Override
-    public String getHostId(long[] key) {
+    public String getHostId(K key) {
         return host;
     }
 
     @Override
-    public List<String> getHostIds(long[] start, long[] end) {
+    public List<String> getHostIds(K start, K end) {
         return hostList;
     }
 
@@ -37,8 +37,12 @@ public class NonDistributedMapping implements KeyMapping<long[]> {
 
     @Override
     public String getNext(String hostId) {
-        int index = Collections.binarySearch(hostList, hostId);
-        return hostList.get(index + 1);
+        int index = Collections.binarySearch(hostList, hostId) + 1;
+        if (index >= hostList.size()) {
+            return null;
+        } else {
+            return hostList.get(index + 1);
+        }
     }
 
     @Override

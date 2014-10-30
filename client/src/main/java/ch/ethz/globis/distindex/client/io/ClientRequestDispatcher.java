@@ -96,7 +96,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
                 encodedRequest = encoder.encodeCreate(cr);
                 break;
             default:
-                throw new RuntimeException("Unknown command type");
+                throw new IllegalArgumentException("Unknown command type");
         }
         return encodedRequest;
     }
