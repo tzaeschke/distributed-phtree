@@ -22,7 +22,9 @@ public interface RequestDecoder<K, V> {
 
     public GetKNNRequest<K> decodeGetKNN(ByteBuffer buffer);
 
-    public GetIteratorBatch<K> decodeGetBatch(ByteBuffer buffer);
+    public GetIteratorBatchRequest<K> decodeGetBatch(ByteBuffer buffer);
 
     public CreateRequest decodeCreate(ByteBuffer buffer);
+
+    public DeleteRequest<K> decodeDelete(ByteBuffer buffer);
 }

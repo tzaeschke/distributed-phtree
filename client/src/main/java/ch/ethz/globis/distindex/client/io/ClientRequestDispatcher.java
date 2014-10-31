@@ -84,7 +84,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
                 encodedRequest = encoder.encodeGetKNN(gknn);
                 break;
             case OpCode.GET_BATCH:
-                GetIteratorBatch gb = (GetIteratorBatch) request;
+                GetIteratorBatchRequest gb = (GetIteratorBatchRequest) request;
                 encodedRequest = encoder.encodeGetBatch(gb);
                 break;
             case OpCode.PUT:
@@ -94,6 +94,10 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
             case OpCode.CREATE_INDEX:
                 CreateRequest cr = (CreateRequest) request;
                 encodedRequest = encoder.encodeCreate(cr);
+                break;
+            case OpCode.DELETE:
+                DeleteRequest dr = (DeleteRequest) request;
+                encodedRequest = encoder.encodeDelete(dr);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command type");

@@ -136,7 +136,7 @@ public class DistributedIndexProxyTest {
             add( new long[] {1, 0}, "baz" );
         }};
 
-        when(dispatcher.send(anyString(), any(GetIteratorBatch.class))).thenAnswer(entryResponse(entries));
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(entryResponse(entries));
 
         Iterator<IndexEntry<long[], String>> expected = entries.iterator();
         Iterator<IndexEntry<long[], String>> it = indexProxy.query(start, end);
@@ -164,7 +164,7 @@ public class DistributedIndexProxyTest {
     public void testRange_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatch.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
 
         long[] start = new long[] {1, 2, 3};
         long[] end = new long[] {1, 2, 3};
@@ -175,11 +175,53 @@ public class DistributedIndexProxyTest {
     public void testRange_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatch.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
 
         long[] start = new long[] {1, 2, 3};
         long[] end = new long[] {1, 2, 3};
         indexProxy.query(start, end);
+    }
+
+    @Test
+    public void testDelete_OK() {
+        RequestDispatcher<long[], String> dispatcher = mockDispatcher();
+        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+
+        long[] key = {1, 2 , 3};
+        String value = new BigInteger(30, new Random()).toString();
+        IndexEntryList<long[], String> singleEntry = new IndexEntryList<>(key, value);
+
+        when(dispatcher.send(anyString(), any(DeleteRequest.class))).thenAnswer(entryResponse(singleEntry));
+        String retrieved = indexProxy.remove(key);
+        assertEquals(value, retrieved);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testDelete_NullArgs() {
+        RequestDispatcher<long[], String> dispatcher = mockDispatcher();
+        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+
+        indexProxy.remove(null);
+    }
+
+    @Test(expected = ServerErrorException.class)
+    public void testDelete_Failure() {
+        RequestDispatcher<long[], String> dispatcher = mockDispatcher();
+        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
+
+        long[] key = new long[] {1, 2, 3};
+        indexProxy.remove(key);
+    }
+
+    @Test(expected = InvalidResponseException.class)
+    public void testDelete_IllegalResponse() {
+        RequestDispatcher<long[], String> dispatcher = mockDispatcher();
+        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
+
+        long[] key = new long[] {1, 2, 3};
+        indexProxy.remove(key);
     }
 
     /**

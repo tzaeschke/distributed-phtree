@@ -54,7 +54,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGetIteratorBatch(GetIteratorBatch<long[]> request) {
+    public Response<long[], byte[]> handleGetIteratorBatch(GetIteratorBatchRequest<long[]> request) {
         String iteratorId = request.getIteratorId();
         int batchSize= request.getBatchSize();
 
@@ -101,6 +101,14 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             results.add(key, previous);
         }
 
+        return createResponse(request, results);
+    }
+
+    @Override
+    public Response<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
+        long[] key = request.getKey();
+        byte[] value = tree.remove(key);
+        IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
     }
 

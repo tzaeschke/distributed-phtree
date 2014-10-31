@@ -12,8 +12,9 @@ public interface RequestHandler<K, V> {
 
     public Response<K, V> handleGetKNN(GetKNNRequest<K> request);
 
-    public Response<K, V> handleGetIteratorBatch(GetIteratorBatch<K> request);
+    public Response<K, V> handleGetIteratorBatch(GetIteratorBatchRequest<K> request);
 
     public Response<K, V> handlePut(PutRequest<K, V> request);
 
+    public Response<K,V> handleDelete(DeleteRequest<K> request);
 }

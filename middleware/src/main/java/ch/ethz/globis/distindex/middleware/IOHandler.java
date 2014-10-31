@@ -2,7 +2,6 @@ package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
-import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.*;
 import org.slf4j.Logger;
@@ -48,6 +47,9 @@ public class IOHandler<K, V> {
                 case OpCode.CREATE_INDEX:
                     response = handleCreateRequest(buffer);
                     break;
+                case OpCode.DELETE:
+                    response = handleDeleteRequest(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -58,8 +60,15 @@ public class IOHandler<K, V> {
         return response;
     }
 
+    private ByteBuffer handleDeleteRequest(ByteBuffer buf) {
+        DeleteRequest<K> request = decoder.decodeDelete(buf);
+        Response<K, V> response = requestHandler.handleDelete(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
+    }
+
     private ByteBuffer handleGetBatchRequest(ByteBuffer buf) {
-        GetIteratorBatch request = decoder.decodeGetBatch(buf);
+        GetIteratorBatchRequest request = decoder.decodeGetBatch(buf);
         Response<K, V> response = requestHandler.handleGetIteratorBatch(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);

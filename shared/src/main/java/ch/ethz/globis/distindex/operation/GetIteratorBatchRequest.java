@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class GetIteratorBatch<K> extends Request {
+public class GetIteratorBatchRequest<K> extends Request {
 
     /** The id of the iterator the requested batch belongs to. */
     String iteratorId;
@@ -17,14 +17,14 @@ public class GetIteratorBatch<K> extends Request {
     /** The end of the query range, if the iterator is ranged.*/
     private K end;
 
-    public GetIteratorBatch(int id, byte opCode, String indexId, String iteratorId, int batchSize) {
+    public GetIteratorBatchRequest(int id, byte opCode, String indexId, String iteratorId, int batchSize) {
         super(id, opCode, indexId);
         this.iteratorId = iteratorId;
         this.batchSize = batchSize;
         this.ranged = false;
     }
 
-    public GetIteratorBatch(int id, byte opCode, String indexId, String iteratorId, int batchSize, K start, K end) {
+    public GetIteratorBatchRequest(int id, byte opCode, String indexId, String iteratorId, int batchSize, K start, K end) {
         super(id, opCode, indexId);
         this.iteratorId = iteratorId;
         this.batchSize = batchSize;

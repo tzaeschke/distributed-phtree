@@ -357,6 +357,44 @@ public class DistributedPHTreeTest {
     }
 
     @Test
+    public void testDeleteContains() throws Exception {
+        int dim = 2;
+        int depth = 64;
+        String host = "localhost";
+
+        try (TestingServer zkServer = new TestingServer(ZK_PORT);
+             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(7080)) {
+
+            zkServer.start();
+            startMiddleware(middleware);
+            startMiddleware(second);
+            DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, ZK_PORT, BigInteger.class);
+            phTree.create(dim, depth);
+
+            long[] key1 = {-1, -1};
+            long[] key2 = {1, 1};
+            BigInteger value1 = new BigInteger(30, new Random());
+            BigInteger value2 = new BigInteger(30, new Random());
+            phTree.put(key1, value1);
+            phTree.put(key2, value2);
+
+            assertTrue(phTree.contains(key1));
+            assertTrue(phTree.contains(key2));
+
+            assertEquals(value1, phTree.remove(key1));
+            assertFalse(phTree.contains(key1));
+            assertTrue(phTree.contains(key2));
+
+            assertEquals(value2, phTree.remove(key2));
+            assertFalse(phTree.contains(key1));
+            assertFalse(phTree.contains(key2));
+
+            phTree.close();
+        }
+    }
+
+    @Test
     public void testPutAndGet3D() throws Exception {
         int dim = 3;
         int depth = 64;

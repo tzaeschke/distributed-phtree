@@ -9,7 +9,6 @@ import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -65,11 +64,29 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     }
 
     @Override
+    public boolean contains(K key) {
+        //ToDo use the ph-tree implementation
+        return get(key) != null;
+    }
+
+    @Override
     public V get(K key) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         String hostId = keyMapping.getHostId(key);
 
         GetRequest<K> request = Requests.newGet(key);
+        Response<K, V> response = requestDispatcher.send(hostId, request);
+
+        check(request, response);
+        return getSingleEntryValue(response);
+    }
+
+    @Override
+    public V remove(K key) {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        String hostId = keyMapping.getHostId(key);
+
+        DeleteRequest<K> request = Requests.newDelete(key);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
@@ -87,7 +104,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     }
 
     public Response<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
-        GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size, start, end);
+        GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size, start, end);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
@@ -95,7 +112,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     }
 
     public Response<K, V> getNextBatch(String hostId, String iteratorId, int size) {
-        GetIteratorBatch<K> request = Requests.newGetBatch(iteratorId, size);
+        GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size);
         Response<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);

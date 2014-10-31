@@ -90,7 +90,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     }
 
     @Override
-    public byte[] encodeGetBatch(GetIteratorBatch<K> request) {
+    public byte[] encodeGetBatch(GetIteratorBatchRequest<K> request) {
         String iteratorId = request.getIteratorId();
 
         int size = request.getBatchSize();
@@ -132,6 +132,20 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         writeMeta(buffer, request);
         buffer.putInt(dim);
         buffer.putInt(depth);
+        return buffer.array();
+    }
+
+    @Override
+    public byte[] encodeDelete(DeleteRequest<K> request) {
+        K key = request.getKey();
+        byte[] keyBytes = keyEncoder.encode(key);
+
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                + request.metadataSize();   // metadata
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
         return buffer.array();
     }
 

@@ -94,7 +94,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     @Override
-    public GetIteratorBatch<K> decodeGetBatch(ByteBuffer buffer) {
+    public GetIteratorBatchRequest<K> decodeGetBatch(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
@@ -105,9 +105,9 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         if (isRanged) {
             K start = decodeKey(buffer);
             K end = decodeKey(buffer);
-            return new GetIteratorBatch<>(requestId, opCode, indexName, iteratorId, size, start, end);
+            return new GetIteratorBatchRequest<>(requestId, opCode, indexName, iteratorId, size, start, end);
         }
-        return new GetIteratorBatch<>(requestId, opCode, indexName, iteratorId, size);
+        return new GetIteratorBatchRequest<>(requestId, opCode, indexName, iteratorId, size);
     }
 
     @Override
@@ -119,6 +119,18 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         int dim = buffer.getInt();
         int depth = buffer.getInt();
         return new CreateRequest(requestId, opCode, indexName, dim, depth);
+    }
+
+    @Override
+    public DeleteRequest<K> decodeDelete(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
+        K key = decodeKey(buffer);
+        assert !buffer.hasRemaining();
+
+        return new DeleteRequest<>(requestId, opCode, indexName, key);
     }
 
     /**

@@ -22,12 +22,16 @@ public class Requests {
         return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, "", key, k);
     }
 
-    public static <K> GetIteratorBatch<K> newGetBatch(String iteratorId, int size) {
-        return new GetIteratorBatch(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
+    public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size) {
+        return new GetIteratorBatchRequest(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
     }
 
-    public static <K> GetIteratorBatch<K> newGetBatch(String iteratorId, int size, K start, K end) {
-        return new GetIteratorBatch<>(nextId(), OpCode.GET_BATCH, "", iteratorId, size, start, end);
+    public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size, K start, K end) {
+        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, "", iteratorId, size, start, end);
+    }
+
+    public static <K> DeleteRequest<K> newDelete(K key) {
+        return new DeleteRequest<>(nextId(), OpCode.DELETE, "", key);
     }
 
     public static CreateRequest newCreate(int dim, int depth) {

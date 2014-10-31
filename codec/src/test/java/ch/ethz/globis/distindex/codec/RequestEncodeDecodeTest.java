@@ -36,6 +36,36 @@ public class RequestEncodeDecodeTest {
     }
 
     @Test
+    public void encodeDeleteRequest() {
+        long[] key = {-1000, 0, 10000, 1, -1};
+
+        DeleteRequest<long[]> request = Requests.newDelete(key);
+        byte[] encodedRequest = requestEncoder.encodeDelete(request);
+
+        DeleteRequest<long[]> decodedRequest = requestDecoder.decodeDelete(ByteBuffer.wrap(encodedRequest));
+        assertRequestMetaEqual(request, decodedRequest);
+        assertArrayEquals(request.getKey(), decodedRequest.getKey());
+    }
+
+    @Test
+    public void encodeDecodeIteratorRequest() {
+        long[] start = {-1000, 0, 10000, 1, -1};
+        long[] end = {1000, 0, -10000, -1, 1};
+        String iteratorId = "test-iterator";
+        int size = 100;
+
+        GetIteratorBatchRequest<long[]> request = Requests.newGetBatch(iteratorId, 100, start, end);
+        byte[] encodedRequest = requestEncoder.encodeGetBatch(request);
+
+        GetIteratorBatchRequest<long[]> decodedRequest = requestDecoder.decodeGetBatch(ByteBuffer.wrap(encodedRequest));
+        assertRequestMetaEqual(request, decodedRequest);
+        assertArrayEquals(request.getStart(), decodedRequest.getStart());
+        assertArrayEquals(request.getEnd(), decodedRequest.getEnd());
+        assertEquals(request.getBatchSize(), decodedRequest.getBatchSize());
+        assertEquals(request.getIteratorId(), decodedRequest.getIteratorId());
+    }
+
+    @Test
     public void encodeDecodeGetRangeRequest() {
         long[] start = {-1000, 0, 10000, 1, -1};
         long[] end = {1000, 0, 10000, -1, 1};
