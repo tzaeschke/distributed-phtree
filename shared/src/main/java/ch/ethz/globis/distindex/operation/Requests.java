@@ -23,7 +23,7 @@ public class Requests {
     }
 
     public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size) {
-        return new GetIteratorBatchRequest(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
+        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, "", iteratorId, size);
     }
 
     public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size, K start, K end) {

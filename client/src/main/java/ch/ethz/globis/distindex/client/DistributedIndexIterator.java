@@ -46,6 +46,12 @@ public class DistributedIndexIterator<K, V> implements IndexIterator<K, V> {
 
     @Override
     public IndexEntry<K, V> next() {
+        if (position == entryBuffer.size()) {
+            getRemoteEntries();
+        }
+        if (position == entryBuffer.size()) {
+            return null;
+        }
         return entryBuffer.get(position++);
     }
 

@@ -26,7 +26,7 @@ import java.util.List;
  * @param <K>
  * @param <V>
  */
-public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable{
+public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     protected RequestDispatcher<K, V> requestDispatcher;
     protected ClusterService<K> clusterService;
