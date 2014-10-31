@@ -2,6 +2,12 @@ package ch.ethz.globis.distindex.api;
 
 import java.util.ArrayList;
 
+/**
+ * An ordered list of {@link ch.ethz.globis.distindex.api.IndexEntry} objects.
+ *
+ * @param <K>                           The type of the index key.
+ * @param <V>                           The type of the index value.
+ */
 public class IndexEntryList<K, V> extends ArrayList<IndexEntry<K, V>> {
 
     public IndexEntryList() {

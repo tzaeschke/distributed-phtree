@@ -3,8 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.DistributedIndexIterator;
-import ch.ethz.globis.distindex.client.DistributedIndexRangedIterator;
-import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
+import ch.ethz.globis.distindex.client.pht.DistributedPHTreeProxy;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.util.MultidimUtil;
@@ -19,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-public class DistributedPHTreeTest {
+public class DistributedPHTreeProxyTest {
 
     private static final int ZK_PORT = 2181;
     private static ExecutorService threadPool;
@@ -47,7 +46,7 @@ public class DistributedPHTreeTest {
             zkServer.start();
             startMiddleware(middleware);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             long[] key = {1L, 2L};
@@ -71,7 +70,7 @@ public class DistributedPHTreeTest {
             zkServer.start();
             startMiddleware(middleware);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             String retrieved = phTree.get(new long[] { 1L, 2L});
@@ -93,7 +92,7 @@ public class DistributedPHTreeTest {
             startMiddleware(first);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             IndexEntryList<long[], String> expected = new IndexEntryList<>();
@@ -137,7 +136,7 @@ public class DistributedPHTreeTest {
                 startMiddleware(first);
                 startMiddleware(second);
 
-                DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+                DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
                 phTree.create(dim, depth);
 
                 IndexEntryList<long[], String> expected = new IndexEntryList<>();
@@ -180,7 +179,7 @@ public class DistributedPHTreeTest {
             zkServer.start();
             startMiddleware(middleware);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             phTree.put(new long[] {10, 10}, "foo");
@@ -225,7 +224,7 @@ public class DistributedPHTreeTest {
             startMiddleware(middleware);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             phTree.put(new long[] {0, 0}, "foo");
@@ -268,7 +267,7 @@ public class DistributedPHTreeTest {
             startMiddleware(middleware);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
             long[] key = {1, 2};
             phTree.put(key, null);
@@ -293,7 +292,7 @@ public class DistributedPHTreeTest {
             startMiddleware(middleware);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             List<long[]> expected = new ArrayList<long[]>() {{
@@ -338,7 +337,7 @@ public class DistributedPHTreeTest {
             startMiddleware(middleware);
             startMiddleware(second);
 
-            DistributedPHTree<String> phTree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
             phTree.create(dim, depth);
 
             long[] key = new long[]{1L, 2L};
@@ -369,7 +368,7 @@ public class DistributedPHTreeTest {
             zkServer.start();
             startMiddleware(middleware);
             startMiddleware(second);
-            DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, ZK_PORT, BigInteger.class);
+            DistributedPHTreeProxy<BigInteger> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, BigInteger.class);
             phTree.create(dim, depth);
 
             long[] key1 = {-1, -1};
@@ -404,7 +403,7 @@ public class DistributedPHTreeTest {
             Middleware middleware = IndexMiddlewareFactory.newPHTreeMiddleware(7070)) {
             zkServer.start();
             startMiddleware(middleware);
-            DistributedPHTree<BigInteger> phTree = new DistributedPHTree<>(host, ZK_PORT, BigInteger.class);
+            DistributedPHTreeProxy<BigInteger> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, BigInteger.class);
             phTree.create(dim, depth);
 
             int nrEntries = 100000;

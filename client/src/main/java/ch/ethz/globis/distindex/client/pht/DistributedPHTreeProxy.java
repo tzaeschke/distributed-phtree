@@ -23,12 +23,28 @@ import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.util.List;
 
-public class DistributedPHTree<V> extends DistributedIndexProxy<long[], V> implements PointIndex<V>{
+/**
+ *  Represents a proxy to a distributed multi-dimensional index. The API implemented is independent of any
+ *  multi-dimensional index API.
+ *
+ * @param <V>                               The value class for this index.
+ */
+public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> implements PointIndex<V>{
 
-    public DistributedPHTree(String host, int port, Class<V> clazz) {
+    public DistributedPHTreeProxy(String host, int port, Class<V> clazz) {
         requestDispatcher = setupDispatcher(clazz);
         clusterService = setupClusterService(host, port);
         clusterService.connect();
+    }
+
+    private RequestDispatcher<long[], V> setupDispatcher(Class<V> clazz) {
+        FieldEncoderDecoder<long[]> keyEncoder = new MultiLongEncoderDecoder();
+        FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>(clazz);
+        RequestEncoder<long[], V> encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
+        ResponseDecoder<long[], V> decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
+        Transport transport = new TCPClient();
+
+        return new ClientRequestDispatcher<>(transport, encoder, decoder);
     }
 
     @Override
@@ -43,15 +59,5 @@ public class DistributedPHTree<V> extends DistributedIndexProxy<long[], V> imple
 
     private ClusterService<long[]> setupClusterService(String host, int port) {
         return new ZKClusterService(host + ":" + port);
-    }
-
-    private RequestDispatcher<long[], V> setupDispatcher(Class<V> clazz) {
-        FieldEncoderDecoder<long[]> keyEncoder = new MultiLongEncoderDecoder();
-        FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>(clazz);
-        RequestEncoder<long[], V> encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
-        ResponseDecoder<long[], V> decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
-        Transport transport = new TCPClient();
-
-        return new ClientRequestDispatcher<>(transport, encoder, decoder);
     }
 }

@@ -1,6 +1,13 @@
 package ch.ethz.globis.distindex.api;
 
+/**
+ *  Represents an entry of an {@link Index}
+ *
+ * @param <K>                           The type of the index key.
+ * @param <V>                           The type of the index value.
+ */
 public class IndexEntry<K, V> {
+
     private K key;
     private V value;
 

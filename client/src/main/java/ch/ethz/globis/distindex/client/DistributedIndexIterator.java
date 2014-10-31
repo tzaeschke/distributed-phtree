@@ -2,12 +2,13 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.Response;
 
 import java.util.Iterator;
 
-public class DistributedIndexIterator<K, V> implements Iterator<IndexEntry<K, V>> {
+public class DistributedIndexIterator<K, V> implements IndexIterator<K, V> {
 
     /** The index over which the iterator is running. */
     DistributedIndexProxy<K, V> indexProxy;

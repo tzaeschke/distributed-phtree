@@ -1,8 +1,7 @@
 package ch.ethz.globis.distindex;
 
-import ch.ethz.globis.distindex.client.pht.DistributedPHTree;
+import ch.ethz.globis.distindex.client.pht.DistributedPHTreeProxy;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.util.TestUtil;
 import org.apache.curator.test.TestingServer;
@@ -32,7 +31,7 @@ public class ParametrizedDistPHTreeTest {
     private static List<Middleware> middlewares = new ArrayList<>();
     private static TestingServer zkServer;
 
-    private DistributedPHTree<String> tree;
+    private DistributedPHTreeProxy<String> tree;
 
     private int nrServers;
 
@@ -60,7 +59,7 @@ public class ParametrizedDistPHTreeTest {
 
     @Before
     public void setupTree() {
-        tree = new DistributedPHTree<>(host, ZK_PORT, String.class);
+        tree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
         tree.create(2, 64);
     }
 

@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.client;
 import ch.ethz.globis.distindex.api.Index;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.exception.InvalidResponseException;
 import ch.ethz.globis.distindex.client.exception.ServerErrorException;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
@@ -120,13 +121,13 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     }
 
     @Override
-    public Iterator<IndexEntry<K, V>> iterator() {
+    public IndexIterator<K, V> iterator() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
         return new DistributedIndexIterator<>(this, keyMapping);
     }
 
-    public Iterator<IndexEntry<K, V>> query(K start, K end) {
+    public IndexIterator<K, V> query(K start, K end) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
         return new DistributedIndexRangedIterator<>(this, keyMapping, start, end);
