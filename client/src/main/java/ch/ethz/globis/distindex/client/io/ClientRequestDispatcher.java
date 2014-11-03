@@ -68,6 +68,24 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
         return responses;
     }
 
+    @Override
+    public SimpleResponse sendSimple(String hostId, Request request) {
+        byte[] requestBytes = encode(request);
+        byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
+        return decoder.decodeInteger(responseBytes);
+    }
+
+    @Override
+    public List<SimpleResponse> sendSimple(List<String> hostIds, Request request) {
+        byte[] requestBytes = encode(request);
+        List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
+        List<SimpleResponse> responses = new ArrayList<>();
+        for (byte[] responseBytes : responseList) {
+            responses.add(decoder.decodeInteger(responseBytes));
+        }
+        return responses;
+    }
+
     private byte[] encode(Request request) {
         byte[] encodedRequest;
         switch (request.getOpCode()) {
@@ -98,6 +116,12 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
             case OpCode.DELETE:
                 DeleteRequest dr = (DeleteRequest) request;
                 encodedRequest = encoder.encodeDelete(dr);
+                break;
+            case OpCode.GET_DEPTH:
+            case OpCode.GET_DIM:
+            case OpCode.GET_SIZE:
+                SimpleRequest sr = (SimpleRequest) request;
+                encodedRequest = encoder.encodeSimple(sr);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command type");

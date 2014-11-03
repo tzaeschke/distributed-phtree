@@ -50,6 +50,15 @@ public class IOHandler<K, V> {
                 case OpCode.DELETE:
                     response = handleDeleteRequest(buffer);
                     break;
+                case OpCode.GET_SIZE:
+                    response = handleGetSizeRequest(buffer);
+                    break;
+                case OpCode.GET_DIM:
+                    response = handleGetDimRequest(buffer);
+                    break;
+                case OpCode.GET_DEPTH:
+                    response = handleGetDepthRequest(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -60,6 +69,27 @@ public class IOHandler<K, V> {
         return response;
     }
 
+    private ByteBuffer handleGetDimRequest(ByteBuffer buffer) {
+        SimpleRequest request = decoder.decodeSimple(buffer);
+        IntegerResponse response = requestHandler.handleGetDim(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
+    }
+
+    private ByteBuffer handleGetDepthRequest(ByteBuffer buffer) {
+        SimpleRequest request = decoder.decodeSimple(buffer);
+        IntegerResponse response = requestHandler.handleGetDepth(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
+    }
+
+    private ByteBuffer handleGetSizeRequest(ByteBuffer buffer) {
+        SimpleRequest request = decoder.decodeSimple(buffer);
+        IntegerResponse response = requestHandler.handleGetSize(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
+    }
+
     private ByteBuffer handleDeleteRequest(ByteBuffer buf) {
         DeleteRequest<K> request = decoder.decodeDelete(buf);
         Response<K, V> response = requestHandler.handleDelete(request);
@@ -68,7 +98,7 @@ public class IOHandler<K, V> {
     }
 
     private ByteBuffer handleGetBatchRequest(ByteBuffer buf) {
-        GetIteratorBatchRequest request = decoder.decodeGetBatch(buf);
+        GetIteratorBatchRequest<K> request = decoder.decodeGetBatch(buf);
         Response<K, V> response = requestHandler.handleGetIteratorBatch(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);

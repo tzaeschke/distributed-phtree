@@ -4,6 +4,7 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.IntegerResponse;
 import ch.ethz.globis.distindex.operation.Response;
 
 import java.nio.ByteBuffer;
@@ -63,5 +64,15 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
     @Override
     public Response<K, V> decode(byte[] payload) {
         return decode(ByteBuffer.wrap(payload));
+    }
+
+    @Override
+    public IntegerResponse decodeInteger(byte[] payload) {
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        byte status = buffer.get();
+        int value = buffer.getInt();
+        return new IntegerResponse(opCode, requestId, status, value);
     }
 }

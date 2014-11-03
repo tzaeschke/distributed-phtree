@@ -1,5 +1,6 @@
 package ch.ethz.globis.disindex.codec.api;
 
+import ch.ethz.globis.distindex.operation.IntegerResponse;
 import ch.ethz.globis.distindex.operation.Response;
 
 /**
@@ -13,4 +14,6 @@ import ch.ethz.globis.distindex.operation.Response;
 public interface ResponseDecoder<K, V> {
 
     public Response<K, V> decode(byte[] payload);
+
+    public IntegerResponse decodeInteger(byte[] payload);
 }

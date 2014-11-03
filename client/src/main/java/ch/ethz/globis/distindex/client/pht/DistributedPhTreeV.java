@@ -26,7 +26,7 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.size();
     }
 
     @Override
@@ -96,12 +96,12 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public int getDIM() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getDim();
     }
 
     @Override
     public int getDEPTH() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getDepth();
     }
 
     @Override

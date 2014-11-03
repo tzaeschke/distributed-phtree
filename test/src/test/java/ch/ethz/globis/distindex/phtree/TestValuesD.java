@@ -56,8 +56,6 @@ public class TestValuesD extends BaseParameterizedTest {
             }
             //build
             assertNull(ind.put(keys[i], Integer.valueOf(i)));
-            //System.out.println("key=" + Bits.toBinary(keys[i], 64));
-            //System.out.println(ind);
             assertTrue("i="+ i, ind.contains(keys[i]));
             assertEquals(i, (int)ind.get(keys[i]));
         }
@@ -84,8 +82,6 @@ public class TestValuesD extends BaseParameterizedTest {
 
         //delete
         for (int i = 0; i < N; i++) {
-            //System.out.println("Removing: " + Bits.toBinary(keys[i], 64));
-            //System.out.println("Tree: \n" + ind);
             assertEquals(-i, (int)ind.remove(keys[i]));
             assertFalse(ind.contains(keys[i]));
             assertNull(ind.get(keys[i]));

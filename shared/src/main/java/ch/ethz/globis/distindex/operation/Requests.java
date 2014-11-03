@@ -38,6 +38,18 @@ public class Requests {
         return new CreateRequest(nextId(), OpCode.CREATE_INDEX, "", dim, depth);
     }
 
+    public static SimpleRequest newGetSize() {
+        return new SimpleRequest(nextId(), OpCode.GET_SIZE, "");
+    }
+
+    public static SimpleRequest newGetDim() {
+        return new SimpleRequest(nextId(), OpCode.GET_DIM, "");
+    }
+
+    public static SimpleRequest newGetDepth() {
+        return new SimpleRequest(nextId(), OpCode.GET_DEPTH, "");
+    }
+
     private static int nextId() {
         return ID.incrementAndGet();
     }

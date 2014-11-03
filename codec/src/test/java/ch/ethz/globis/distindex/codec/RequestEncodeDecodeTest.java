@@ -118,6 +118,30 @@ public class RequestEncodeDecodeTest {
         assertEquals("Create requests do not match", request, decodedRequest);
     }
 
+    @Test
+    public void encodeDecodeGetSize() {
+        SimpleRequest request = Requests.newGetSize();
+        encodeDecodeSimpleRequest(request);
+    }
+
+    @Test
+    public void encodeDecodeGetDim() {
+        SimpleRequest request = Requests.newGetDim();
+        encodeDecodeSimpleRequest(request);
+    }
+
+    @Test
+    public void encodeDecodeGetDepth() {
+        SimpleRequest request = Requests.newGetDepth();
+        encodeDecodeSimpleRequest(request);
+    }
+
+    private void encodeDecodeSimpleRequest(SimpleRequest request) {
+        byte[] encodedRequest = requestEncoder.encodeSimple(request);
+        SimpleRequest decoded = requestDecoder.decodeSimple(ByteBuffer.wrap(encodedRequest));
+        assertEquals("Requests do not match", request, decoded);
+    }
+
     private void assertRequestMetaEqual(Request request, Request decoded) {
         assertEquals("Request metadata not equal", request, decoded);
     }

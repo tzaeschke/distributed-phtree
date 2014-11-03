@@ -149,6 +149,14 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
+    @Override
+    public byte[] encodeSimple(SimpleRequest request) {
+        int outputSize = request.metadataSize();
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        return buffer.array();
+    }
+
     /**
      * Shorthand method to encode the request metadata into the buffer.
      * @param buffer                The output buffer used to encode the data.

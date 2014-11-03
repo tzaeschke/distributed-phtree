@@ -127,6 +127,57 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return new DistributedIndexIterator<>(this, keyMapping);
     }
 
+    public int size() {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        List<String> hostIds = keyMapping.getHostIds();
+        SimpleRequest request = Requests.newGetSize();
+
+        List<SimpleResponse> responses = requestDispatcher.sendSimple(hostIds, request);
+        int size = 0;
+        for (SimpleResponse simpleResponse : responses) {
+            size += (int) simpleResponse.getContent();
+        }
+        return size;
+    }
+
+    public int getDim() {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        List<String> hostIds = keyMapping.getHostIds();
+        SimpleRequest request = Requests.newGetDim();
+
+        List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
+        int dim = -1;
+        for (SimpleResponse simpleResponse : responses) {
+            if (dim == -1) {
+                dim = (int) simpleResponse.getContent();
+            } else {
+                if (dim != (int) simpleResponse.getContent()) {
+                    throw new RuntimeException("Inconsistent index meta-data across cluster");
+                }
+            }
+        }
+        return dim;
+    }
+
+    public int getDepth() {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        List<String> hostIds = keyMapping.getHostIds();
+        SimpleRequest request = Requests.newGetDepth();
+
+        List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
+        int depth = -1;
+        for (SimpleResponse simpleResponse : responses) {
+            if (depth == -1) {
+                depth = (int) simpleResponse.getContent();
+            } else {
+                if (depth != (int) simpleResponse.getContent()) {
+                    throw new RuntimeException("Inconsistent index meta-data across cluster");
+                }
+            }
+        }
+        return depth;
+    }
+
     public IndexIterator<K, V> query(K start, K end) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
 

@@ -9,11 +9,18 @@ import java.util.List;
 public class MultidimUtil {
 
     public static List<long[]> nearestNeighbours(long[] q, int k, List<long[]> points) {
+        if (points.size() == 0) {
+            return new ArrayList<>();
+        }
         PhTree tree = createTree(points);
         return tree.nearestNeighbour(k, q);
     }
 
     public static List<long[]> sort(List<long[]> points) {
+        if (points.size() == 0) {
+            return new ArrayList<>();
+        }
+
         PhTree tree = createTree(points);
 
         List<long[]> output = new ArrayList<>();

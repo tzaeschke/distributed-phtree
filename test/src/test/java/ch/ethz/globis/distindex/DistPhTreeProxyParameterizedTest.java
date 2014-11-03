@@ -266,6 +266,13 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         }
     }
 
+    @Test
+    public void testSimple() throws Exception {
+        assertEquals(0, phTree.size());
+        assertEquals(2, phTree.getDim());
+        assertEquals(64, phTree.getDepth());
+    }
+
     private static long[] k(long... keys) {
         return keys;
     }

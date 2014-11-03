@@ -5,7 +5,6 @@ import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.v3.PhTree3;
 import org.junit.Test;
 import org.zoodb.index.critbit.BitTools;
 

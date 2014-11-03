@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.BaseParameterizedTest;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.pht.Bits;
 import ch.ethz.globis.pht.PhTree;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Random;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class TestDeletion extends BaseParameterizedTest {
 
     private PHFactory factory;

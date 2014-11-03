@@ -5,6 +5,7 @@ import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.IntegerResponse;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.Response;
 
@@ -35,6 +36,20 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         encode(buffer, response.getEntries());
         writeString(response.getIteratorId(), buffer);
         return buffer.toByteArray();
+    }
+
+    @Override
+    public byte[] encode(IntegerResponse response) {
+        int outputSize = 4      // request id
+                        + 1     // opcode
+                        + 1     // status
+                        + 4;    // int value
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        buffer.put(response.getOpCode());
+        buffer.putInt(response.getRequestId());
+        buffer.put(response.getStatus());
+        buffer.putInt(response.getContent());
+        return buffer.array();
     }
 
     public void encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {

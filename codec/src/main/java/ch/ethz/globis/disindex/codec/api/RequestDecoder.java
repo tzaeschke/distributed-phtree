@@ -27,4 +27,6 @@ public interface RequestDecoder<K, V> {
     public CreateRequest decodeCreate(ByteBuffer buffer);
 
     public DeleteRequest<K> decodeDelete(ByteBuffer buffer);
+
+    public SimpleRequest decodeSimple(ByteBuffer buffer);
 }

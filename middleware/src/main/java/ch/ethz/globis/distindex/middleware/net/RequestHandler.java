@@ -17,4 +17,10 @@ public interface RequestHandler<K, V> {
     public Response<K, V> handlePut(PutRequest<K, V> request);
 
     public Response<K,V> handleDelete(DeleteRequest<K> request);
+
+    public IntegerResponse handleGetSize(Request request);
+
+    public IntegerResponse handleGetDim(Request request);
+
+    public IntegerResponse handleGetDepth(Request request);
 }

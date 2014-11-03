@@ -9,4 +9,8 @@ public class OpCode {
     public static final byte GET_RANGE = 21;
     public static final byte GET_KNN = 22;
     public static final byte GET_BATCH = 23;
+    public static final byte GET_SIZE = 24;
+    public static final byte GET_DIM = 25;
+    public static final byte GET_DEPTH = 26;
+
 }

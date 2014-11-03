@@ -133,6 +133,14 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         return new DeleteRequest<>(requestId, opCode, indexName, key);
     }
 
+    @Override
+    public SimpleRequest decodeSimple(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        return new SimpleRequest(requestId, opCode, indexName);
+    }
+
     /**
      * Decode a key from the current ByteBuffer.
      *

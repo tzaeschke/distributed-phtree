@@ -112,6 +112,24 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return createResponse(request, results);
     }
 
+    @Override
+    public IntegerResponse handleGetSize(Request request) {
+        int size = tree.size();
+        return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, size);
+    }
+
+    @Override
+    public IntegerResponse handleGetDim(Request request) {
+        int dim = tree.getDIM();
+        return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, dim);
+    }
+
+    @Override
+    public IntegerResponse handleGetDepth(Request request) {
+        int depth = tree.getDEPTH();
+        return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, depth);
+    }
+
     private Response<long[], byte[]> createError(Request request) {
         return new Response<>(request.getOpCode(), request.getId(), OpStatus.FAILURE);
     }
