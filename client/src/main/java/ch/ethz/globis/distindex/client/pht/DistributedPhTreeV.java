@@ -1,8 +1,9 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.distindex.api.IndexEntry;
-import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.PVIterator;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeQStats;
+import ch.ethz.globis.pht.PhTreeV;
 
 import java.util.List;
 
@@ -106,40 +107,5 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     @Override
     public List<long[]> nearestNeighbour(int k, long... key) {
         return proxy.getNearestNeighbors(key, k);
-    }
-
-    public static class DistributedPhTreeIterator<V> implements PVIterator<V> {
-
-        private IndexIterator<long[], V> proxyIterator;
-
-        public DistributedPhTreeIterator(IndexIterator<long[], V> proxyIterator) {
-            this.proxyIterator = proxyIterator;
-        }
-
-        @Override
-        public long[] nextKey() {
-            return proxyIterator.next().getKey();
-        }
-
-        @Override
-        public V nextValue() {
-            return proxyIterator.next().getValue();
-        }
-
-        @Override
-        public PVEntry<V> nextEntry() {
-            IndexEntry<long[], V> currentEntry = proxyIterator.next();
-            return new PVEntry<>(currentEntry.getKey(), currentEntry.getValue());
-        }
-
-        @Override
-        public boolean hasNext() {
-            return proxyIterator.hasNext();
-        }
-
-        @Override
-        public V next() {
-            return proxyIterator.next().getValue();
-        }
     }
 }
