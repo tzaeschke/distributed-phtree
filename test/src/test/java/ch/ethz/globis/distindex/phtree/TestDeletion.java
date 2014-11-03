@@ -28,7 +28,7 @@ public class TestDeletion extends BaseParameterizedTest {
     public void testDeleteSingle() {
         PhTree ind = factory.createPHTreeSet(3, 32);
         Random R = new Random(0);
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 10000; i++) {
             long[] v = new long[]{R.nextInt(), R.nextInt(), R.nextInt()};
             ind.insert(v);
             assertTrue(ind.contains(v));
@@ -41,7 +41,7 @@ public class TestDeletion extends BaseParameterizedTest {
     public void testDeleteMulti2D() {
         PhTree ind = factory.createPHTreeSet(2, 16);
         Random R = new Random(1);
-        int N = 200000;
+        int N = 20000;
         long[][] vals = new long[N][];
         for (int i = 0; i < N; i++) {
             long[] v = new long[]{R.nextInt(), R.nextInt()};
@@ -67,7 +67,7 @@ public class TestDeletion extends BaseParameterizedTest {
     public void testDeleteMulti3D() {
         PhTree ind = factory.createPHTreeSet(3, 32);
         Random R = new Random(0);
-        int N = 200000;
+        int N = 20000;
         long[][] vals = new long[N][];
         for (int i = 0; i < N; i++) {
             long[] v = new long[]{R.nextInt(), R.nextInt(), R.nextInt()};

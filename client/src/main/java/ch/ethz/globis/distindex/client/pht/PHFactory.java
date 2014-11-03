@@ -28,7 +28,7 @@ public class PHFactory {
         PhTreeVD<V> tree = new PhTreeVD<>(dim);
         Unsafe unsafe = UnsafeUtil.get();
         try {
-            Field field = PhTreeRangeD.class.getDeclaredField("pht");
+            Field field = PhTreeVD.class.getDeclaredField("pht");
             long offset = unsafe.objectFieldOffset(field);
             unsafe.putObject(tree, offset, proxy);
         } catch (NoSuchFieldException e) {

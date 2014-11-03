@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.phtree;
 import ch.ethz.globis.distindex.BaseParameterizedTest;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.pht.PhTreeVD;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,9 +11,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
+@Ignore
 public class TestValuesD extends BaseParameterizedTest {
 
     private PHFactory factory;
@@ -24,12 +24,12 @@ public class TestValuesD extends BaseParameterizedTest {
 
     @Test
     public void test3D() {
-        smokeTest(10000, 3, 0);
+        smokeTest(1000, 3, 0);
     }
 
     @Test
     public void test2D() {
-        smokeTest(100000, 2, 0);
+        smokeTest(1000, 2, 0);
     }
 
     @Test

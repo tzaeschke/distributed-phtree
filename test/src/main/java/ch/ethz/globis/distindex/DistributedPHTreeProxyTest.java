@@ -406,7 +406,7 @@ public class DistributedPHTreeProxyTest {
             DistributedPHTreeProxy<BigInteger> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, BigInteger.class);
             phTree.create(dim, depth);
 
-            int nrEntries = 100000;
+            int nrEntries = 10000;
             Random random = new Random();
 
             long[] key;

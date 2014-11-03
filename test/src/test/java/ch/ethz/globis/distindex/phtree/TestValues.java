@@ -29,12 +29,12 @@ public class TestValues extends BaseParameterizedTest {
 
     @Test
     public void test3D() {
-        smokeTest(10000, 3, 64, 0);
+        smokeTest(1000, 3, 64, 0);
     }
 
     @Test
     public void test2D() {
-        smokeTest(100000, 2, 16, 0);
+        smokeTest(1000, 2, 16, 0);
     }
 
     @Test

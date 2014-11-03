@@ -224,7 +224,7 @@ public class TestInsertion extends BaseParameterizedTest {
     public void test15() {
         PhTree ind = factory.createPHTreeSet(2, 16);
         Random R = new Random(1);
-        int N = 200000;
+        int N = 20000;
         long[][] vals = new long[N][];
         for (int i = 0; i < N; i++) {
             long[] v = new long[]{R.nextInt(), R.nextInt()};

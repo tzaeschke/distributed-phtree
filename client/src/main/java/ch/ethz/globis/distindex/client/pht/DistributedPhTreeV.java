@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeQStats;
@@ -91,7 +92,9 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public boolean isRangeEmpty(long[] longs, long[] longs2) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        //ToDo implement this by doing a server call
+        PVIterator<V> it  = query(longs, longs2);
+        return !it.hasNext();
     }
 
     @Override
