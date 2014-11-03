@@ -107,13 +107,8 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     }
 
     private void closeEventLoops() {
-        try {
-            bossGroup.shutdownGracefully().sync();
-            workerGroup.shutdownGracefully().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        bossGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
     }
 
     private String getHostId() {
