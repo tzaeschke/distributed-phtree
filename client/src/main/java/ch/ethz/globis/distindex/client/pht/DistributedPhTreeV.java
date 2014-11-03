@@ -70,12 +70,12 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public String toStringPlain() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
     }
 
     @Override
     public String toStringTree() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
     }
 
     @Override

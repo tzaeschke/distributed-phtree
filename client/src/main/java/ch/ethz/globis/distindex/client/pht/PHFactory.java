@@ -1,10 +1,7 @@
 package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.distindex.client.util.UnsafeUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeRangeD;
-import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.PhTreeVProxy;
+import ch.ethz.globis.pht.*;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -23,6 +20,22 @@ public class PHFactory {
         DistributedPHTreeProxy<V> proxy = new DistributedPHTreeProxy<>(zkHost, zkPort, valueClass);
         proxy.create(dim, depth);
         return new DistributedPhTreeV<>(proxy);
+    }
+
+    public <V> PhTreeVD<V> createPHTreeVD(int dim, Class<V> valueClass) {
+        PhTreeV<V> proxy = createPHTreeMap(dim, Double.SIZE, valueClass);
+
+        PhTreeVD<V> tree = new PhTreeVD<>(dim);
+        Unsafe unsafe = UnsafeUtil.get();
+        try {
+            Field field = PhTreeRangeD.class.getDeclaredField("pht");
+            long offset = unsafe.objectFieldOffset(field);
+            unsafe.putObject(tree, offset, proxy);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        return tree;
     }
 
     public PhTree createPHTreeSet(int dim, int depth) {
