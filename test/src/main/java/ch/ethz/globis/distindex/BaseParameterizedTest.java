@@ -25,7 +25,6 @@ public class BaseParameterizedTest {
 
     private static final int S_BASE_PORT = 7070;
 
-
     private static ExecutorService threadPool;
     private static List<Middleware> middlewares = new ArrayList<>();
     private static TestingServer zkServer;

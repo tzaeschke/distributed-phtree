@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class GetKNNRequest<K> extends Request {
+public class GetKNNRequest<K> extends BaseRequest {
 
     private K key;
     private int k;

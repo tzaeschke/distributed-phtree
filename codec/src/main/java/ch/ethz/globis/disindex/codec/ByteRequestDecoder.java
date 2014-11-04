@@ -3,8 +3,10 @@ package ch.ethz.globis.disindex.codec;
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.distindex.operation.*;
+import com.google.common.base.Splitter;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * Decodes request messages from the client.
@@ -14,6 +16,8 @@ import java.nio.ByteBuffer;
  * @param <K>                   The type of the key.
  */
 public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
+
+    private static final Splitter.MapSplitter splitter = Splitter.on(",").withKeyValueSeparator("=");
 
     /** The decoder used for the key.*/
     private FieldDecoder<K> keyDecoder;
@@ -134,11 +138,21 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     @Override
-    public SimpleRequest decodeSimple(ByteBuffer buffer) {
+    public BaseRequest decodeBase(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-        return new SimpleRequest(requestId, opCode, indexName);
+        return new BaseRequest(requestId, opCode, indexName);
+    }
+
+    @Override
+    public MapRequest decodeMap(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        String mapString = new String(readValue(buffer));
+        Map<String, String> contents = splitter.split(mapString);
+        return new MapRequest(requestId, opCode, indexName, contents);
     }
 
     /**

@@ -168,6 +168,42 @@ public class DistributedPHTreeProxyTest {
         }
     }
 
+    @Test
+    public void closeIterator() throws Exception {
+        int dim = 2;
+        int depth = 64;
+        String host = "localhost";
+        try (TestingServer zkServer  = new TestingServer(ZK_PORT);
+             Middleware first = IndexMiddlewareFactory.newPHTreeMiddleware(7070);
+             Middleware second = IndexMiddlewareFactory.newPHTreeMiddleware(8080)) {
+            zkServer.start();
+            startMiddleware(first);
+            startMiddleware(second);
+
+            DistributedPHTreeProxy<String> phTree = new DistributedPHTreeProxy<>(host, ZK_PORT, String.class);
+            phTree.create(dim, depth);
+
+            IndexEntryList<long[], String> expected = new IndexEntryList<>();
+
+            expected.add(k(0, 0), "foo1");
+            expected.add(k(0, 1), "foo");
+            expected.add(k(1, 1), "foo");
+            expected.add(k(1, 2), "bar");
+            expected.add(k(-1, -2), "fuzz");
+            expected.add(k(-1, -1), "fuz");
+
+            for (IndexEntry<long[], String> entry : expected) {
+                phTree.put(entry.getKey(), entry.getValue());
+            }
+
+            DistributedIndexIterator<long[], String> it = (DistributedIndexIterator<long[], String>) phTree.iterator();
+
+            assertTrue(it.hasNext());
+            it.close();
+            assertFalse(it.hasNext());
+        }
+    }
+
      @Test
     public void testGetRange() throws Exception {
         int dim = 2;

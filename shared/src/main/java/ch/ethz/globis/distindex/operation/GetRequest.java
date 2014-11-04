@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class GetRequest<K> extends Request{
+public class GetRequest<K> extends BaseRequest {
 
     private K key;
 

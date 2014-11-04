@@ -20,7 +20,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     private Map<String, PVIterator<byte[]>> iterators = new HashMap<>();
 
     @Override
-    public Response<long[], byte[]> handleCreate(CreateRequest request) {
+    public ResultResponse<long[], byte[]> handleCreate(CreateRequest request) {
         int dim  = request.getDim();
         int depth = request.getDepth();
         tree = new PhTree3<>(dim, depth);
@@ -28,7 +28,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGet(GetRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleGet(GetRequest<long[]> request) {
         long[] key = request.getKey();
         byte[] value = tree.get(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
@@ -36,7 +36,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGetRange(GetRangeRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleGetRange(GetRangeRequest<long[]> request) {
         long[] start = request.getStart();
         long[] end = request.getEnd();
 
@@ -45,7 +45,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGetKNN(GetKNNRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleGetKNN(GetKNNRequest<long[]> request) {
         long[] key = request.getKey();
         int k = request.getK();
 
@@ -54,7 +54,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleGetIteratorBatch(GetIteratorBatchRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleGetIteratorBatch(GetIteratorBatchRequest<long[]> request) {
         String iteratorId = request.getIteratorId();
         int batchSize= request.getBatchSize();
 
@@ -91,7 +91,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handlePut(PutRequest<long[], byte[]> request) {
+    public ResultResponse<long[], byte[]> handlePut(PutRequest<long[], byte[]> request) {
         long[] key = request.getKey();
         byte[] value = request.getValue();
 
@@ -105,7 +105,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
         long[] key = request.getKey();
         byte[] value = tree.remove(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
@@ -113,37 +113,44 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public IntegerResponse handleGetSize(Request request) {
+    public IntegerResponse handleGetSize(BaseRequest request) {
         int size = tree.size();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, size);
     }
 
     @Override
-    public IntegerResponse handleGetDim(Request request) {
+    public IntegerResponse handleGetDim(BaseRequest request) {
         int dim = tree.getDIM();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, dim);
     }
 
     @Override
-    public IntegerResponse handleGetDepth(Request request) {
+    public IntegerResponse handleGetDepth(BaseRequest request) {
         int depth = tree.getDEPTH();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, depth);
     }
 
-    private Response<long[], byte[]> createError(Request request) {
-        return new Response<>(request.getOpCode(), request.getId(), OpStatus.FAILURE);
+    @Override
+    public IntegerResponse handleCloseIterator(MapRequest request) {
+        String iteratorId = request.getParameter("iteratorId");
+        iterators.remove(iteratorId);
+        return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, 0);
     }
 
-    private Response<long[], byte[]> createResponse(Request request) {
-        return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+    private ResultResponse<long[], byte[]> createError(BaseRequest request) {
+        return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.FAILURE);
     }
 
-    private Response<long[], byte[]> createResponse(Request request, IndexEntryList<long[], byte[]> results, String iteratorId) {
-        return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results, iteratorId);
+    private ResultResponse<long[], byte[]> createResponse(BaseRequest request) {
+        return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
     }
 
-    private Response<long[], byte[]> createResponse(Request request, IndexEntryList<long[], byte[]> results) {
-        return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
+    private ResultResponse<long[], byte[]> createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results, String iteratorId) {
+        return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results, iteratorId);
+    }
+
+    private ResultResponse<long[], byte[]> createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results) {
+        return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
     }
 
     private IndexEntryList<long[], byte[]> createKeyList(List<long[]> keyList) {

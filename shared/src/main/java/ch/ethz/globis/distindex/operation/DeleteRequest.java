@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class DeleteRequest<K> extends Request {
+public class DeleteRequest<K> extends BaseRequest {
 
     private K key;
 

@@ -32,6 +32,7 @@
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
         <curator.version>2.6.0</curator.version>
+        <guava.version>18.0</guava.version>
     </properties>
 
     <modules>
@@ -68,6 +69,11 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
 
             <!--Curator, built on top of zookeeper-->

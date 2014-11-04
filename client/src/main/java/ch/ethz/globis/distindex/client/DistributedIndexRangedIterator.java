@@ -4,11 +4,12 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.operation.Response;
+import ch.ethz.globis.distindex.operation.ResultResponse;
 
-import java.util.Iterator;
+import java.io.Closeable;
+import java.io.IOException;
 
-public class DistributedIndexRangedIterator<K, V> implements IndexIterator<K, V> {
+public class DistributedIndexRangedIterator<K, V> implements IndexIterator<K, V>, Closeable, AutoCloseable {
 
     /** The index over which the iterator is running. */
     DistributedIndexProxy<K, V> indexProxy;
@@ -63,7 +64,7 @@ public class DistributedIndexRangedIterator<K, V> implements IndexIterator<K, V>
         if (currentHostId == null) {
             return;
         }
-        Response<K, V> response = indexProxy.getNextBatch(currentHostId, iteratorId, batchSize, start, end);
+        ResultResponse<K, V> response = indexProxy.getNextBatch(currentHostId, iteratorId, batchSize, start, end);
         if (response != null) {
             if (response.getIteratorId().equals("")) {
                 currentHostId = keyMapping.getNext(currentHostId);
@@ -74,5 +75,10 @@ public class DistributedIndexRangedIterator<K, V> implements IndexIterator<K, V>
             entryBuffer = new IndexEntryList<>();
         }
         position = 0;
+    }
+
+    @Override
+    public void close() throws IOException {
+        indexProxy.closeIterator(currentHostId, iteratorId);
     }
 }

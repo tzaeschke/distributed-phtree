@@ -3,7 +3,7 @@ package ch.ethz.globis.distindex.operation;
 /**
  * Consists of a single object
  */
-public class SimpleResponse<T> {
+public class SimpleResponse<T> implements Response {
 
     private byte opCode;
     private int requestId;
@@ -18,14 +18,17 @@ public class SimpleResponse<T> {
         this.content = content;
     }
 
+    @Override
     public byte getOpCode() {
         return opCode;
     }
 
+    @Override
     public int getRequestId() {
         return requestId;
     }
 
+    @Override
     public byte getStatus() {
         return status;
     }

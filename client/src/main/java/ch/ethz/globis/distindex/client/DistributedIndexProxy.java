@@ -10,11 +10,11 @@ import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -44,8 +44,8 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         List<String> hostIds = keyMapping.getHostIds();
 
         CreateRequest request = Requests.newCreate(dim, depth);
-        List<Response<K, V>> responses = requestDispatcher.send(hostIds, request);
-        for (Response<K, V> response : responses) {
+        List<ResultResponse<K, V>> responses = requestDispatcher.send(hostIds, request);
+        for (ResultResponse<K, V> response : responses) {
             if (response.getStatus() != OpStatus.SUCCESS) {
                 return false;
             }
@@ -59,7 +59,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         String hostId = keyMapping.getHostId(key);
 
         PutRequest<K, V> request = Requests.newPut(key, value);
-        Response<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
         check(request, response);
         return getSingleEntryValue(response);
     }
@@ -76,7 +76,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         String hostId = keyMapping.getHostId(key);
 
         GetRequest<K> request = Requests.newGet(key);
-        Response<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
         return getSingleEntryValue(response);
@@ -88,7 +88,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         String hostId = keyMapping.getHostId(key);
 
         DeleteRequest<K> request = Requests.newDelete(key);
-        Response<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
         return getSingleEntryValue(response);
@@ -100,24 +100,31 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         GetRangeRequest<K> request = Requests.newGetRange(start, end);
-        List<Response<K, V>> responses = requestDispatcher.send(hostIds, request);
+        List<ResultResponse<K, V>> responses = requestDispatcher.send(hostIds, request);
         return combine(responses);
     }
 
-    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
+    public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
         GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size, start, end);
-        Response<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
         return response;
     }
 
-    public Response<K, V> getNextBatch(String hostId, String iteratorId, int size) {
+    public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size) {
         GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size);
-        Response<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
 
         check(request, response);
         return response;
+    }
+
+    public void closeIterator(String hostId, String iteratorId) {
+        MapRequest request = Requests.newMap(OpCode.CLOSE_ITERATOR);
+        request.addParamater("iteratorId", iteratorId);
+        SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
+        check(request, response);
     }
 
     @Override
@@ -130,7 +137,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     public int size() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds();
-        SimpleRequest request = Requests.newGetSize();
+        BaseRequest request = Requests.newGetSize();
 
         List<SimpleResponse> responses = requestDispatcher.sendSimple(hostIds, request);
         int size = 0;
@@ -143,7 +150,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     public int getDim() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds();
-        SimpleRequest request = Requests.newGetDim();
+        BaseRequest request = Requests.newGetDim();
 
         List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
         int dim = -1;
@@ -162,7 +169,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
     public int getDepth() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds();
-        SimpleRequest request = Requests.newGetDepth();
+        BaseRequest request = Requests.newGetDepth();
 
         List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
         int depth = -1;
@@ -184,9 +191,9 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return new DistributedIndexRangedIterator<>(this, keyMapping, start, end);
     }
 
-    protected List<K> combineKeys(List<Response<K, V>> responses) {
+    protected List<K> combineKeys(List<ResultResponse<K, V>> responses) {
         List<K> results = new ArrayList<>();
-        for (Response<K,V> response : responses) {
+        for (ResultResponse<K,V> response : responses) {
             for (IndexEntry<K, V> entry : response.getEntries()) {
                 results.add(entry.getKey());
             }
@@ -194,15 +201,15 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return results;
     }
 
-    private IndexEntryList<K, V> combine(List<Response<K, V>> responses) {
+    private IndexEntryList<K, V> combine(List<ResultResponse<K, V>> responses) {
         IndexEntryList<K, V> results = new IndexEntryList<>();
-        for (Response<K,V> response : responses) {
+        for (ResultResponse<K,V> response : responses) {
             results.addAll(response.getEntries());
         }
         return results;
     }
 
-    private <K, V> void check(Request request, Response<K, V> response) {
+    private void check(Request request, Response response) {
         if (response == null) {
             throw new NullPointerException("Response should not be null");
         }
@@ -214,7 +221,7 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         }
     }
 
-    private V getSingleEntryValue(Response<K, V> response) {
+    private V getSingleEntryValue(ResultResponse<K, V> response) {
         return (response.getNrEntries() == 0) ? null :  response.singleEntry().getValue();
     }
 
