@@ -11,7 +11,7 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.Response;
+import ch.ethz.globis.distindex.operation.ResultResponse;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -38,16 +38,16 @@ public class ResponseEncodeDecodeTest {
         int requestId = random.nextInt();
         IndexEntryList<long[], byte[]> generatedEntries = generateEntries(100);
 
-        Response<long[], byte[]> response = new Response<>(opCode, requestId, opStatus, generatedEntries);
+        ResultResponse<long[], byte[]> response = new ResultResponse<>(opCode, requestId, opStatus, generatedEntries);
 
         byte[] encodedResponse = encoder.encode(response);
 
-        Response<long[], String> decodedResponse = decoder.decode(encodedResponse);
+        ResultResponse<long[], String> decodedResponse = decoder.decode(encodedResponse);
         assertEqualsMeta(response, decodedResponse);
         assertEqualsResults(response.getEntries(), decodedResponse.getEntries(), valueCodec);
     }
 
-    private void assertEqualsMeta(Response<long[], byte[]> original, Response<long[], String> decoded) {
+    private void assertEqualsMeta(ResultResponse<long[], byte[]> original, ResultResponse<long[], String> decoded) {
         assertEquals("Request id's do not match.", original.getRequestId(), decoded.getRequestId());
         assertEquals("Op codes do not match.", original.getOpCode(), decoded.getOpCode());
         assertEquals("Status codes do not match.", original.getStatus(), decoded.getStatus());

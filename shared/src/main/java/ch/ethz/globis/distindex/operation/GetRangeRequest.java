@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class GetRangeRequest<K> extends Request {
+public class GetRangeRequest<K> extends BaseRequest {
 
     private K start;
     private K end;

@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.operation;
 
 
-public class CreateRequest extends Request {
+public class CreateRequest extends BaseRequest {
 
     private int dim;
     private int depth;

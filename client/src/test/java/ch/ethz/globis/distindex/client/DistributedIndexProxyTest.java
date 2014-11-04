@@ -60,7 +60,7 @@ public class DistributedIndexProxyTest {
     public void testGet_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(Request.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(failureResponse());
 
         long[] key = { 1, 2, 3 };
         indexProxy.get(key);
@@ -70,7 +70,7 @@ public class DistributedIndexProxyTest {
     public void testGet_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(Request.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(invalidIdResponse());
 
         long[] key = { 1, 2, 3 };
         indexProxy.get(key);
@@ -235,16 +235,16 @@ public class DistributedIndexProxyTest {
      * @param <V>
      * @return                          Mockito answer containing the response.
      */
-    private <K, V> Answer<Response<K, V>> entryResponse(final IndexEntryList<K, V> entries) {
-        return new Answer<Response<K,V>>() {
+    private <K, V> Answer<ResultResponse<K, V>> entryResponse(final IndexEntryList<K, V> entries) {
+        return new Answer<ResultResponse<K,V>>() {
 
             @Override
-            public Response<K, V> answer(InvocationOnMock invocation) throws Throwable {
-                Request request = (Request) invocation.getArguments()[1];
+            public ResultResponse<K, V> answer(InvocationOnMock invocation) throws Throwable {
+                BaseRequest request = (BaseRequest) invocation.getArguments()[1];
                 IndexEntryList<K, V> actual = new IndexEntryList<>();
                 actual.addAll(entries);
 
-                return new Response<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, actual);
+                return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, actual);
             }
         };
     }
@@ -255,12 +255,12 @@ public class DistributedIndexProxyTest {
      * Return a mock response with the same opCode but with a different request id.
      * @return                         Mockito answer containing the response.
      */
-    private Answer<Response> invalidIdResponse() {
-        return new Answer<Response>() {
+    private Answer<ResultResponse> invalidIdResponse() {
+        return new Answer<ResultResponse>() {
             @Override
-            public Response answer(InvocationOnMock invocation) throws Throwable {
-                Request request = (Request) invocation.getArguments()[1];
-                return new Response(request.getOpCode(), request.getId() + 1, OpStatus.SUCCESS);
+            public ResultResponse answer(InvocationOnMock invocation) throws Throwable {
+                BaseRequest request = (BaseRequest) invocation.getArguments()[1];
+                return new ResultResponse(request.getOpCode(), request.getId() + 1, OpStatus.SUCCESS);
             }
         };
     }
@@ -271,12 +271,12 @@ public class DistributedIndexProxyTest {
      * Return a mock response with the same opCode and request id but a failure status.
      * @return                          Mockito answer containing the response.
      */
-    private Answer<Response> failureResponse() {
-        return new Answer<Response>() {
+    private Answer<ResultResponse> failureResponse() {
+        return new Answer<ResultResponse>() {
             @Override
-            public Response answer(InvocationOnMock invocation) throws Throwable {
-                Request request = (Request) invocation.getArguments()[1];
-                return new Response(request.getOpCode(), request.getId(), OpStatus.FAILURE);
+            public ResultResponse answer(InvocationOnMock invocation) throws Throwable {
+                BaseRequest request = (BaseRequest) invocation.getArguments()[1];
+                return new ResultResponse(request.getOpCode(), request.getId(), OpStatus.FAILURE);
             }
         };
     }

@@ -4,23 +4,25 @@ import ch.ethz.globis.distindex.operation.*;
 
 public interface RequestHandler<K, V> {
 
-    public Response<K, V> handleCreate(CreateRequest request);
+    public ResultResponse<K, V> handleCreate(CreateRequest request);
 
-    public Response<K, V> handleGet(GetRequest<K> request);
+    public ResultResponse<K, V> handleGet(GetRequest<K> request);
 
-    public Response<K, V> handleGetRange(GetRangeRequest<K> request);
+    public ResultResponse<K, V> handleGetRange(GetRangeRequest<K> request);
 
-    public Response<K, V> handleGetKNN(GetKNNRequest<K> request);
+    public ResultResponse<K, V> handleGetKNN(GetKNNRequest<K> request);
 
-    public Response<K, V> handleGetIteratorBatch(GetIteratorBatchRequest<K> request);
+    public ResultResponse<K, V> handleGetIteratorBatch(GetIteratorBatchRequest<K> request);
 
-    public Response<K, V> handlePut(PutRequest<K, V> request);
+    public ResultResponse<K, V> handlePut(PutRequest<K, V> request);
 
-    public Response<K,V> handleDelete(DeleteRequest<K> request);
+    public ResultResponse<K,V> handleDelete(DeleteRequest<K> request);
 
-    public IntegerResponse handleGetSize(Request request);
+    public IntegerResponse handleGetSize(BaseRequest request);
 
-    public IntegerResponse handleGetDim(Request request);
+    public IntegerResponse handleGetDim(BaseRequest request);
 
-    public IntegerResponse handleGetDepth(Request request);
+    public IntegerResponse handleGetDepth(BaseRequest request);
+
+    public IntegerResponse handleCloseIterator(MapRequest request);
 }

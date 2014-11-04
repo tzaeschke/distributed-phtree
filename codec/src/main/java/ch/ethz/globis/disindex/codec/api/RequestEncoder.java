@@ -27,5 +27,7 @@ public interface RequestEncoder<K, V> {
 
     public byte[] encodeDelete(DeleteRequest<K> dr);
 
-    public byte[] encodeSimple(SimpleRequest sr);
+    public byte[] encodeBase(BaseRequest br);
+
+    public byte[] encodeMap(MapRequest sr);
 }

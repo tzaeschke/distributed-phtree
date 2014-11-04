@@ -5,7 +5,7 @@ import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.IntegerResponse;
-import ch.ethz.globis.distindex.operation.Response;
+import ch.ethz.globis.distindex.operation.ResultResponse;
 
 import java.nio.ByteBuffer;
 
@@ -25,7 +25,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
         this.valueDecoder = valueDecoder;
     }
 
-    public Response<K, V> decode(ByteBuffer buffer) {
+    public ResultResponse<K, V> decode(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         byte status = buffer.get();
@@ -51,7 +51,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
         }
 
         String iteratorId = readString(buffer);
-        return new Response<>(opCode, requestId, status, entries, iteratorId);
+        return new ResultResponse<>(opCode, requestId, status, entries, iteratorId);
     }
 
     private String readString(ByteBuffer buffer) {
@@ -62,7 +62,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
     }
 
     @Override
-    public Response<K, V> decode(byte[] payload) {
+    public ResultResponse<K, V> decode(byte[] payload) {
         return decode(ByteBuffer.wrap(payload));
     }
 

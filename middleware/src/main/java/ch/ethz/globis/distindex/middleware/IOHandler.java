@@ -59,6 +59,9 @@ public class IOHandler<K, V> {
                 case OpCode.GET_DEPTH:
                     response = handleGetDepthRequest(buffer);
                     break;
+                case OpCode.CLOSE_ITERATOR:
+                    response = handleCloseIterator(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -69,22 +72,29 @@ public class IOHandler<K, V> {
         return response;
     }
 
+    private ByteBuffer handleCloseIterator(ByteBuffer buffer) {
+        MapRequest request = decoder.decodeMap(buffer);
+        IntegerResponse response = requestHandler.handleCloseIterator(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
+    }
+
     private ByteBuffer handleGetDimRequest(ByteBuffer buffer) {
-        SimpleRequest request = decoder.decodeSimple(buffer);
+        BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetDim(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetDepthRequest(ByteBuffer buffer) {
-        SimpleRequest request = decoder.decodeSimple(buffer);
+        BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetDepth(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetSizeRequest(ByteBuffer buffer) {
-        SimpleRequest request = decoder.decodeSimple(buffer);
+        BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetSize(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
@@ -92,55 +102,55 @@ public class IOHandler<K, V> {
 
     private ByteBuffer handleDeleteRequest(ByteBuffer buf) {
         DeleteRequest<K> request = decoder.decodeDelete(buf);
-        Response<K, V> response = requestHandler.handleDelete(request);
+        ResultResponse<K, V> response = requestHandler.handleDelete(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetBatchRequest(ByteBuffer buf) {
         GetIteratorBatchRequest<K> request = decoder.decodeGetBatch(buf);
-        Response<K, V> response = requestHandler.handleGetIteratorBatch(request);
+        ResultResponse<K, V> response = requestHandler.handleGetIteratorBatch(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleCreateRequest(ByteBuffer buf) {
         CreateRequest request = decoder.decodeCreate(buf);
-        Response<K, V> response = requestHandler.handleCreate(request);
+        ResultResponse<K, V> response = requestHandler.handleCreate(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handlePutRequest(ByteBuffer buf) {
         PutRequest<K, V> request = decoder.decodePut(buf);
-        Response<K, V> response = requestHandler.handlePut(request);
+        ResultResponse<K, V> response = requestHandler.handlePut(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetRequest(ByteBuffer buf) {
         GetRequest<K> request = decoder.decodeGet(buf);
-        Response<K, V> response = requestHandler.handleGet(request);
+        ResultResponse<K, V> response = requestHandler.handleGet(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetRangeRequest(ByteBuffer buf) {
         GetRangeRequest<K> request = decoder.decodeGetRange(buf);
-        Response<K, V> response = requestHandler.handleGetRange(request);
+        ResultResponse<K, V> response = requestHandler.handleGetRange(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleGetKNNRequest(ByteBuffer buf) {
         GetKNNRequest<K> request = decoder.decodeGetKNN(buf);
-        Response<K, V> response = requestHandler.handleGetKNN(request);
+        ResultResponse<K, V> response = requestHandler.handleGetKNN(request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleErroneousRequest(ByteBuffer buf) {
-        Response<K, V> response = new Response<>((byte) 0, 0, OpStatus.FAILURE);
+        ResultResponse<K, V> response = new ResultResponse<>((byte) 0, 0, OpStatus.FAILURE);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }

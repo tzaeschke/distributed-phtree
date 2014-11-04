@@ -119,30 +119,44 @@ public class RequestEncodeDecodeTest {
     }
 
     @Test
+    public void encodeDecodeMapRequest() {
+        int dim = 5;
+        int depth = 64;
+        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
+        request.addParamater("dim", dim);
+        request.addParamater("depth", depth);
+        byte[] encodedRequest = requestEncoder.encodeMap(request);
+        MapRequest decoded = requestDecoder.decodeMap(ByteBuffer.wrap(encodedRequest));
+        assertEquals(request, decoded);
+        assertEquals(Integer.toString(dim), request.getParameter("dim"));
+        assertEquals(Integer.toString(depth), request.getParameter("depth"));
+    }
+
+    @Test
     public void encodeDecodeGetSize() {
-        SimpleRequest request = Requests.newGetSize();
-        encodeDecodeSimpleRequest(request);
+        BaseRequest request = Requests.newGetSize();
+        encodeDecodeBasicRequest(request);
     }
 
     @Test
     public void encodeDecodeGetDim() {
-        SimpleRequest request = Requests.newGetDim();
-        encodeDecodeSimpleRequest(request);
+        BaseRequest request = Requests.newGetDim();
+        encodeDecodeBasicRequest(request);
     }
 
     @Test
     public void encodeDecodeGetDepth() {
-        SimpleRequest request = Requests.newGetDepth();
-        encodeDecodeSimpleRequest(request);
+        BaseRequest request = Requests.newGetDepth();
+        encodeDecodeBasicRequest(request);
     }
 
-    private void encodeDecodeSimpleRequest(SimpleRequest request) {
-        byte[] encodedRequest = requestEncoder.encodeSimple(request);
-        SimpleRequest decoded = requestDecoder.decodeSimple(ByteBuffer.wrap(encodedRequest));
+    private void encodeDecodeBasicRequest(BaseRequest request) {
+        byte[] encodedRequest = requestEncoder.encodeBase(request);
+        BaseRequest decoded = requestDecoder.decodeBase(ByteBuffer.wrap(encodedRequest));
         assertEquals("Requests do not match", request, decoded);
     }
 
-    private void assertRequestMetaEqual(Request request, Request decoded) {
+    private void assertRequestMetaEqual(BaseRequest request, BaseRequest decoded) {
         assertEquals("Request metadata not equal", request, decoded);
     }
 

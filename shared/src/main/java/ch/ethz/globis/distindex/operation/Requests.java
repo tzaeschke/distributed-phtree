@@ -38,16 +38,20 @@ public class Requests {
         return new CreateRequest(nextId(), OpCode.CREATE_INDEX, "", dim, depth);
     }
 
-    public static SimpleRequest newGetSize() {
-        return new SimpleRequest(nextId(), OpCode.GET_SIZE, "");
+    public static MapRequest newMap(byte opCode) {
+        return new MapRequest(nextId(), opCode, "");
     }
 
-    public static SimpleRequest newGetDim() {
-        return new SimpleRequest(nextId(), OpCode.GET_DIM, "");
+    public static BaseRequest newGetSize() {
+        return new BaseRequest(nextId(), OpCode.GET_SIZE, "");
     }
 
-    public static SimpleRequest newGetDepth() {
-        return new SimpleRequest(nextId(), OpCode.GET_DEPTH, "");
+    public static BaseRequest newGetDim() {
+        return new BaseRequest(nextId(), OpCode.GET_DIM, "");
+    }
+
+    public static BaseRequest newGetDepth() {
+        return new BaseRequest(nextId(), OpCode.GET_DEPTH, "");
     }
 
     private static int nextId() {

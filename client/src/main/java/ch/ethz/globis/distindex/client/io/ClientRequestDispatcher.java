@@ -43,7 +43,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      * @return                                      The decoded response.
      */
     @Override
-    public Response<K, V> send(String hostId, Request request) {
+    public ResultResponse<K, V> send(String hostId, BaseRequest request) {
         byte[] requestBytes = encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
         return decoder.decode(responseBytes);
@@ -58,10 +58,10 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      * @return                                      The decoded responses.
      */
     @Override
-    public List<Response<K, V>> send(List<String> hostIds, Request request) {
+    public List<ResultResponse<K, V>> send(List<String> hostIds, BaseRequest request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
-        List<Response<K, V>> responses = new ArrayList<>();
+        List<ResultResponse<K, V>> responses = new ArrayList<>();
         for (byte[] responseBytes : responseList) {
             responses.add(decoder.decode(responseBytes));
         }
@@ -69,14 +69,14 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
     }
 
     @Override
-    public SimpleResponse sendSimple(String hostId, Request request) {
+    public SimpleResponse sendSimple(String hostId, BaseRequest request) {
         byte[] requestBytes = encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
         return decoder.decodeInteger(responseBytes);
     }
 
     @Override
-    public List<SimpleResponse> sendSimple(List<String> hostIds, Request request) {
+    public List<SimpleResponse> sendSimple(List<String> hostIds, BaseRequest request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<SimpleResponse> responses = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
         return responses;
     }
 
-    private byte[] encode(Request request) {
+    private byte[] encode(BaseRequest request) {
         byte[] encodedRequest;
         switch (request.getOpCode()) {
             case OpCode.GET:
@@ -120,8 +120,12 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
             case OpCode.GET_DEPTH:
             case OpCode.GET_DIM:
             case OpCode.GET_SIZE:
-                SimpleRequest sr = (SimpleRequest) request;
-                encodedRequest = encoder.encodeSimple(sr);
+                BaseRequest br = (BaseRequest) request;
+                encodedRequest = encoder.encodeBase(br);
+                break;
+            case OpCode.CLOSE_ITERATOR:
+                MapRequest mr = (MapRequest) request;
+                encodedRequest = encoder.encodeMap(mr);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command type");

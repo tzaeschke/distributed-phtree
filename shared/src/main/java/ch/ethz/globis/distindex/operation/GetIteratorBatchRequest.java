@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.operation;
 
-public class GetIteratorBatchRequest<K> extends Request {
+public class GetIteratorBatchRequest<K> extends BaseRequest {
 
     /** The id of the iterator the requested batch belongs to. */
     String iteratorId;

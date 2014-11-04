@@ -16,7 +16,7 @@ import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.Requests;
-import ch.ethz.globis.distindex.operation.Response;
+import ch.ethz.globis.distindex.operation.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
@@ -53,7 +53,7 @@ public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> 
         List<String> hostIds = keyMapping.getHostIds();
 
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        List<Response<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 

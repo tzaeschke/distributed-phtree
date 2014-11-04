@@ -3,7 +3,10 @@ package ch.ethz.globis.disindex.codec;
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.*;
+import com.google.common.base.Joiner;
 
+import javax.jdo.annotations.Join;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -16,6 +19,8 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
 
     private FieldEncoder<K> keyEncoder;
     private FieldEncoder<V> valueEncoder;
+
+    private static final Joiner.MapJoiner joiner = Joiner.on(",").withKeyValueSeparator("=>");
 
     public ByteRequestEncoder(FieldEncoder<K> keyEncoder, FieldEncoder<V> valueEncoder) {
         this.keyEncoder = keyEncoder;
@@ -150,10 +155,22 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     }
 
     @Override
-    public byte[] encodeSimple(SimpleRequest request) {
+    public byte[] encodeBase(BaseRequest request) {
         int outputSize = request.metadataSize();
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
+        return buffer.array();
+    }
+
+    @Override
+    public byte[] encodeMap(MapRequest request) {
+        String mapString = joiner.join(request.getContents());
+        int outputSize = 4
+                + mapString.getBytes().length
+                + request.metadataSize();
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeString(buffer, mapString);
         return buffer.array();
     }
 
@@ -163,7 +180,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
      * @param request               The request being encoded.
      * @return                      The buffer after the write operation was completed.
      */
-    private ByteBuffer writeMeta(ByteBuffer buffer, Request request) {
+    private ByteBuffer writeMeta(ByteBuffer buffer, BaseRequest request) {
         buffer.put(request.getOpCode());
         buffer.putInt(request.getId());
         writeString(buffer, request.getIndexId());
