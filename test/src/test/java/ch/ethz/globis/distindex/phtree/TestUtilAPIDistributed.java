@@ -1,9 +1,5 @@
 package ch.ethz.globis.distindex.phtree;
 
-/**
- * Created by bvancea on 06.11.14.
- */
-
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
