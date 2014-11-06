@@ -33,7 +33,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Before
     public void setupTree() {
-        phTree = new DistributedPHTreeProxy<>(HOST, ZK_PORT, String.class);
+        phTree = new DistributedPHTreeProxy<>(HOST, ZK_PORT);
         phTree.create(2, 64);
     }
 

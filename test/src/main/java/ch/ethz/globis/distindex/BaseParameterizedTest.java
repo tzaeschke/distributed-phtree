@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex;
 
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
-import ch.ethz.globis.distindex.util.TestUtil;
+import ch.ethz.globis.distindex.util.MiddlewareUtil;
 import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -62,7 +62,7 @@ public class BaseParameterizedTest {
 
         for (int i = 0; i < nrServers; i++) {
             Middleware current = IndexMiddlewareFactory.newPhTree(HOST, S_BASE_PORT + i * 10, HOST, ZK_PORT);
-            TestUtil.startMiddleware(threadPool, current);
+            MiddlewareUtil.startMiddleware(threadPool, current);
             middlewares.add(current);
         }
     }

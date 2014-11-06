@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class SimpleResponseEncodeDecodeTest {
 
     private FieldEncoderDecoder<long[]> keyCodec = new MultiLongEncoderDecoder();
-    private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>(String.class);
+    private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>();
     private ResponseEncoder<long[], byte[]> encoder = new ByteResponseEncoder<>(keyCodec);
     private ResponseDecoder<long[], String> decoder = new ByteResponseDecoder<>(keyCodec, valueCodec);
 

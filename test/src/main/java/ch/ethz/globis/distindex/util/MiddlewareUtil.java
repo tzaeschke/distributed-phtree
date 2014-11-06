@@ -4,7 +4,7 @@ import ch.ethz.globis.distindex.middleware.api.Middleware;
 
 import java.util.concurrent.ExecutorService;
 
-public class TestUtil {
+public class MiddlewareUtil {
 
     public static void startMiddleware(ExecutorService threadPool, Middleware middleware) {
         threadPool.execute((Runnable) middleware);

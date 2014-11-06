@@ -13,7 +13,7 @@ public class SerializingEncoderDecoderTest {
     @Test
     public void testEncodeDecodeBigInteger() {
         BigInteger bigInteger = new BigInteger(1024 * 1024, new Random());
-        SerializingEncoderDecoder<BigInteger> codec = new SerializingEncoderDecoder<>(BigInteger.class);
+        SerializingEncoderDecoder<BigInteger> codec = new SerializingEncoderDecoder<>();
         byte[] bytes = codec.encode(bigInteger);
         BigInteger decoded = codec.decode(bytes);
         assertEquals(bigInteger, decoded);

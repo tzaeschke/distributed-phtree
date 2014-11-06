@@ -23,8 +23,8 @@ public class TestValues extends BaseParameterizedTest {
         factory = new PHFactory(HOST, ZK_PORT);
     }
 
-    public <T> PhTreeV<T> createTree(int dim, int depth, Class<T> valueClass) {
-        return factory.createPHTreeMap(dim, depth, valueClass);
+    public <T> PhTreeV<T> createTree(int dim, int depth) {
+        return factory.createPHTreeMap(dim, depth);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class TestValues extends BaseParameterizedTest {
 
     private void smokeTest(int N, int DIM, int DEPTH, long SEED) {
         Random R = new Random(SEED);
-        PhTreeV<Integer> ind = createTree(DIM, DEPTH, Integer.class);
+        PhTreeV<Integer> ind = createTree(DIM, DEPTH);
         long[][] keys = new long[N][DIM];
         for (int i = 0; i < N; i++) {
             for (int d = 0; d < DIM; d++) {
@@ -102,7 +102,7 @@ public class TestValues extends BaseParameterizedTest {
                 {00100001, 10110100},//   v=null
         };
 
-        PhTreeV<Integer> ind = createTree(2, 8, Integer.class);
+        PhTreeV<Integer> ind = createTree(2, 8);
 
         ind.put(keys[0], 0);
         assertNotNull(ind.get(keys[0]));
@@ -134,7 +134,7 @@ public class TestValues extends BaseParameterizedTest {
                 {0.7713129661706796, 0.7126874281456893, 0.2112353749298962, 0.7830924897671794, 0.945333238959629, 0.014236355103667941}
         };
 
-        PhTreeV<Object> ind = createTree(DIM, 64, Object.class);
+        PhTreeV<Object> ind = createTree(DIM, 64);
 
         Object V = new Object();
         long[] buf = new long[DIM];
@@ -153,7 +153,7 @@ public class TestValues extends BaseParameterizedTest {
         int DIM = 3;
         int DEPTH = 64;
         Random R = new Random(0);
-        PhTreeV<Integer> ind = createTree(DIM, DEPTH, Integer.class);
+        PhTreeV<Integer> ind = createTree(DIM, DEPTH);
         long[][] keys = new long[N][DIM];
         for (int i = 0; i < N; i++) {
             for (int d = 0; d < DIM; d++) {
@@ -219,7 +219,7 @@ public class TestValues extends BaseParameterizedTest {
     public void testQueryBug() {
         int DIM = 3;
         int DEPTH = 64;
-        PhTreeV<Integer> ind = createTree(DIM, DEPTH, Integer.class);
+        PhTreeV<Integer> ind = createTree(DIM, DEPTH);
         long[][] keys = {
                 {629649304, -1266264776, 99807007},
                 {5955764, -1946737912, 39620447},

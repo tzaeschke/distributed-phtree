@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class RequestEncodeDecodeTest {
 
     private FieldEncoderDecoder<long[]> keyCodec = new MultiLongEncoderDecoder();
-    private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>(String.class);
+    private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>();
     private ByteRequestEncoder<long[], String> requestEncoder = new ByteRequestEncoder<>(keyCodec, valueCodec);
     private ByteRequestDecoder<long[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
 

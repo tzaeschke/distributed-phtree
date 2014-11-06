@@ -44,7 +44,7 @@ public class TestValuesD extends BaseParameterizedTest {
 
     private void smokeTest(int N, int DIM, long SEED) {
         Random R = new Random(SEED);
-        PhTreeVD<Integer> ind = createTree(DIM, Integer.class);
+        PhTreeVD<Integer> ind = createTree(DIM);
         double[][] keys = new double[N][DIM];
         for (int i = 0; i < N; i++) {
             for (int d = 0; d < DIM; d++) {
@@ -90,8 +90,8 @@ public class TestValuesD extends BaseParameterizedTest {
         assertEquals(0, ind.size());
     }
 
-    private <V> PhTreeVD<V> createTree(int dim, Class<V> valueClass) {
-        return factory.createPHTreeVD(dim, valueClass);
+    private <V> PhTreeVD<V> createTree(int dim) {
+        return factory.createPHTreeVD(dim);
     }
 
     /**
@@ -112,7 +112,7 @@ public class TestValuesD extends BaseParameterizedTest {
                 {0.7713129661706796, 0.7126874281456893, 0.2112353749298962, 0.7830924897671794, 0.945333238959629, 0.014236355103667941}
         };
 
-        PhTreeVD<Object> ind = createTree(DIM, Object.class);
+        PhTreeVD<Object> ind = createTree(DIM);
 
         Object V = new Object();
         for (int i = 0; i < keysD.length; i++) {
@@ -126,7 +126,7 @@ public class TestValuesD extends BaseParameterizedTest {
         int N = 1000;
         int DIM = 3;
         Random R = new Random(0);
-        PhTreeVD<Integer> ind = createTree(DIM, Integer.class);
+        PhTreeVD<Integer> ind = createTree(DIM);
         double[][] keys = new double[N][DIM];
         for (int i = 0; i < N; i++) {
             for (int d = 0; d < DIM; d++) {

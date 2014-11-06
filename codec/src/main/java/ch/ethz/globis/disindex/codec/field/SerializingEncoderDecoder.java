@@ -23,12 +23,10 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
     private final Kryo kryo;
 
     /** The class of the type of Java object,*/
-    private final Class<V> clazz;
+    private Class<V> clazz;
 
-    public SerializingEncoderDecoder(Class<V> clazz) {
-        this.clazz = clazz;
+    public SerializingEncoderDecoder() {
         this.kryo = new Kryo();
-        kryo.register(clazz);
     }
 
     @Override
@@ -49,6 +47,10 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
     public byte[] encode(V value) {
         if (value == null) {
             return new byte[0];
+        }
+        if (clazz == null) {
+            clazz = (Class<V>) value.getClass();
+            kryo.register(clazz);
         }
         ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
         Output output = new Output(outputBuffer);

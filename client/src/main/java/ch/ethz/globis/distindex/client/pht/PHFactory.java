@@ -12,20 +12,20 @@ public class PHFactory {
         this.zkPort = zkPort;
     }
 
-    public <V> PhTreeV<V> createPHTreeMap(int dim, int depth, Class<V> valueClass) {
-        DistributedPHTreeProxy<V> proxy = new DistributedPHTreeProxy<>(zkHost, zkPort, valueClass);
+    public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
+        DistributedPHTreeProxy<V> proxy = new DistributedPHTreeProxy<>(zkHost, zkPort);
         proxy.create(dim, depth);
         return new DistributedPhTreeV<>(proxy);
     }
 
-    public <V> PhTreeVD<V> createPHTreeVD(int dim, Class<V> valueClass) {
-        PhTreeV<V> proxy = createPHTreeMap(dim, Double.SIZE, valueClass);
+    public <V> PhTreeVD<V> createPHTreeVD(int dim) {
+        PhTreeV<V> proxy = createPHTreeMap(dim, Double.SIZE);
 
         return new PhTreeVD<>(proxy);
     }
 
     public PhTree createPHTreeSet(int dim, int depth) {
-        PhTreeV<Object> proxy = createPHTreeMap(dim, depth, Object.class);
+        PhTreeV<Object> proxy = createPHTreeMap(dim, depth);
 
         return new PhTreeVProxy(proxy);
     }

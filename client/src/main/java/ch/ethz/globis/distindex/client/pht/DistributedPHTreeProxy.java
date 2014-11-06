@@ -31,15 +31,15 @@ import java.util.List;
  */
 public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> implements PointIndex<V>{
 
-    public DistributedPHTreeProxy(String host, int port, Class<V> clazz) {
-        requestDispatcher = setupDispatcher(clazz);
+    public DistributedPHTreeProxy(String host, int port) {
+        requestDispatcher = setupDispatcher();
         clusterService = setupClusterService(host, port);
         clusterService.connect();
     }
 
-    private RequestDispatcher<long[], V> setupDispatcher(Class<V> clazz) {
+    private RequestDispatcher<long[], V> setupDispatcher() {
         FieldEncoderDecoder<long[]> keyEncoder = new MultiLongEncoderDecoder();
-        FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>(clazz);
+        FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>();
         RequestEncoder<long[], V> encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
         ResponseDecoder<long[], V> decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
         Transport transport = new TCPClient();
