@@ -20,7 +20,10 @@ import ch.ethz.globis.distindex.operation.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.BitTools;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,9 +52,77 @@ public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> 
 
     @Override
     public List<long[]> getNearestNeighbors(long[] key, int k) {
+
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
+
+        //return getNearestNeighbors(keyMapping.getHostIds(), key, k);
+
+        String keyHostId = keyMapping.getHostId(key);
+        List<long[]> neighbours = getNearestNeighbors(keyHostId, key, k);
+        if (neighbours.size() < k) {
+            //ToDo need to gradually expand the number of nodes to query
+            return getNearestNeighbors(keyMapping.getHostIds(), key, k);
+        }
+        long[] farthestNeighbor = neighbours.get(k - 1);
+
         List<String> hostIds = keyMapping.getHostIds();
 
+        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
+    }
+
+    /**
+     * Find all the hosts that need to be checked to find points inside the multi-dimensional
+     * ball B(query, dist(query - neighbor)).
+     *
+     * @param query                                 The center of the multi-dimensional ball.
+     * @param neighbor                              A point on the surface of the ball. dist(query, neighbor) determines
+     *                                              the radius of the sphere.
+     * @return                                      The hostId's whose assigned spatial regions intersect with the ball.
+     */
+    private List<String> additionalHostsToCheck(long[] query, long[] neighbor) {
+        int dim = query.length;
+        if (dim != neighbor.length) {
+            throw new IllegalArgumentException("The points must have the same dimensionality");
+        }
+        String queryZ = getZRepresentation(query);
+        String neighZ = getZRepresentation(neighbor);
+        int prefix = StringUtils.indexOfDifference(queryZ, neighZ) / dim;
+        String zRegionOfInterest = queryZ.substring(0, prefix);
+        //now just need to find the neighbour regions of zRegionOfInterest in a Z-order curve of prefix iterations and dim
+        //dimensions and see which hosts hold these regions
+
+        return new ArrayList<>();
+    }
+
+    private String getZRepresentation(long[] point) {
+        long[] mergedBits = BitTools.mergeLong(64, point);
+        String bitString = "";
+        for (long value : mergedBits) {
+            bitString += longToString(value);
+        }
+        return bitString;
+    }
+
+    private String longToString(long l) {
+        String bitString = Long.toBinaryString(l);
+        int padding = 64 - bitString.length();
+        String output = "";
+        while (padding > 0) {
+            padding--;
+            output += "0";
+        }
+        return output + bitString;
+    }
+
+    private List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
+        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request);
+        return extractKeys(response);
+    }
+
+    private List<long[]> getNearestNeighbors(List<String> hostIds, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));

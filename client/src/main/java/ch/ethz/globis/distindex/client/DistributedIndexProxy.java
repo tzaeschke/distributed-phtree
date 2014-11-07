@@ -201,6 +201,14 @@ public class DistributedIndexProxy<K, V> implements Index<K, V>, Closeable, Auto
         return results;
     }
 
+    protected List<K> extractKeys(ResultResponse<K, V> response) {
+        List<K> keys = new ArrayList<>();
+        for (IndexEntry<K, V> entry : response.getEntries()) {
+            keys.add(entry.getKey());
+        }
+        return keys;
+    }
+
     private IndexEntryList<K, V> combine(List<ResultResponse<K, V>> responses) {
         IndexEntryList<K, V> results = new IndexEntryList<>();
         for (ResultResponse<K,V> response : responses) {

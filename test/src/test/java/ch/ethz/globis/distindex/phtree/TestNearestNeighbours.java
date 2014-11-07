@@ -79,6 +79,18 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     }
 
     @Test
+    public void testNearestNeighborDist() {
+        PhTree idx = factory.createPHTreeSet(2, 64);
+        idx.insert(new long[] {50000, 0});
+        idx.insert(new long[] {-1000, 500});
+        idx.insert(new long[] {100, 1000});
+        List<long[]> result = idx.nearestNeighbour(3, 0, 0);
+        for (long[] key : result) {
+            System.out.print(Arrays.toString(key) + " ");
+        }
+    }
+
+    @Test
     public void testNeighbour4_5of4() {
         PhTree idx = factory.createPHTreeSet(2, 8);
         idx.insert(new long[]{3,3});
