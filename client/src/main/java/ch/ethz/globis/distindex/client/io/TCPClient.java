@@ -5,10 +5,7 @@ import ch.ethz.globis.disindex.codec.util.BitUtils;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class responsible for sending byte messages to a remote server and receiving the reply.
@@ -128,7 +125,7 @@ public class TCPClient implements Transport {
      * @return                              A list of the replies.
      */
     @Override
-    public List<byte[]> sendAndReceive(List<String> hosts, byte[] payload) {
+    public List<byte[]> sendAndReceive(Collection<String> hosts, byte[] payload) {
         List<byte[]> responses = new ArrayList<>();
         for (String host : hosts) {
             responses.add(sendAndReceive(host, payload));

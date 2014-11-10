@@ -6,6 +6,7 @@ import ch.ethz.globis.distindex.operation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      * @return                                      The decoded responses.
      */
     @Override
-    public List<ResultResponse<K, V>> send(List<String> hostIds, BaseRequest request) {
+    public List<ResultResponse<K, V>> send(Collection<String> hostIds, BaseRequest request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<ResultResponse<K, V>> responses = new ArrayList<>();
@@ -76,7 +77,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
     }
 
     @Override
-    public List<SimpleResponse> sendSimple(List<String> hostIds, BaseRequest request) {
+    public List<SimpleResponse> sendSimple(Collection<String> hostIds, BaseRequest request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<SimpleResponse> responses = new ArrayList<>();
