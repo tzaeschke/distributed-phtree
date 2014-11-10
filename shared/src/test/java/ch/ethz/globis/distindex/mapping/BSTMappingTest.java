@@ -19,4 +19,15 @@ public class BSTMappingTest {
             assertEquals(Arrays.asList(hosts).subList(0, i + 1), mapping.getHostIds());
         }
     }
+
+    @Test
+    public void testTreeCreation() {
+        int size = 16;
+        String[] keys = new String[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = String.valueOf(i);
+        }
+        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), keys);
+        System.out.println(mapping.getHosts());
+    }
 }

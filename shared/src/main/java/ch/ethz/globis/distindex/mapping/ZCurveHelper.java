@@ -8,8 +8,7 @@ import java.util.List;
 
 public class ZCurveHelper {
 
-
-    public static List<long[]> getNeighbours(long[] query, long[] neighbor) {
+    public static List<long[]> getNeighbours(long[] query, long[] neighbor, int depth) {
         int dim = query.length;
         if (dim != neighbor.length) {
             throw new IllegalArgumentException("The points must have the same dimensionality");
@@ -20,11 +19,12 @@ public class ZCurveHelper {
         //find the prefix corresponding to the region that contains only the query point
         //the neighbour is contained in one of its neighbours
         int prefix = (int ) Math.ceil(StringUtils.getCommonPrefix(queryZ, neighZ).length() / dim);
-        //now just need to find the neighbour regions of zRegionOfInterest in a Z-order curve of prefix iterations and dim
-        //dimensions and see which hosts hold these regions
-        long neighboursOffset = 1L << (Long.SIZE - prefix);
-        List<long[]> neighbours = getValidNeighbours(query, 1, Long.SIZE - prefix);
+        List<long[]> neighbours = getValidNeighbours(query, 1, depth - prefix);
         return neighbours;
+    }
+
+    public static List<long[]> getNeighbours(long[] query, long[] neighbor) {
+        return getNeighbours(query, neighbor, 64);
     }
 
     private static List<long[]> getValidNeighbours(long[] query, int hops, int size) {

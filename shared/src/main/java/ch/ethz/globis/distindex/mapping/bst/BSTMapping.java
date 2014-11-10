@@ -2,9 +2,7 @@ package ch.ethz.globis.distindex.mapping.bst;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class BSTMapping<K> implements KeyMapping<K> {
 
@@ -22,6 +20,23 @@ public class BSTMapping<K> implements KeyMapping<K> {
         this.converter = converter;
         this.bst = BST.fromArray(hosts);
         this.intervals = bst.leafs();
+    }
+
+    @Override
+    public Map<String, String> getHosts() {
+        Map<String, String> codeHosts = new HashMap<>();
+        getHosts("", bst.getRoot(), codeHosts);
+        return codeHosts;
+    }
+
+    private void getHosts(String partial, BSTNode<K> node, Map<String, String> map) {
+        if (node != null) {
+            getHosts(partial + "0", node.getLeft(), map);
+            if (node.getContent() != null) {
+                map.put(partial, node.getContent());
+            }
+            getHosts(partial + "1", node.getRight(), map);
+        }
     }
 
     @Override

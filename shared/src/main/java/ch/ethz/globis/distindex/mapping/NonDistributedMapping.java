@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.mapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class NonDistributedMapping<K> implements KeyMapping<K> {
 
@@ -13,6 +14,11 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         this.host = host;
         this.hostList = new ArrayList<>();
         hostList.add(host);
+    }
+
+    @Override
+    public Map<String, String> getHosts() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

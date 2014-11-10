@@ -38,6 +38,22 @@ public class BST<K> {
         return current;
     }
 
+    public List<String> getHosts(BSTNode<K> node) {
+        List<String> hosts = new ArrayList<>();
+        getHosts(node, hosts);
+        return hosts;
+    }
+
+    private void getHosts(BSTNode<K> node, List<String> hosts) {
+        if (node != null) {
+            getHosts(node.getLeft(), hosts);
+            if (node.getContent() != null) {
+                hosts.add(node.getContent());
+            }
+            getHosts(node.getRight(), hosts);
+        }
+    }
+
     public List<String> leafs() {
         List<String> results = new ArrayList<>();
         findRange(root, results);

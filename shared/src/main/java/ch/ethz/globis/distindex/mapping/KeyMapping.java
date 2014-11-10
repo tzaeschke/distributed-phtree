@@ -1,8 +1,11 @@
 package ch.ethz.globis.distindex.mapping;
 
 import java.util.List;
+import java.util.Map;
 
 public interface KeyMapping<K> {
+
+    public Map<String, String> getHosts();
 
     /**
      * Obtain the hostId of the machine that stores the key received as an argument.
