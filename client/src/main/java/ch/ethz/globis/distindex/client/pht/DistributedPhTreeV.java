@@ -1,6 +1,5 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.pht.*;
 
 import java.util.List;
@@ -113,5 +112,9 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     public List<long[]> nearestNeighbour(int i, PhDistance phDistance, PhDimFilter phDimFilter, long... keys) {
         //ToDo this is currently not supported by the PH Tree, but it will change in the future
         throw new UnsupportedOperationException();
+    }
+
+    public DistributedPHTreeProxy<V> getProxy() {
+        return proxy;
     }
 }

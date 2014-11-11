@@ -92,6 +92,11 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
         return isRunning;
     }
 
+    @Override
+    public <K, V> IOHandler<K, V> getHandler() {
+        return (IOHandler<K, V>) handler;
+    }
+
     private <K, V> ServerBootstrap initServerBootstrap(final IOHandler<K, V> handler) {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)

@@ -98,4 +98,8 @@ public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> 
     private ClusterService<long[]> setupClusterService(String host, int port) {
         return new ZKClusterService(host + ":" + port);
     }
+
+    public KeyMapping<long[]> getMapping() {
+        return clusterService.getMapping();
+    }
 }

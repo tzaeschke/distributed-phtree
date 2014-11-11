@@ -38,7 +38,7 @@ public class BaseParameterizedTest {
 
     @BeforeClass
     public static void initExecutor() throws Exception {
-        threadPool = Executors.newFixedThreadPool(4);
+        threadPool = Executors.newFixedThreadPool(32);
         zkServer = new TestingServer(ZK_PORT);
         zkServer.start();
 

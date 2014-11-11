@@ -12,6 +12,12 @@ public class PHFactory {
         this.zkPort = zkPort;
     }
 
+    public <V> DistributedPHTreeProxy<V> createProxy(int dim, int depth) {
+        DistributedPHTreeProxy<V> tree =  new DistributedPHTreeProxy<>(zkHost, zkPort);
+        tree.create(dim, depth);
+        return tree;
+    }
+
     public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
         DistributedPHTreeProxy<V> proxy = new DistributedPHTreeProxy<>(zkHost, zkPort);
         proxy.create(dim, depth);
