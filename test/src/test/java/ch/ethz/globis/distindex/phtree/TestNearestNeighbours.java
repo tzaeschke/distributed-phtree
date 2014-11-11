@@ -39,16 +39,16 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
         KeyMapping<long[]> mapping = proxy.getMapping();
         System.out.println(mapping.getHosts());
-
-        long side = Long.MAX_VALUE * 1/8;
-        long radius = (long) (side * Math.sqrt(2));
+        long side = Long.MAX_VALUE * 1/2;
+        //long radius = (long) (side * Math.sqrt(2));
+        tree.insert(0, side);
         tree.insert(side, side);
-        tree.insert(0, radius);
-        tree.insert(radius, 0);
-        tree.insert(-radius, 0);
+        tree.insert(0, side + 1);
 
-        List<long[]> result = tree.nearestNeighbour(5, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
         System.out.println(resultsToString(result));
+        check(64, result.get(0), 0, side);
+        check(64, result.get(1), 0, side + 1);
     }
 
     @Test
