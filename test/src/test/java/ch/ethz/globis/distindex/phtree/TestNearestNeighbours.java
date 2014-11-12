@@ -33,22 +33,47 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         factory = new PHFactory(HOST, ZK_PORT);
     }
 
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +--------------B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------Q----AC---+
+     |    |    |    |    |
+     |    |    |    |    |
+     +-------------------+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side + 1
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
     @Test
-    public void testLargeCircle() {
+    public void testFind16Hosts_OutsideAndLeft() {
         DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
         PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
-        KeyMapping<long[]> mapping = proxy.getMapping();
-        System.out.println(mapping.getHosts());
+
         long side = Long.MAX_VALUE * 1/2;
-        //long radius = (long) (side * Math.sqrt(2));
-        tree.insert(0, side);
-        tree.insert(side, side);
-        tree.insert(0, side + 1);
+        long[] A = {0, side};
+        long[] B = {side, side};
+        long[] C = {0, side + 1};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
 
         List<long[]> result = tree.nearestNeighbour(2, 0, 0);
-        System.out.println(resultsToString(result));
-        check(64, result.get(0), 0, side);
-        check(64, result.get(1), 0, side + 1);
+        check(64, result.get(0), A);
+        check(64, result.get(1), C);
     }
 
     @Test

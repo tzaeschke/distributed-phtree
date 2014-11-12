@@ -31,9 +31,9 @@ public class ZCurveHelper {
         int dim = query.length;
         List<String> offsetPermutations = generatePermutations(2 * hops, dim);
 
-        int[] offsets = new int[2 * hops + 1];
+        long[] offsets = new long[2 * hops + 1];
         for (int i = -hops; i <= hops; i++) {
-            offsets[hops + i] = i * (1 << size);
+            offsets[hops + i] = i * (1L << size);
         }
 
         List<long[]> neighbours = new ArrayList<>();
