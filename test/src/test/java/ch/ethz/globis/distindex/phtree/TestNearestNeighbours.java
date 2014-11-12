@@ -4,9 +4,7 @@ import ch.ethz.globis.distindex.BaseParameterizedTest;
 import ch.ethz.globis.distindex.client.pht.DistributedPHTreeProxy;
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.v3.PhTree3;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
@@ -15,13 +13,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TestNearestNeighbours extends BaseParameterizedTest {
 
-    private static final long EPSILON = 400;
+    private static final long EPSILON = 100;
+
+    private PhDistance metric = new PhDistanceL();
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -69,11 +67,14 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] A = {side, 0};
         long[] B = {side, side};
         long[] C = {side + 1, 0};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
+
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -113,12 +114,14 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] A = {side, 0};
         long[] B = {side, side};
         long[] C = {-side - 1, 0};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
-        assertEquals(2, result.size());
+        List<long[]> result = tree.nearestNeighbour(2, Q);
+        assertEquals("Invalid result size", 2, result.size());
         checkContains(result, C);
         checkContains(result, A);
     }
@@ -157,11 +160,13 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] A = {side, 0};
         long[] B = {side, side};
         long[] C = {0, -side-1};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -201,11 +206,13 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] A = {side, 0};
         long[] B = {side, side};
         long[] C = {0, side + 1};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -246,11 +253,13 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] B = {side, side};
         long radius = (long) (side * Math.sqrt(2));
         long[] C = {0, - radius + EPSILON};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -291,11 +300,13 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] B = {side, side};
         long radius = (long) (side * Math.sqrt(2));
         long[] C = {radius - EPSILON, 0};
+        long[] Q = {0, 0};
+        assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -319,7 +330,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
                 return;
             }
         }
-        fail("Not found: " + Arrays.toString(v));
+        fail("Point not found in results: " + Arrays.toString(v));
     }
 
     private String resultsToString(List<long[]> results) {
