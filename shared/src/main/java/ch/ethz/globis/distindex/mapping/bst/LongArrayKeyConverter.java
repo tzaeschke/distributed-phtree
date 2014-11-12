@@ -2,6 +2,15 @@ package ch.ethz.globis.distindex.mapping.bst;
 
 public class LongArrayKeyConverter implements KeyConverter<long[]> {
 
+    private int bitWidth = 64;
+
+    public LongArrayKeyConverter() {
+    }
+
+    public LongArrayKeyConverter(int bitWidth) {
+        this.bitWidth = bitWidth;
+    }
+
     @Override
     public String convert(long[] key) {
         //convert the value to string
@@ -16,7 +25,7 @@ public class LongArrayKeyConverter implements KeyConverter<long[]> {
     @Override
     public boolean isBitSet(long[] key, int position) {
         int dimIndex = position % key.length;
-        int bitIndex = 63 - position / key.length;
+        int bitIndex = bitWidth - 1 - position / key.length;
         return isBitSet(key[dimIndex], bitIndex);
     }
 

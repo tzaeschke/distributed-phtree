@@ -10,12 +10,6 @@ public class BSTMapping<K> implements KeyMapping<K> {
     private KeyConverter<K> converter;
     private List<String> intervals;
 
-    public BSTMapping(KeyConverter<K> converter) {
-        this.converter = converter;
-        this.bst = new BST<K>();
-        this.intervals = bst.leafs();
-    }
-
     public BSTMapping(KeyConverter<K> converter, String[] hosts) {
         this.converter = converter;
         this.bst = BST.fromArray(hosts);
@@ -89,6 +83,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
         List<String> keys = bst.leafs();
         keys.add(host);
         bst = BST.fromArray(keys.toArray(new String[keys.size()]));
+    }
+
+    @Override
+    public void setWidth(int bitWidth) {
+
     }
 
     private BSTNode find(K key) {

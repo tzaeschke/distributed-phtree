@@ -24,6 +24,8 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory for the peers.*/
     private static final String HOSTS_PATH = "/peers";
 
+    private static final String INDEX_PATH = "/index";
+
     /** The zookeeper object. */
     private ZooKeeper zk;
 
@@ -51,18 +53,24 @@ public class ZKClusterService implements ClusterService<long[]> {
         Watcher mappingChangedWatcher = new Watcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
-                if (isRunning && Event.EventType.NodeChildrenChanged == watchedEvent.getType()) {
+                if (isRunning && (Event.EventType.NodeChildrenChanged == watchedEvent.getType()
+                        || Event.EventType.NodeDataChanged == watchedEvent.getType())) {
                     readCurrentMapping();
                 }
             }
         };
 
+        int bitWidth = 64;
         try {
+            if (zk.exists(INDEX_PATH, false) != null) {
+                String bitWidthString = new String(zk.getData(INDEX_PATH, mappingChangedWatcher, new Stat()));
+                bitWidth = Integer.parseInt(bitWidthString);
+            }
             List<String> children = zk.getChildren(HOSTS_PATH, mappingChangedWatcher);
             String[] hosts = children.toArray(new String[children.size()]);
-            mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
+            mapping = new BSTMapping<>(new LongArrayKeyConverter(bitWidth), hosts);
         } catch (KeeperException.NoNodeException nne) {
-            mapping = new BSTMapping<>(new LongArrayKeyConverter(), new String[] {});
+            mapping = new BSTMapping<>(new LongArrayKeyConverter(bitWidth), new String[] {});
         } catch (KeeperException.ConnectionLossException cle) {
             //retry
             LOG.error("Connection loss exception.", cle);

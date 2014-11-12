@@ -12,7 +12,7 @@ public class BSTMappingTest {
 
     @Test
     public void testMapping() {
-        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
+        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), new String[]{});
         String[] hosts = { "one", "two", "three", "four", "five" };
         for (int i = 0; i < hosts.length; i++) {
             mapping.add(hosts[i]);
