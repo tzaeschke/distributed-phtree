@@ -21,6 +21,8 @@ import static org.junit.Assert.fail;
 
 public class TestNearestNeighbours extends BaseParameterizedTest {
 
+    private static final long EPSILON = 400;
+
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] { {16} });
@@ -59,12 +61,144 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      *  The two nearest neighbours of Q are A and C.
      */
     @Test
-    public void testFind16Hosts_OutsideAndLeft() {
+    public void testFind16Hosts_Across1() {
         DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
         PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
 
         long side = Long.MAX_VALUE * 1/2;
-        long[] A = {0, side};
+        long[] A = {side, 0};
+        long[] B = {side, side};
+        long[] C = {side + 1, 0};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
+
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
+    }
+
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +--------------B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----C----Q----A----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +-------------------+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side + 1
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
+    @Test
+    public void testFind16Hosts_Across2() {
+        DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = Long.MAX_VALUE * 1/2;
+        long[] A = {side, 0};
+        long[] B = {side, side};
+        long[] C = {-side - 1, 0};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
+
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
+    }
+
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +--------------B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------Q----A----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------C---------+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side + 1
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
+    @Test
+    public void testFind16Hosts_Across3() {
+        DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = Long.MAX_VALUE * 1/2;
+        long[] A = {side, 0};
+        long[] B = {side, side};
+        long[] C = {0, -side-1};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
+
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
+    }
+
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------C----B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------Q----A----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +-------------------+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
+    @Test
+    public void testFind16Hosts_Across4() {
+        DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = Long.MAX_VALUE * 1/2;
+        long[] A = {side, 0};
         long[] B = {side, side};
         long[] C = {0, side + 1};
         tree.insert(A);
@@ -72,28 +206,99 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(C);
 
         List<long[]> result = tree.nearestNeighbour(2, 0, 0);
-        check(64, result.get(0), A);
-        check(64, result.get(1), C);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
     }
 
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +--------------B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------Q----A----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +-------------------+
+     |    |    C    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side * sqrt(2) - EPSILON
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
     @Test
-    public void testUnitCircle() {
-        PhTreeV<Object> idx = factory.createPHTreeMap(2, 64);
-        PhTreeVD<Object> tree = new PhTreeVD<>(idx);
-        tree.put(new double[]{0, 0}, null);
-        tree.put(sinCostForAngle(30), null);
-        tree.put(sinCostForAngle(60), null);
-        tree.put(sinCostForAngle(90), null);
-        tree.put(sinCostForAngle(120), null);
-        tree.put(sinCostForAngle(150), null);
-        tree.put(sinCostForAngle(180), null);
-        tree.put(sinCostForAngle(210), null);
-        tree.put(sinCostForAngle(240), null);
-        tree.put(sinCostForAngle(270), null);
-        tree.put(sinCostForAngle(300), null);
-        tree.put(sinCostForAngle(330), null);
-        List<double[]> result = tree.nearestNeighbour(3, 0, 0);
-        System.out.println(resultsToStringDouble(result));
+    public void testFind16Hosts_Across5() {
+        DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = Long.MAX_VALUE * 1/2;
+        long[] A = {side, 0};
+        long[] B = {side, side};
+        long radius = (long) (side * Math.sqrt(2));
+        long[] C = {0, - radius + EPSILON};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
+
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
+    }
+
+    /**
+     * Configuration presented below:
+     *
+     +----+----+----+----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +--------------B----+
+     |    |    |    |    |
+     |    |    |    |    |
+     +---------Q----AC---+
+     |    |    |    |    |
+     |    |    |    |    |
+     +-------------------+
+     |    |    |    |    |
+     |    |    |    |    |
+     +----+----+----+----+
+     *  The space is split evenly between 16 hosts and the points contained are A, B and C. Q is the query point
+     *  for kNN but it is not stored.
+     *
+     *  dist(Q, A) = side
+     *  dist(Q, B) = side * sqrt(2)
+     *  dist(Q, C) = side * sqrt(2) - EPSILON
+     *
+     *  The two nearest neighbours of Q are A and C.
+     */
+    @Test
+    public void testFind16Hosts_Across6() {
+        DistributedPHTreeProxy<Object> proxy = factory.createProxy(2, 64);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = Long.MAX_VALUE * 1/2;
+        long[] A = {side, 0};
+        long[] B = {side, side};
+        long radius = (long) (side * Math.sqrt(2));
+        long[] C = {radius - EPSILON, 0};
+        tree.insert(A);
+        tree.insert(B);
+        tree.insert(C);
+
+        List<long[]> result = tree.nearestNeighbour(2, 0, 0);
+        assertEquals(2, result.size());
+        checkContains(result, C);
+        checkContains(result, A);
     }
 
     private double[] sinCostForAngle(int angleInDegrees) {
