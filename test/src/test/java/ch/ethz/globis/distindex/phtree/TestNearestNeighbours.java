@@ -17,10 +17,7 @@ import org.junit.Test;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -90,14 +87,6 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(A);
         tree.insert(B);
         tree.insert(C);
-
-//        Map<String, String> map = clusterService.getMapping().getHosts();
-//        System.out.println(map);
-//        for (Middleware middleware : middlewares) {
-//            IndexMiddleware mid = (IndexMiddleware) middleware;
-//            PhTreeRequestHandler rh = (PhTreeRequestHandler) mid.getHandler().getRequestHandler();
-//            System.out.println(mid.getHost() + ":" + mid.getPort() + " -> "  + rh.getTree().size());
-//        }
 
         List<long[]> result = tree.nearestNeighbour(2, Q);
         assertEquals(2, result.size());
@@ -481,5 +470,21 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         }
         out += "]";
         return out;
+    }
+
+    private void printMappingAndSizes() {
+        Map<String, String> map = clusterService.getMapping().getHosts();
+
+        Map<String, String> reverse = new HashMap<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            reverse.put(entry.getValue(), entry.getKey());
+        }
+
+        for (Middleware middleware : middlewares) {
+            IndexMiddleware mid = (IndexMiddleware) middleware;
+            PhTreeRequestHandler rh = (PhTreeRequestHandler) mid.getHandler().getRequestHandler();
+            String hostId = String.format("%s:%s", mid.getHost(), mid.getPort());
+            System.out.println(hostId + " " + reverse.get(hostId) + " " + rh.getTree().size());
+        }
     }
 }

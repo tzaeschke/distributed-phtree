@@ -19,7 +19,7 @@ public class ZCurveHelper {
         //find the prefix corresponding to the region that contains only the query point
         //the neighbour is contained in one of its neighbours
         int prefix = (int ) Math.ceil(StringUtils.getCommonPrefix(queryZ, neighZ).length() / dim);
-        List<long[]> neighbours = getValidNeighbours(query, 1, depth - prefix);
+        List<long[]> neighbours = getValidNeighbours(query, 2, depth - prefix);
         return neighbours;
     }
 

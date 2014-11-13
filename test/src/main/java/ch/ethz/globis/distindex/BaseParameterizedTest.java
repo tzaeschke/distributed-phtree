@@ -64,7 +64,7 @@ public class BaseParameterizedTest {
             middlewares.clear();
 
             for (int i = 0; i < nrServers; i++) {
-                Middleware current = createMiddleware(i, HOST, S_BASE_PORT + i * 10, HOST, ZK_PORT);
+                Middleware current = createMiddleware(i, HOST, S_BASE_PORT + i * 2, HOST, ZK_PORT);
                 MiddlewareUtil.startMiddleware(threadPool, current);
                 middlewares.add(current);
             }
