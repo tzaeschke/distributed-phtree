@@ -3,7 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.DistributedIndexIterator;
-import ch.ethz.globis.distindex.client.pht.DistributedPHTreeProxy;
+import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
-    private DistributedPHTreeProxy<String> phTree;
+    private PHTreeIndexProxy<String> phTree;
 
     public DistPhTreeProxyParameterizedTest(int nrServers) throws IOException {
         super(nrServers);
@@ -33,7 +33,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Before
     public void setupTree() {
-        phTree = new DistributedPHTreeProxy<>(HOST, ZK_PORT);
+        phTree = new PHTreeIndexProxy<>(HOST, ZK_PORT);
         phTree.create(2, 64);
     }
 

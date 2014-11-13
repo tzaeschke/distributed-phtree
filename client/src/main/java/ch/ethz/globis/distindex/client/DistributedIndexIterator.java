@@ -12,7 +12,7 @@ import java.io.IOException;
 public class DistributedIndexIterator<K, V> implements IndexIterator<K, V>, Closeable, AutoCloseable {
 
     /** The index over which the iterator is running. */
-    DistributedIndexProxy<K, V> indexProxy;
+    IndexProxy<K, V> indexProxy;
 
     /** The entries that are currently buffered*/
     IndexEntryList<K, V> entryBuffer;
@@ -27,7 +27,7 @@ public class DistributedIndexIterator<K, V> implements IndexIterator<K, V>, Clos
     // the position within the entry buffer
     private int position = -1;
 
-    public DistributedIndexIterator(DistributedIndexProxy<K, V> indexProxy, KeyMapping<K> keyMapping) {
+    public DistributedIndexIterator(IndexProxy<K, V> indexProxy, KeyMapping<K> keyMapping) {
         this.indexProxy = indexProxy;
         this.keyMapping = keyMapping;
         this.currentHostId = keyMapping.getFirst();

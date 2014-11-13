@@ -11,13 +11,13 @@ import java.util.List;
 public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     /** Proxy to the remote PH tree */
-    private DistributedPHTreeProxy<V> proxy;
+    private PHTreeIndexProxy<V> proxy;
 
     /**
      * Main constructor, avoids responsibility of building the proxy.
      * @param proxy
      */
-    public DistributedPhTreeV(DistributedPHTreeProxy<V> proxy) {
+    public DistributedPhTreeV(PHTreeIndexProxy<V> proxy) {
         this.proxy = proxy;
     }
 
@@ -114,7 +114,7 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
         throw new UnsupportedOperationException();
     }
 
-    public DistributedPHTreeProxy<V> getProxy() {
+    public PHTreeIndexProxy<V> getProxy() {
         return proxy;
     }
 }

@@ -12,14 +12,14 @@ public class PHFactory {
         this.zkPort = zkPort;
     }
 
-    public <V> DistributedPHTreeProxy<V> createProxy(int dim, int depth) {
-        DistributedPHTreeProxy<V> tree =  new DistributedPHTreeProxy<>(zkHost, zkPort);
+    public <V> PHTreeIndexProxy<V> createProxy(int dim, int depth) {
+        PHTreeIndexProxy<V> tree =  new PHTreeIndexProxy<>(zkHost, zkPort);
         tree.create(dim, depth);
         return tree;
     }
 
     public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
-        DistributedPHTreeProxy<V> proxy = new DistributedPHTreeProxy<>(zkHost, zkPort);
+        PHTreeIndexProxy<V> proxy = new PHTreeIndexProxy<>(zkHost, zkPort);
         proxy.create(dim, depth);
         return new DistributedPhTreeV<>(proxy);
     }

@@ -32,12 +32,12 @@ import static org.mockito.Mockito.when;
  *
  * Both the RequestDispatcher and the ClusterService are mocked via Mockito.
  */
-public class DistributedIndexProxyTest {
+public class IndexProxyTest {
 
     @Test
     public void testGet_OK() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
@@ -51,7 +51,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = NullPointerException.class)
     public void testGet_NullArgs() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         indexProxy.get(null);
     }
@@ -59,7 +59,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = ServerErrorException.class)
     public void testGet_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(failureResponse());
 
         long[] key = { 1, 2, 3 };
@@ -69,7 +69,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = InvalidResponseException.class)
     public void testGet_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(invalidIdResponse());
 
         long[] key = { 1, 2, 3 };
@@ -79,7 +79,7 @@ public class DistributedIndexProxyTest {
     @Test
     public void testPut_OK() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
@@ -93,7 +93,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = NullPointerException.class)
     public void testPut_NullArgs() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         String value = new BigInteger(30, new Random()).toString();
         indexProxy.put(null, value);
@@ -102,7 +102,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = ServerErrorException.class)
     public void testPut_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
@@ -114,7 +114,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = InvalidResponseException.class)
     public void testPut_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
@@ -126,7 +126,7 @@ public class DistributedIndexProxyTest {
     @Test
     public void testRange_OK() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] start = { -2, -2};
         long[] end = { 2, 2};
@@ -155,7 +155,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = NullPointerException.class)
     public void testRange_NullArgs() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         indexProxy.query(null, null);
     }
@@ -163,7 +163,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = ServerErrorException.class)
     public void testRange_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
 
         long[] start = new long[] {1, 2, 3};
@@ -174,7 +174,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = InvalidResponseException.class)
     public void testRange_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
 
         long[] start = new long[] {1, 2, 3};
@@ -185,7 +185,7 @@ public class DistributedIndexProxyTest {
     @Test
     public void testDelete_OK() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
@@ -199,7 +199,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = NullPointerException.class)
     public void testDelete_NullArgs() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
 
         indexProxy.remove(null);
     }
@@ -207,7 +207,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = ServerErrorException.class)
     public void testDelete_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
 
         long[] key = new long[] {1, 2, 3};
@@ -217,7 +217,7 @@ public class DistributedIndexProxyTest {
     @Test(expected = InvalidResponseException.class)
     public void testDelete_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
-        DistributedIndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
+        IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
         when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
 
         long[] key = new long[] {1, 2, 3};
@@ -286,13 +286,13 @@ public class DistributedIndexProxyTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <K, V> DistributedIndexProxy<K, V> mockIndexProxy(RequestDispatcher<K, V> dispatcher) {
+    private <K, V> IndexProxy<K, V> mockIndexProxy(RequestDispatcher<K, V> dispatcher) {
         String mockHostId = "mockHostId";
         KeyMapping<K> mapping = new NonDistributedMapping<>(mockHostId);
 
         ClusterService<K> mockClusterService = mock(ClusterService.class);
         when(mockClusterService.getMapping()).thenReturn(mapping);
 
-        return new DistributedIndexProxy<>(dispatcher, mockClusterService);
+        return new IndexProxy<>(dispatcher, mockClusterService);
     }
 }

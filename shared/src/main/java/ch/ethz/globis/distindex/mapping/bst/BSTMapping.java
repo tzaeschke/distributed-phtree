@@ -85,11 +85,6 @@ public class BSTMapping<K> implements KeyMapping<K> {
         bst = BST.fromArray(keys.toArray(new String[keys.size()]));
     }
 
-    @Override
-    public void setWidth(int bitWidth) {
-
-    }
-
     private BSTNode find(K key) {
         BSTNode current = bst.getRoot();
         if (current == null) {

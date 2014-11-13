@@ -7,7 +7,7 @@ import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.distindex.api.PointIndex;
-import ch.ethz.globis.distindex.client.DistributedIndexProxy;
+import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.distindex.client.io.ClientRequestDispatcher;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.client.io.TCPClient;
@@ -21,10 +21,7 @@ import ch.ethz.globis.distindex.operation.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.BitTools;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,9 +32,9 @@ import java.util.Set;
  *
  * @param <V>                               The value class for this index.
  */
-public class DistributedPHTreeProxy<V> extends DistributedIndexProxy<long[], V> implements PointIndex<V>{
+public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointIndex<V>{
 
-    public DistributedPHTreeProxy(String host, int port) {
+    public PHTreeIndexProxy(String host, int port) {
         requestDispatcher = setupDispatcher();
         clusterService = setupClusterService(host, port);
         clusterService.connect();
