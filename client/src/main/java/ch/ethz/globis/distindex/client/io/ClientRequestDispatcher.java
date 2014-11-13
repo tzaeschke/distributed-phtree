@@ -44,7 +44,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      * @return                                      The decoded response.
      */
     @Override
-    public ResultResponse<K, V> send(String hostId, BaseRequest request) {
+    public ResultResponse<K, V> send(String hostId, Request request) {
         byte[] requestBytes = encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
         return decoder.decode(responseBytes);
@@ -59,7 +59,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      * @return                                      The decoded responses.
      */
     @Override
-    public List<ResultResponse<K, V>> send(Collection<String> hostIds, BaseRequest request) {
+    public List<ResultResponse<K, V>> send(Collection<String> hostIds, Request request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<ResultResponse<K, V>> responses = new ArrayList<>();
@@ -70,14 +70,14 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
     }
 
     @Override
-    public SimpleResponse sendSimple(String hostId, BaseRequest request) {
+    public SimpleResponse sendSimple(String hostId, Request request) {
         byte[] requestBytes = encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
         return decoder.decodeInteger(responseBytes);
     }
 
     @Override
-    public List<SimpleResponse> sendSimple(Collection<String> hostIds, BaseRequest request) {
+    public List<SimpleResponse> sendSimple(Collection<String> hostIds, Request request) {
         byte[] requestBytes = encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<SimpleResponse> responses = new ArrayList<>();
@@ -87,7 +87,7 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
         return responses;
     }
 
-    private byte[] encode(BaseRequest request) {
+    private byte[] encode(Request request) {
         byte[] encodedRequest;
         switch (request.getOpCode()) {
             case OpCode.GET:
