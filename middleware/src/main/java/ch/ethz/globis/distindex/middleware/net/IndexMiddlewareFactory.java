@@ -15,12 +15,17 @@ import ch.ethz.globis.distindex.orchestration.ZKClusterService;
  */
 public class IndexMiddlewareFactory {
 
-    public static IndexMiddleware newPHTreeMiddleware(int port) {
-        return newPhTree("localhost", port, "localhost", 2181);
+    public static <K, V> IndexMiddleware newMiddleware(String host, int port, String zkHost, int zkPort, IOHandler<K, V> ioHandler) {
+        ClusterService<long[]> clusterService = new ZKClusterService(zkHost, zkPort);
+        return new IndexMiddleware<>(host, port, clusterService, ioHandler);
     }
 
-    public static <K, V> IndexMiddleware newMiddleware(String host, int port, String zkHost, int zkPort, IOHandler<K, V> ioHandler) {
-        ClusterService clusterService = new ZKClusterService(zkHost, zkPort);
+    public static IndexMiddleware<long[], byte[]> newPhTree(String host, int port, ClusterService<long[]> clusterService) {
+        RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler();
+        RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
+        ResponseEncoder<long[], byte[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
+
+        IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, requestDecoder, responseEncoder);
         return new IndexMiddleware<>(host, port, clusterService, ioHandler);
     }
 

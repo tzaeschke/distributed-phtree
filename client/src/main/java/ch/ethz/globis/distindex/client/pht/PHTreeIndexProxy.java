@@ -34,6 +34,13 @@ import java.util.Set;
  */
 public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointIndex<V>{
 
+    public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
+        this.clusterService = clusterService;
+        this.requestDispatcher = setupDispatcher();
+
+        this.clusterService.connect();
+    }
+
     public PHTreeIndexProxy(String host, int port) {
         requestDispatcher = setupDispatcher();
         clusterService = setupClusterService(host, port);

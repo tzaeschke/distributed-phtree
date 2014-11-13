@@ -119,4 +119,12 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     private String getHostId() {
         return host + ":" + port;
     }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
 }

@@ -4,7 +4,9 @@ import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.util.MiddlewareUtil;
 import org.apache.curator.test.TestingServer;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,7 +28,7 @@ public class BaseParameterizedTest {
     private static final int S_BASE_PORT = 7070;
 
     private static ExecutorService threadPool;
-    private static List<Middleware> middlewares = new ArrayList<>();
+    protected static List<Middleware> middlewares = new ArrayList<>();
     private static TestingServer zkServer;
 
     private int nrServers;
@@ -55,15 +57,21 @@ public class BaseParameterizedTest {
 
     public BaseParameterizedTest(int nrServers) throws IOException {
         this.nrServers = nrServers;
-        for (Middleware middleware : middlewares) {
-            middleware.close();
-        }
-        middlewares.clear();
+        if (nrServers != middlewares.size()) {
+            for (Middleware middleware : middlewares) {
+                middleware.close();
+            }
+            middlewares.clear();
 
-        for (int i = 0; i < nrServers; i++) {
-            Middleware current = IndexMiddlewareFactory.newPhTree(HOST, S_BASE_PORT + i * 10, HOST, ZK_PORT);
-            MiddlewareUtil.startMiddleware(threadPool, current);
-            middlewares.add(current);
+            for (int i = 0; i < nrServers; i++) {
+                Middleware current = createMiddleware(i, HOST, S_BASE_PORT + i * 10, HOST, ZK_PORT);
+                MiddlewareUtil.startMiddleware(threadPool, current);
+                middlewares.add(current);
+            }
         }
+    }
+
+    protected Middleware createMiddleware(int i, String host, int port, String zkHost, int zkPort) {
+        return IndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
     }
 }

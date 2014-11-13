@@ -4,7 +4,7 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.DistributedIndexIterator;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
 import org.junit.After;
@@ -44,7 +44,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testRanged() {
-        PHFactory factory = new PHFactory(HOST, ZK_PORT);
+        ZKPHFactory factory = new ZKPHFactory(HOST, ZK_PORT);
         PhTree tree = factory.createPHTreeSet(2, 64);
         System.out.println(tree);
     }

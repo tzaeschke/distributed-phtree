@@ -5,6 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is a mock and is only used during testing.
+ *
+ * Might want to even remove it.
+ * @param <K>
+ */
 public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     private final String host;
@@ -55,10 +61,5 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     public void add(String hostId) {
         int index = Collections.binarySearch(hostList, hostId);
         hostList.add(index, hostId);
-    }
-
-    @Override
-    public void setWidth(int bitWidth) {
-        //no need to do anything here
     }
 }

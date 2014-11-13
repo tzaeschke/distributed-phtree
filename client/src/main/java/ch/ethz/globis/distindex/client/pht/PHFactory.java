@@ -1,44 +1,21 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeRangeD;
+import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTreeVD;
 
-public class PHFactory {
+/**
+ * Created by bvancea on 13.11.14.
+ */
+public interface PHFactory {
+    <V> PHTreeIndexProxy<V> createProxy(int dim, int depth);
 
-    private String zkHost;
-    private int zkPort;
+    <V> PhTreeV<V> createPHTreeMap(int dim, int depth);
 
-    public PHFactory(String zkHost, int zkPort) {
-        this.zkHost = zkHost;
-        this.zkPort = zkPort;
-    }
+    <V> PhTreeVD<V> createPHTreeVD(int dim);
 
-    public <V> PHTreeIndexProxy<V> createProxy(int dim, int depth) {
-        PHTreeIndexProxy<V> tree =  new PHTreeIndexProxy<>(zkHost, zkPort);
-        tree.create(dim, depth);
-        return tree;
-    }
+    PhTree createPHTreeSet(int dim, int depth);
 
-    public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
-        PHTreeIndexProxy<V> proxy = new PHTreeIndexProxy<>(zkHost, zkPort);
-        proxy.create(dim, depth);
-        return new DistributedPhTreeV<>(proxy);
-    }
-
-    public <V> PhTreeVD<V> createPHTreeVD(int dim) {
-        PhTreeV<V> proxy = createPHTreeMap(dim, Double.SIZE);
-
-        return new PhTreeVD<>(proxy);
-    }
-
-    public PhTree createPHTreeSet(int dim, int depth) {
-        PhTreeV<Object> proxy = createPHTreeMap(dim, depth);
-
-        return new PhTreeVProxy(proxy);
-    }
-
-    public PhTreeRangeD createPHTreeRangeSet(int dim, int depth) {
-        PhTree backingTree = createPHTreeSet(2 * dim, depth);
-
-        return new PhTreeRangeD(backingTree);
-    }
+    PhTreeRangeD createPHTreeRangeSet(int dim, int depth);
 }

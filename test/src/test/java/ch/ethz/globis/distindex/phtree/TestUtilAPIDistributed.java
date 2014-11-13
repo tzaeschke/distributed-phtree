@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.phtree;
 
-import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.util.MiddlewareUtil;
@@ -50,7 +50,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
         this.nrServers = nrServers;
     }
 
-    private PHFactory factory = new PHFactory(ZK_HOST, ZK_PORT);
+    private ZKPHFactory factory = new ZKPHFactory(ZK_HOST, ZK_PORT);
 
     @Override
     public PhTree newTree(int dim, int depth) {

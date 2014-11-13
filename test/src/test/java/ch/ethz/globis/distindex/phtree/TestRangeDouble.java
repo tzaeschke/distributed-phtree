@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.BaseParameterizedTest;
-import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.pht.PhTreeRangeD;
 import ch.ethz.globis.pht.PhTreeRangeD.PHREntry;
 import org.junit.Before;
@@ -19,11 +19,11 @@ public class TestRangeDouble extends BaseParameterizedTest {
 
     private PhTreeRangeD pht;
     private PHREntry e1, e2, e3;
-    private PHFactory factory;
+    private ZKPHFactory factory;
 
     public TestRangeDouble(int nrServers) throws IOException {
         super(nrServers);
-        factory = new PHFactory(HOST, ZK_PORT);
+        factory = new ZKPHFactory(HOST, ZK_PORT);
     }
 
     @Before

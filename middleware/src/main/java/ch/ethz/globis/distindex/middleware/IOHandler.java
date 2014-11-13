@@ -155,6 +155,10 @@ public class IOHandler<K, V> {
         return ByteBuffer.wrap(responseBytes);
     }
 
+    public RequestHandler<K, V> getRequestHandler() {
+        return requestHandler;
+    }
+
     private byte getMessageCode(ByteBuffer buffer) {
         return buffer.get(0);
     }

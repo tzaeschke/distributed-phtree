@@ -178,4 +178,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
         return results;
     }
+
+    public PhTreeV<byte[]> getTree() {
+        return tree;
+    }
 }
