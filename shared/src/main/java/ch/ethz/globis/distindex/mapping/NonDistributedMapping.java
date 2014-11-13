@@ -60,6 +60,11 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public int getDepth(String hostId) {
+        return 0;
+    }
+
+    @Override
     public void add(String hostId) {
         int index = Collections.binarySearch(hostList, hostId);
         hostList.add(index, hostId);

@@ -89,6 +89,23 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public int getDepth(String hostId) {
+        return getDepth(hostId, bst.getRoot(), 0);
+    }
+
+    private int getDepth(String hostId, BSTNode<K> node, int depth) {
+        if (node == null) {
+            return 0;
+        }
+        if (node.getContent() != null && hostId.equals(node.getContent())) {
+            return depth + 1;
+        }
+        return Math.max(getDepth(hostId, node.getLeft(), depth + 1),
+                getDepth(hostId, node.getRight(), depth + 1) );
+
+    }
+
+    @Override
     public void add(String host) {
         List<String> keys = bst.leafs();
         keys.add(host);

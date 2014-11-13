@@ -31,7 +31,7 @@ public class ZCurveHelper {
         return getNeighbours(query, neighbor, 64);
     }
 
-    private static List<long[]> getProjectionsWithinHops(long[] query, int hops, int size) {
+    public static List<long[]> getProjectionsWithinHops(long[] query, int hops, int size) {
         int dim = query.length;
         List<String> offsetPermutations = generatePermutations(2 * hops, dim);
 

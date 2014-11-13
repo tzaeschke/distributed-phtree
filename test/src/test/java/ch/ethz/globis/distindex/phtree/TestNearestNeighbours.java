@@ -420,6 +420,26 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         checkContains(result, A);
     }
 
+    @Test
+    public void testFind16Hosts_NotEnough() {
+        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 16);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+
+        long side = SQUARE_SIDE;
+        long[] A = {side * 2, 0};
+        long[] B = {0, side * 2};
+
+        long[] Q = {0, 0};
+
+        tree.insert(A);
+        tree.insert(B);
+
+        List<long[]> result = tree.nearestNeighbour(2, Q);
+        assertEquals(2, result.size());
+        checkContains(result, B);
+        checkContains(result, A);
+    }
+
     private double[] sinCostForAngle(int angleInDegrees) {
         double angleInRadians = Math.toRadians(angleInDegrees);
         return new double[] { Math.sin(angleInRadians), Math.cos(angleInRadians)};

@@ -23,8 +23,7 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  *  Represents a proxy to a distributed multi-dimensional index. The API implemented is independent of any
@@ -81,9 +80,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         String keyHostId = keyMapping.getHostId(key);
         List<long[]> candidates = getNearestNeighbors(keyHostId, key, k);
         if (candidates.size() < k) {
-            iterativeExpansion(keyMapping, key, k);
+            return iterativeExpansion(keyMapping, key, k);
         }
-
         return radiusSearch(key, k, candidates);
     }
 
@@ -110,7 +108,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      * @return                          The k nearest neighbours on the hosts.
      */
-    private List<long[]> getNearestNeighbors(List<String> hostIds, long[] key, int k) {
+    private List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
@@ -125,8 +123,25 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      */
     private List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
-        //ToDo need to gradually expand the number of nodes to query
-        return getNearestNeighbors(keyMapping.getHostIds(), key, k);
+        List<String> allHostIds = keyMapping.getHostIds();
+        String hostId = keyMapping.getHostId(key);
+
+        List<long[]> candidates;
+        int size = depth - keyMapping.getDepth(hostId) / dim;
+        Set<String> currentHostIds;
+        boolean foundK = false;
+        int hops = 1;
+        do {
+            List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, size);
+            currentHostIds = keyMapping.getHostsContaining(projections);
+            candidates = getNearestNeighbors(currentHostIds, key, k);
+            if (candidates.size() == k) {
+                foundK = true;
+            }
+            hops++;
+        } while (!foundK && (currentHostIds.size() < allHostIds.size()));
+
+        return candidates;
     }
 
     /**
