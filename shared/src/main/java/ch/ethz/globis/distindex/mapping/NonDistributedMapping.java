@@ -1,9 +1,6 @@
 package ch.ethz.globis.distindex.mapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is a mock and is only used during testing.
@@ -55,6 +52,11 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         } else {
             return hostList.get(index + 1);
         }
+    }
+
+    @Override
+    public Set<String> getHostsContaining(List<K> keys) {
+        return new HashSet<>(hostList);
     }
 
     @Override

@@ -28,7 +28,10 @@ import java.util.List;
  */
 public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
+    /** The request dispatcher for the messages to the index servers */
     protected RequestDispatcher<K, V> requestDispatcher;
+
+    /** The cluster service. Handles information regarding the hosts. */
     protected ClusterService<K> clusterService;
 
     protected IndexProxy() { }

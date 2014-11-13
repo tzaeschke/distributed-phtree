@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.mapping;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface KeyMapping<K> {
 
@@ -43,6 +44,8 @@ public interface KeyMapping<K> {
      * @return
      */
     public String getNext(String hostId);
+
+    public Set<String> getHostsContaining(List<K> keys);
 
     /**
      * Add a hostId to the key mapping.

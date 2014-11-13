@@ -16,13 +16,13 @@ import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
 import ch.ethz.globis.distindex.operation.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.Request;
 import ch.ethz.globis.distindex.operation.Requests;
 import ch.ethz.globis.distindex.operation.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +33,9 @@ import java.util.Set;
  * @param <V>                               The value class for this index.
  */
 public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointIndex<V>{
+
+    private int depth = -1;
+    private int dim = -1;
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
@@ -58,44 +61,92 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     }
 
     @Override
+    public boolean create(int dim, int depth) {
+        this.dim = dim;
+        this.depth = depth;
+        return super.create(dim, depth);
+    }
+
+    /**
+     * Find the k nearest neighbours of a query point.
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @return
+     */
+    @Override
     public List<long[]> getNearestNeighbors(long[] key, int k) {
 
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
 
-        //return getNearestNeighbors(keyMapping.getHostIds(), key, k);
-
         String keyHostId = keyMapping.getHostId(key);
-        List<long[]> neighbours = getNearestNeighbors(keyHostId, key, k);
-        if (neighbours.size() < k) {
-            //ToDo need to gradually expand the number of nodes to query
-            return getNearestNeighbors(keyMapping.getHostIds(), key, k);
-        }
-        if (k <= 0) {
-            return neighbours;
-        }
-        long[] farthestNeighbor = neighbours.get(k - 1);
-        List<long[]> neighbors = ZCurveHelper.getNeighbours(key, farthestNeighbor);
-
-        Set<String> neighbourHosts = new HashSet<>();
-        for (long[] neighbour : neighbors) {
-            //ToDo the neighbour rectangle size is dim * size, which could correspond to the zones of more hosts, need to make sure this case is resolved
-            neighbourHosts.add(keyMapping.getHostId(neighbour));
+        List<long[]> candidates = getNearestNeighbors(keyHostId, key, k);
+        if (candidates.size() < k) {
+            iterativeExpansion(keyMapping, key, k);
         }
 
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        List<ResultResponse<long[], V>> responses = requestDispatcher.send(neighbourHosts, request);
-        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
+        return radiusSearch(key, k, candidates);
     }
 
+    /**
+     * Find the k nearest neighbours of a query point from the host with the id hostId.
+     *
+     * @param hostId                    The id of the host on which the query is run.
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @return                          The k nearest neighbours on the host.
+     */
     private List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         ResultResponse<long[], V> response = requestDispatcher.send(hostId, request);
         return extractKeys(response);
     }
 
+    /**
+     *  Find the k nearest neighbours of a query point from the hosts with the ids contained
+     *  int the hostIds list.
+     *
+     * @param hostIds
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @return                          The k nearest neighbours on the hosts.
+     */
     private List<long[]> getNearestNeighbors(List<String> hostIds, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
+    }
+
+    /**
+     * Perform an iterative expansion search for the nearest neighbour. This should be called if
+     * the host containing the query point does not contain K nearest neighbours.
+     *
+     * @param key                       The query point.
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     */
+    private List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
+        //ToDo need to gradually expand the number of nodes to query
+        return getNearestNeighbors(keyMapping.getHostIds(), key, k);
+    }
+
+    /**
+     * Perform a radius search to check if there are any neighbours nearer to the query point than the
+     * neighbours found on the query host server.
+     *
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @param candidates                The nearest neighbours on the query point's host server.
+     * @return                          The k nearest neighbour points.
+     */
+    private List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
+        KeyMapping<long[]> keyMapping = clusterService.getMapping();
+
+        long[] farthestNeighbor = candidates.get(k - 1);
+        List<long[]> neighbors = ZCurveHelper.getProjectedNeighbours(key, farthestNeighbor);
+        Set<String> neighbourHosts = keyMapping.getHostsContaining(neighbors);
+
+        Request request = Requests.newGetKNN(key, k);
+        List<ResultResponse<long[], V>> responses = requestDispatcher.send(neighbourHosts, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 

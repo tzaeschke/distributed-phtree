@@ -79,6 +79,16 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public Set<String> getHostsContaining(List<K> keys) {
+        Set<String> neighbourHosts = new HashSet<>();
+        for (K key : keys) {
+            String hostId = getHostId(key);
+            neighbourHosts.add(hostId);
+        }
+        return neighbourHosts;
+    }
+
+    @Override
     public void add(String host) {
         List<String> keys = bst.leafs();
         keys.add(host);

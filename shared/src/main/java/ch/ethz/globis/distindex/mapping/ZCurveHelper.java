@@ -6,6 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides useful helper methods for dealing the nearest neighbours.
+ *
+ */
 public class ZCurveHelper {
 
     public static List<long[]> getNeighbours(long[] query, long[] neighbor, int depth) {
@@ -19,15 +23,15 @@ public class ZCurveHelper {
         //find the prefix corresponding to the region that contains only the query point
         //the neighbour is contained in one of its neighbours
         int prefix = (int ) Math.ceil(StringUtils.getCommonPrefix(queryZ, neighZ).length() / dim);
-        List<long[]> neighbours = getValidNeighbours(query, 2, depth - prefix);
+        List<long[]> neighbours = getProjectionsWithinHops(query, 2, depth - prefix);
         return neighbours;
     }
 
-    public static List<long[]> getNeighbours(long[] query, long[] neighbor) {
+    public static List<long[]> getProjectedNeighbours(long[] query, long[] neighbor) {
         return getNeighbours(query, neighbor, 64);
     }
 
-    private static List<long[]> getValidNeighbours(long[] query, int hops, int size) {
+    private static List<long[]> getProjectionsWithinHops(long[] query, int hops, int size) {
         int dim = query.length;
         List<String> offsetPermutations = generatePermutations(2 * hops, dim);
 
