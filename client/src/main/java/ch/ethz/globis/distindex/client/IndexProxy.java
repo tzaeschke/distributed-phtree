@@ -10,7 +10,6 @@ import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -134,7 +133,13 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     public IndexIterator<K, V> iterator() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
-        return new DistributedIndexIterator<>(this, keyMapping);
+        return new DistIndexIterator<>(this, keyMapping);
+    }
+
+    public IndexIterator<K, V> query(K start, K end) {
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+
+        return new DistIndexIterator<>(this, keyMapping, start, end);
     }
 
     public int size() {
@@ -186,12 +191,6 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             }
         }
         return depth;
-    }
-
-    public IndexIterator<K, V> query(K start, K end) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-
-        return new DistributedIndexRangedIterator<>(this, keyMapping, start, end);
     }
 
     protected List<K> combineKeys(List<ResultResponse<K, V>> responses) {

@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.client.DistributedIndexIterator;
+import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.util.MultidimUtil;
@@ -110,7 +110,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
             phTree.put(entry.getKey(), entry.getValue());
         }
 
-        DistributedIndexIterator<long[], String> it = (DistributedIndexIterator<long[], String>) phTree.iterator();
+        IndexIterator<long[], String> it = phTree.iterator();
 
         IndexEntryList<long[], String> received = new IndexEntryList<>();
         while (it.hasNext()) {
