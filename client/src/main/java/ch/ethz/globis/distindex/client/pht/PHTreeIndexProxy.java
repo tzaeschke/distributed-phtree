@@ -82,7 +82,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         if (candidates.size() < k) {
             return iterativeExpansion(keyMapping, key, k);
         }
-        return radiusSearch(key, k, candidates);
+        //return radiusSearch(key, k, candidates);
+        return radiusSearchUsingRange(key, k, candidates);
     }
 
     /**
@@ -163,6 +164,33 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         Request request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(neighbourHosts, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
+    }
+
+    private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
+        KeyMapping<long[]> keyMapping = clusterService.getMapping();
+
+        long[] farthestNeighbor = candidates.get(k - 1);
+        long distance = computeDistance(key, farthestNeighbor);
+        long[] start = transpose(key, -distance);
+        long[] end = transpose(key, distance);
+        List<long[]> expandedCandidates = combineKeys(getRange(start, end));
+        return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
+    }
+
+    private long computeDistance(long[] a, long[] b) {
+        long dist = 0;
+        for (int i = 0; i < a.length; i++) {
+            dist += (a[i] - b[i]) * (a[i] - b[i]);
+        }
+        return (long) Math.sqrt(dist) + 1;
+    }
+
+    private long[] transpose(long[] a, long offset) {
+        long[] result = Arrays.copyOf(a, a.length);
+        for (int i = 0; i < a.length; i++) {
+            result[i] += offset;
+        }
+        return result;
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {

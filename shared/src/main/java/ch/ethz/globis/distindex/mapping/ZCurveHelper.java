@@ -13,16 +13,8 @@ import java.util.List;
 public class ZCurveHelper {
 
     public static List<long[]> getNeighbours(long[] query, long[] neighbor, int depth) {
-        int dim = query.length;
-        if (dim != neighbor.length) {
-            throw new IllegalArgumentException("The points must have the same dimensionality");
-        }
-        String queryZ = getZRepresentation(query);
-        String neighZ = getZRepresentation(neighbor);
+        int prefix = getCommonPrefix(query, neighbor);
 
-        //find the prefix corresponding to the region that contains only the query point
-        //the neighbour is contained in one of its neighbours
-        int prefix = (int ) Math.ceil(StringUtils.getCommonPrefix(queryZ, neighZ).length() / dim);
         List<long[]> neighbours = getProjectionsWithinHops(query, 2, depth - prefix);
         return neighbours;
     }
@@ -60,6 +52,46 @@ public class ZCurveHelper {
         return neighbours;
     }
 
+    /**
+     * Return the number of common prefix bits between the bits of the multi-dimensional point a and the
+     * multi-dimensional point b.
+     *
+     * Is it the same as the number of common prefix bits of the bit interleavings of a and b, divided by the
+     * dimension.
+     * @param a
+     * @param b
+     * @return
+     */
+    public static int getCommonPrefix(long[] a, long[] b) {
+        int dim = a.length;
+        if (dim != b.length) {
+            throw new IllegalArgumentException("The points must have the same dimensionality");
+        }
+
+        String queryZ = getZRepresentation(a);
+        String neighZ = getZRepresentation(b);
+
+        //find the prefix corresponding to the region that contains only the query point
+        //the neighbour is contained in one of its neighbours
+        int prefix = (int ) Math.ceil(StringUtils.getCommonPrefix(queryZ, neighZ).length() / dim);
+        return prefix;
+    }
+
+    public static List<String> getHostsInRange(KeyMapping<long[]> keyMapping, long[] start, long[] end) {
+        int prefix = getCommonPrefix(start, end);
+        //keyMapping.getDepth();
+        return null;
+    }
+
+    private static String getZRepresentation(long[] point) {
+        long[] mergedBits = BitTools.mergeLong(64, point);
+        String bitString = "";
+        for (long value : mergedBits) {
+            bitString += longToString(value);
+        }
+        return bitString;
+    }
+
     public static boolean willAdditionOverflow(long left, long right) {
         if (right < 0 && right != Long.MIN_VALUE) {
             return willSubtractionOverflow(left, -right);
@@ -90,15 +122,6 @@ public class ZCurveHelper {
                 generatePermutation(length - 1, partial + i, hops, permutations);
             }
         }
-    }
-
-    private static String getZRepresentation(long[] point) {
-        long[] mergedBits = BitTools.mergeLong(64, point);
-        String bitString = "";
-        for (long value : mergedBits) {
-            bitString += longToString(value);
-        }
-        return bitString;
     }
 
     private static String longToString(long l) {

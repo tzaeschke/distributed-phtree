@@ -51,6 +51,21 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public List<String> getHostIds(String prefix) {
+        int prefixLength = prefix.length();
+        BSTNode<K> current = bst.getRoot();
+        int i = 0;
+        while (current != null && i < prefixLength) {
+            char bit = prefix.charAt(i++);
+            current = (bit == '0') ? current.getLeft() : current.getRight();
+        }
+        if (current == null) {
+            return new ArrayList<>();
+        }
+        return bst.getHosts(current);
+    }
+
+    @Override
     public List<String> getHostIds() {
         if (bst == null) {
             return new ArrayList<>();

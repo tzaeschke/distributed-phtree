@@ -11,7 +11,6 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
@@ -216,6 +215,14 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             }
         }
         return depth;
+    }
+
+    protected List<K> combineKeys(IndexEntryList<K, V> entries) {
+        List<K> results = new ArrayList<>();
+        for (IndexEntry<K, V> entry : entries) {
+            results.add(entry.getKey());
+        }
+        return results;
     }
 
     protected List<K> combineKeys(List<ResultResponse<K, V>> responses) {
