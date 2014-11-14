@@ -46,6 +46,24 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
     }
 
     /**
+     * Decode a contains request from the client.
+     *
+     * @param buffer                    The ByteBuffer containing bytes sent by the client.
+     *                                  The request type has already been read.
+     * @return                          The key for which the contains operation has to be executed.
+     */
+    @Override
+    public ContainsRequest<K> decodeContains(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
+        K key = decodeKey(buffer);
+        assert !buffer.hasRemaining();
+        return new ContainsRequest<>(requestId, opCode, indexName, key);
+    }
+
+    /**
      * Decode a put request from the client.
      * @param buffer                    The ByteBuffer containing bytes sent by the client.
      *                                  The request type has already been read.

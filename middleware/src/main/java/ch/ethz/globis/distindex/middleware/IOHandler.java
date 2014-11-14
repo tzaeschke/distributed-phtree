@@ -69,6 +69,9 @@ public class IOHandler<K, V> {
                 case OpCode.CLOSE_ITERATOR:
                     response = handleCloseIterator(clientHost, buffer);
                     break;
+                case OpCode.CONTAINS:
+                    response = handleContains(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -77,6 +80,13 @@ public class IOHandler<K, V> {
             response = handleErroneousRequest(buffer);
         }
         return response;
+    }
+
+    private ByteBuffer handleContains(ByteBuffer buffer) {
+        ContainsRequest<K> request = decoder.decodeContains(buffer);
+        IntegerResponse response = requestHandler.handleContains(request);
+        byte[] responseBytes = encoder.encode(response);
+        return ByteBuffer.wrap(responseBytes);
     }
 
     private ByteBuffer handleCloseIterator(String clientHost, ByteBuffer buffer) {

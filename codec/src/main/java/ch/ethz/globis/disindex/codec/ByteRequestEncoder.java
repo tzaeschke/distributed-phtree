@@ -69,10 +69,27 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 MapRequest mr = (MapRequest) request;
                 encodedRequest = encodeMap(mr);
                 break;
+            case OpCode.CONTAINS:
+                ContainsRequest<K> contr = (ContainsRequest<K>) request;
+                encodedRequest = encodeContains(contr);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown command type");
         }
         return encodedRequest;
+    }
+
+    private byte[] encodeContains(ContainsRequest<K> request) {
+        K key = request.getKey();
+        byte[] keyBytes = keyEncoder.encode(key);
+
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                + request.metadataSize();   // metadata
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
+        return buffer.array();
     }
 
     public byte[] encodePut(PutRequest<K, V> request) {

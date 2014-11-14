@@ -29,4 +29,6 @@ public interface RequestHandler<K, V> {
     public IntegerResponse handleCloseIterator(String clientHost, MapRequest request);
 
     public void cleanup(String clientHost);
+
+    public IntegerResponse handleContains(ContainsRequest<K> request);
 }

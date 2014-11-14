@@ -16,6 +16,8 @@ public interface RequestDecoder<K, V> {
 
     public GetRequest<K> decodeGet(ByteBuffer buffer);
 
+    public ContainsRequest<K> decodeContains(ByteBuffer buffer);
+
     public PutRequest<K, V> decodePut(ByteBuffer buffer);
 
     public GetRangeRequest<K> decodeGetRange(ByteBuffer buffer);

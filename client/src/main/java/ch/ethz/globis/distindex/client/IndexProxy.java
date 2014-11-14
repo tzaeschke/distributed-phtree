@@ -11,6 +11,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
@@ -81,8 +82,12 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     @Override
     public boolean contains(K key) {
-        //ToDo use the ph-tree implementation
-        return get(key) != null;
+        KeyMapping<K> keyMapping = clusterService.getMapping();
+        String hostId = keyMapping.getHostId(key);
+        ContainsRequest<K> request = Requests.newContains(key);
+        SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
+        check(request, response);
+        return ((int) response.getContent() == 1);
     }
 
     @Override

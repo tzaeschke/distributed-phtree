@@ -13,5 +13,6 @@ public class OpCode {
     public static final byte GET_DIM = 25;
     public static final byte GET_DEPTH = 26;
     public static final byte CLOSE_ITERATOR = 27;
+    public static final byte CONTAINS = 28;
 
 }

@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
+import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
@@ -10,6 +11,7 @@ import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
 import ch.ethz.globis.pht.v3.PhTree3;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.util.*;
 
@@ -39,6 +41,14 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         byte[] value = tree.get(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
+    }
+
+    @Override
+    public IntegerResponse handleContains(ContainsRequest<long[]> request) {
+        long[] key = request.getKey();
+        boolean contains = tree.contains(key);
+        int content = contains ? 1 : 0;
+        return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, content);
     }
 
     @Override

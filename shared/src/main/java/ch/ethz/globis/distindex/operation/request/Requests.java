@@ -60,4 +60,8 @@ public class Requests {
     private static int nextId() {
         return ID.incrementAndGet();
     }
+
+    public static <K> ContainsRequest<K> newContains(K key) {
+        return new ContainsRequest<>(nextId(), OpCode.CONTAINS, "", key);
+    }
 }
