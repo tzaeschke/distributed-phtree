@@ -4,7 +4,7 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 import java.io.Closeable;
 import java.io.IOException;

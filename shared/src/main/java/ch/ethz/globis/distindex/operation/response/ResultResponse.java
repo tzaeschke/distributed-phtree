@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.response;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;

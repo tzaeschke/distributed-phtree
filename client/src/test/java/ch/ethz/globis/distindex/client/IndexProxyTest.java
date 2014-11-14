@@ -9,6 +9,8 @@ import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.NonDistributedMapping;
 import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;

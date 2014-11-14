@@ -2,7 +2,7 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
 import com.google.common.base.Splitter;
 
 import java.nio.ByteBuffer;
@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Decodes request messages from the client.
  *
- * The value is not decode on the server side and is inserted in the tree as is.
+ * The value is not decodeResult on the server side and is inserted in the tree as is.
  *
  * @param <K>                   The type of the key.
  */

@@ -2,7 +2,9 @@ package ch.ethz.globis.distindex.client.io;
 
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,12 +24,12 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
     private Transport transport;
 
     /** Encodes requests into a form that can be sent over the transport to the server. */
-    protected RequestEncoder<K, V> encoder;
+    protected RequestEncoder encoder;
 
     /** Decodes the messages received from the server to Response objects. */
     protected ResponseDecoder<K, V> decoder;
 
-    public ClientRequestDispatcher(Transport transport, RequestEncoder<K, V> encoder, ResponseDecoder<K, V> decoder) {
+    public ClientRequestDispatcher(Transport transport, RequestEncoder encoder, ResponseDecoder<K, V> decoder) {
         this.transport = transport;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -45,9 +47,9 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      */
     @Override
     public ResultResponse<K, V> send(String hostId, Request request) {
-        byte[] requestBytes = encode(request);
+        byte[] requestBytes = encoder.encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
-        return decoder.decode(responseBytes);
+        return decoder.decodeResult(responseBytes);
     }
 
     /**
@@ -60,78 +62,31 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
      */
     @Override
     public List<ResultResponse<K, V>> send(Collection<String> hostIds, Request request) {
-        byte[] requestBytes = encode(request);
+        byte[] requestBytes = encoder.encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<ResultResponse<K, V>> responses = new ArrayList<>();
         for (byte[] responseBytes : responseList) {
-            responses.add(decoder.decode(responseBytes));
+            responses.add(decoder.decodeResult(responseBytes));
         }
         return responses;
     }
 
     @Override
     public SimpleResponse sendSimple(String hostId, Request request) {
-        byte[] requestBytes = encode(request);
+        byte[] requestBytes = encoder.encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
         return decoder.decodeInteger(responseBytes);
     }
 
     @Override
     public List<SimpleResponse> sendSimple(Collection<String> hostIds, Request request) {
-        byte[] requestBytes = encode(request);
+        byte[] requestBytes = encoder.encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
         List<SimpleResponse> responses = new ArrayList<>();
         for (byte[] responseBytes : responseList) {
             responses.add(decoder.decodeInteger(responseBytes));
         }
         return responses;
-    }
-
-    private byte[] encode(Request request) {
-        byte[] encodedRequest;
-        switch (request.getOpCode()) {
-            case OpCode.GET:
-                GetRequest<K> gr = (GetRequest<K>) request;
-                encodedRequest = encoder.encodeGet(gr);
-                break;
-            case OpCode.GET_RANGE:
-                GetRangeRequest<K> grr = (GetRangeRequest<K>) request;
-                encodedRequest = encoder.encodeGetRange(grr);
-                break;
-            case OpCode.GET_KNN:
-                GetKNNRequest<K> gknn = (GetKNNRequest<K>) request;
-                encodedRequest = encoder.encodeGetKNN(gknn);
-                break;
-            case OpCode.GET_BATCH:
-                GetIteratorBatchRequest gb = (GetIteratorBatchRequest) request;
-                encodedRequest = encoder.encodeGetBatch(gb);
-                break;
-            case OpCode.PUT:
-                PutRequest<K, V> p = (PutRequest<K, V>) request;
-                encodedRequest = encoder.encodePut(p);
-                break;
-            case OpCode.CREATE_INDEX:
-                CreateRequest cr = (CreateRequest) request;
-                encodedRequest = encoder.encodeCreate(cr);
-                break;
-            case OpCode.DELETE:
-                DeleteRequest dr = (DeleteRequest) request;
-                encodedRequest = encoder.encodeDelete(dr);
-                break;
-            case OpCode.GET_DEPTH:
-            case OpCode.GET_DIM:
-            case OpCode.GET_SIZE:
-                BaseRequest br = (BaseRequest) request;
-                encodedRequest = encoder.encodeBase(br);
-                break;
-            case OpCode.CLOSE_ITERATOR:
-                MapRequest mr = (MapRequest) request;
-                encodedRequest = encoder.encodeMap(mr);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown command type");
-        }
-        return encodedRequest;
     }
 
     @Override

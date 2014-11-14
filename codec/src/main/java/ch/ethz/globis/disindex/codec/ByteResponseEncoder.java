@@ -5,8 +5,8 @@ import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.operation.IntegerResponse;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -1,7 +1,8 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import ch.ethz.globis.distindex.operation.IntegerResponse;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 /**
  * Contains operations corresponding to decoding responses send by the middleware node to the client library.
@@ -13,7 +14,7 @@ import ch.ethz.globis.distindex.operation.ResultResponse;
  */
 public interface ResponseDecoder<K, V> {
 
-    public ResultResponse<K, V> decode(byte[] payload);
+    public ResultResponse<K, V> decodeResult(byte[] payload);
 
     public IntegerResponse decodeInteger(byte[] payload);
 }

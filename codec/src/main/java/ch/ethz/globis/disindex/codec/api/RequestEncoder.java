@@ -1,6 +1,6 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
 
 /**
  * Contains operations corresponding to encoding requests send by the client library
@@ -8,26 +8,8 @@ import ch.ethz.globis.distindex.operation.*;
  *
  * The request parameters are encoded as byte arrays.
  *
- * @param <K>                       The type of key.
- * @param <V>                       The type of value.
  */
-public interface RequestEncoder<K, V> {
+public interface RequestEncoder {
 
-    public byte[] encodePut(PutRequest<K, V> request);
-
-    public byte[] encodeGet(GetRequest<K> request);
-
-    public byte[] encodeGetRange(GetRangeRequest<K> request);
-
-    public byte[] encodeGetKNN(GetKNNRequest<K> request);
-
-    public byte[] encodeGetBatch(GetIteratorBatchRequest<K> request);
-
-    public byte[] encodeCreate(CreateRequest request);
-
-    public byte[] encodeDelete(DeleteRequest<K> dr);
-
-    public byte[] encodeBase(BaseRequest br);
-
-    public byte[] encodeMap(MapRequest sr);
+    public byte[] encode(Request request);
 }

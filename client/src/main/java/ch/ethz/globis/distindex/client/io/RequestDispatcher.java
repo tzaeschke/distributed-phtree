@@ -1,9 +1,8 @@
 package ch.ethz.globis.distindex.client.io;
 
-import ch.ethz.globis.distindex.operation.BaseRequest;
-import ch.ethz.globis.distindex.operation.Request;
-import ch.ethz.globis.distindex.operation.ResultResponse;
-import ch.ethz.globis.distindex.operation.SimpleResponse;
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 
 import java.io.Closeable;
 import java.util.Collection;

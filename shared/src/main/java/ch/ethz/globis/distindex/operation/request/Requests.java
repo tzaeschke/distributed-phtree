@@ -1,4 +1,7 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.request;
+
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.request.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

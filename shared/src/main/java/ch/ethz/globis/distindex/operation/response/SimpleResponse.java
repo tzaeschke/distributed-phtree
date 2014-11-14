@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.response;
 
 /**
  * Consists of a single object

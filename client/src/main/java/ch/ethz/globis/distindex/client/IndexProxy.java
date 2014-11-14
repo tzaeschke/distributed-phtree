@@ -9,6 +9,10 @@ import ch.ethz.globis.distindex.client.exception.ServerErrorException;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 
 import java.io.Closeable;

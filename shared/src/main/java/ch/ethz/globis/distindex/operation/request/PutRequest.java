@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.request;
 
 public class PutRequest<K, V> extends BaseRequest {
 

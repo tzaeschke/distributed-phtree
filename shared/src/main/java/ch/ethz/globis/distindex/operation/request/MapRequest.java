@@ -1,4 +1,6 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.request;
+
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
 
 import java.util.HashMap;
 import java.util.Map;

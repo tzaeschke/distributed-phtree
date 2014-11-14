@@ -4,8 +4,9 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.operation.IntegerResponse;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 import java.nio.ByteBuffer;
 
@@ -62,7 +63,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
     }
 
     @Override
-    public ResultResponse<K, V> decode(byte[] payload) {
+    public ResultResponse<K, V> decodeResult(byte[] payload) {
         return decode(ByteBuffer.wrap(payload));
     }
 

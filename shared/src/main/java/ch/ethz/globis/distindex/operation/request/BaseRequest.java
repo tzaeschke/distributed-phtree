@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.operation;
+package ch.ethz.globis.distindex.operation.request;
 
 /**
  * Models a request sent from the client library to one of the remote nodes.

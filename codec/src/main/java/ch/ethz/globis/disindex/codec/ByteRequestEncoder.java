@@ -2,11 +2,10 @@ package ch.ethz.globis.disindex.codec;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.request.*;
 import com.google.common.base.Joiner;
 
-import javax.jdo.annotations.Join;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -15,7 +14,7 @@ import java.nio.ByteBuffer;
  * @param <K>                   The type of the key.
  * @param <V>                   The type of the value.
  */
-public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
+public class ByteRequestEncoder<K, V> implements RequestEncoder {
 
     private FieldEncoder<K> keyEncoder;
     private FieldEncoder<V> valueEncoder;
@@ -25,6 +24,55 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
     public ByteRequestEncoder(FieldEncoder<K> keyEncoder, FieldEncoder<V> valueEncoder) {
         this.keyEncoder = keyEncoder;
         this.valueEncoder = valueEncoder;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public byte[] encode(Request request) {
+        byte[] encodedRequest;
+        switch (request.getOpCode()) {
+            case OpCode.GET:
+                GetRequest<K> gr = (GetRequest<K>) request;
+                encodedRequest = encodeGet(gr);
+                break;
+            case OpCode.GET_RANGE:
+                GetRangeRequest<K> grr = (GetRangeRequest<K>) request;
+                encodedRequest = encodeGetRange(grr);
+                break;
+            case OpCode.GET_KNN:
+                GetKNNRequest<K> gknn = (GetKNNRequest<K>) request;
+                encodedRequest = encodeGetKNN(gknn);
+                break;
+            case OpCode.GET_BATCH:
+                GetIteratorBatchRequest gb = (GetIteratorBatchRequest) request;
+                encodedRequest = encodeGetBatch(gb);
+                break;
+            case OpCode.PUT:
+                PutRequest<K, V> p = (PutRequest<K, V>) request;
+                encodedRequest = encodePut(p);
+                break;
+            case OpCode.CREATE_INDEX:
+                CreateRequest cr = (CreateRequest) request;
+                encodedRequest = encodeCreate(cr);
+                break;
+            case OpCode.DELETE:
+                DeleteRequest dr = (DeleteRequest) request;
+                encodedRequest = encodeDelete(dr);
+                break;
+            case OpCode.GET_DEPTH:
+            case OpCode.GET_DIM:
+            case OpCode.GET_SIZE:
+                BaseRequest br = (BaseRequest) request;
+                encodedRequest = encodeBase(br);
+                break;
+            case OpCode.CLOSE_ITERATOR:
+                MapRequest mr = (MapRequest) request;
+                encodedRequest = encodeMap(mr);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown command type");
+        }
+        return encodedRequest;
     }
 
     public byte[] encodePut(PutRequest<K, V> request) {
@@ -44,7 +92,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeGet(GetRequest<K> request) {
         K key = request.getKey();
         byte[] keyBytes = keyEncoder.encode(key);
@@ -58,7 +105,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeGetRange(GetRangeRequest<K> request) {
         K start = request.getStart();
         K end = request.getEnd();
@@ -77,7 +123,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeGetKNN(GetKNNRequest<K> request) {
         K key = request.getKey();
         int k = request.getK();
@@ -94,7 +139,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeGetBatch(GetIteratorBatchRequest<K> request) {
         String iteratorId = request.getIteratorId();
 
@@ -127,7 +171,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeCreate(CreateRequest request) {
         int dim = request.getDim();
         int depth = request.getDepth();
@@ -140,7 +183,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeDelete(DeleteRequest<K> request) {
         K key = request.getKey();
         byte[] keyBytes = keyEncoder.encode(key);
@@ -154,7 +196,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeBase(BaseRequest request) {
         int outputSize = request.metadataSize();
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
@@ -162,7 +203,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         return buffer.array();
     }
 
-    @Override
     public byte[] encodeMap(MapRequest request) {
         String mapString = joiner.join(request.getContents());
         int outputSize = 4
@@ -214,5 +254,4 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder<K, V> {
         buffer.put(data);
         return buffer;
     }
-
 }

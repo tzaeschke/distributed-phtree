@@ -15,10 +15,10 @@ import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
-import ch.ethz.globis.distindex.operation.GetKNNRequest;
-import ch.ethz.globis.distindex.operation.Request;
-import ch.ethz.globis.distindex.operation.Requests;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
@@ -52,7 +52,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private RequestDispatcher<long[], V> setupDispatcher() {
         FieldEncoderDecoder<long[]> keyEncoder = new MultiLongEncoderDecoder();
         FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>();
-        RequestEncoder<long[], V> encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
+        RequestEncoder encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
         ResponseDecoder<long[], V> decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
         Transport transport = new TCPClient();
 

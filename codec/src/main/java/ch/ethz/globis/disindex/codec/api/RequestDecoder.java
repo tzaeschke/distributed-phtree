@@ -1,6 +1,6 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.request.*;
 
 import java.nio.ByteBuffer;
 

@@ -11,7 +11,7 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -42,7 +42,7 @@ public class ResponseEncodeDecodeTest {
 
         byte[] encodedResponse = encoder.encode(response);
 
-        ResultResponse<long[], String> decodedResponse = decoder.decode(encodedResponse);
+        ResultResponse<long[], String> decodedResponse = decoder.decodeResult(encodedResponse);
         assertEqualsMeta(response, decodedResponse);
         assertEqualsResults(response.getEntries(), decodedResponse.getEntries(), valueCodec);
     }
