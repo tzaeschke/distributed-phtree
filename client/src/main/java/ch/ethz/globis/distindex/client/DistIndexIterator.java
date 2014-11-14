@@ -140,4 +140,8 @@ public class DistIndexIterator<K, V> implements IndexIterator<K, V>, Closeable, 
         indexProxy.closeIterator(currentHostId, iteratorId);
         entryBuffer = null;
     }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
 }
