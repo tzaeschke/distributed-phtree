@@ -166,6 +166,17 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 
+    /**
+     * Perform a radius search to check if there are any neighbours nearer to the query point than the
+     * neighbours found on the query host server.
+     *
+     * This is done using a radius search.
+     *
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @param candidates                The nearest neighbours on the query point's host server.
+     * @return                          The k nearest neighbour points.
+     */
     private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
 
