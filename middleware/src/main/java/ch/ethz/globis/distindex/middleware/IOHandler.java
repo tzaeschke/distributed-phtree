@@ -26,7 +26,11 @@ public class IOHandler<K, V> {
         this.encoder = encoder;
     }
 
-    public ByteBuffer handle(ByteBuffer buffer) {
+    public void cleanup(String clientHost) {
+        requestHandler.cleanup(clientHost);
+    }
+
+    public ByteBuffer handle(String clientHost, ByteBuffer buffer) {
         byte messageCode = getMessageCode(buffer);
 
         ByteBuffer response;
@@ -42,7 +46,7 @@ public class IOHandler<K, V> {
                     response = handleGetRangeRequest(buffer);
                     break;
                 case OpCode.GET_BATCH:
-                    response = handleGetBatchRequest(buffer);
+                    response = handleGetBatchRequest(clientHost, buffer);
                     break;
                 case OpCode.PUT:
                     response = handlePutRequest(buffer);
@@ -63,7 +67,7 @@ public class IOHandler<K, V> {
                     response = handleGetDepthRequest(buffer);
                     break;
                 case OpCode.CLOSE_ITERATOR:
-                    response = handleCloseIterator(buffer);
+                    response = handleCloseIterator(clientHost, buffer);
                     break;
                 default:
                     response = handleErroneousRequest(buffer);
@@ -75,9 +79,9 @@ public class IOHandler<K, V> {
         return response;
     }
 
-    private ByteBuffer handleCloseIterator(ByteBuffer buffer) {
+    private ByteBuffer handleCloseIterator(String clientHost, ByteBuffer buffer) {
         MapRequest request = decoder.decodeMap(buffer);
-        IntegerResponse response = requestHandler.handleCloseIterator(request);
+        IntegerResponse response = requestHandler.handleCloseIterator(clientHost, request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }
@@ -110,9 +114,9 @@ public class IOHandler<K, V> {
         return ByteBuffer.wrap(responseBytes);
     }
 
-    private ByteBuffer handleGetBatchRequest(ByteBuffer buf) {
+    private ByteBuffer handleGetBatchRequest(String clientHost, ByteBuffer buf) {
         GetIteratorBatchRequest<K> request = decoder.decodeGetBatch(buf);
-        ResultResponse<K, V> response = requestHandler.handleGetIteratorBatch(request);
+        ResultResponse<K, V> response = requestHandler.handleGetIteratorBatch(clientHost, request);
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }

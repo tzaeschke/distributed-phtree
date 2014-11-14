@@ -34,7 +34,8 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
-        ByteBuffer response = ioHandler.handle(buf.nioBuffer());
+        String clientHost = ctx.channel().remoteAddress().toString();
+        ByteBuffer response = ioHandler.handle(clientHost, buf.nioBuffer());
         ByteBuf nettyBuf = Unpooled.wrappedBuffer(response);
         ByteBuf sizeBuf = Unpooled.copyInt(nettyBuf.readableBytes());
 
@@ -42,5 +43,21 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
         ctx.write(nettyBuf);
         ctx.flush();
         buf.release();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        String clientHost = ctx.channel().remoteAddress().toString();
+        LOG.info("Client " + clientHost + " disconnected.");
+        ioHandler.cleanup(clientHost);
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        String clientHost = ctx.channel().remoteAddress().toString();
+        LOG.info("Client " + clientHost + " disconnected.");
+        ioHandler.cleanup(clientHost);
+        super.exceptionCaught(ctx, cause);
     }
 }

@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
@@ -11,16 +11,19 @@ import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
 import ch.ethz.globis.pht.v3.PhTree3;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
-    PhTreeV<byte[]> tree;
+    private PhTreeV<byte[]> tree;
 
-    private Map<String, PVIterator<byte[]>> iterators = new HashMap<>();
+    private Map<String, PVIterator<byte[]>> iterators;
+    private Map<String, Set<String>> clientIteratorMapping;
+
+    public PhTreeRequestHandler() {
+        iterators = new HashMap<>();
+        clientIteratorMapping = new HashMap<>();
+    }
 
     @Override
     public ResultResponse<long[], byte[]> handleCreate(CreateRequest request) {
@@ -57,7 +60,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleGetIteratorBatch(GetIteratorBatchRequest<long[]> request) {
+    public ResultResponse<long[], byte[]> handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<long[]> request) {
         String iteratorId = request.getIteratorId();
         int batchSize= request.getBatchSize();
 
@@ -86,11 +89,29 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         if (it.hasNext()) {
             iterators.put(iteratorId, it);
+            addIteratorForClient(clientHost, iteratorId);
         } else {
             iteratorId = "";
+            removeIteratorForClient(clientHost, iteratorId);
         }
 
         return createResponse(request, results, iteratorId);
+    }
+
+    private void addIteratorForClient(String clientHost, String iteratorId) {
+        Set<String> iteratorIds = clientIteratorMapping.get(clientHost);
+        if (iteratorIds == null) {
+            iteratorIds = new HashSet<>();
+        }
+        iteratorIds.add(iteratorId);
+        clientIteratorMapping.put(clientHost, iteratorIds);
+    }
+
+    private void removeIteratorForClient(String clientHost, String iteratorId) {
+        Set<String> iteratorIds = clientIteratorMapping.get(clientHost);
+        if (iteratorIds != null) {
+            iteratorIds.remove(iteratorId);
+        }
     }
 
     @Override
@@ -134,10 +155,21 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public IntegerResponse handleCloseIterator(MapRequest request) {
+    public IntegerResponse handleCloseIterator(String clientHost, MapRequest request) {
         String iteratorId = request.getParameter("iteratorId");
         iterators.remove(iteratorId);
+        removeIteratorForClient(clientHost, iteratorId);
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, 0);
+    }
+
+    @Override
+    public void cleanup(String clientHost) {
+        Set<String> iteratorIds = clientIteratorMapping.get(clientHost);
+        if (iteratorIds != null) {
+            for (String iteratorId : iteratorIds) {
+                removeIteratorForClient(clientHost, iteratorId);
+            }
+        }
     }
 
     private ResultResponse<long[], byte[]> createError(BaseRequest request) {

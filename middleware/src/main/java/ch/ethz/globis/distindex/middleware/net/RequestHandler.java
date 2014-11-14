@@ -14,7 +14,7 @@ public interface RequestHandler<K, V> {
 
     public ResultResponse<K, V> handleGetKNN(GetKNNRequest<K> request);
 
-    public ResultResponse<K, V> handleGetIteratorBatch(GetIteratorBatchRequest<K> request);
+    public ResultResponse<K, V> handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<K> request);
 
     public ResultResponse<K, V> handlePut(PutRequest<K, V> request);
 
@@ -26,5 +26,7 @@ public interface RequestHandler<K, V> {
 
     public IntegerResponse handleGetDepth(BaseRequest request);
 
-    public IntegerResponse handleCloseIterator(MapRequest request);
+    public IntegerResponse handleCloseIterator(String clientHost, MapRequest request);
+
+    public void cleanup(String clientHost);
 }

@@ -136,7 +136,9 @@ public class DistIndexIterator<K, V> implements IndexIterator<K, V> {
 
     @Override
     public void close() {
-        indexProxy.closeIterator(currentHostId, iteratorId, this);
+        if (currentHostId != null) {
+            indexProxy.closeIterator(currentHostId, iteratorId, this);
+        }
         entryBuffer = null;
     }
 

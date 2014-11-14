@@ -43,7 +43,9 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     /** A set of the current open iterators. The keys are the iterator ids*/
     private Set<IndexIterator<K, V>> openIterators;
 
-    protected IndexProxy() { }
+    protected IndexProxy() {
+        this.openIterators = new HashSet<>();
+    }
 
     public IndexProxy(RequestDispatcher<K, V> requestDispatcher,
                       ClusterService<K> clusterService) {
@@ -256,7 +258,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public void close() throws IOException {
         closeOpenIterators();
-        openIterators = null;
+        openIterators.clear();
         if (requestDispatcher != null) {
             requestDispatcher.close();
         }
