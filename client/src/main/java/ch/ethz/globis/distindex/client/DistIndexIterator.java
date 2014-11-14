@@ -6,7 +6,6 @@ import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -15,7 +14,7 @@ import java.io.IOException;
  * @param <K>                                   The class of the keys.
  * @param <V>                                   The class of the values.
  */
-public class DistIndexIterator<K, V> implements IndexIterator<K, V>, Closeable, AutoCloseable {
+public class DistIndexIterator<K, V> implements IndexIterator<K, V> {
 
     /** The index over which the iterator is running. */
     IndexProxy<K, V> indexProxy;
@@ -136,12 +135,13 @@ public class DistIndexIterator<K, V> implements IndexIterator<K, V>, Closeable, 
     }
 
     @Override
-    public void close() throws IOException {
-        indexProxy.closeIterator(currentHostId, iteratorId);
+    public void close() {
+        indexProxy.closeIterator(currentHostId, iteratorId, this);
         entryBuffer = null;
     }
 
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
+
 }

@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.api;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /**
@@ -8,5 +9,5 @@ import java.util.Iterator;
  * @param <K>                           The type of the index key.
  * @param <V>                           The type of the index value.
  */
-public interface IndexIterator<K, V> extends Iterator<IndexEntry<K, V>> {
+public interface IndexIterator<K, V> extends Iterator<IndexEntry<K, V>>, Closeable, AutoCloseable{
 }

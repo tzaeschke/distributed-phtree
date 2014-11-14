@@ -8,7 +8,8 @@ import ch.ethz.globis.distindex.client.exception.InvalidResponseException;
 import ch.ethz.globis.distindex.client.exception.ServerErrorException;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.operation.*;
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
@@ -18,7 +19,9 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Proxy class for working with a distributed, remote index.
@@ -37,12 +40,16 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     /** The cluster service. Handles information regarding the hosts. */
     protected ClusterService<K> clusterService;
 
+    /** A set of the current open iterators. The keys are the iterator ids*/
+    private Set<IndexIterator<K, V>> openIterators;
+
     protected IndexProxy() { }
 
     public IndexProxy(RequestDispatcher<K, V> requestDispatcher,
                       ClusterService<K> clusterService) {
         this.requestDispatcher = requestDispatcher;
         this.clusterService = clusterService;
+        this.openIterators = new HashSet<>();
     }
 
     public boolean create(int dim, int depth) {
@@ -126,24 +133,31 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return response;
     }
 
-    public void closeIterator(String hostId, String iteratorId) {
-        MapRequest request = Requests.newMap(OpCode.CLOSE_ITERATOR);
-        request.addParamater("iteratorId", iteratorId);
-        SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
-        check(request, response);
+    public void closeIterator(String hostId, String iteratorId, IndexIterator<K, V> it) {
+        try {
+            MapRequest request = Requests.newMap(OpCode.CLOSE_ITERATOR);
+            request.addParamater("iteratorId", iteratorId);
+            SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
+            check(request, response);
+        } finally {
+            openIterators.remove(it);
+        }
     }
 
     @Override
     public IndexIterator<K, V> iterator() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-
-        return new DistIndexIterator<>(this, keyMapping);
+        IndexIterator<K, V> it = new DistIndexIterator<>(this, keyMapping);
+        openIterators.add(it);
+        return it;
     }
 
     public IndexIterator<K, V> query(K start, K end) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
 
-        return new DistIndexIterator<>(this, keyMapping, start, end);
+        IndexIterator<K, V> it = new DistIndexIterator<>(this, keyMapping, start, end);
+        openIterators.add(it);
+        return it;
     }
 
     public int size() {
@@ -241,6 +255,8 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     @Override
     public void close() throws IOException {
+        closeOpenIterators();
+        openIterators = null;
         if (requestDispatcher != null) {
             requestDispatcher.close();
         }
@@ -249,4 +265,9 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         }
     }
 
+    private void closeOpenIterators() throws IOException {
+        for (IndexIterator<K, V> it : openIterators) {
+            it.close();
+        }
+    }
 }
