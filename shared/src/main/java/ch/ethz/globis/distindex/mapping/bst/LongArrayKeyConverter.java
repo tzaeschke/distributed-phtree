@@ -1,5 +1,7 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
+import ch.ethz.globis.distindex.mapping.ZCurveHelper;
+
 public class LongArrayKeyConverter implements KeyConverter<long[]> {
 
     private int bitWidth = 64;
@@ -20,6 +22,11 @@ public class LongArrayKeyConverter implements KeyConverter<long[]> {
             buffer += isBitSet(key, i) ? "1" : 0;
         }
         return buffer;
+    }
+
+    @Override
+    public String getBitPrefix(long[] start, long[] end) {
+        return ZCurveHelper.getCommonPrefix(start, end);
     }
 
     @Override

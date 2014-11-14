@@ -178,8 +178,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The k nearest neighbour points.
      */
     private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
-        KeyMapping<long[]> keyMapping = clusterService.getMapping();
-
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = computeDistance(key, farthestNeighbor);
         long[] start = transpose(key, -distance);

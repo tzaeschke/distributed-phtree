@@ -13,7 +13,7 @@ import java.util.List;
 public class ZCurveHelper {
 
     public static List<long[]> getNeighbours(long[] query, long[] neighbor, int depth) {
-        int prefix = getCommonPrefix(query, neighbor);
+        int prefix = getCommonPrefixLength(query, neighbor);
 
         List<long[]> neighbours = getProjectionsWithinHops(query, 2, depth - prefix);
         return neighbours;
@@ -62,7 +62,7 @@ public class ZCurveHelper {
      * @param b
      * @return
      */
-    public static int getCommonPrefix(long[] a, long[] b) {
+    public static int getCommonPrefixLength(long[] a, long[] b) {
         int dim = a.length;
         if (dim != b.length) {
             throw new IllegalArgumentException("The points must have the same dimensionality");
@@ -77,10 +77,16 @@ public class ZCurveHelper {
         return prefix;
     }
 
-    public static List<String> getHostsInRange(KeyMapping<long[]> keyMapping, long[] start, long[] end) {
-        int prefix = getCommonPrefix(start, end);
-        //keyMapping.getDepth();
-        return null;
+    public static String getCommonPrefix(long[] a, long[] b) {
+        int dim = a.length;
+        if (dim != b.length) {
+            throw new IllegalArgumentException("The points must have the same dimensionality");
+        }
+
+        String queryZ = getZRepresentation(a);
+        String neighZ = getZRepresentation(b);
+
+        return StringUtils.getCommonPrefix(queryZ, neighZ);
     }
 
     private static String getZRepresentation(long[] point) {

@@ -47,7 +47,8 @@ public class BSTMapping<K> implements KeyMapping<K> {
         if (bst == null) {
             return new ArrayList<>();
         }
-        return bst.leafs();
+        String prefix = converter.getBitPrefix(start, end);
+        return getHostIds(prefix);
     }
 
     @Override
@@ -55,12 +56,18 @@ public class BSTMapping<K> implements KeyMapping<K> {
         int prefixLength = prefix.length();
         BSTNode<K> current = bst.getRoot();
         int i = 0;
+        String lastHost = null;
         while (current != null && i < prefixLength) {
             char bit = prefix.charAt(i++);
+            lastHost = current.getContent();
             current = (bit == '0') ? current.getLeft() : current.getRight();
         }
         if (current == null) {
-            return new ArrayList<>();
+            List<String> results = new ArrayList<>();
+            if (results != null) {
+                results.add(lastHost);
+            }
+            return results;
         }
         return bst.getHosts(current);
     }
@@ -127,13 +134,13 @@ public class BSTMapping<K> implements KeyMapping<K> {
         bst = BST.fromArray(keys.toArray(new String[keys.size()]));
     }
 
-    private BSTNode find(K key) {
-        BSTNode current = bst.getRoot();
+    private BSTNode<K> find(K key) {
+        BSTNode<K> current = bst.getRoot();
         if (current == null) {
             return null;
         }
         int position = 0;
-        BSTNode previous = null;
+        BSTNode<K> previous = null;
         while (current != null) {
             previous = current;
             current = converter.isBitSet(key, position) ? current.getRight() : current.getLeft();

@@ -146,7 +146,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         expected.add(new IndexEntry<>(new long[] { 10L, 11L}, "foo"));
         expected.add(new IndexEntry<>(new long[] { 11L, 10L}, "foo"));
 
-        assertEquals(result.size(), expected.size());
+        assertEquals(expected.size(), result.size());
         for (int i = 0; i < result.size(); i++) {
             assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
             assertEquals(expected.get(i).getValue(), result.get(i).getValue());
