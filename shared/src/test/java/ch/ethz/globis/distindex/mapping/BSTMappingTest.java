@@ -5,6 +5,8 @@ import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,5 +31,32 @@ public class BSTMappingTest {
         }
         KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), keys);
         System.out.println(mapping.getHosts());
+    }
+
+    @Test
+    public void testRangeQuery() {
+        String[] hosts = { "one", "two", "three", "four" };
+        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
+        Map<String, String> directMapping = mapping.getHosts();
+        long[] start = {1, 1};
+        long[] end = {2, 2};
+        List<String> hostIds = mapping.getHostIds(start, end);
+        assertEqualsListVararg(hostIds, directMapping.get("00"));
+
+        start = new long[] {-1, -1};
+        end = new long[] {-5, -5};
+        hostIds = mapping.getHostIds(start, end);
+        assertEqualsListVararg(hostIds, directMapping.get("11"));
+
+        start = new long[] {-1, -1};
+        end = new long[] {5, 5};
+        hostIds = mapping.getHostIds(start, end);
+        assertEqualsListVararg(hostIds, directMapping.get("00"), directMapping.get("01"),
+                directMapping.get("10"), directMapping.get("11"));
+    }
+
+    private void assertEqualsListVararg(List<String> current, String... expected) {
+        List<String> expectedList = Arrays.asList(expected);
+        assertEquals(expectedList, current);
     }
 }

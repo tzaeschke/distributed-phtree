@@ -30,6 +30,12 @@ public class LongArrayKeyConverter implements KeyConverter<long[]> {
     }
 
     @Override
+    public String getBitRepresentation(long[] point, int prefix) {
+        String zRepr = ZCurveHelper.getZRepresentation(point);
+        return zRepr.substring(0, prefix);
+    }
+
+    @Override
     public boolean isBitSet(long[] key, int position) {
         int dimIndex = position % key.length;
         int bitIndex = bitWidth - 1 - position / key.length;

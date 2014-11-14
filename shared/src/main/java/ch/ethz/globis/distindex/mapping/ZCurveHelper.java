@@ -89,7 +89,7 @@ public class ZCurveHelper {
         return StringUtils.getCommonPrefix(queryZ, neighZ);
     }
 
-    private static String getZRepresentation(long[] point) {
+    public static String getZRepresentation(long[] point) {
         long[] mergedBits = BitTools.mergeLong(64, point);
         String bitString = "";
         for (long value : mergedBits) {

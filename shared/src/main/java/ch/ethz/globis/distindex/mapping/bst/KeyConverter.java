@@ -6,5 +6,7 @@ public interface KeyConverter<K> {
 
     public String getBitPrefix(K start, K end);
 
+    public String getBitRepresentation(long[] point, int prefix);
+
     public boolean isBitSet(K key, int position);
 }
