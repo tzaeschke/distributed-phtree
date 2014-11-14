@@ -1,4 +1,6 @@
-package ch.ethz.globis.distindex.mapping;
+package ch.ethz.globis.distindex.client;
+
+import ch.ethz.globis.distindex.mapping.KeyMapping;
 
 import java.util.*;
 

@@ -1,5 +1,8 @@
-package ch.ethz.globis.distindex.client.pht;
+package ch.ethz.globis.distindex;
 
+import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
+import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.pht.*;
 

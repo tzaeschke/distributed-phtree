@@ -1,8 +1,9 @@
-package ch.ethz.globis.distindex.orchestration;
+package ch.ethz.globis.distindex;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 
 public class SimpleClusterService implements ClusterService<long[]> {
 

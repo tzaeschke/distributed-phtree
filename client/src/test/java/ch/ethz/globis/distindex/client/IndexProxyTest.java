@@ -7,7 +7,6 @@ import ch.ethz.globis.distindex.client.exception.ServerErrorException;
 import ch.ethz.globis.distindex.client.io.ClientRequestDispatcher;
 import ch.ethz.globis.distindex.client.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.mapping.NonDistributedMapping;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
