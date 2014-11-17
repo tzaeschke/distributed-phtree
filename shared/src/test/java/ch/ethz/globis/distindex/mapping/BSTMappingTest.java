@@ -48,6 +48,16 @@ public class BSTMappingTest {
         hostIds = mapping.getHostIds(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("11"));
 
+        start = new long[] {-1, 1};
+        end = new long[] {-5, 5};
+        hostIds = mapping.getHostIds(start, end);
+        assertEqualsListVararg(hostIds, directMapping.get("10"));
+
+        start = new long[] {1, -1};
+        end = new long[] {5, -5};
+        hostIds = mapping.getHostIds(start, end);
+        assertEqualsListVararg(hostIds, directMapping.get("01"));
+
         start = new long[] {-1, -1};
         end = new long[] {5, 5};
         hostIds = mapping.getHostIds(start, end);
