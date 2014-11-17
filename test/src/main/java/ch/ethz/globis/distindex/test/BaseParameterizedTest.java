@@ -1,7 +1,8 @@
-package ch.ethz.globis.distindex;
+package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

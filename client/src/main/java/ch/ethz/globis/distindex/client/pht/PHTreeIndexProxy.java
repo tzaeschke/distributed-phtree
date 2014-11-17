@@ -36,6 +36,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private int depth = -1;
     private int dim = -1;
 
+    private boolean rangeKNN = false;
+
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
         this.requestDispatcher = setupDispatcher();
@@ -82,8 +84,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         if (candidates.size() < k) {
             return iterativeExpansion(keyMapping, key, k);
         }
-        //return radiusSearch(key, k, candidates);
-        return radiusSearchUsingRange(key, k, candidates);
+        return radiusSearch(key, k, candidates);
     }
 
     /**
@@ -155,6 +156,25 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The k nearest neighbour points.
      */
     private List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
+        if (rangeKNN) {
+            return radiusSearchUsingRange(key, k, candidates);
+        } else {
+            return radiusSearchUsingFurtherClosest(key, k, candidates);
+        }
+    }
+
+    /**
+     * Perform a radius search to check if there are any neighbours nearer to the query point than the
+     * neighbours found on the query host server.
+     *
+     * This is done by locating the furthest neighbour from the candidates.
+     *
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @param candidates                The nearest neighbours on the query point's host server.
+     * @return                          The k nearest neighbour points.
+     */
+    private List<long[]> radiusSearchUsingFurtherClosest(long[] key, int k, List<long[]> candidates) {
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
 
         long[] farthestNeighbor = candidates.get(k - 1);
@@ -204,6 +224,14 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
     private ClusterService<long[]> setupClusterService(String host, int port) {
         return new ZKClusterService(host + ":" + port);
+    }
+
+    public boolean isRangeKNN() {
+        return rangeKNN;
+    }
+
+    public void setRangeKNN(boolean rangeKNN) {
+        this.rangeKNN = rangeKNN;
     }
 
     public KeyMapping<long[]> getMapping() {

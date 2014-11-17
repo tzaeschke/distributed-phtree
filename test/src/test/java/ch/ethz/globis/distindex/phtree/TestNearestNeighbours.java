@@ -1,16 +1,16 @@
 package ch.ethz.globis.distindex.phtree;
 
-import ch.ethz.globis.distindex.BaseParameterizedTest;
+import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
-import ch.ethz.globis.distindex.SimplePhFactory;
+import ch.ethz.globis.distindex.test.SimplePhFactory;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.SimpleClusterService;
+import ch.ethz.globis.distindex.test.SimpleClusterService;
 import ch.ethz.globis.pht.*;
 import org.junit.Test;
 import org.junit.runners.Parameterized;

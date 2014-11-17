@@ -41,6 +41,7 @@
         <module>codec</module>
         <module>test</module>
         <module>shared</module>
+        <module>benchmark</module>
     </modules>
 
     <build>

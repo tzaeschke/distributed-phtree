@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex;
+package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHFactory;

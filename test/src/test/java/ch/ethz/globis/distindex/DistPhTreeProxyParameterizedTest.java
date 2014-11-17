@@ -5,6 +5,7 @@ import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
+import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
 import org.junit.After;

@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex;
+package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;

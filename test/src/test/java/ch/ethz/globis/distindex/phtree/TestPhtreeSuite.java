@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.phtree;
 
+import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
 import ch.ethz.globis.pht.test.util.TestSuite;
 import ch.ethz.globis.pht.test.util.TestUtil;
 import org.slf4j.Logger;

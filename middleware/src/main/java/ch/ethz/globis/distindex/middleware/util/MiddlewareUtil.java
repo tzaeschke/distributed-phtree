@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex;
+package ch.ethz.globis.distindex.middleware.util;
 
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 

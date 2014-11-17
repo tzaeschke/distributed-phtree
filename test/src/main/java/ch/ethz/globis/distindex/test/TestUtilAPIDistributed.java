@@ -1,9 +1,9 @@
-package ch.ethz.globis.distindex.phtree;
+package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
-import ch.ethz.globis.distindex.MiddlewareUtil;
+import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeV;
 import ch.ethz.globis.pht.PhTreeVProxy;
