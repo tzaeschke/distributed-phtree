@@ -38,17 +38,26 @@ public class PhTreeBenchmark {
         private static final String ZK_HOST = "localhost";
         private static final int ZK_PORT = 2181;
         private static final int S_BASE_PORT = 7070;
-        static final int NUMBER_OF_SERVERS = 16;
+        static final int NUMBER_OF_SERVERS = 4;
 
         private static ExecutorService threadPool;
         private static TestingServer zkServer;
         private static List<Middleware> middlewares = new ArrayList<Middleware>();
 
-        static {
-            init();
+        @Setup
+        public void init() {
+            setupCluster();
             indexProxy = setupIndex();
-            indexProxy.setRangeKNN(true);
             insert();
+        }
+
+        @TearDown
+        public void close() throws IOException {
+            for (Middleware middleware : middlewares) {
+                middleware.close();
+            }
+            threadPool.shutdownNow();
+            zkServer.close();
         }
 
         private static PHTreeIndexProxy<Object> setupIndex() {
@@ -65,7 +74,7 @@ public class PhTreeBenchmark {
             }
         }
 
-        public static void init() {
+        public static void setupCluster() {
             try {
                 threadPool = Executors.newFixedThreadPool(NUMBER_OF_SERVERS * 2);
                 zkServer = new TestingServer(ZK_PORT);
@@ -89,6 +98,7 @@ public class PhTreeBenchmark {
     @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
     @Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.NANOSECONDS)
     public Object defaultBenchmark(BenchmarkState state) {
+        state.indexProxy.setRangeKNN(false);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
