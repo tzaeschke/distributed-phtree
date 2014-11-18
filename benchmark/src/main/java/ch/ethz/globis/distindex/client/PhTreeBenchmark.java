@@ -96,9 +96,18 @@ public class PhTreeBenchmark {
     @Benchmark
     @BenchmarkMode({Mode.Throughput})
     @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    @Measurement(iterations = 10, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    public Object defaultBenchmark(BenchmarkState state) {
+    @Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
+    public Object benchmarkNonRange(BenchmarkState state) {
         state.indexProxy.setRangeKNN(false);
+        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
+    }
+
+    @Benchmark
+    @BenchmarkMode({Mode.Throughput})
+    @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
+    @Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
+    public Object benchmarkRange(BenchmarkState state) {
+        state.indexProxy.setRangeKNN(true);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
