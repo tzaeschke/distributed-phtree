@@ -202,9 +202,20 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         long distance = computeDistance(key, farthestNeighbor);
         long[] start = transpose(key, -distance);
         long[] end = transpose(key, distance);
-        List<long[]> expandedCandidates = combineKeys(getRange(start, end));
+        List<String> hostIds = clusterService.getMapping().getHostIds(start, end);
+        List<long[]> expandedCandidates = getNearestNeighbors(hostIds, key, k);
         return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
     }
+
+//    private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
+//        long[] farthestNeighbor = candidates.get(k - 1);
+//        long distance = computeDistance(key, farthestNeighbor);
+//        long[] start = transpose(key, -distance);
+//        long[] end = transpose(key, distance);
+//        List<String> hostIds = clusterService.getMapping().getHostIds(start, end);
+//        List<long[]> expandedCandidates = getNearestNeighbors(hostIds, key, k);
+//        return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
+//    }
 
     private long computeDistance(long[] a, long[] b) {
         long dist = 0;

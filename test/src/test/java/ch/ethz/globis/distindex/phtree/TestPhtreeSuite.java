@@ -12,7 +12,7 @@ public class TestPhtreeSuite extends TestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
 
-    static final int NUMBER_OF_SERVERS = 4;
+    static final int NUMBER_OF_SERVERS = 16;
 
     static {
         try {
