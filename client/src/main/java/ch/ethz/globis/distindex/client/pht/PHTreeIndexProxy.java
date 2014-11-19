@@ -146,12 +146,12 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         String hostId = keyMapping.getHostId(key);
 
         List<long[]> candidates;
-        int size = depth - keyMapping.getDepth(hostId) / dim;
+        int regionBitWidth = depth - keyMapping.getDepth(hostId) / dim;
         Set<String> currentHostIds;
         boolean foundK = false;
         int hops = 1;
         do {
-            List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, size);
+            List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
             currentHostIds = keyMapping.getHostsContaining(projections);
             candidates = getNearestNeighbors(currentHostIds, key, k);
             if (candidates.size() == k) {

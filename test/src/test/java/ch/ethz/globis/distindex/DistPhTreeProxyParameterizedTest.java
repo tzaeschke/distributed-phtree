@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
+import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
@@ -29,7 +30,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{ {2}});
+        return Arrays.asList(new Object[][]{ {16}});
     }
 
     @Before
@@ -254,7 +255,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testPutAndGetRandom2D() throws Exception {
-        int nrEntries = 10000;
+        int nrEntries = 1000;
         Random random = new Random();
 
         long[] key;
@@ -265,6 +266,24 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
             phTree.put(key, value);
             assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
         }
+    }
+
+    @Test
+    public void testRandomInsertAndKNN() {
+        Random random = new Random();
+        for (int i = 0; i < 100; i++) {
+            long[] key = { random.nextLong(), random.nextLong() };
+            phTree.put(key, new BigInteger(64, random).toString());
+        }
+
+        for (int i = 0; i < 100; i++) {
+            phTree.getNearestNeighbors(randomKey(), 10);
+        }
+    }
+
+    private static long[] randomKey() {
+        Random random = new Random();
+        return new long[] { random.nextLong(), random.nextLong() };
     }
 
     @Test

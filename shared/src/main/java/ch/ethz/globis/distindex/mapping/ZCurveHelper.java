@@ -23,21 +23,21 @@ public class ZCurveHelper {
         return getNeighbours(query, neighbor, 64);
     }
 
-    public static List<long[]> getProjectionsWithinHops(long[] query, int hops, int size) {
+    public static List<long[]> getProjectionsWithinHops(long[] query, int hops, int regionBitWidth) {
         int dim = query.length;
-        List<String> offsetPermutations = generatePermutations(2 * hops, dim);
+        List<int[]> offsetPermutations = generatePermutations(2 * hops, dim);
 
         long[] offsets = new long[2 * hops + 1];
         for (int i = -hops; i <= hops; i++) {
-            offsets[hops + i] = i * (1L << size);
+            offsets[hops + i] = i * (1L << regionBitWidth);
         }
 
         List<long[]> neighbours = new ArrayList<>();
 
-        for (String offsetPerm : offsetPermutations ) {
+        for (int[] offsetPerm : offsetPermutations ) {
             long[] neighbour = new long[dim];
-            for (int i = 0; i < offsetPerm.length(); i++) {
-                int offsetIndex = Integer.parseInt(String.valueOf(offsetPerm.charAt(i)));
+            for (int i = 0; i < offsetPerm.length; i++) {
+                int offsetIndex = offsetPerm[i];
                 if (willAdditionOverflow(query[i], offsets[offsetIndex])) {
                     neighbour = null;
                     break;
@@ -114,18 +114,24 @@ public class ZCurveHelper {
         }
     }
 
-    public static List<String> generatePermutations(int max, int dim) {
-        List<String> permutations = new ArrayList<>();
+    public static List<int[]> generatePermutations(int max, int dim) {
+        List<int[]> permutations = new ArrayList<>();
         generatePermutation(dim, "", max, permutations);
         return permutations;
     }
 
-    private static void generatePermutation(int length, String partial, int hops, List<String> permutations) {
+    private static void generatePermutation(int length, String partial, int hops, List<int[]> permutations) {
         if (length <= 0) {
-            permutations.add(partial);
+            String[] tokens = partial.split(",");
+            int[] perm = new int[tokens.length];
+            for (int i = 0; i < perm.length; i++) {
+                perm[i] = Integer.valueOf(tokens[i]);
+            }
+            permutations.add(perm);
         } else {
             for (int i = 0; i <= hops; i++) {
-                generatePermutation(length - 1, partial + i, hops, permutations);
+                String newPartial = "".equals(partial) ? String.valueOf(i) : partial + "," + i;
+                generatePermutation(length - 1, newPartial, hops, permutations);
             }
         }
     }
