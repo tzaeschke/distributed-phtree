@@ -25,10 +25,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Benchmark suite for the k nearest neighbour operation
+ */
+public class PhTreeKNNBenchmark {
 
-public class PhTreeBenchmark {
-
-    private static Logger LOG = LoggerFactory.getLogger(PhTreeBenchmark.class);
+    private static Logger LOG = LoggerFactory.getLogger(PhTreeKNNBenchmark.class);
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
@@ -118,7 +120,7 @@ public class PhTreeBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + PhTreeBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + PhTreeKNNBenchmark.class.getSimpleName() + ".*")
                 .forks(1)
                 .build();
         new Runner(opt).run();
