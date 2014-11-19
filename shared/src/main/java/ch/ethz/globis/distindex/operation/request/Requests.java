@@ -21,6 +21,10 @@ public class Requests {
         return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, "", start, end);
     }
 
+    public static <K> GetRangeRequest<K> newGetRange(K start, K end, double distance) {
+        return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, "", start, end, distance);
+    }
+
     public static <K> GetKNNRequest<K> newGetKNN(K key, int k) {
         return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, "", key, k);
     }

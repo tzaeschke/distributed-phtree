@@ -36,6 +36,7 @@ public class PhTreeKNNBenchmark {
     private static KNNStrategy basic = new BasicKNNStrategy();
     private static KNNStrategy range = new RangeKNNStrategy();
     private static KNNStrategy rangeKNN = new RangeHostsKNNStrategy();
+    private static KNNStrategy rangeFilter = new RangeFilteredKNNStrategy();
 
     @Benchmark
     public Object basicSearchAllNeighbours(BenchmarkState state) {
@@ -46,6 +47,12 @@ public class PhTreeKNNBenchmark {
     @Benchmark
     public Object rectangleRangeSearch(BenchmarkState state) {
         state.indexProxy.setKnnStrategy(range);
+        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
+    }
+
+    @Benchmark
+    public Object rectangleRangeSearchFiltered(BenchmarkState state) {
+        state.indexProxy.setKnnStrategy(rangeFilter);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 

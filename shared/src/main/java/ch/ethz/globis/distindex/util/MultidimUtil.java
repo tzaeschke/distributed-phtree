@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.util;
 import ch.ethz.globis.pht.PhTree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,5 +40,29 @@ public class MultidimUtil {
             tree.insert(point);
         }
         return tree;
+    }
+
+    public static long computeDistance(long[] a, long[] b) {
+        long dist = 0;
+        for (int i = 0; i < a.length; i++) {
+            dist += (a[i] - b[i]) * (a[i] - b[i]);
+        }
+        return (long) Math.sqrt(dist) + 1;
+    }
+
+    public static long[] transpose(long[] a, long offset) {
+        long[] result = Arrays.copyOf(a, a.length);
+        for (int i = 0; i < a.length; i++) {
+            result[i] += offset;
+        }
+        return result;
+    }
+
+    public static long[] transpose(long[] a, double offset) {
+        long[] result = Arrays.copyOf(a, a.length);
+        for (int i = 0; i < a.length; i++) {
+            result[i] += offset;
+        }
+        return result;
     }
 }

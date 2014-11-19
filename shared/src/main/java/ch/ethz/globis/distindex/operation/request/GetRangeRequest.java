@@ -4,11 +4,19 @@ public class GetRangeRequest<K> extends BaseRequest {
 
     private K start;
     private K end;
+    private double distance = -1;
 
     public GetRangeRequest(int id, byte opCode, String indexId, K start, K end) {
         super(id, opCode, indexId);
         this.start = start;
         this.end = end;
+    }
+
+    public GetRangeRequest(int id, byte opCode, String indexId, K start, K end, double distance) {
+        super(id, opCode, indexId);
+        this.start = start;
+        this.end = end;
+        this.distance = distance;
     }
 
     public K getStart() {
@@ -17,5 +25,9 @@ public class GetRangeRequest<K> extends BaseRequest {
 
     public K getEnd() {
         return end;
+    }
+
+    public double getDistance() {
+        return distance;
     }
 }

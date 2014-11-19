@@ -7,9 +7,8 @@ import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PVIterator;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
 import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
@@ -55,8 +54,14 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     public ResultResponse<long[], byte[]> handleGetRange(GetRangeRequest<long[]> request) {
         long[] start = request.getStart();
         long[] end = request.getEnd();
+        double distance = request.getDistance();
 
-        IndexEntryList<long[], byte[]> results = createList(tree.query(start, end));
+        IndexEntryList<long[], byte[]> results;
+        if (distance > 0) {
+            results = createList(tree.query(start, end), MultidimUtil.transpose(start, distance), distance);
+        } else {
+            results = createList(tree.query(start, end));
+        }
         return createResponse(request, results);
     }
 
@@ -203,7 +208,6 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         for (long[] key : keyList) {
             results.add(key, null);
         }
-
         return results;
     }
 
@@ -212,6 +216,18 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         while (it.hasNext()) {
             PVEntry<byte[]> entry = it.nextEntry();
             results.add(entry.getKey(), entry.getValue());
+        }
+        return results;
+    }
+
+    private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it, long[] key, double distance) {
+        IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
+        PhDistance measure = new PhDistanceD();
+        while (it.hasNext()) {
+            PVEntry<byte[]> entry = it.nextEntry();
+            if (distance > measure.dist(key, entry.getKey())) {
+                results.add(entry.getKey(), entry.getValue());
+            }
         }
         return results;
     }

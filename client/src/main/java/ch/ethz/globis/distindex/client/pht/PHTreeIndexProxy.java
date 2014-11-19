@@ -6,6 +6,7 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
+import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.PointIndex;
 import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.distindex.client.io.ClientRequestDispatcher;
@@ -16,6 +17,7 @@ import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
@@ -64,6 +66,23 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         this.dim = dim;
         this.depth = depth;
         return super.create(dim, depth);
+    }
+
+    /**
+     * Perform a range query and then filter using a distance.
+     *
+     * @param start
+     * @param end
+     * @param distance
+     * @return
+     */
+    public IndexEntryList<long[], V> getRange(long[] start, long[] end, double distance) {
+        KeyMapping<long[]> keyMapping = clusterService.getMapping();
+        List<String> hostIds = keyMapping.getHostIds(start, end);
+
+        GetRangeRequest<long[]> request = Requests.newGetRange(start, end, distance);
+        List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        return combine(responses);
     }
 
     /**
@@ -155,22 +174,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
         return knnStrategy.radiusSearch(key, k, candidates, this);
-    }
-
-    long computeDistance(long[] a, long[] b) {
-        long dist = 0;
-        for (int i = 0; i < a.length; i++) {
-            dist += (a[i] - b[i]) * (a[i] - b[i]);
-        }
-        return (long) Math.sqrt(dist) + 1;
-    }
-
-    long[] transpose(long[] a, long offset) {
-        long[] result = Arrays.copyOf(a, a.length);
-        for (int i = 0; i < a.length; i++) {
-            result[i] += offset;
-        }
-        return result;
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {

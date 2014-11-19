@@ -131,12 +131,14 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
 
         int outputSize = startKeyBytes.length + 4   // start key bytes + number of start key bytes
                         + endKeyBytes.length + 4    // end key bytes + number of end key bytes
+                        + 8                         // distance
                         + request.metadataSize();   // metadata size
 
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
         writeByteArray(buffer, startKeyBytes);
         writeByteArray(buffer, endKeyBytes);
+        buffer.putDouble(request.getDistance());
         return buffer.array();
     }
 

@@ -94,7 +94,8 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
 
         K start = decodeKey(buffer);
         K end = decodeKey(buffer);
-        return new GetRangeRequest<>(requestId, opCode, indexName, start, end);
+        double distance = buffer.getDouble();
+        return new GetRangeRequest<>(requestId, opCode, indexName, start, end, distance);
     }
 
     /**

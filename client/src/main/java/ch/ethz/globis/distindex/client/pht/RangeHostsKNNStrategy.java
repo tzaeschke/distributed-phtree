@@ -25,9 +25,9 @@ public class RangeHostsKNNStrategy implements KNNStrategy {
     @Override
     public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
-        long distance = indexProxy.computeDistance(key, farthestNeighbor);
-        long[] start = indexProxy.transpose(key, -distance);
-        long[] end = indexProxy.transpose(key, distance);
+        long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
+        long[] start = MultidimUtil.transpose(key, -distance);
+        long[] end = MultidimUtil.transpose(key, distance);
         List<String> hostIds = indexProxy.getMapping().getHostIds(start, end);
         List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
         return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);

@@ -243,7 +243,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return keys;
     }
 
-    private IndexEntryList<K, V> combine(List<ResultResponse<K, V>> responses) {
+    protected IndexEntryList<K, V> combine(List<ResultResponse<K, V>> responses) {
         IndexEntryList<K, V> results = new IndexEntryList<>();
         for (ResultResponse<K,V> response : responses) {
             results.addAll(response.getEntries());
