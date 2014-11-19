@@ -37,6 +37,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private int dim = -1;
 
     private boolean rangeKNN = false;
+    private KNNStrategy knnStrategy = new SquareRangeKNNStrategy();
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
@@ -95,7 +96,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      * @return                          The k nearest neighbours on the host.
      */
-    private List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
+    List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         ResultResponse<long[], V> response = requestDispatcher.send(hostId, request);
         return extractKeys(response);
@@ -110,7 +111,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      * @return                          The k nearest neighbours on the hosts.
      */
-    private List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
+    List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
@@ -124,7 +125,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param key                       The key to be used as query.
      * @param k                         The number of neighbours to be returned.
      */
-    private List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
+    List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
         List<String> allHostIds = keyMapping.getHostIds();
         String hostId = keyMapping.getHostId(key);
 
@@ -155,69 +156,11 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param candidates                The nearest neighbours on the query point's host server.
      * @return                          The k nearest neighbour points.
      */
-    private List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
-        if (rangeKNN) {
-            return radiusSearchUsingRange(key, k, candidates);
-        } else {
-            return radiusSearchUsingFurtherClosest(key, k, candidates);
-        }
+    List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
+        return knnStrategy.radiusSearch(key, k, candidates, this);
     }
 
-    /**
-     * Perform a radius search to check if there are any neighbours nearer to the query point than the
-     * neighbours found on the query host server.
-     *
-     * This is done by locating the furthest neighbour from the candidates.
-     *
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @param candidates                The nearest neighbours on the query point's host server.
-     * @return                          The k nearest neighbour points.
-     */
-    private List<long[]> radiusSearchUsingFurtherClosest(long[] key, int k, List<long[]> candidates) {
-        KeyMapping<long[]> keyMapping = clusterService.getMapping();
-
-        long[] farthestNeighbor = candidates.get(k - 1);
-        List<long[]> neighbors = ZCurveHelper.getProjectedNeighbours(key, farthestNeighbor);
-        Set<String> neighbourHosts = keyMapping.getHostsContaining(neighbors);
-
-        Request request = Requests.newGetKNN(key, k);
-        List<ResultResponse<long[], V>> responses = requestDispatcher.send(neighbourHosts, request);
-        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
-    }
-
-    /**
-     * Perform a radius search to check if there are any neighbours nearer to the query point than the
-     * neighbours found on the query host server.
-     *
-     * This is done using a radius search.
-     *
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @param candidates                The nearest neighbours on the query point's host server.
-     * @return                          The k nearest neighbour points.
-     */
-    private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
-        long[] farthestNeighbor = candidates.get(k - 1);
-        long distance = computeDistance(key, farthestNeighbor);
-        long[] start = transpose(key, -distance);
-        long[] end = transpose(key, distance);
-        List<String> hostIds = clusterService.getMapping().getHostIds(start, end);
-        List<long[]> expandedCandidates = getNearestNeighbors(hostIds, key, k);
-        return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
-    }
-
-//    private List<long[]> radiusSearchUsingRange(long[] key, int k, List<long[]> candidates) {
-//        long[] farthestNeighbor = candidates.get(k - 1);
-//        long distance = computeDistance(key, farthestNeighbor);
-//        long[] start = transpose(key, -distance);
-//        long[] end = transpose(key, distance);
-//        List<String> hostIds = clusterService.getMapping().getHostIds(start, end);
-//        List<long[]> expandedCandidates = getNearestNeighbors(hostIds, key, k);
-//        return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
-//    }
-
-    private long computeDistance(long[] a, long[] b) {
+    long computeDistance(long[] a, long[] b) {
         long dist = 0;
         for (int i = 0; i < a.length; i++) {
             dist += (a[i] - b[i]) * (a[i] - b[i]);
@@ -225,7 +168,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return (long) Math.sqrt(dist) + 1;
     }
 
-    private long[] transpose(long[] a, long offset) {
+    long[] transpose(long[] a, long offset) {
         long[] result = Arrays.copyOf(a, a.length);
         for (int i = 0; i < a.length; i++) {
             result[i] += offset;
@@ -239,6 +182,10 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
     public boolean isRangeKNN() {
         return rangeKNN;
+    }
+
+    public void setKnnStrategy(KNNStrategy knnStrategy) {
+        this.knnStrategy = knnStrategy;
     }
 
     public void setRangeKNN(boolean rangeKNN) {
