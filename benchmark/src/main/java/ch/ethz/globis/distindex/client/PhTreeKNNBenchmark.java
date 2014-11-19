@@ -1,8 +1,6 @@
 package ch.ethz.globis.distindex.client;
 
-import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
+import ch.ethz.globis.distindex.client.pht.*;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
 
@@ -28,9 +26,34 @@ import java.util.concurrent.TimeUnit;
 /**
  * Benchmark suite for the k nearest neighbour operation
  */
+@BenchmarkMode({Mode.Throughput})
+@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
+@Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
 public class PhTreeKNNBenchmark {
 
     private static Logger LOG = LoggerFactory.getLogger(PhTreeKNNBenchmark.class);
+
+    private static KNNStrategy basic = new BasicKNNStrategy();
+    private static KNNStrategy range = new RangeKNNStrategy();
+    private static KNNStrategy rangeKNN = new RangeHostsKNNStrategy();
+
+    @Benchmark
+    public Object basicSearchAllNeighbours(BenchmarkState state) {
+        state.indexProxy.setKnnStrategy(basic);
+        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
+    }
+
+    @Benchmark
+    public Object rectangleRangeSearch(BenchmarkState state) {
+        state.indexProxy.setKnnStrategy(range);
+        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
+    }
+
+    @Benchmark
+    public Object rectangleRangeKNNSearch(BenchmarkState state) {
+        state.indexProxy.setKnnStrategy(rangeKNN);
+        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
+    }
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
@@ -93,24 +116,6 @@ public class PhTreeKNNBenchmark {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Benchmark
-    @BenchmarkMode({Mode.Throughput})
-    @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    @Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    public Object benchmarkNonRange(BenchmarkState state) {
-        state.indexProxy.setRangeKNN(false);
-        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
-    }
-
-    @Benchmark
-    @BenchmarkMode({Mode.Throughput})
-    @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    @Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-    public Object benchmarkRange(BenchmarkState state) {
-        state.indexProxy.setRangeKNN(true);
-        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
     private static long[] randomKey() {

@@ -9,7 +9,7 @@ import java.util.List;
  *
  *  Then apply an additional knn to combine candidates.
  */
-public class SquareRangeFilteredKNNStrategy implements KNNStrategy {
+public class RangeFilteredKNNStrategy implements KNNStrategy {
 
     @Override
     public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {

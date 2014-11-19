@@ -16,7 +16,6 @@ import ch.ethz.globis.distindex.client.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
-import ch.ethz.globis.distindex.operation.request.Request;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
@@ -36,13 +35,11 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private int depth = -1;
     private int dim = -1;
 
-    private boolean rangeKNN = false;
-    private KNNStrategy knnStrategy = new SquareRangeKNNStrategy();
+    private KNNStrategy knnStrategy = new RangeKNNStrategy();
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
         this.requestDispatcher = setupDispatcher();
-
         this.clusterService.connect();
     }
 
@@ -180,16 +177,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return new ZKClusterService(host + ":" + port);
     }
 
-    public boolean isRangeKNN() {
-        return rangeKNN;
-    }
-
     public void setKnnStrategy(KNNStrategy knnStrategy) {
         this.knnStrategy = knnStrategy;
-    }
-
-    public void setRangeKNN(boolean rangeKNN) {
-        this.rangeKNN = rangeKNN;
     }
 
     public KeyMapping<long[]> getMapping() {

@@ -9,7 +9,7 @@ import java.util.List;
  * find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn))
  * and perform a range query in those areas. Then apply an additional knn to combine candidates.
  */
-public class SquareSearchKNNStrategy implements KNNStrategy {
+public class RangeKNNStrategy implements KNNStrategy {
 
     /**
      * Perform a radius search to check if there are any neighbours nearer to the query point than the
@@ -28,8 +28,8 @@ public class SquareSearchKNNStrategy implements KNNStrategy {
         long distance = indexProxy.computeDistance(key, farthestNeighbor);
         long[] start = indexProxy.transpose(key, -distance);
         long[] end = indexProxy.transpose(key, distance);
-        List<String> hostIds = indexProxy.getMapping().getHostIds(start, end);
-        List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
-        return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
+//        List<String> hostIds = indexProxy.getMapping().getHostIds(start, end);
+//        List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
+        return MultidimUtil.nearestNeighbours(key, k, indexProxy.combineKeys(indexProxy.getRange(start, end)));
     }
 }

@@ -217,7 +217,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return depth;
     }
 
-    protected List<K> combineKeys(IndexEntryList<K, V> entries) {
+    public List<K> combineKeys(IndexEntryList<K, V> entries) {
         List<K> results = new ArrayList<>();
         for (IndexEntry<K, V> entry : entries) {
             results.add(entry.getKey());
