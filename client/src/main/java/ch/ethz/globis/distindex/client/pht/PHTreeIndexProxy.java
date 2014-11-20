@@ -142,7 +142,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      */
     List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
-        List<String> allHostIds = keyMapping.getHostIds();
+//        List<String> allHostIds = keyMapping.getHostIds();
         String hostId = keyMapping.getHostId(key);
 
         List<long[]> candidates;
@@ -151,14 +151,18 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         boolean foundK = false;
         int hops = 1;
         do {
-            List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
-            currentHostIds = keyMapping.getHostsContaining(projections);
+            if (hops + regionBitWidth > depth) {
+                currentHostIds = new HashSet<>(keyMapping.getHostIds());
+            } else {
+                List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
+                currentHostIds = keyMapping.getHostsContaining(projections);
+            }
             candidates = getNearestNeighbors(currentHostIds, key, k);
             if (candidates.size() == k) {
                 foundK = true;
             }
             hops++;
-        } while (!foundK && (currentHostIds.size() < allHostIds.size()));
+        } while (!foundK && (regionBitWidth + hops) <= depth);
 
         return candidates;
     }

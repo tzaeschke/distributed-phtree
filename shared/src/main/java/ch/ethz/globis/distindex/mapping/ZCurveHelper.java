@@ -23,6 +23,37 @@ public class ZCurveHelper {
         return getNeighbours(query, neighbor, 64);
     }
 
+    public static List<long[]> getProjectionsWithinHops2(long[] query, int hops, int regionBitWidth) {
+        int dim = query.length;
+        List<int[]> offsetPermutations = generatePermutations(2 * hops, dim);
+
+        long[] offsets = new long[2 * hops + 1];
+        for (int i = -hops; i <= hops; i++) {
+            offsets[hops + i] = i;
+        }
+
+        List<long[]> neighbours = new ArrayList<>();
+
+        for (int[] offsetPerm : offsetPermutations ) {
+            long[] neighbour = new long[dim];
+            for (int i = 0; i < offsetPerm.length; i++) {
+                int offsetIndex = offsetPerm[i];
+//                if (willAdditionOverflow(query[i], offsets[offsetIndex])) {
+//                    neighbour = null;
+//                    break;
+//                } else {
+                    long q;
+                    q = query[i];
+                    neighbour[i] = q + offsets[offsetIndex];
+//                }
+            }
+            if (neighbour != null) {
+                neighbours.add(neighbour);
+            }
+        }
+        return neighbours;
+    }
+
     public static List<long[]> getProjectionsWithinHops(long[] query, int hops, int regionBitWidth) {
         int dim = query.length;
         List<int[]> offsetPermutations = generatePermutations(2 * hops, dim);
@@ -42,7 +73,13 @@ public class ZCurveHelper {
                     neighbour = null;
                     break;
                 } else {
-                    neighbour[i] += offsets[offsetIndex];
+                    long q = query[i];
+//                    if (offsets[offsetIndex] > 0) {
+//                        q = query[i] & (-1L << (regionBitWidth - 1));
+//                    } else {
+//                        q = query[i] | (~(-1L << (regionBitWidth - 1)));
+//                    }
+                    neighbour[i] = q + offsets[offsetIndex];
                 }
             }
             if (neighbour != null) {

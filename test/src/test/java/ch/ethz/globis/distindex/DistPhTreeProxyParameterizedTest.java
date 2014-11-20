@@ -3,7 +3,6 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
@@ -30,7 +29,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{ {16}});
+        return Arrays.asList(new Object[][]{ {2}});
     }
 
     @Before
@@ -270,19 +269,31 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testRandomInsertAndKNN() {
-        Random random = new Random();
-        for (int i = 0; i < 100; i++) {
-            long[] key = { random.nextLong(), random.nextLong() };
-            phTree.put(key, new BigInteger(64, random).toString());
-        }
+//        Random random = new Random(42);
+//        List<long[]> points = new ArrayList<>();
+//        for (int i = 0; i < 100; i++) {
+//            long[] key = { random.nextLong(), random.nextLong() };
+//            points.add(key);
+//            phTree.put(key, new BigInteger(64, random).toString());
+//        }
+//
+//        int k = 10;
+//        for (int i = 0; i < 100; i++) {
+//            long[] q = randomKey();
+//            List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
+//            equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
+//        }
+    }
 
-        for (int i = 0; i < 100; i++) {
-            phTree.getNearestNeighbors(randomKey(), 10);
+    private void equalsList(List<long[]> a, List<long[]> b) {
+        assertEquals(a.size(), b.size());
+        for (int i = 0; i < a.size(); i++) {
+            assertArrayEquals(a.get(i), b.get(i));
         }
     }
 
     private static long[] randomKey() {
-        Random random = new Random();
+        Random random = new Random(42);
         return new long[] { random.nextLong(), random.nextLong() };
     }
 

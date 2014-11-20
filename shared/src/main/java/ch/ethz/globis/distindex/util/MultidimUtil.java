@@ -2,12 +2,29 @@ package ch.ethz.globis.distindex.util;
 
 import ch.ethz.globis.pht.PhTree;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 public class MultidimUtil {
+
+    public static List<long[]> nearestNeighboursBruteForce(final long[] q, int k, List<long[]> points) {
+        Collections.sort(points, new Comparator<long[]>() {
+            @Override
+            public int compare(long[] a, long[] b) {
+                return distance(a, q).compareTo(distance(b, q));
+            }
+        });
+        return points.subList(0, k);
+    }
+
+    private static BigDecimal distance(final long[] a, final long[] b) {
+        BigDecimal dist = new BigDecimal(0);
+        for (int i = 0; i < a.length; i++) {
+            BigDecimal d = new BigDecimal(a[i]).subtract(new BigDecimal(b[i]));
+            dist = dist.add(d.pow(2));
+        }
+        return dist;
+    }
 
     public static List<long[]> nearestNeighbours(long[] q, int k, List<long[]> points) {
         if (points.size() == 0) {
