@@ -15,4 +15,21 @@ target/
 .metadata
 .bin/
 .tmp/
-.settings 
+.settings
+
+#Vim
+*.swp
+
+# Latex - latexmk
+*.aux
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.toc
