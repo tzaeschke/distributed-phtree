@@ -37,13 +37,13 @@ public class MultidimUtilTest {
     public void testRandomInsertAndKNN() {
         Random random = new Random();
         List<long[]> points = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             long[] key = { random.nextLong(), random.nextLong() };
             points.add(key);
         }
 
         int k = 10;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             long[] q = {random.nextLong(), random.nextLong() };
             List<long[]> nearestNeighbors = MultidimUtil.nearestNeighbours(q, k, points);
             equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
