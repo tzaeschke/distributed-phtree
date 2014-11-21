@@ -492,7 +492,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     }
 
     private void printMappingAndSizes() {
-        Map<String, String> map = clusterService.getMapping().getHosts();
+        Map<String, String> map = clusterService.getMapping().asMap();
 
         Map<String, String> reverse = new HashMap<>();
         for (Map.Entry<String, String> entry : map.entrySet()) {

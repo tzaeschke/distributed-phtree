@@ -22,7 +22,7 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
-    public Map<String, String> getHosts() {
+    public Map<String, String> asMap() {
         throw new UnsupportedOperationException();
     }
 

@@ -7,7 +7,23 @@ public class BSTNode<K> {
     private K key;
     private int size;
 
-    public BSTNode<K> getLeft() {
+    public BSTNode() {
+    }
+
+    public BSTNode(String content, int size) {
+        this.content = content;
+    }
+
+    public BSTNode(BSTNode<K> original) {
+        this(original.getContent(), original.getSize());
+    }
+
+    public void clear() {
+        this.setKey(null);
+        this.setSize(0);
+    }
+
+    public BSTNode<K> leftChild() {
         return left;
     }
 
@@ -15,7 +31,7 @@ public class BSTNode<K> {
         this.left = left;
     }
 
-    public BSTNode<K> getRight() {
+    public BSTNode<K> rightChild() {
         return right;
     }
 

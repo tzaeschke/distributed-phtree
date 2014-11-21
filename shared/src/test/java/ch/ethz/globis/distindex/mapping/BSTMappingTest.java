@@ -30,14 +30,26 @@ public class BSTMappingTest {
             keys[i] = String.valueOf(i);
         }
         KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), keys);
-        System.out.println(mapping.getHosts());
+        System.out.println(mapping.asMap());
+    }
+
+    @Test
+    public void testTreeCreationIterative() {
+        int size = 16;
+        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
+        String[] keys = new String[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = String.valueOf(i);
+            mapping.add(keys[i]);
+        }
+        System.out.println(mapping.asMap());
     }
 
     @Test
     public void testRangeQuery() {
         String[] hosts = { "one", "two", "three", "four" };
         KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
-        Map<String, String> directMapping = mapping.getHosts();
+        Map<String, String> directMapping = mapping.asMap();
         long[] start = {1, 1};
         long[] end = {2, 2};
         List<String> hostIds = mapping.getHostIds(start, end);

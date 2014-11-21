@@ -6,7 +6,7 @@ import java.util.Set;
 
 public interface KeyMapping<K> {
 
-    public Map<String, String> getHosts();
+    public Map<String, String> asMap();
 
     /**
      * Obtain the hostId of the machine that stores the key received as an argument.

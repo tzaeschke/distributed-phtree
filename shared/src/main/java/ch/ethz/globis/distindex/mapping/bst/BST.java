@@ -46,15 +46,15 @@ public class BST<K> {
 
     private void getHosts(BSTNode<K> node, List<String> hosts) {
         if (node != null) {
-            getHosts(node.getLeft(), hosts);
+            getHosts(node.leftChild(), hosts);
             if (node.getContent() != null) {
                 hosts.add(node.getContent());
             }
-            getHosts(node.getRight(), hosts);
+            getHosts(node.rightChild(), hosts);
         }
     }
 
-    public List<String> leafs() {
+    public List<String> leaves() {
         List<String> results = new ArrayList<>();
         findRange(root, results);
         return results;
@@ -64,10 +64,10 @@ public class BST<K> {
         if (current == null) {
             return;
         }
-        findRange(current.getLeft(), result);
+        findRange(current.leftChild(), result);
         if (current.getContent() != null) {
             result.add(current.getContent());
         }
-        findRange(current.getRight(), result);
+        findRange(current.rightChild(), result);
     }
 }

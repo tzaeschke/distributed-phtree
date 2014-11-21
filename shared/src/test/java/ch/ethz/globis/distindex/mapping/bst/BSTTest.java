@@ -12,7 +12,7 @@ public class BSTTest {
     public void testCreation() {
         String[] keys = new String[]{"one", "two", "three", "four", "five", "six", "seven"};
         BST bst = BST.fromArray(keys);
-        assertEquals(Arrays.asList(keys), bst.leafs());
+        assertEquals(Arrays.asList(keys), bst.leaves());
     }
 
     @Test
@@ -23,6 +23,6 @@ public class BSTTest {
             keys[i] = String.valueOf(i);
         }
         BST bst = BST.fromArray(keys);
-        assertEquals(Arrays.asList(keys), bst.leafs());
+        assertEquals(Arrays.asList(keys), bst.leaves());
     }
 }

@@ -13,24 +13,66 @@ public class BSTMapping<K> implements KeyMapping<K> {
     public BSTMapping(KeyConverter<K> converter, String[] hosts) {
         this.converter = converter;
         this.bst = BST.fromArray(hosts);
-        this.intervals = bst.leafs();
+        this.intervals = bst.leaves();
+    }
+
+    public BSTMapping(KeyConverter<K> converter) {
+        this.converter = converter;
+        this.bst = new BST<>();
     }
 
     @Override
-    public Map<String, String> getHosts() {
-        Map<String, String> codeHosts = new HashMap<>();
-        getHosts("", bst.getRoot(), codeHosts);
-        return codeHosts;
+    public void add(String host) {
+        addHost(host);
     }
 
-    private void getHosts(String partial, BSTNode<K> node, Map<String, String> map) {
-        if (node != null) {
-            getHosts(partial + "0", node.getLeft(), map);
-            if (node.getContent() != null) {
-                map.put(partial, node.getContent());
+    private void addHost(String host) {
+        Queue<BSTNode<K>> queue = new LinkedList<>();
+        BSTNode<K> theNewNode = newNode(host);
+        if (bst.getRoot() == null) {
+            bst.setRoot(theNewNode);
+        } else {
+            boolean inserted = false;
+            BSTNode<K> current;
+            queue.add(bst.getRoot());
+            while (!inserted) {
+                current = queue.poll();
+                if (addToNode(current, host)) {
+                    inserted = true;
+                } else {
+                    addToQueue(queue, current.leftChild());
+                    addToQueue(queue, current.rightChild());
+                }
             }
-            getHosts(partial + "1", node.getRight(), map);
+            queue.clear();
         }
+        this.intervals = bst.leaves();
+    }
+
+    private boolean addToNode(BSTNode<K> parent, String host) {
+        if (parent.leftChild() == null && parent.rightChild() == null) {
+            BSTNode<K> node = new BSTNode<>();
+            node.setContent(parent.getContent());
+            parent.setContent(null);
+            parent.setLeft(node);
+            parent.setRight(newNode(host));
+            return true;
+        }
+        return false;
+    }
+
+    private BSTNode<K> newNode(String host) {
+        BSTNode<K> current = new BSTNode<>();
+        current.setContent(host);
+        return current;
+    }
+
+    private boolean addToQueue(Queue<BSTNode<K>> queue, BSTNode<K> node) {
+        if (node != null) {
+            queue.add(node);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -60,7 +102,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         while (current != null && i < prefixLength) {
             char bit = prefix.charAt(i++);
             lastHost = current.getContent();
-            current = (bit == '0') ? current.getLeft() : current.getRight();
+            current = (bit == '0') ? current.leftChild() : current.rightChild();
         }
         if (current == null) {
             List<String> results = new ArrayList<>();
@@ -77,7 +119,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         if (bst == null) {
             return new ArrayList<>();
         }
-        return bst.leafs();
+        return bst.leaves();
     }
 
     @Override
@@ -111,6 +153,23 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public Map<String, String> asMap() {
+        Map<String, String> codeHosts = new HashMap<>();
+        getHosts("", bst.getRoot(), codeHosts);
+        return codeHosts;
+    }
+
+    private void getHosts(String partial, BSTNode<K> node, Map<String, String> map) {
+        if (node != null) {
+            getHosts(partial + "0", node.leftChild(), map);
+            if (node.getContent() != null) {
+                map.put(partial, node.getContent());
+            }
+            getHosts(partial + "1", node.rightChild(), map);
+        }
+    }
+
+    @Override
     public int getDepth(String hostId) {
         return getDepth(hostId, bst.getRoot(), 0);
     }
@@ -122,16 +181,9 @@ public class BSTMapping<K> implements KeyMapping<K> {
         if (node.getContent() != null && hostId.equals(node.getContent())) {
             return depth + 1;
         }
-        return Math.max(getDepth(hostId, node.getLeft(), depth + 1),
-                getDepth(hostId, node.getRight(), depth + 1) );
+        return Math.max(getDepth(hostId, node.leftChild(), depth + 1),
+                getDepth(hostId, node.rightChild(), depth + 1) );
 
-    }
-
-    @Override
-    public void add(String host) {
-        List<String> keys = bst.leafs();
-        keys.add(host);
-        bst = BST.fromArray(keys.toArray(new String[keys.size()]));
     }
 
     private BSTNode<K> find(K key) {
@@ -143,7 +195,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         BSTNode<K> previous = null;
         while (current != null) {
             previous = current;
-            current = converter.isBitSet(key, position) ? current.getRight() : current.getLeft();
+            current = converter.isBitSet(key, position) ? current.rightChild() : current.leftChild();
             position++;
         }
         return previous;
