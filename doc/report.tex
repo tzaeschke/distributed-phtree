@@ -129,6 +129,21 @@ Describe how iterators are handle when dealing with a cluster of index servers. 
 \subsection{Range search}
 Describe how the range search is performed. Describe how the number of hows that need to be querried is reduced and what the alternatives are.
 
+\subsection{K Nearest neighbours}
+The K nearest neighbours should be found in the following manner:
+\begin{enumerate}
+    \item First, a request for the k nearest neighbours is sent to the host that holds the query key. This query will return a number of candidate points.
+    \item After finding the furthest neighbour fn from the set of candidates obtained at the previous step on could do the following:
+        \begin{itemize}
+            \item look into all neighbouring ares and check for neighbours that are closer to q than fn.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a knn query into those areas. Then apply an additional knn to combine candidates.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a range query in those areas. Then apply an additional knn to combine candidates.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a range query followed by a filtering based on dist(q, fn) in those areas. Then apply an additional knn to combine candidates.
+        \end{itemize}
+\end{enumerate}
+
+This algorithms works under that assumption that all hosts hold at least k points. If that is not the case, and fewer candidates are returned from the first query, one would need to increase the query space and check all of the neighboring areas of the zone holding the query key. To achieve correctness even if all the cluster holds fewer than k keys, one could iteratively query more neighbours in each steps (i.e. first query the 1 - hop neighbourhood, then the 2 - hop neighbourhood) and stop after all of the hosts have been querried.
+
 \section{Implementation}
 Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.
 
