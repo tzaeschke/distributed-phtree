@@ -42,9 +42,9 @@
 
 % Please adapt the following fields if necessary!
 \hypersetup{
-    pdftitle = My fancy Bachelor/Master Thesis Title,
-    pdfauthor = Matthias Geel,
-    pdfsubject = Bachelor/Master Thesis,
+    pdftitle = Distributed Ph Tree, 
+    pdfauthor = Bogdan Vancea,
+    pdfsubject = Master Thesis,
 		hidelinks,
     plainpages = false,
     bookmarksnumbered = true
@@ -53,12 +53,13 @@
 \raggedbottom
 
 % Please adapt the following fields if necessary!
-\title{My fancy Bachelor/Master Thesis Title}
-\category{Bachelor/Master Thesis} % Something like Semester Project, Bachelor Thesis or Master Thesis
-\author{Matthias Geel}
-\email{$<$geel@inf.ethz.ch$>$}
+\title{Cluster-Computing and Parallelisation for the
+Multi-Dimensional PH-Index}
+\category{Master Thesis} 
+\author{Bogdan Aurel Vancea}
+\email{$<$bvancea@student.ethz.ch$>$}
 \professor{Prof. Dr. Moira C. Norrie}
-\assistant{Dr. Michael Nebeling}
+\assistant{Tilmann Zaeschke \\Christoph Zimmerli}
 \group{Global Information Systems Group}
 \institute{Institute of Information Systems}
 \department{Department of Computer Science}
@@ -90,26 +91,38 @@ Here comes the abstract.
 \section{Multi-dimensional Indexes}
 \label{sec:title}
 
-\subsection{Subsection Title}
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\subsection{Background information}
+Need to add an introduction here.
 
 This is an example of how to cite a scientific publication~\cite{murolo2013} from your bibliography (BibTeX\footnote{\url{http://en.wikipedia.org/wiki/BibTeX}} file). And this example shows how you create links within your documents, e.g. link to section~\ref{sec:title}.
 
 \chapter{Design and Implementation}
 \section{Algorithms}
+\subsection{Data partitioning}
 
+Describe here how the key-value pairs are partitioned across the hosts.
+\subsection{Data balancing}
+
+Describe how the key-value pairs are balanced across the index nodes.
+\subsection{Basic Index operation}
+
+Describe the point operations here. These are operations that affect a single key-value pair, like get, put, delete, contains, etc.
+
+\subsection{Iterators}
+Describe how iterators are handle when dealing with a cluster of index servers. Describe the current algorithm used and the alternatives.
+
+\subsection{Range search}
+Describe how the range search is performed. Describe how the number of hows that need to be querried is reduced and what the alternatives are.
+
+\section{Implementation}
+Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.
+
+Currently used frameworks:
+\begin{description}
+    \item[ZooKeeper] ZooKeeper is used for stored cluster metadata and membership. Currently, the only alternative would have been to implement such a distributed storage manager manually. Using ZooKeeper saved a lot of development time. 
+    \item[Netty] Netty is a Java IO library and it is used to implement the server request handling component. Alternatives would have been Java NIO library.
+    \item[Kryo] Kryo is very fast serialization library for Java and it is used to serialize the values that have to be stored on the server. These objects need to be transformed into a represention that can be sent over the network. Kryo is faster than the Java serialization, does not require the implementation of the Serializable interface and transforms the objects into byte arrays. This should make the representation smaller than simply transforming the object to a string.
+\end{description}
 \chapter{Performance Analysis}
 \section{Benchmark}
 
