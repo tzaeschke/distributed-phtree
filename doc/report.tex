@@ -104,6 +104,21 @@ Describe here how the key-value pairs are partitioned across the hosts.
 \subsection{Data balancing}
 
 Describe how the key-value pairs are balanced across the index nodes.
+The cluster should be able to properly balance the amount of keys that are stored in each server.
+
+A simple load balancing strategy would be the following:
+\begin{enumerate}
+    \item Upon reaching a certain threshold t of keys stored, a host decides it has to split it's zone.
+    \item This host first sends a broadcast to all nodes to request the number of keys they all store. It then chooses the hosts with the fewest keys and considers that this key is the split receiver. The splitter decides to split it's zone in half (or in such manner that around half of the keys held in the initial zone are moved to the receiver).
+    \item The splitting host sends the keys to the receiver. (What does the received do with them? Duplicates could appear in case of KNN or range querries. ) . 
+    \item After the receiver received all keys, the mapping is updated on the Zookeeper.
+    \item The splitter then deletes all of the keys send from it's own index (maybe this can be done really fast by removing a bunch of nodes from the index).
+\end{enumerate}
+
+Ideas that might not work:
+\begin{itemize}
+    \item Storing information like the number of keys held by each node in Zookeeper. This would mean that the ZooKeeper would need to be notified on each insert, which would cause severe scalability and availability issues. What could work is that the ZK is notified when each host reaches a certain key threshold (i.e, every 1000 keys inserted, a request is send to ZK).
+\end{itemize}
 \subsection{Basic Index operation}
 
 Describe the point operations here. These are operations that affect a single key-value pair, like get, put, delete, contains, etc.
