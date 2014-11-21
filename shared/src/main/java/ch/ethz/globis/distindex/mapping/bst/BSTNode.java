@@ -62,4 +62,30 @@ public class BSTNode<K> {
     public void setSize(int size) {
         this.size = size;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BSTNode)) return false;
+
+        BSTNode bstNode = (BSTNode) o;
+
+        if (size != bstNode.size) return false;
+        if (content != null ? !content.equals(bstNode.content) : bstNode.content != null) return false;
+        if (key != null ? !key.equals(bstNode.key) : bstNode.key != null) return false;
+        if (left != null ? !left.equals(bstNode.left) : bstNode.left != null) return false;
+        if (right != null ? !right.equals(bstNode.right) : bstNode.right != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = left != null ? left.hashCode() : 0;
+        result = 31 * result + (right != null ? right.hashCode() : 0);
+        result = 31 * result + (content != null ? content.hashCode() : 0);
+        result = 31 * result + (key != null ? key.hashCode() : 0);
+        result = 31 * result + size;
+        return result;
+    }
 }

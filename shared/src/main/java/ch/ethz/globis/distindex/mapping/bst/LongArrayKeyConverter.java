@@ -45,4 +45,21 @@ public class LongArrayKeyConverter implements KeyConverter<long[]> {
     private boolean isBitSet(long value, int i) {
         return ((1L << i) & value) != 0;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LongArrayKeyConverter)) return false;
+
+        LongArrayKeyConverter that = (LongArrayKeyConverter) o;
+
+        if (bitWidth != that.bitWidth) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return bitWidth;
+    }
 }

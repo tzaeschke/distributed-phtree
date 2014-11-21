@@ -70,4 +70,21 @@ public class BST<K> {
         }
         findRange(current.rightChild(), result);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BST)) return false;
+
+        BST bst = (BST) o;
+
+        if (root != null ? !root.equals(bst.root) : bst.root != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return root != null ? root.hashCode() : 0;
+    }
 }

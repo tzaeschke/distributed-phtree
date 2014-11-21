@@ -10,6 +10,9 @@ public class BSTMapping<K> implements KeyMapping<K> {
     private KeyConverter<K> converter;
     private List<String> intervals;
 
+    public BSTMapping() {
+    }
+
     public BSTMapping(KeyConverter<K> converter, String[] hosts) {
         this.converter = converter;
         this.bst = BST.fromArray(hosts);
@@ -201,4 +204,25 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return previous;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BSTMapping)) return false;
+
+        BSTMapping that = (BSTMapping) o;
+
+        if (bst != null ? !bst.equals(that.bst) : that.bst != null) return false;
+        if (converter != null ? !converter.equals(that.converter) : that.converter != null) return false;
+        if (intervals != null ? !intervals.equals(that.intervals) : that.intervals != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = bst != null ? bst.hashCode() : 0;
+        result = 31 * result + (converter != null ? converter.hashCode() : 0);
+        result = 31 * result + (intervals != null ? intervals.hashCode() : 0);
+        return result;
+    }
 }

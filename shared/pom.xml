@@ -34,6 +34,19 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo</artifactId>
+            <version>2.24.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+        </dependency>
+        <dependency>
             <groupId>ch.ethz.globis.pht</groupId>
             <artifactId>phtree</artifactId>
         </dependency>
