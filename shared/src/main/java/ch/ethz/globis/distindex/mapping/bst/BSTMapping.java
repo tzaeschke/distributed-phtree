@@ -34,6 +34,12 @@ public class BSTMapping<K> implements KeyMapping<K> {
         bst.setRoot(remove(bst.getRoot(), host));
     }
 
+    @Override
+    public int size() {
+        //ToDo implement this properly
+        return bst.leaves().size();
+    }
+
     private BSTNode<K> remove(BSTNode<K> node, String host) {
         if (node.getContent() != null) {
             if (host.equals(node.getContent())) {

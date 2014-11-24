@@ -46,6 +46,7 @@ public class BSTMappingTest {
         for (int i = 0; i < size; i++) {
             mapping.remove(keys[i]);
             System.out.println(mapping.asMap());
+            System.out.println(mapping.getHostIds());
         }
     }
 

@@ -72,4 +72,6 @@ public interface KeyMapping<K> {
      * @param host
      */
     public void remove(String host);
+
+    public int size();
 }

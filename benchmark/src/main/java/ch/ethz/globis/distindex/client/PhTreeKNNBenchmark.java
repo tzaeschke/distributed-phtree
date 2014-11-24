@@ -11,6 +11,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.VerboseMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,8 +89,8 @@ public class PhTreeKNNBenchmark {
             for (Middleware middleware : middlewares) {
                 middleware.close();
             }
-            threadPool.shutdownNow();
             zkServer.close();
+            threadPool.shutdownNow();
         }
 
         private static PHTreeIndexProxy<Object> setupIndex() {

@@ -4,12 +4,14 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTNode;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,7 +31,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private static final Logger LOG = LoggerFactory.getLogger(ZKClusterService.class);
 
     /** Timeout for the connection to Zookeeper.*/
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 1000;
 
     /** The directory for the peers.*/
     private static final String HOSTS_PATH = "/peers";
@@ -44,7 +47,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private String hostPort;
 
     /** The current mapping */
-    private KeyMapping<long[]> mapping;
+    private MultidimMapping mapping;
 
     private static Kryo kryo;
 
@@ -63,32 +66,23 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     public void readCurrentMapping() {
-        Watcher mappingChangedWatcher = new Watcher() {
+        CuratorWatcher mappingChangedWatcher = new CuratorWatcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
-                if (isRunning && (Event.EventType.NodeChildrenChanged == watchedEvent.getType()
-                        || Event.EventType.NodeDataChanged == watchedEvent.getType())) {
+                if (isRunning && (Watcher.Event.EventType.NodeChildrenChanged == watchedEvent.getType()
+                        || Watcher.Event.EventType.NodeDataChanged == watchedEvent.getType())) {
                     readCurrentMapping();
                 }
             }
         };
 
-        int bitWidth = 64;
         try {
-            if (client.checkExists().forPath(INDEX_PATH) == null) {
-                client.create().forPath(INDEX_PATH);
-                client.setData().forPath(INDEX_PATH, String.valueOf(bitWidth).getBytes());
-            } else {
-                String bitWidthString = new String(client.getData().usingWatcher(mappingChangedWatcher).forPath(INDEX_PATH));
-                bitWidth = Integer.parseInt(bitWidthString);
-            }
             if (client.checkExists().forPath(MAPPING_PATH) == null) {
-                mapping = new BSTMapping<>(new LongArrayKeyConverter(bitWidth));
+                mapping = new MultidimMapping();
             } else {
                 byte[] data = client.getData().usingWatcher(mappingChangedWatcher).forPath(MAPPING_PATH);
-                mapping = deserialize(data);
+                mapping = MultidimMapping.deserialize(data);
             }
-
         } catch (KeeperException.ConnectionLossException cle) {
             //retry
             LOG.error("Connection loss exception.", cle);
@@ -114,15 +108,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         mapping.add(hostId);
 
         try {
-            if (client.checkExists().forPath(HOSTS_PATH) == null) {
-                client.create().withMode(CreateMode.PERSISTENT).forPath(HOSTS_PATH,"".getBytes());
-            }
-            String pathName = client.create().withMode(CreateMode.EPHEMERAL).forPath(zkNodeName);
-
-            writeCurrentMapping();
-
-            assert pathName != null;
-            assert pathName.equals(zkNodeName);
+            writeCurrentMapping(mapping);
         } catch (KeeperException.NodeExistsException nee) {
             LOG.warn("Node with name {} already exists on the server. This could happen in a test environment.", zkNodeName);
         } catch (KeeperException ke) {
@@ -134,8 +120,8 @@ public class ZKClusterService implements ClusterService<long[]> {
         }
     }
 
-    private void writeCurrentMapping() throws Exception {
-        byte[] data = serialize(mapping);
+    private void writeCurrentMapping(MultidimMapping mapping) throws Exception {
+        byte[] data = mapping.serialize();
         if (client.checkExists().forPath(MAPPING_PATH) == null) {
             client.create().forPath(MAPPING_PATH);
         }
@@ -143,16 +129,11 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     public void unregisterHost(String hostId) {
-        String zkNodeName = zookeeperNodeName(hostId);
         validateHostId(hostId);
 
         try {
-            Stat stat = client.checkExists().forPath(zkNodeName);
-            client.delete().withVersion(stat.getVersion()).forPath(zkNodeName);
-
-            List<String> hosts = client.getChildren().forPath(HOSTS_PATH);
-            mapping = new BSTMapping<>(new LongArrayKeyConverter(64), hosts.toArray(new String[hosts.size()]));
-            writeCurrentMapping();
+            mapping.remove(hostId);
+            writeCurrentMapping(mapping);
 
         } catch (KeeperException ke) {
             LOG.error("Error during communication with Zookeeper.", ke);
@@ -175,17 +156,17 @@ public class ZKClusterService implements ClusterService<long[]> {
     @Override
     public void disconnect() {
         isRunning = false;
-        stopZK();
         try {
             LOG.info("Cluster service with zk session id 0x{} was disconnected.",
                     Long.toHexString(client.getZookeeperClient().getZooKeeper().getSessionId()));
+            stopZK();
         } catch (Exception e) {
             LOG.error("Failed to obtain a ZK handle");
         }
     }
 
     private void startZK() {
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 3);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
         client.start();
     }
@@ -201,24 +182,6 @@ public class ZKClusterService implements ClusterService<long[]> {
         if ((hostId == null) || hostId.equals("")) {
             throw new IllegalArgumentException("Host id invalid: " + hostId);
         }
-    }
-
-    private byte[] serialize(KeyMapping<long[]> mapping) {
-        Output output = new Output(new ByteArrayOutputStream());
-        getKryo().writeObject(output, mapping);
-        return output.getBuffer();
-    }
-
-    private BSTMapping<long[]> deserialize(byte[] bytes) {
-        return getKryo().readObject(new Input(bytes), BSTMapping.class);
-    }
-
-    private Kryo getKryo() {
-        if (kryo == null) {
-            kryo = new Kryo();
-            kryo.register(KeyMapping.class);
-        }
-        return kryo;
     }
 
     private String zookeeperNodeName(String hostId) {
