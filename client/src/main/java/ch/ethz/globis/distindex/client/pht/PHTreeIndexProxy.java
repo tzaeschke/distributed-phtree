@@ -23,6 +23,8 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -33,6 +35,8 @@ import java.util.*;
  * @param <V>                               The value class for this index.
  */
 public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointIndex<V>{
+
+    private static final Logger LOG = LoggerFactory.getLogger(PHTreeIndexProxy.class);
 
     private int depth = -1;
     private int dim = -1;
@@ -77,11 +81,17 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return
      */
     public IndexEntryList<long[], V> getRange(long[] start, long[] end, double distance) {
+        LOG.debug("Get Range request started on interval {} and distance {}",
+                Arrays.toString(start) + "-" + Arrays.toString(end), distance);
+
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         GetRangeRequest<long[]> request = Requests.newGetRange(start, end, distance);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+
+        LOG.debug("Get Range request ended on interval {} and distance {}",
+                Arrays.toString(start) + "-" + Arrays.toString(end), distance);
         return combine(responses);
     }
 
@@ -93,15 +103,18 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     @Override
     public List<long[]> getNearestNeighbors(long[] key, int k) {
-
+        LOG.debug("KNN request started for key={} and k={}", Arrays.toString(key), k);
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
-
         String keyHostId = keyMapping.getHostId(key);
         List<long[]> candidates = getNearestNeighbors(keyHostId, key, k);
+        List<long[]> neighbours;
         if (candidates.size() < k) {
-            return iterativeExpansion(keyMapping, key, k);
+            neighbours = iterativeExpansion(keyMapping, key, k);
+        } else {
+            neighbours = radiusSearch(key, k, candidates);
         }
-        return radiusSearch(key, k, candidates);
+        LOG.debug("KNN request ended for key={} and k={}", Arrays.toString(key), k);
+        return neighbours;
     }
 
     /**
@@ -113,6 +126,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The k nearest neighbours on the host.
      */
     List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
+        logKNNRequest(hostId, key, k);
+
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         ResultResponse<long[], V> response = requestDispatcher.send(hostId, request);
         return extractKeys(response);
@@ -128,6 +143,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The k nearest neighbours on the hosts.
      */
     List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
+        logKNNRequest(hostIds, key, k);
+
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
         List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
@@ -190,5 +207,15 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
     public KeyMapping<long[]> getMapping() {
         return clusterService.getMapping();
+    }
+
+    void logKNNRequest(Collection<String> hostIds, long[] key, int k) {
+        for (String hostId : hostIds) {
+            logKNNRequest(hostId, key, k);
+        }
+    }
+
+    void logKNNRequest(String hostId, long[] key, int k) {
+        LOG.debug("Sending kNN request with key = {} and k = {} to host" + hostId, Arrays.toString(key), k);
     }
 }

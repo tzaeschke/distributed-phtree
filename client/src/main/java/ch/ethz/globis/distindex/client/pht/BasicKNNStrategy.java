@@ -33,8 +33,6 @@ public class BasicKNNStrategy implements KNNStrategy {
         Set<String> neighbourHosts = keyMapping.getHostsContaining(neighbors);
 
         List<long[]> nearestNeighbors = indexProxy.getNearestNeighbors(neighbourHosts, key, k);
-//        Request request = Requests.newGetKNN(key, k);
-//        List<ResultResponse<long[], V>> responses = indexProxy.send(neighbourHosts, request);
         return MultidimUtil.nearestNeighbours(key, k, nearestNeighbors);
     }
 }
