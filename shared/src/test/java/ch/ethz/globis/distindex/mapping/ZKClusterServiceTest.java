@@ -3,22 +3,22 @@ package ch.ethz.globis.distindex.mapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTNode;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import org.apache.commons.math.stat.clustering.Cluster;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.test.TestingServer;
-import org.apache.zookeeper.WatchedEvent;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,25 +35,29 @@ public class ZKClusterServiceTest {
 
     @Test
     public void testAddHost() {
-        try (TestingServer zk = newZK(ZK_PORT);
-            CuratorFramework client = newClient(ZK_HOST_PORT)) {
+        ClusterService<long[]> clusterService = null;
+        try (TestingServer zk = newZK(ZK_PORT)) {
             zk.start();
-            client.start();
+            clusterService  = new ZKClusterService(ZK_HOST, ZK_PORT);
+            clusterService.connect();
+            clusterService.registerHost("1");
+            clusterService.registerHost("2");
+            KeyMapping<long[]> mapping1 = clusterService.getMapping();
+            clusterService.disconnect();
 
-            BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
-            mapping.add("1");
-            mapping.add("2");
-
-            byte[] data = serialize(mapping);
-            client.create().forPath(ZK_PATH);
-            client.setData().forPath(ZK_PATH, data);
-            byte[] serializedBytes = client.getData().forPath(ZK_PATH);
-
-            BSTMapping<long[]> decodedMapping = deserialize(serializedBytes);
-            assertEquals(mapping, decodedMapping);
-
+            clusterService = new ZKClusterService(ZK_HOST, ZK_PORT);
+            clusterService.connect();
+            KeyMapping<long[]> mapping2 = clusterService.getMapping();
+            clusterService.unregisterHost("1");
+            clusterService.unregisterHost("2");
+            assertEquals(0, mapping2.size());
+            clusterService.disconnect();
         } catch (Exception e) {
             LOG.error("An exception occurred ", e);
+        } finally {
+            if (clusterService != null) {
+                clusterService.disconnect();
+            }
         }
     }
 
@@ -63,28 +67,23 @@ public class ZKClusterServiceTest {
         mapping.add("1");
         mapping.add("2");
         byte[] serializedBytes = serialize(mapping);
-        BSTMapping<long[]> deserializedMapping = deserialize(serializedBytes);
+        BSTMapping<long[]> deserializedMapping = (BSTMapping<long[]>) deserialize(serializedBytes);
         assertEquals(mapping, deserializedMapping);
     }
-
-    private void sendToZK(CuratorFramework client) {
-    }
-
-    private byte[] serialize(BSTMapping<long[]> mapping) {
+    private byte[] serialize(KeyMapping<long[]> mapping) {
         Output output = new Output(new ByteArrayOutputStream());
         getKryo().writeObject(output, mapping);
         return output.getBuffer();
     }
 
-    private BSTMapping<long[]> deserialize(byte[] bytes) {
+    private KeyMapping<long[]> deserialize(byte[] bytes) {
         return getKryo().readObject(new Input(bytes), BSTMapping.class);
     }
 
     private Kryo getKryo() {
         if (kryo == null) {
             kryo = new Kryo();
-            kryo.register(BSTMapping.class);
-            kryo.register(BSTNode.class);
+            kryo.register(KeyMapping.class);
         }
         return kryo;
     }

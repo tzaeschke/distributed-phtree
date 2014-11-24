@@ -35,7 +35,7 @@ public class BSTMappingTest {
 
     @Test
     public void testTreeCreationIterative() {
-        int size = 16;
+        int size = 4;
         KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
         String[] keys = new String[size];
         for (int i = 0; i < size; i++) {
@@ -43,6 +43,11 @@ public class BSTMappingTest {
             mapping.add(keys[i]);
         }
         System.out.println(mapping.asMap());
+        for (int i = 0; i < size; i++) {
+            mapping.remove(keys[i]);
+            System.out.println(mapping.asMap());
+            System.out.println(mapping.getHostIds());
+        }
     }
 
     @Test
