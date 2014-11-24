@@ -73,5 +73,28 @@ public interface KeyMapping<K> {
      */
     public void remove(String host);
 
+    /**
+     * Set the number of keys associated with a host.
+     *
+     * @param host
+     * @param size
+     */
+    public void setSize(String host, int size);
+
+    /**
+     * Return the host that can be the receiver of a split operation.
+     *
+     * Should not necessarily bet the host with the smallest number of keys, as that host could be currently
+     * part of a running re-balancing.
+     *
+     * @param host
+     * @return
+     */
+    public String getHostForSplitting(String host);
+
+    /**
+     * Return the number of hosts within the mapping.
+     * @return
+     */
     public int size();
 }

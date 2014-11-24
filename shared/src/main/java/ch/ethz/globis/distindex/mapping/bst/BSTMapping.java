@@ -35,6 +35,37 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public void setSize(String host, int size) {
+        BSTNode<K> node = bst.findByContent(host);
+        node.setSize(size);
+    }
+
+    @Override
+    public String getHostForSplitting(String host) {
+        List<BSTNode<K>> nodes = bst.nodes();
+        Collections.sort(nodes, new Comparator<BSTNode<K>>() {
+            @Override
+            public int compare(BSTNode<K> o1, BSTNode<K> o2) {
+                int size1 = o1.getSize();
+                int size2 = o2.getSize();
+                if (size1 == size2) {
+                    return 0;
+                } else {
+                    if (size1 > size2) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }
+            }
+        });
+        if (nodes.size() > 0) {
+            return nodes.get(0).getContent();
+        }
+        return null;
+    }
+
+    @Override
     public int size() {
         //ToDo implement this properly
         return bst.leaves().size();

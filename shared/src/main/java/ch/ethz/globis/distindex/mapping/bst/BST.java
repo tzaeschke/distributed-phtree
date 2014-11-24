@@ -60,6 +60,42 @@ public class BST<K> {
         return results;
     }
 
+    public List<BSTNode<K>> nodes() {
+        List<BSTNode<K>> results = new ArrayList<>();
+        getNodes(root, results);
+        return results;
+    }
+
+    private void getNodes(BSTNode<K> root, List<BSTNode<K>> results) {
+        if (root == null) {
+            return;
+        }
+        if (root.getContent() != null) {
+            results.add(root);
+        }
+        getNodes(root.leftChild(), results);
+        getNodes(root.rightChild(), results);
+    }
+
+    public BSTNode<K> findByContent(String content) {
+        return findByContent(root, content);
+    }
+
+    private BSTNode<K> findByContent(BSTNode<K> root, String content) {
+        if (root.getContent() != null && content.equals(root.getContent())) {
+            return root;
+        }
+        BSTNode<K> node = findByContent(root.leftChild(), content);
+        if (node != null) {
+            return root;
+        }
+        node = findByContent(root.rightChild(), content);
+        if (node != null) {
+            return root;
+        }
+        return null;
+    }
+
     private void findRange(BSTNode<K> current, List<String> result) {
         if (current == null) {
             return;
