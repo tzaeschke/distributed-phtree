@@ -29,6 +29,32 @@ public class BSTMapping<K> implements KeyMapping<K> {
         addHost(host);
     }
 
+    @Override
+    public void remove(String host) {
+        bst.setRoot(remove(bst.getRoot(), host));
+    }
+
+    private BSTNode<K> remove(BSTNode<K> node, String host) {
+        if (node.getContent() != null) {
+            if (host.equals(node.getContent())) {
+                return null;
+            } else {
+                return node;
+            }
+        }
+        BSTNode<K> left = remove(node.leftChild(), host);
+        BSTNode<K> right = remove(node.rightChild(), host);
+        if (left == null) {
+            return new BSTNode<>(right);
+        }
+        if (right == null) {
+            return new BSTNode<>(left);
+        }
+        node.setLeft(left);
+        node.setRight(right);
+        return node;
+    }
+
     private void addHost(String host) {
         Queue<BSTNode<K>> queue = new LinkedList<>();
         BSTNode<K> theNewNode = newNode(host);

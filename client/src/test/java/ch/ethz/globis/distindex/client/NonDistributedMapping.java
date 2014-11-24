@@ -76,4 +76,10 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         int index = Collections.binarySearch(hostList, hostId);
         hostList.add(index, hostId);
     }
+
+    @Override
+    public void remove(String hostId) {
+        int index = Collections.binarySearch(hostList, hostId);
+        hostList.remove(index);
+    }
 }

@@ -66,4 +66,10 @@ public interface KeyMapping<K> {
      * @param host
      */
     public void add(String host);
+
+    /**
+     * Remove a hostId from the keyMapping
+     * @param host
+     */
+    public void remove(String host);
 }
