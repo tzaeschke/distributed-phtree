@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeV;
@@ -100,7 +100,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
             middlewares.clear();
 
             for (int i = 0; i < nrServers; i++) {
-                Middleware current = IndexMiddlewareFactory.newPhTree(ZK_HOST, S_BASE_PORT + i * 10, ZK_HOST, ZK_PORT);
+                Middleware current = PhTreeIndexMiddlewareFactory.newPhTree(ZK_HOST, S_BASE_PORT + i * 10, ZK_HOST, ZK_PORT);
                 MiddlewareUtil.startMiddleware(threadPool, current);
                 middlewares.add(current);
             }

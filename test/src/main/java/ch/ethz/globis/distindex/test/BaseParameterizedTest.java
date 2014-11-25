@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.test;
 
 import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
@@ -70,6 +70,6 @@ public class BaseParameterizedTest {
     }
 
     protected Middleware createMiddleware(int i, String host, int port, String zkHost, int zkPort) {
-        return IndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
+        return PhTreeIndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
     }
 }

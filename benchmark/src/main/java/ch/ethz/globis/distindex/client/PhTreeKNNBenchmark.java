@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.distindex.client.pht.*;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import org.apache.curator.test.TestingServer;
@@ -11,7 +11,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.openjdk.jmh.runner.options.VerboseMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +113,7 @@ public class PhTreeKNNBenchmark {
                 zkServer.start();
 
                 for (int i = 0; i < NUMBER_OF_SERVERS; i++) {
-                    Middleware current = IndexMiddlewareFactory.newPhTree(ZK_HOST, S_BASE_PORT + i * 10, ZK_HOST, ZK_PORT);
+                    Middleware current = PhTreeIndexMiddlewareFactory.newPhTree(ZK_HOST, S_BASE_PORT + i * 10, ZK_HOST, ZK_PORT);
                     MiddlewareUtil.startMiddleware(threadPool, current);
                     middlewares.add(current);
                 }

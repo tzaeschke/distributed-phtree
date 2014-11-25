@@ -16,28 +16,30 @@ import java.util.*;
 
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
-    private PhTreeV<byte[]> tree;
+    private IndexContext indexContext;
 
     private Map<String, PVIterator<byte[]>> iterators;
     private Map<String, Set<String>> clientIteratorMapping;
 
-    public PhTreeRequestHandler() {
-        iterators = new HashMap<>();
-        clientIteratorMapping = new HashMap<>();
+    public PhTreeRequestHandler(IndexContext indexContext) {
+        this.indexContext = indexContext;
+        this.iterators = new HashMap<>();
+        this.clientIteratorMapping = new HashMap<>();
     }
 
     @Override
     public ResultResponse<long[], byte[]> handleCreate(CreateRequest request) {
         int dim  = request.getDim();
         int depth = request.getDepth();
-        tree = new PhTree3<>(dim, depth);
+        PhTreeV<byte[]> tree = new PhTree3<>(dim, depth);
+        indexContext.setTree(tree);
         return createResponse(request);
     }
 
     @Override
     public ResultResponse<long[], byte[]> handleGet(GetRequest<long[]> request) {
         long[] key = request.getKey();
-        byte[] value = tree.get(key);
+        byte[] value = tree().get(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
     }
@@ -45,7 +47,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     @Override
     public IntegerResponse handleContains(ContainsRequest<long[]> request) {
         long[] key = request.getKey();
-        boolean contains = tree.contains(key);
+        boolean contains = tree().contains(key);
         int content = contains ? 1 : 0;
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, content);
     }
@@ -58,9 +60,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         IndexEntryList<long[], byte[]> results;
         if (distance > 0) {
-            results = createList(tree.query(start, end), MultidimUtil.transpose(start, distance), distance);
+            results = createList(tree().query(start, end), MultidimUtil.transpose(start, distance), distance);
         } else {
-            results = createList(tree.query(start, end));
+            results = createList(tree().query(start, end));
         }
         return createResponse(request, results);
     }
@@ -70,7 +72,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] key = request.getKey();
         int k = request.getK();
 
-        IndexEntryList<long[], byte[]> results = createKeyList(tree.nearestNeighbour(k, key));
+        IndexEntryList<long[], byte[]> results = createKeyList(tree().nearestNeighbour(k, key));
         return createResponse(request, results);
     }
 
@@ -83,9 +85,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         if ("".equals(iteratorId)) {
             iteratorId = UUID.randomUUID().toString();
             if (request.isRanged()) {
-                it = tree.query(request.getStart(), request.getEnd());
+                it = tree().query(request.getStart(), request.getEnd());
             } else {
-                it = tree.queryExtent();
+                it = tree().queryExtent();
             }
         } else {
             it = iterators.remove(iteratorId);
@@ -134,7 +136,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] key = request.getKey();
         byte[] value = request.getValue();
 
-        byte[] previous = tree.put(key, value);
+        byte[] previous = tree().put(key, value);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         if (previous != null) {
             results.add(key, previous);
@@ -146,26 +148,26 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     @Override
     public ResultResponse<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
         long[] key = request.getKey();
-        byte[] value = tree.remove(key);
+        byte[] value = tree().remove(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
     }
 
     @Override
     public IntegerResponse handleGetSize(BaseRequest request) {
-        int size = tree.size();
+        int size = tree().size();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, size);
     }
 
     @Override
     public IntegerResponse handleGetDim(BaseRequest request) {
-        int dim = tree.getDIM();
+        int dim = tree().getDIM();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, dim);
     }
 
     @Override
     public IntegerResponse handleGetDepth(BaseRequest request) {
-        int depth = tree.getDEPTH();
+        int depth = tree().getDEPTH();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, depth);
     }
 
@@ -240,7 +242,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return results;
     }
 
-    public PhTreeV<byte[]> getTree() {
-        return tree;
+    public PhTreeV<byte[]> tree() {
+        return indexContext.getTree();
     }
 }

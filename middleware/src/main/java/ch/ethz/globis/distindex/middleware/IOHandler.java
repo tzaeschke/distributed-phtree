@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
+import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
@@ -17,11 +18,16 @@ public class IOHandler<K, V> {
     private static final Logger LOG = LoggerFactory.getLogger(IOHandler.class);
 
     private RequestHandler<K, V> requestHandler;
+    private BalancingRequestHandler<K, V> balancingRequestHandler;
     private RequestDecoder<K, V> decoder;
     private ResponseEncoder<K, V> encoder;
 
-    public IOHandler(RequestHandler<K, V> requestHandler, RequestDecoder<K, V> decoder, ResponseEncoder<K, V> encoder) {
+    public IOHandler(RequestHandler<K, V> requestHandler,
+                     BalancingRequestHandler<K, V> balancingRequestHandler,
+                     RequestDecoder<K, V> decoder,
+                     ResponseEncoder<K, V> encoder) {
         this.requestHandler = requestHandler;
+        this.balancingRequestHandler = balancingRequestHandler;
         this.decoder = decoder;
         this.encoder = encoder;
     }
@@ -72,6 +78,15 @@ public class IOHandler<K, V> {
                 case OpCode.CONTAINS:
                     response = handleContains(buffer);
                     break;
+                case OpCode.BALANCE_INIT:
+                    response = handleBalanceInit(buffer);
+                    break;
+                case OpCode.BALANCE_PUT:
+                    response = handleBalancePut(buffer);
+                    break;
+                case OpCode.BALANCE_COMMIT:
+                    response = handleBalanceCommit(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -80,6 +95,18 @@ public class IOHandler<K, V> {
             response = handleErroneousRequest(buffer);
         }
         return response;
+    }
+
+    private ByteBuffer handleBalanceCommit(ByteBuffer buffer) {
+        throw new UnsupportedOperationException();
+    }
+
+    private ByteBuffer handleBalancePut(ByteBuffer buffer) {
+        throw new UnsupportedOperationException();
+    }
+
+    private ByteBuffer handleBalanceInit(ByteBuffer buffer) {
+        throw new UnsupportedOperationException();
     }
 
     private ByteBuffer handleContains(ByteBuffer buffer) {

@@ -6,7 +6,7 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.test.SimpleClusterService;
@@ -43,7 +43,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
 
     @Override
     protected Middleware createMiddleware(int i, String host, int port, String zkHost, int zkPort) {
-        return IndexMiddlewareFactory.newPhTree(host, port, clusterService);
+        return PhTreeIndexMiddlewareFactory.newPhTree(host, port, clusterService);
     }
 
     /**
@@ -503,7 +503,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
             IndexMiddleware mid = (IndexMiddleware) middleware;
             PhTreeRequestHandler rh = (PhTreeRequestHandler) mid.getHandler().getRequestHandler();
             String hostId = String.format("%s:%s", mid.getHost(), mid.getPort());
-            System.out.println(hostId + " " + reverse.get(hostId) + " " + rh.getTree().size());
+            System.out.println(hostId + " " + reverse.get(hostId) + " " + rh.tree().size());
         }
     }
 }
