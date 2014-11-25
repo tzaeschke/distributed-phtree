@@ -88,12 +88,30 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         return encodedRequest;
     }
 
-    public byte[] encodePutBalancingRequest(PutBalancingRequest<K> pbr) {
-        throw new UnsupportedOperationException("Operation not yet implemented.");
+    public byte[] encodePutBalancingRequest(PutBalancingRequest<K> request) {
+        K key = request.getKey();
+        byte[] value = request.getValue();
+        byte[] keyBytes = keyEncoder.encode(key);
+
+        int outputSize = keyBytes.length + 4        // key bytes + number of key bytes
+                + value.length + 4     // value bytes + number of value bytes
+                + request.metadataSize();   // metadata
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, keyBytes);
+        writeByteArray(buffer, value);
+        return buffer.array();
     }
 
-    public byte[] encodeInitBalancingRequest(InitBalancingRequest ibr) {
-        throw new UnsupportedOperationException("Operation not yet implemented.");
+    public byte[] encodeInitBalancingRequest(InitBalancingRequest request) {
+        int size = request.getSize();
+        int outputSize = request.metadataSize()
+                + 4;
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        buffer.putInt(size);
+        return buffer.array();
     }
 
     public byte[] encodeContains(ContainsRequest<K> request) {

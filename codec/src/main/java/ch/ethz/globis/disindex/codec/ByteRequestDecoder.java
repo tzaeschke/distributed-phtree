@@ -176,17 +176,30 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
 
     @Override
     public InitBalancingRequest decodeInitBalancing(ByteBuffer buffer) {
-        throw new UnsupportedOperationException("Operation not yet implemented.");
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        int size = buffer.getInt();
+        return new InitBalancingRequest(requestId, opCode, indexName, size);
     }
 
     @Override
     public PutBalancingRequest<K> decodePutBalancing(ByteBuffer buffer) {
-        throw new UnsupportedOperationException("Operation not yet implemented.");
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+
+        K key = decodeKey(buffer);
+        byte[] value = readValue(buffer);
+        return new PutBalancingRequest<>(requestId, opCode, indexName, key, value);
     }
 
     @Override
     public CommitBalancingRequest decodeCommitBalancing(ByteBuffer buffer) {
-        throw new UnsupportedOperationException("Operation not yet implemented.");
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        return new CommitBalancingRequest(requestId, opCode, indexName);
     }
 
     /**
