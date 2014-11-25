@@ -9,8 +9,8 @@ import static org.junit.Assert.assertEquals;
 public class BSTTest {
 
     @Test
-    public void testCreation() {
-        String[] keys = new String[]{"one", "two", "three", "four", "five", "six", "seven"};
+    public void testLeaves() {
+        String[] keys = new String[]{ "one", "two", "three", "four", "five", "six", "seven" };
         BST bst = BST.fromArray(keys);
         assertEquals(Arrays.asList(keys), bst.leaves());
     }
@@ -24,5 +24,33 @@ public class BSTTest {
         }
         BST bst = BST.fromArray(keys);
         assertEquals(Arrays.asList(keys), bst.leaves());
+    }
+
+    @Test
+    public void testGetNodes() {
+        BST bst = new BST();
+        int size = 100;
+        String[] keys = new String[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = String.valueOf(i);
+            bst.add(keys[i]);
+        }
+        assertEquals(size, bst.nodes().size());
+    }
+
+    @Test
+    public void testFindByContent() {
+        BST bst = new BST();
+        int size = 100;
+        String[] keys = new String[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = String.valueOf(i);
+            bst.add(keys[i]);
+        }
+
+        for (int i = 0; i < size; i++) {
+            BSTNode node = bst.findByContent(String.valueOf(i));
+            assertEquals(String.valueOf(i), node.getContent());
+        }
     }
 }

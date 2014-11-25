@@ -89,12 +89,16 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
-    public String getHostForSplitting(String host) {
+    public String getHostForSplitting() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public int size() {
         return hostList.size();
+    }
+
+    @Override
+    public void clear() {
     }
 }

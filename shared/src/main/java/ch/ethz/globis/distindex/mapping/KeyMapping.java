@@ -87,14 +87,18 @@ public interface KeyMapping<K> {
      * Should not necessarily bet the host with the smallest number of keys, as that host could be currently
      * part of a running re-balancing.
      *
-     * @param host
      * @return
      */
-    public String getHostForSplitting(String host);
+    public String getHostForSplitting();
 
     /**
      * Return the number of hosts within the mapping.
      * @return
      */
     public int size();
+
+    /**
+     * Clear the mapping.
+     */
+    public void clear();
 }

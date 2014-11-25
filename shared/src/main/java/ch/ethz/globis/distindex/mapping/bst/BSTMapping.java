@@ -11,6 +11,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
     private List<String> intervals;
 
     public BSTMapping() {
+        //this should not be used, but is needed for Kryo
     }
 
     public BSTMapping(KeyConverter<K> converter, String[] hosts) {
@@ -26,7 +27,8 @@ public class BSTMapping<K> implements KeyMapping<K> {
 
     @Override
     public void add(String host) {
-        addHost(host);
+        this.bst.add(host);
+        this.intervals = bst.leaves();
     }
 
     @Override
@@ -41,7 +43,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
-    public String getHostForSplitting(String host) {
+    public String getHostForSplitting() {
         List<BSTNode<K>> nodes = bst.nodes();
         Collections.sort(nodes, new Comparator<BSTNode<K>>() {
             @Override
@@ -51,7 +53,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
                 if (size1 == size2) {
                     return 0;
                 } else {
-                    if (size1 > size2) {
+                    if (size1 < size2) {
                         return 1;
                     } else {
                         return -1;
@@ -69,6 +71,12 @@ public class BSTMapping<K> implements KeyMapping<K> {
     public int size() {
         //ToDo implement this properly
         return bst.leaves().size();
+    }
+
+    @Override
+    public void clear() {
+        this.bst = new BST<>();
+        this.intervals = bst.leaves();
     }
 
     private BSTNode<K> remove(BSTNode<K> node, String host) {
@@ -92,54 +100,6 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return node;
     }
 
-    private void addHost(String host) {
-        Queue<BSTNode<K>> queue = new LinkedList<>();
-        BSTNode<K> theNewNode = newNode(host);
-        if (bst.getRoot() == null) {
-            bst.setRoot(theNewNode);
-        } else {
-            boolean inserted = false;
-            BSTNode<K> current;
-            queue.add(bst.getRoot());
-            while (!inserted) {
-                current = queue.poll();
-                if (addToNode(current, host)) {
-                    inserted = true;
-                } else {
-                    addToQueue(queue, current.leftChild());
-                    addToQueue(queue, current.rightChild());
-                }
-            }
-            queue.clear();
-        }
-        this.intervals = bst.leaves();
-    }
-
-    private boolean addToNode(BSTNode<K> parent, String host) {
-        if (parent.leftChild() == null && parent.rightChild() == null) {
-            BSTNode<K> node = new BSTNode<>();
-            node.setContent(parent.getContent());
-            parent.setContent(null);
-            parent.setLeft(node);
-            parent.setRight(newNode(host));
-            return true;
-        }
-        return false;
-    }
-
-    private BSTNode<K> newNode(String host) {
-        BSTNode<K> current = new BSTNode<>();
-        current.setContent(host);
-        return current;
-    }
-
-    private boolean addToQueue(Queue<BSTNode<K>> queue, BSTNode<K> node) {
-        if (node != null) {
-            queue.add(node);
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public String getHostId(K key) {

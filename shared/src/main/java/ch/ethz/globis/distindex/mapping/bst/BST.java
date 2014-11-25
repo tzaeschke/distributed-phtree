@@ -1,7 +1,9 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class BST<K> {
 
@@ -38,6 +40,53 @@ public class BST<K> {
         return current;
     }
 
+    public void add(String host) {
+        Queue<BSTNode<K>> queue = new LinkedList<>();
+        BSTNode<K> theNewNode = newNode(host);
+        if (root == null) {
+            root = theNewNode;
+        } else {
+            boolean inserted = false;
+            BSTNode<K> current;
+            queue.add(root);
+            while (!inserted) {
+                current = queue.poll();
+                if (addToNode(current, host)) {
+                    inserted = true;
+                } else {
+                    addToQueue(queue, current.leftChild());
+                    addToQueue(queue, current.rightChild());
+                }
+            }
+            queue.clear();
+        }
+    }
+
+    private boolean addToNode(BSTNode<K> parent, String host) {
+        if (parent.leftChild() == null && parent.rightChild() == null) {
+            BSTNode<K> node = new BSTNode<>();
+            node.setContent(parent.getContent());
+            parent.setContent(null);
+            parent.setLeft(node);
+            parent.setRight(newNode(host));
+            return true;
+        }
+        return false;
+    }
+
+    private BSTNode<K> newNode(String host) {
+        BSTNode<K> current = new BSTNode<>();
+        current.setContent(host);
+        return current;
+    }
+
+    private boolean addToQueue(Queue<BSTNode<K>> queue, BSTNode<K> node) {
+        if (node != null) {
+            queue.add(node);
+            return true;
+        }
+        return false;
+    }
     public List<String> getHosts(BSTNode<K> node) {
         List<String> hosts = new ArrayList<>();
         getHosts(node, hosts);
@@ -82,16 +131,19 @@ public class BST<K> {
     }
 
     private BSTNode<K> findByContent(BSTNode<K> root, String content) {
+        if (root == null) {
+            return null;
+        }
         if (root.getContent() != null && content.equals(root.getContent())) {
             return root;
         }
         BSTNode<K> node = findByContent(root.leftChild(), content);
         if (node != null) {
-            return root;
+            return node;
         }
         node = findByContent(root.rightChild(), content);
         if (node != null) {
-            return root;
+            return node;
         }
         return null;
     }
