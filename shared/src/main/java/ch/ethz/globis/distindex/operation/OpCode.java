@@ -15,4 +15,7 @@ public class OpCode {
     public static final byte CLOSE_ITERATOR = 27;
     public static final byte CONTAINS = 28;
 
+    public static final byte BALANCE_INIT = 30;
+    public static final byte BALANCE_PUT = 31;
+    public static final byte BALANCE_COMMIT = 32;
 }

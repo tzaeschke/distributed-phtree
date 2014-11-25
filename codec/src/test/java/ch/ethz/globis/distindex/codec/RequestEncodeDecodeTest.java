@@ -134,6 +134,34 @@ public class RequestEncodeDecodeTest {
     }
 
     @Test
+    public void encodeDecodeInitBalancingRequest() {
+        int size = new Random().nextInt();
+        InitBalancingRequest request = Requests.newInitBalancing(size);
+        byte[] encodedRequest = requestEncoder.encode(request);
+        InitBalancingRequest decoded = requestDecoder.decodeInitBalancing(ByteBuffer.wrap(encodedRequest));
+        assertEquals(request, decoded);
+    }
+
+    @Test
+    public void encodeDecodeCommitBalancingRequest() {
+        CommitBalancingRequest request = Requests.newCommitBalancing();
+        byte[] encodedRequest = requestEncoder.encode(request);
+        CommitBalancingRequest decoded = requestDecoder.decodeCommitBalancing(ByteBuffer.wrap(encodedRequest));
+        assertEquals(request, decoded);
+    }
+
+    @Test
+    public void encodeDecodePutBalancingRequest() {
+        long[] key = {-1000, 0, 10000, 1, -1};
+        String value = new BigInteger(100, new Random()).toString();
+        PutBalancingRequest<long[]> request = Requests.newPutBalancing(key, value.getBytes());
+
+        byte[] encodedRequest = requestEncoder.encode(request);
+        PutBalancingRequest<long[]> decoded = requestDecoder.decodePutBalancing(ByteBuffer.wrap(encodedRequest));
+        assertEquals(request, decoded);
+    }
+
+    @Test
     public void encodeDecodeGetSize() {
         BaseRequest request = Requests.newGetSize();
         encodeDecodeBasicRequest(request);

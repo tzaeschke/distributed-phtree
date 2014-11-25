@@ -33,4 +33,10 @@ public interface RequestDecoder<K, V> {
     public BaseRequest decodeBase(ByteBuffer buffer);
 
     public MapRequest decodeMap(ByteBuffer buffer);
+
+    public InitBalancingRequest decodeInitBalancing(ByteBuffer buffer);
+
+    public PutBalancingRequest<K> decodePutBalancing(ByteBuffer buffer);
+
+    public CommitBalancingRequest decodeCommitBalancing(ByteBuffer buffer);
 }

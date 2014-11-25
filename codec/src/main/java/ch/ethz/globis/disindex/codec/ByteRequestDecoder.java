@@ -174,6 +174,21 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         return new MapRequest(requestId, opCode, indexName, contents);
     }
 
+    @Override
+    public InitBalancingRequest decodeInitBalancing(ByteBuffer buffer) {
+        throw new UnsupportedOperationException("Operation not yet implemented.");
+    }
+
+    @Override
+    public PutBalancingRequest<K> decodePutBalancing(ByteBuffer buffer) {
+        throw new UnsupportedOperationException("Operation not yet implemented.");
+    }
+
+    @Override
+    public CommitBalancingRequest decodeCommitBalancing(ByteBuffer buffer) {
+        throw new UnsupportedOperationException("Operation not yet implemented.");
+    }
+
     /**
      * Decode a key from the current ByteBuffer.
      *

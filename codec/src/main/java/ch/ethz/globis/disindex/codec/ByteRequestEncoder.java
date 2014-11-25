@@ -62,8 +62,17 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             case OpCode.GET_DEPTH:
             case OpCode.GET_DIM:
             case OpCode.GET_SIZE:
+            case OpCode.BALANCE_COMMIT:
                 BaseRequest br = (BaseRequest) request;
                 encodedRequest = encodeBase(br);
+                break;
+            case OpCode.BALANCE_INIT:
+                InitBalancingRequest ibr = (InitBalancingRequest) request;
+                encodedRequest = encodeInitBalancingRequest(ibr);
+                break;
+            case OpCode.BALANCE_PUT:
+                PutBalancingRequest<K> pbr = (PutBalancingRequest) request;
+                encodedRequest = encodePutBalancingRequest(pbr);
                 break;
             case OpCode.CLOSE_ITERATOR:
                 MapRequest mr = (MapRequest) request;
@@ -79,7 +88,15 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         return encodedRequest;
     }
 
-    private byte[] encodeContains(ContainsRequest<K> request) {
+    public byte[] encodePutBalancingRequest(PutBalancingRequest<K> pbr) {
+        throw new UnsupportedOperationException("Operation not yet implemented.");
+    }
+
+    public byte[] encodeInitBalancingRequest(InitBalancingRequest ibr) {
+        throw new UnsupportedOperationException("Operation not yet implemented.");
+    }
+
+    public byte[] encodeContains(ContainsRequest<K> request) {
         K key = request.getKey();
         byte[] keyBytes = keyEncoder.encode(key);
 
