@@ -13,6 +13,11 @@ public class IndexEntryList<K, V> extends ArrayList<IndexEntry<K, V>> {
     public IndexEntryList() {
         super();
     }
+
+    public IndexEntryList(int size) {
+        super(size);
+    }
+
     public IndexEntryList(IndexEntry<K, V> entry) {
         super();
         add(entry);

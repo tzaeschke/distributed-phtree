@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -159,6 +160,8 @@ public class RequestEncodeDecodeTest {
         byte[] encodedRequest = requestEncoder.encode(request);
         PutBalancingRequest<long[]> decoded = requestDecoder.decodePutBalancing(ByteBuffer.wrap(encodedRequest));
         assertEquals(request, decoded);
+        assertArrayEquals(request.getKey(), decoded.getKey());
+        assertArrayEquals(request.getValue(), decoded.getValue());
     }
 
     @Test
