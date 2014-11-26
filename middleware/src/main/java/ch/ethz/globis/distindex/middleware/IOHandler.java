@@ -7,6 +7,7 @@ import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +21,12 @@ public class IOHandler<K, V> {
     private RequestHandler<K, V> requestHandler;
     private BalancingRequestHandler<K, V> balancingRequestHandler;
     private RequestDecoder<K, V> decoder;
-    private ResponseEncoder<K, V> encoder;
+    private ResponseEncoder encoder;
 
     public IOHandler(RequestHandler<K, V> requestHandler,
                      BalancingRequestHandler<K, V> balancingRequestHandler,
                      RequestDecoder<K, V> decoder,
-                     ResponseEncoder<K, V> encoder) {
+                     ResponseEncoder encoder) {
         this.requestHandler = requestHandler;
         this.balancingRequestHandler = balancingRequestHandler;
         this.decoder = decoder;
@@ -98,103 +99,101 @@ public class IOHandler<K, V> {
     }
 
     private ByteBuffer handleBalanceCommit(ByteBuffer buffer) {
-        throw new UnsupportedOperationException();
+        CommitBalancingRequest request = decoder.decodeCommitBalancing(buffer);
+        Response response = balancingRequestHandler.handleCommit(request);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleBalancePut(ByteBuffer buffer) {
-        throw new UnsupportedOperationException();
+        PutBalancingRequest<K> request = decoder.decodePutBalancing(buffer);
+        Response response = balancingRequestHandler.handlePut(request);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleBalanceInit(ByteBuffer buffer) {
-        throw new UnsupportedOperationException();
+        InitBalancingRequest request = decoder.decodeInitBalancing(buffer);
+        Response response = balancingRequestHandler.handleInit(request);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleContains(ByteBuffer buffer) {
         ContainsRequest<K> request = decoder.decodeContains(buffer);
         IntegerResponse response = requestHandler.handleContains(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleCloseIterator(String clientHost, ByteBuffer buffer) {
         MapRequest request = decoder.decodeMap(buffer);
         IntegerResponse response = requestHandler.handleCloseIterator(clientHost, request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetDimRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetDim(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetDepthRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetDepth(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetSizeRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
         IntegerResponse response = requestHandler.handleGetSize(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleDeleteRequest(ByteBuffer buf) {
         DeleteRequest<K> request = decoder.decodeDelete(buf);
         ResultResponse<K, V> response = requestHandler.handleDelete(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetBatchRequest(String clientHost, ByteBuffer buf) {
         GetIteratorBatchRequest<K> request = decoder.decodeGetBatch(buf);
         ResultResponse<K, V> response = requestHandler.handleGetIteratorBatch(clientHost, request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleCreateRequest(ByteBuffer buf) {
         CreateRequest request = decoder.decodeCreate(buf);
         ResultResponse<K, V> response = requestHandler.handleCreate(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handlePutRequest(ByteBuffer buf) {
         PutRequest<K, V> request = decoder.decodePut(buf);
         ResultResponse<K, V> response = requestHandler.handlePut(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetRequest(ByteBuffer buf) {
         GetRequest<K> request = decoder.decodeGet(buf);
         ResultResponse<K, V> response = requestHandler.handleGet(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetRangeRequest(ByteBuffer buf) {
         GetRangeRequest<K> request = decoder.decodeGetRange(buf);
         ResultResponse<K, V> response = requestHandler.handleGetRange(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleGetKNNRequest(ByteBuffer buf) {
         GetKNNRequest<K> request = decoder.decodeGetKNN(buf);
         ResultResponse<K, V> response = requestHandler.handleGetKNN(request);
-        byte[] responseBytes = encoder.encode(response);
-        return ByteBuffer.wrap(responseBytes);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleErroneousRequest(ByteBuffer buf) {
         ResultResponse<K, V> response = new ResultResponse<>((byte) 0, 0, OpStatus.FAILURE);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer encodeResponse(Response response) {
         byte[] responseBytes = encoder.encode(response);
         return ByteBuffer.wrap(responseBytes);
     }

@@ -24,7 +24,7 @@ public class ResponseEncodeDecodeTest {
 
     private FieldEncoderDecoder<long[]> keyCodec = new MultiLongEncoderDecoder();
     private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>();
-    private ResponseEncoder<long[], byte[]> encoder = new ByteResponseEncoder<>(keyCodec);
+    private ResponseEncoder encoder = new ByteResponseEncoder<>(keyCodec);
     private ResponseDecoder<long[], String> decoder = new ByteResponseDecoder<>(keyCodec, valueCodec);
 
     private Byte[] opCodes = {OpCode.GET, OpCode.CREATE_INDEX, OpCode.PUT, OpCode.GET_KNN, OpCode.GET_RANGE};

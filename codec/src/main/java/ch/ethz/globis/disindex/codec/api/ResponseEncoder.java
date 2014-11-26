@@ -1,19 +1,14 @@
 package ch.ethz.globis.disindex.codec.api;
 
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
-import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 
 /**
  * Contains operations corresponding to encoding responses send by the middleware node to the client library.
  *
  * The response parameters are encoded as byte arrays.
  *
- * @param <K>                       The type of key.
- * @param <V>                       The type of value.
  */
-public interface ResponseEncoder<K, V> {
+public interface ResponseEncoder {
 
-    public byte[] encode(ResultResponse<K, V> response);
-
-    public byte[] encode(IntegerResponse response);
+    public byte[] encode(Response response);
 }

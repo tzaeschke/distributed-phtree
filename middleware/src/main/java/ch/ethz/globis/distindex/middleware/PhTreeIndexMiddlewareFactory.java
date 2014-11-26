@@ -29,7 +29,7 @@ public class PhTreeIndexMiddlewareFactory {
         RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);
         BalancingRequestHandler<long[], byte[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
         RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
-        ResponseEncoder<long[], byte[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
+        ResponseEncoder responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
 
         IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, balancingRequestHandler, requestDecoder, responseEncoder);
         return new IndexMiddleware<>(host, port, clusterService, ioHandler);
@@ -40,7 +40,7 @@ public class PhTreeIndexMiddlewareFactory {
         RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);
         BalancingRequestHandler<long[], byte[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
         RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
-        ResponseEncoder<long[], byte[]> responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
+        ResponseEncoder responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
 
         IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, balancingRequestHandler, requestDecoder, responseEncoder);
         return newMiddleware(host, port, zkHost, zkPort, ioHandler);

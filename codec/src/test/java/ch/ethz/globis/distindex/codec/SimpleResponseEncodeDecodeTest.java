@@ -20,7 +20,7 @@ public class SimpleResponseEncodeDecodeTest {
 
     private FieldEncoderDecoder<long[]> keyCodec = new MultiLongEncoderDecoder();
     private FieldEncoderDecoder<String> valueCodec = new SerializingEncoderDecoder<>();
-    private ResponseEncoder<long[], byte[]> encoder = new ByteResponseEncoder<>(keyCodec);
+    private ResponseEncoder encoder = new ByteResponseEncoder<>(keyCodec);
     private ResponseDecoder<long[], String> decoder = new ByteResponseDecoder<>(keyCodec, valueCodec);
 
     @Test

@@ -4,10 +4,9 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.operation.OpCode;
-import ch.ethz.globis.distindex.operation.request.BalancingRequest;
-import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
-import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
-import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
+import ch.ethz.globis.distindex.operation.OpStatus;
+import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.pht.PhTreeV;
 
@@ -46,7 +45,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
         int size = request.getSize();
         buffer = new IndexEntryList<>(size);
 
-        return ackResponse();
+        return ackResponse(request);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
         byte[] value = request.getValue();
         buffer.add(key, value);
 
-        return ackResponse();
+        return ackResponse(request);
     }
 
     @Override
@@ -66,11 +65,10 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
                 tree.put(entry.getKey(), entry.getValue());
             }
         }
-        return ackResponse();
+        return ackResponse(request);
     }
 
-    private Response ackResponse() {
-        //ToDo implement and ACK response
-        return null;
+    private Response ackResponse(Request request) {
+        return new BaseResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
     }
 }

@@ -27,7 +27,7 @@ import java.util.Set;
  * Proxy class for working with a distributed, remote index.
  *
  * Translates each method call into a request to one or more remote remote nods which store the index data. The
- * received response are processed to decode the results. *
+ * received response are processed to decodeResult the results. *
  *
  * @param <K>
  * @param <V>

@@ -4,6 +4,7 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
@@ -26,7 +27,32 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
         this.valueDecoder = valueDecoder;
     }
 
-    public ResultResponse<K, V> decode(ByteBuffer buffer) {
+    @Override
+    public Response decode(byte[] payload) {
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
+
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        byte status = buffer.get();
+        return new BaseResponse(opCode, requestId, status);
+    }
+
+    @Override
+    public IntegerResponse decodeInteger(byte[] payload) {
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        byte status = buffer.get();
+        int value = buffer.getInt();
+        return new IntegerResponse(opCode, requestId, status, value);
+    }
+
+    @Override
+    public ResultResponse<K, V> decodeResult(byte[] payload) {
+        return decodeResult(ByteBuffer.wrap(payload));
+    }
+
+    public ResultResponse<K, V> decodeResult(ByteBuffer buffer) {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         byte status = buffer.get();
@@ -60,20 +86,5 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
         byte[] strBytes = new byte[strBytesNr];
         buffer.get(strBytes);
         return new String(strBytes);
-    }
-
-    @Override
-    public ResultResponse<K, V> decodeResult(byte[] payload) {
-        return decode(ByteBuffer.wrap(payload));
-    }
-
-    @Override
-    public IntegerResponse decodeInteger(byte[] payload) {
-        ByteBuffer buffer = ByteBuffer.wrap(payload);
-        byte opCode = buffer.get();
-        int requestId = buffer.getInt();
-        byte status = buffer.get();
-        int value = buffer.getInt();
-        return new IntegerResponse(opCode, requestId, status, value);
     }
 }

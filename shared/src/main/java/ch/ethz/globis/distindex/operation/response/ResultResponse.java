@@ -13,6 +13,8 @@ public class ResultResponse<K, V> implements Response {
 
     private IndexEntryList<K, V> entries;
 
+    public ResultResponse() {}
+
     public ResultResponse(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries) {
         this.opCode = opCode;
         this.requestId = requestId;

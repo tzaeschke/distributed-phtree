@@ -6,6 +6,7 @@ import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 import java.io.ByteArrayOutputStream;
@@ -15,9 +16,9 @@ import java.nio.ByteBuffer;
 /**
  * Encodes response messages sent by the server to the client.
  *
- * @param <K>                   The type of the key.
+ * @param <K>                       The type of key.
  */
-public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
+public class ByteResponseEncoder<K> implements ResponseEncoder {
 
     private FieldEncoder<K> keyEncoder;
 
@@ -25,7 +26,22 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         this.keyEncoder = keyEncoder;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+    public byte[] encode(Response response) {
+        if (response instanceof IntegerResponse) {
+            return encode((IntegerResponse) response);
+        } else if (response instanceof ResultResponse) {
+            return encode((ResultResponse<K, byte[]>) response);
+        }
+        return encodeBase(response);
+    }
+
+    /**
+     * Encode a result response.
+     *
+     * @param response                          The result response.
+     * @return
+     */
     public byte[] encode(ResultResponse<K, byte[]> response) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         buffer.write(response.getOpCode());
@@ -37,7 +53,12 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         return buffer.toByteArray();
     }
 
-    @Override
+    /**
+     * Encode an integer response.
+     *
+     * @param response                          The integer response.
+     * @return
+     */
     public byte[] encode(IntegerResponse response) {
         int outputSize = 4      // request id
                         + 1     // opcode
@@ -48,6 +69,23 @@ public class ByteResponseEncoder<K> implements ResponseEncoder<K, byte[]>{
         buffer.putInt(response.getRequestId());
         buffer.put(response.getStatus());
         buffer.putInt(response.getContent());
+        return buffer.array();
+    }
+
+    /**
+     * Encode a simple, base response.
+     *
+     * @param response
+     * @return
+     */
+    public byte[] encodeBase(Response response) {
+        int outputSize = 4      // request id
+                + 1             // opcode
+                + 1;            // status
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        buffer.put(response.getOpCode());
+        buffer.putInt(response.getRequestId());
+        buffer.put(response.getStatus());
         return buffer.array();
     }
 

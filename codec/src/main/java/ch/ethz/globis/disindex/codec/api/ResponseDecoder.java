@@ -14,6 +14,8 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
  */
 public interface ResponseDecoder<K, V> {
 
+    public Response decode(byte[] payload);
+
     public ResultResponse<K, V> decodeResult(byte[] payload);
 
     public IntegerResponse decodeInteger(byte[] payload);
