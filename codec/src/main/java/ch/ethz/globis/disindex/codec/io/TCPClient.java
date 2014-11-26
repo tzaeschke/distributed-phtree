@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.client.io;
+package ch.ethz.globis.disindex.codec.io;
 
 import ch.ethz.globis.disindex.codec.util.BitUtils;
 

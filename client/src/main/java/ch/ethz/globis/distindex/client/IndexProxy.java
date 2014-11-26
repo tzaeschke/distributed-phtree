@@ -6,7 +6,7 @@ import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.exception.InvalidResponseException;
 import ch.ethz.globis.distindex.client.exception.ServerErrorException;
-import ch.ethz.globis.distindex.client.io.RequestDispatcher;
+import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
