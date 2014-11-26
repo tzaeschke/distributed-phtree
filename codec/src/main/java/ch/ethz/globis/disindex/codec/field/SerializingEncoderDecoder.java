@@ -44,6 +44,7 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public byte[] encode(V value) {
         if (value == null) {
             return new byte[0];

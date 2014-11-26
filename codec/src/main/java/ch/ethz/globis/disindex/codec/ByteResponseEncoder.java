@@ -5,12 +5,17 @@ import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Output;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -32,6 +37,8 @@ public class ByteResponseEncoder<K> implements ResponseEncoder {
             return encode((IntegerResponse) response);
         } else if (response instanceof ResultResponse) {
             return encode((ResultResponse<K, byte[]>) response);
+        } else if (response instanceof MapResponse) {
+            return encodeMap((MapResponse) response);
         }
         return encodeBase(response);
     }
@@ -75,7 +82,7 @@ public class ByteResponseEncoder<K> implements ResponseEncoder {
     /**
      * Encode a simple, base response.
      *
-     * @param response
+     * @param response                          The base response.
      * @return
      */
     public byte[] encodeBase(Response response) {
@@ -87,6 +94,18 @@ public class ByteResponseEncoder<K> implements ResponseEncoder {
         buffer.putInt(response.getRequestId());
         buffer.put(response.getStatus());
         return buffer.array();
+    }
+
+    /**
+     * Encode a map response.
+     * @param response                          The map response.
+     * @return
+     */
+    public byte[] encodeMap(MapResponse response) {
+        Output output = new Output(new ByteArrayOutputStream());
+        Kryo kryo = new Kryo();
+        kryo.writeObject(output, response);
+        return output.toBytes();
     }
 
     public void encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {

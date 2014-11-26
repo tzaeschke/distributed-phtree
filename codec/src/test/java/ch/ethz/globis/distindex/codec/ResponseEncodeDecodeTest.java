@@ -11,11 +11,15 @@ import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
+import ch.ethz.globis.distindex.operation.response.BaseResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +35,7 @@ public class ResponseEncodeDecodeTest {
     private Byte[] opStatuses = {OpStatus.SUCCESS, OpStatus.FAILURE};
 
     @Test
-    public void encodeResponse() {
+    public void encodeDecodeResultResponse() {
         Random random = new Random();
         byte opCode = getRandom(opCodes, random);
         byte opStatus = getRandom(opStatuses, random);
@@ -45,6 +49,37 @@ public class ResponseEncodeDecodeTest {
         ResultResponse<long[], String> decodedResponse = decoder.decodeResult(encodedResponse);
         assertEqualsMeta(response, decodedResponse);
         assertEqualsResults(response.getEntries(), decodedResponse.getEntries(), valueCodec);
+    }
+
+    @Test
+    public void encodeDecodeBaseResponse() {
+        Random random = new Random();
+        byte opCode = getRandom(opCodes, random);
+        byte opStatus = getRandom(opStatuses, random);
+        int requestId = random.nextInt();
+
+        Response response = new BaseResponse(opCode, requestId, opStatus);
+
+        byte[] data = encoder.encode(response);
+        Response decodedResponse = decoder.decode(data);
+        assertEquals(response, decodedResponse);
+    }
+
+    @Test
+    public void encodeDecodeMapResponse() {
+        Random random = new Random();
+        byte opCode = getRandom(opCodes, random);
+        byte opStatus = getRandom(opStatuses, random);
+        int requestId = random.nextInt();
+        MapResponse response = new MapResponse(opCode, requestId, opStatus);
+        for (int i = 0; i < 10; i++) {
+            UUID object = UUID.randomUUID();
+            String key = object.toString();
+            response.addParameter(key, key);
+        }
+        byte[] data = encoder.encode(response);
+        MapResponse decodedResponse = decoder.decodeMap(data);
+        assertEquals(response, decodedResponse);
     }
 
     private void assertEqualsMeta(ResultResponse<long[], byte[]> original, ResultResponse<long[], String> decoded) {

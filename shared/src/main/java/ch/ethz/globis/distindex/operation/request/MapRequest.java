@@ -18,7 +18,7 @@ public class MapRequest extends BaseRequest {
     }
 
     public void addParamater(String key, Object value) {
-        contents.put(key, value.toString());
+        contents.put(key, String.valueOf(value));
     }
 
     public String getParameter(String key) {

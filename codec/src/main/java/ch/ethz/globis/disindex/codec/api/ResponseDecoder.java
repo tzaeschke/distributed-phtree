@@ -1,6 +1,7 @@
 package ch.ethz.globis.disindex.codec.api;
 
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
@@ -19,4 +20,6 @@ public interface ResponseDecoder<K, V> {
     public ResultResponse<K, V> decodeResult(byte[] payload);
 
     public IntegerResponse decodeInteger(byte[] payload);
+
+    public MapResponse decodeMap(byte[] payload);
 }
