@@ -12,6 +12,7 @@ public class BSTNode<K> {
 
     public BSTNode(String content, int size) {
         this.content = content;
+        this.size = size;
     }
 
     public BSTNode(BSTNode<K> original) {

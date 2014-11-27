@@ -84,6 +84,11 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setSize(String host, int size) {
         throw new UnsupportedOperationException();
     }
@@ -100,5 +105,10 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     @Override
     public void clear() {
+    }
+
+    @Override
+    public String getLargestZone(String currentHostId) {
+        return null;
     }
 }

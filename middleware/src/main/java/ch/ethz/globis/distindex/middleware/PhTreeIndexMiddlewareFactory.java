@@ -20,7 +20,7 @@ import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 public class PhTreeIndexMiddlewareFactory {
 
     public static IndexMiddleware<long[], byte[]> newPhTree(String host, int port, ClusterService<long[]> clusterService) {
-        IndexContext indexContext = new IndexContext();
+        IndexContext indexContext = new IndexContext(host, port);
         indexContext.setClusterService(clusterService);
 
         RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);

@@ -1,6 +1,7 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -34,6 +35,20 @@ public class BSTMapping<K> implements KeyMapping<K> {
     @Override
     public void remove(String host) {
         bst.setRoot(remove(bst.getRoot(), host));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
+        //ToDo split the zone with the largest size
+        BSTNode<K> splitting = bst.findByContent(splittingHostId);
+        int previousSize = splitting.getSize();
+        bst.addToNode(splitting, receiverHostId);
+        BSTNode<K> oldZone = splitting.leftChild();
+        oldZone.setSize(previousSize - sizeMoved);
+
+        BSTNode<K> newZone = splitting.rightChild();
+        newZone.setSize(sizeMoved);
     }
 
     @Override
@@ -77,6 +92,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
     public void clear() {
         this.bst = new BST<>();
         this.intervals = bst.leaves();
+    }
+
+    @Override
+    public String getLargestZone(String currentHostId) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private BSTNode<K> remove(BSTNode<K> node, String host) {
@@ -225,6 +245,10 @@ public class BSTMapping<K> implements KeyMapping<K> {
             position++;
         }
         return previous;
+    }
+
+    public BST<K> getBst() {
+        return bst;
     }
 
     @Override

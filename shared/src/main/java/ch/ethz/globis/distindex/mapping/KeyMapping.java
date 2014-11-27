@@ -6,6 +6,9 @@ import java.util.Set;
 
 public interface KeyMapping<K> {
 
+    /**
+     * @return                  the prefix - host mapping.
+     */
     public Map<String, String> asMap();
 
     /**
@@ -59,6 +62,11 @@ public interface KeyMapping<K> {
      */
     public Set<String> getHostsContaining(List<K> keys);
 
+    /**
+     * Get the depth of the hostId.
+     * @param hostId
+     * @return
+     */
     public int getDepth(String hostId);
 
     /**
@@ -72,6 +80,13 @@ public interface KeyMapping<K> {
      * @param host
      */
     public void remove(String host);
+
+    /**
+     *
+     * @param splittingHostId
+     * @param receiverHostId
+     */
+    public void split(String splittingHostId, String receiverHostId, int sizeMoved);
 
     /**
      * Set the number of keys associated with a host.
@@ -101,4 +116,13 @@ public interface KeyMapping<K> {
      * Clear the mapping.
      */
     public void clear();
+
+    /**
+     * Get the zone that has the largest size from the zones owned by the host whose hostId is
+     * received as an argument.
+     *
+     * @param currentHostId                             The hostId
+     * @return
+     */
+    public String getLargestZone(String currentHostId);
 }

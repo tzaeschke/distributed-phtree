@@ -1,6 +1,7 @@
 package ch.ethz.globis.distindex.middleware.balancing;
 
 import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
+import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
@@ -12,12 +13,15 @@ import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.pht.BitTools;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
 
 /**
  * The simple balancing strategy.
  */
-public class SplitBalancingStrategy implements BalancingStrategy {
+public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
 
     /** The in-memory index context */
     private IndexContext indexContext;
@@ -28,7 +32,7 @@ public class SplitBalancingStrategy implements BalancingStrategy {
     /** The entries that are currently moved to another host. */
     private IndexEntryList<long[], byte[]> buffer;
 
-    public SplitBalancingStrategy(IndexContext indexContext) {
+    public SplitEvenHalfBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
     }
 
@@ -42,7 +46,7 @@ public class SplitBalancingStrategy implements BalancingStrategy {
         initBalancing(entries.size(), receiverHostId);
         sendEntries(entries, receiverHostId);
         commitBalancing(receiverHostId);
-        updateMapping(currentHostId, receiverHostId);
+        updateMapping(currentHostId, receiverHostId, entries.size());
         removeEntries(entries);
     }
 
@@ -53,8 +57,8 @@ public class SplitBalancingStrategy implements BalancingStrategy {
      * @param currentHostId                     The hostId of the splitting host.
      * @param receiverHostId                    The hostId of the receiving host.
      */
-    private void updateMapping(String currentHostId, String receiverHostId) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    private void updateMapping(String currentHostId, String receiverHostId, int newSize) {
+        getMapping().split(currentHostId, receiverHostId, newSize);
     }
 
     /**
@@ -87,6 +91,12 @@ public class SplitBalancingStrategy implements BalancingStrategy {
         }
     }
 
+    /**
+     * Send an initialize balancing request to the host whose hostId was received as an argument.
+     *
+     * @param entriesToSend
+     * @param receiverHostId
+     */
     private void initBalancing(int entriesToSend, String receiverHostId) {
         InitBalancingRequest request = Requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request);
@@ -95,6 +105,11 @@ public class SplitBalancingStrategy implements BalancingStrategy {
         }
     }
 
+    /**
+     * Send a commit balancing request to the hose whose hostId was received as an argument.
+     *
+     * @param receiverHostId
+     */
     private void commitBalancing( String receiverHostId) {
         CommitBalancingRequest request = Requests.newCommitBalancing();
         Response response = requestDispatcher.send(receiverHostId, request);
@@ -103,11 +118,37 @@ public class SplitBalancingStrategy implements BalancingStrategy {
         }
     }
 
+    /**
+     * Get a list of entries that will be sent to the other host to perform the re-balancing.
+     *
+     * @param currentHostId
+     * @return
+     */
     private IndexEntryList<long[], byte[]> getEntriesForSplitting(String currentHostId) {
+        //get the zone that needs to be split
+        PhTreeV<byte[]> treeV = indexContext.getTree();
+        int dim = treeV.getDIM();
+        int depth = treeV.getDEPTH();
+        KeyMapping<long[]> mapping = getMapping();
+        String prefix = mapping.getLargestZone(currentHostId);
 
-        throw new UnsupportedOperationException("Not currently implemented.");
+        //get the iterator over the zone that will be moved
+        long[] start = BitUtils.generateRangeStart(prefix, dim, depth);
+        long[] end = BitUtils.generateRangeEnd(prefix, dim, depth);
+        PVIterator<byte[]> query = treeV.query(start, end);
+
+        //retrieve all entries that will be moved
+        IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
+        while (query.hasNext()) {
+            PVEntry<byte[]> e = query.nextEntry();
+            entries.add(e.getKey(), e.getValue());
+        }
+        return entries;
     }
 
+    /**
+     * @return                                  The current key-host mapping.
+     */
     private KeyMapping<long[]> getMapping() {
         return indexContext.getClusterService().getMapping();
     }
