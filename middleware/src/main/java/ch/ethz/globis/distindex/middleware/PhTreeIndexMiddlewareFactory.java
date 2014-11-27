@@ -19,13 +19,10 @@ import ch.ethz.globis.distindex.orchestration.ZKClusterService;
  */
 public class PhTreeIndexMiddlewareFactory {
 
-    public static <K, V> IndexMiddleware newMiddleware(String host, int port, String zkHost, int zkPort, IOHandler<K, V> ioHandler) {
-        ClusterService<long[]> clusterService = new ZKClusterService(zkHost, zkPort);
-        return new IndexMiddleware<>(host, port, clusterService, ioHandler);
-    }
-
     public static IndexMiddleware<long[], byte[]> newPhTree(String host, int port, ClusterService<long[]> clusterService) {
         IndexContext indexContext = new IndexContext();
+        indexContext.setClusterService(clusterService);
+
         RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);
         BalancingRequestHandler<long[], byte[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
         RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
@@ -36,17 +33,7 @@ public class PhTreeIndexMiddlewareFactory {
     }
 
     public static IndexMiddleware newPhTree(String host, int port, String zkHost, int zkPort) {
-        IndexContext indexContext = new IndexContext();
-        RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);
-        BalancingRequestHandler<long[], byte[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
-        RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
-        ResponseEncoder responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
-
-        IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, balancingRequestHandler, requestDecoder, responseEncoder);
-        return newMiddleware(host, port, zkHost, zkPort, ioHandler);
-    }
-
-    public static IndexMiddleware newLocalPhTree(int port) {
-        return newPhTree("localhost", port, "localhost", 2181);
+        ClusterService<long[]> clusterService = new ZKClusterService(zkHost, zkPort);
+        return newPhTree(host, port, clusterService);
     }
 }

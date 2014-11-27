@@ -101,4 +101,70 @@ public class BitUtils {
         }
         return longArray;
     }
+
+    /**
+     * Generate the start of the range that corresponds to the prefix received as an argument.
+     *
+     * This is done by extracting the even bits from the prefix and padding with zeroes.
+     *
+     * @param rangePrefix           The bit prefix as a string.
+     * @param dim                   The number of dimensions of the points.
+     * @param depth                 The bit-depth of the points.
+     * @return                      The start point of the range.
+     */
+    public static long[] generateRangeStart(String rangePrefix, int dim, int depth) {
+        int length = rangePrefix.length();
+        int pos = depth * dim;
+        for (int i = 0; i < pos - length; i++) {
+            rangePrefix += "0";
+        }
+        long[] point = new long[dim];
+        for (int i = 0; i < length; i+=2) {
+            if (rangePrefix.charAt(pos - length) == '1') {
+                setBit(point, pos, dim);
+            }
+            pos--;
+        }
+        return point;
+    }
+
+    /**
+     * Generate the end of the range that corresponds to the prefix received as an argument.
+     *
+     * This is done by extracting the odd bits from the prefix and padding with 1's.
+     *
+     * @param rangePrefix           The bit prefix as a string.
+     * @param dim                   The number of dimensions of the points.
+     * @param depth                 The bit-depth of the points.
+     * @return                      The end point of the range.
+     */
+    public static long[] generateRangeEnd(String rangePrefix, int dim, int depth) {
+        int length = rangePrefix.length();
+        int pos = depth * dim;
+        for (int i = 0; i < pos - length; i++) {
+            rangePrefix += "1";
+        }
+        long[] point = new long[dim];
+        for (int i = 1; i < length; i+=2) {
+            if (rangePrefix.charAt(pos - length) == '1') {
+                setBit(point, pos, dim);
+            }
+            pos--;
+        }
+        return point;
+    }
+
+    /**
+     * Set the bit with the position received as an argument to the multi-dimension point received
+     * as an argument.
+     *
+     * @param data                  The multi-dimensional point.
+     * @param position              The position that should be set.
+     * @param bitWidth              The bitWidth of each dimension.
+     */
+    private static void setBit(long[] data, int position, int bitWidth) {
+        int dimIndex = position % data.length;
+        int bitIndex = bitWidth - 1 - position / data.length;
+        data[dimIndex] = data[dimIndex] | (1 << bitIndex);
+    }
 }

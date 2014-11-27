@@ -142,7 +142,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      */
     List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
-//        List<String> allHostIds = keyMapping.getHostIds();
         String hostId = keyMapping.getHostId(key);
 
         List<long[]> candidates;

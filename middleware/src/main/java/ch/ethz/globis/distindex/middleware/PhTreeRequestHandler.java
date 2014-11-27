@@ -14,6 +14,9 @@ import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.util.*;
 
+/**
+ * An implementation of the RequestHandler backed by an in-memory PhTree. *
+ */
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     private IndexContext indexContext;
