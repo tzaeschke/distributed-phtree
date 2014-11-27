@@ -49,7 +49,7 @@ public class BSTTest {
         }
 
         for (int i = 0; i < size; i++) {
-            BSTNode node = bst.findByContent(String.valueOf(i));
+            BSTNode node = bst.findFirstByContent(String.valueOf(i));
             assertEquals(String.valueOf(i), node.getContent());
         }
     }

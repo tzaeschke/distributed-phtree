@@ -1,8 +1,10 @@
 package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.middleware.balancing.BalancingStrategy;
+import ch.ethz.globis.distindex.middleware.balancing.SplitEvenHalfBalancingStrategy;
+import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
-import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
@@ -10,7 +12,6 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 
 import java.util.*;
 
@@ -19,13 +20,22 @@ import java.util.*;
  */
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
+    /** Need to make this configurable*/
+    private static final int THRESHOLD = 100;
+
+    /** The index context associated with this handler. */
     private IndexContext indexContext;
 
+    /** The balancing strategy used */
+    private BalancingStrategy balancingStrategy;
+
     private Map<String, PVIterator<byte[]>> iterators;
+
     private Map<String, Set<String>> clientIteratorMapping;
 
     public PhTreeRequestHandler(IndexContext indexContext) {
         this.indexContext = indexContext;
+        this.balancingStrategy = new SplitEvenHalfBalancingStrategy(indexContext);
         this.iterators = new HashMap<>();
         this.clientIteratorMapping = new HashMap<>();
     }
@@ -141,10 +151,13 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         byte[] previous = tree().put(key, value);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
+
         if (previous != null) {
             results.add(key, previous);
-        }
 
+            //only need to check balancing if we actually inserted something
+            checkBalancing();
+        }
         return createResponse(request, results);
     }
 
@@ -152,6 +165,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     public ResultResponse<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
         long[] key = request.getKey();
         byte[] value = tree().remove(key);
+        if (value != null) {
+            checkBalancing();
+        }
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
     }
@@ -189,6 +205,12 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             for (String iteratorId : iteratorIds) {
                 removeIteratorForClient(clientHost, iteratorId);
             }
+        }
+    }
+
+    private void checkBalancing() {
+        if (indexContext.getTree().size() > THRESHOLD) {
+            balancingStrategy.balance();
         }
     }
 

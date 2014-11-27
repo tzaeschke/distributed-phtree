@@ -1,42 +1,44 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
-public class BSTNode<K> {
+public class BSTNode {
 
-    private BSTNode<K> left, right;
+    private BSTNode left, right;
     private String content;
-    private K key;
     private int size;
+    private String prefix;
 
     public BSTNode() {
     }
 
-    public BSTNode(String content, int size) {
+    public BSTNode(String prefix, String content, int size) {
+        this.prefix = prefix;
         this.content = content;
         this.size = size;
     }
 
-    public BSTNode(BSTNode<K> original) {
-        this(original.getContent(), original.getSize());
+    public BSTNode(BSTNode original) {
+        this.content = original.getContent();
+        this.size = original.getSize();
     }
 
     public void clear() {
-        this.setKey(null);
+        this.setContent(null);
         this.setSize(0);
     }
 
-    public BSTNode<K> leftChild() {
+    public BSTNode leftChild() {
         return left;
     }
 
-    public void setLeft(BSTNode<K> left) {
+    public void setLeft(BSTNode left) {
         this.left = left;
     }
 
-    public BSTNode<K> rightChild() {
+    public BSTNode rightChild() {
         return right;
     }
 
-    public void setRight(BSTNode<K> right) {
+    public void setRight(BSTNode right) {
         this.right = right;
     }
 
@@ -48,14 +50,6 @@ public class BSTNode<K> {
         this.content = content;
     }
 
-    public K getKey() {
-        return key;
-    }
-
-    public void setKey(K key) {
-        this.key = key;
-    }
-
     public int getSize() {
         return size;
     }
@@ -64,29 +58,33 @@ public class BSTNode<K> {
         this.size = size;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BSTNode)) return false;
 
-        BSTNode bstNode = (BSTNode) o;
+        BSTNode node = (BSTNode) o;
 
-        if (size != bstNode.size) return false;
-        if (content != null ? !content.equals(bstNode.content) : bstNode.content != null) return false;
-        if (key != null ? !key.equals(bstNode.key) : bstNode.key != null) return false;
-        if (left != null ? !left.equals(bstNode.left) : bstNode.left != null) return false;
-        if (right != null ? !right.equals(bstNode.right) : bstNode.right != null) return false;
+        if (size != node.size) return false;
+        if (content != null ? !content.equals(node.content) : node.content != null) return false;
+        if (prefix != null ? !prefix.equals(node.prefix) : node.prefix != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = left != null ? left.hashCode() : 0;
-        result = 31 * result + (right != null ? right.hashCode() : 0);
-        result = 31 * result + (content != null ? content.hashCode() : 0);
-        result = 31 * result + (key != null ? key.hashCode() : 0);
+        int result = content != null ? content.hashCode() : 0;
         result = 31 * result + size;
+        result = 31 * result + (prefix != null ? prefix.hashCode() : 0);
         return result;
     }
 }

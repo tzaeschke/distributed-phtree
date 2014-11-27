@@ -1,13 +1,12 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import org.junit.Test;
 
 import java.util.*;
 
 public class BSTMapping<K> implements KeyMapping<K> {
 
-    private BST<K> bst;
+    private BST bst;
     private KeyConverter<K> converter;
     private List<String> intervals;
 
@@ -23,7 +22,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
 
     public BSTMapping(KeyConverter<K> converter) {
         this.converter = converter;
-        this.bst = new BST<>();
+        this.bst = new BST();
     }
 
     @Override
@@ -41,28 +40,28 @@ public class BSTMapping<K> implements KeyMapping<K> {
     @Override
     public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
         //ToDo split the zone with the largest size
-        BSTNode<K> splitting = bst.findByContent(splittingHostId);
+        BSTNode splitting = bst.findFirstByContent(splittingHostId);
         int previousSize = splitting.getSize();
         bst.addToNode(splitting, receiverHostId);
-        BSTNode<K> oldZone = splitting.leftChild();
+        BSTNode oldZone = splitting.leftChild();
         oldZone.setSize(previousSize - sizeMoved);
 
-        BSTNode<K> newZone = splitting.rightChild();
+        BSTNode newZone = splitting.rightChild();
         newZone.setSize(sizeMoved);
     }
 
     @Override
     public void setSize(String host, int size) {
-        BSTNode<K> node = bst.findByContent(host);
+        BSTNode node = bst.findFirstByContent(host);
         node.setSize(size);
     }
 
     @Override
     public String getHostForSplitting() {
-        List<BSTNode<K>> nodes = bst.nodes();
-        Collections.sort(nodes, new Comparator<BSTNode<K>>() {
+        List<BSTNode> nodes = bst.nodes();
+        Collections.sort(nodes, new Comparator<BSTNode>() {
             @Override
-            public int compare(BSTNode<K> o1, BSTNode<K> o2) {
+            public int compare(BSTNode o1, BSTNode o2) {
                 int size1 = o1.getSize();
                 int size2 = o2.getSize();
                 if (size1 == size2) {
@@ -90,16 +89,25 @@ public class BSTMapping<K> implements KeyMapping<K> {
 
     @Override
     public void clear() {
-        this.bst = new BST<>();
+        this.bst = new BST();
         this.intervals = bst.leaves();
     }
 
     @Override
     public String getLargestZone(String currentHostId) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        List<BSTNode> nodes = bst.findByContent(currentHostId);
+        int maxSize = 0;
+        BSTNode largest = null;
+        for (BSTNode node : nodes) {
+            if (node.getSize() > maxSize) {
+                largest = node;
+                maxSize = node.getSize();
+            }
+        }
+        return (largest == null) ? null : largest.getPrefix();
     }
 
-    private BSTNode<K> remove(BSTNode<K> node, String host) {
+    private BSTNode remove(BSTNode node, String host) {
         if (node.getContent() != null) {
             if (host.equals(node.getContent())) {
                 return null;
@@ -107,13 +115,18 @@ public class BSTMapping<K> implements KeyMapping<K> {
                 return node;
             }
         }
-        BSTNode<K> left = remove(node.leftChild(), host);
-        BSTNode<K> right = remove(node.rightChild(), host);
+        BSTNode left = remove(node.leftChild(), host);
+        BSTNode right = remove(node.rightChild(), host);
+        BSTNode returned;
         if (left == null) {
-            return new BSTNode<>(right);
+            returned = new BSTNode(right);
+            returned.setPrefix(node.getPrefix());
+            return returned;
         }
         if (right == null) {
-            return new BSTNode<>(left);
+            returned = new BSTNode(left);
+            returned.setPrefix(node.getPrefix());
+            return returned;
         }
         node.setLeft(left);
         node.setRight(right);
@@ -142,7 +155,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
     @Override
     public List<String> getHostIds(String prefix) {
         int prefixLength = prefix.length();
-        BSTNode<K> current = bst.getRoot();
+        BSTNode current = bst.getRoot();
         int i = 0;
         String lastHost = null;
         while (current != null && i < prefixLength) {
@@ -205,7 +218,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return codeHosts;
     }
 
-    private void getHosts(String partial, BSTNode<K> node, Map<String, String> map) {
+    private void getHosts(String partial, BSTNode node, Map<String, String> map) {
         if (node != null) {
             getHosts(partial + "0", node.leftChild(), map);
             if (node.getContent() != null) {
@@ -220,7 +233,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return getDepth(hostId, bst.getRoot(), 0);
     }
 
-    private int getDepth(String hostId, BSTNode<K> node, int depth) {
+    private int getDepth(String hostId, BSTNode node, int depth) {
         if (node == null) {
             return 0;
         }
@@ -232,13 +245,13 @@ public class BSTMapping<K> implements KeyMapping<K> {
 
     }
 
-    private BSTNode<K> find(K key) {
-        BSTNode<K> current = bst.getRoot();
+    private BSTNode find(K key) {
+        BSTNode current = bst.getRoot();
         if (current == null) {
             return null;
         }
         int position = 0;
-        BSTNode<K> previous = null;
+        BSTNode previous = null;
         while (current != null) {
             previous = current;
             current = converter.isBitSet(key, position) ? current.rightChild() : current.leftChild();
@@ -247,7 +260,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return previous;
     }
 
-    public BST<K> getBst() {
+    public BST getBst() {
         return bst;
     }
 

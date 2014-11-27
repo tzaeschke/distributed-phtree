@@ -5,9 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class BST<K> {
+/***
+ * A binary search tree implementation.
+ */
+public class BST {
 
-    private BSTNode<K> root;
+    private BSTNode root;
 
     public BSTNode getRoot() {
         return root;
@@ -18,13 +21,14 @@ public class BST<K> {
     }
 
     public void add(String host) {
-        Queue<BSTNode<K>> queue = new LinkedList<>();
-        BSTNode<K> theNewNode = newNode(host);
+        Queue<BSTNode> queue = new LinkedList<>();
+        BSTNode theNewNode = newNode(host);
         if (root == null) {
             root = theNewNode;
+            root.setPrefix("");
         } else {
             boolean inserted = false;
-            BSTNode<K> current;
+            BSTNode current;
             queue.add(root);
             while (!inserted) {
                 current = queue.poll();
@@ -39,38 +43,42 @@ public class BST<K> {
         }
     }
 
-    public boolean addToNode(BSTNode<K> parent, String host) {
+    public boolean addToNode(BSTNode parent, String host) {
         if (parent.leftChild() == null && parent.rightChild() == null) {
-            BSTNode<K> node = new BSTNode<>(parent);
-            //node.setContent(parent.getContent());
-            parent.setContent(null);
+            BSTNode node = new BSTNode(parent);
+            node.setPrefix(parent.getPrefix() + "0");
+
             parent.setLeft(node);
-            parent.setRight(newNode(host));
+            BSTNode newNode = newNode(host);
+            newNode.setPrefix(parent.getPrefix() + "1");
+            parent.setRight(newNode);
+
+            parent.clear();
             return true;
         }
         return false;
     }
 
-    private BSTNode<K> newNode(String host) {
-        BSTNode<K> current = new BSTNode<>();
+    private BSTNode newNode(String host) {
+        BSTNode current = new BSTNode();
         current.setContent(host);
         return current;
     }
 
-    private boolean addToQueue(Queue<BSTNode<K>> queue, BSTNode<K> node) {
+    private boolean addToQueue(Queue<BSTNode> queue, BSTNode node) {
         if (node != null) {
             queue.add(node);
             return true;
         }
         return false;
     }
-    public List<String> getHosts(BSTNode<K> node) {
+    public List<String> getHosts(BSTNode node) {
         List<String> hosts = new ArrayList<>();
         getHosts(node, hosts);
         return hosts;
     }
 
-    private void getHosts(BSTNode<K> node, List<String> hosts) {
+    private void getHosts(BSTNode node, List<String> hosts) {
         if (node != null) {
             getHosts(node.leftChild(), hosts);
             if (node.getContent() != null) {
@@ -86,13 +94,13 @@ public class BST<K> {
         return results;
     }
 
-    public List<BSTNode<K>> nodes() {
-        List<BSTNode<K>> results = new ArrayList<>();
+    public List<BSTNode> nodes() {
+        List<BSTNode> results = new ArrayList<>();
         getNodes(root, results);
         return results;
     }
 
-    private void getNodes(BSTNode<K> root, List<BSTNode<K>> results) {
+    private void getNodes(BSTNode root, List<BSTNode> results) {
         if (root == null) {
             return;
         }
@@ -103,41 +111,48 @@ public class BST<K> {
         getNodes(root.rightChild(), results);
     }
 
-    public static <K> BST<K> fromArray(String[] array) {
+    public static  BST fromArray(String[] array) {
         BSTNode node = fromArray(array, 0, array.length - 1);
-        BST<K> bst =  new BST<>();
+        BST bst =  new BST();
         bst.setRoot(node);
         return bst;
     }
 
-    private static <K> BSTNode fromArray(String[] array, int start, int end) {
+    private static  BSTNode fromArray(String[] array, int start, int end) {
         if (start > end) {
             return null;
         }
         if (start == end) {
-            BSTNode<K> current = new BSTNode<>();
+            BSTNode current = new BSTNode();
             current.setContent(array[start]);
             return current;
         }
         int mid = start + (end - start) / 2;
-        BSTNode<K> current = new BSTNode<>();
+        BSTNode current = new BSTNode();
         current.setLeft(fromArray(array, start, mid));
         current.setRight(fromArray(array, mid + 1, end));
         return current;
     }
 
-    public BSTNode<K> findByContent(String content) {
+    /**
+     * Return the first node encountered in the in-order traversal that matches
+     * the content received as an arugment.
+     *
+     * @param content
+     * @return
+     */
+    public BSTNode findFirstByContent(String content) {
         return findByContent(root, content);
     }
 
-    private BSTNode<K> findByContent(BSTNode<K> root, String content) {
+    private BSTNode findByContent(BSTNode root, String content) {
         if (root == null) {
             return null;
         }
         if (root.getContent() != null && content.equals(root.getContent())) {
             return root;
         }
-        BSTNode<K> node = findByContent(root.leftChild(), content);
+        BSTNode node = findByContent(root.leftChild(), content);
         if (node != null) {
             return node;
         }
@@ -148,7 +163,31 @@ public class BST<K> {
         return null;
     }
 
-    private void findRange(BSTNode<K> current, List<String> result) {
+    /**
+     * Return all the nodes whose content match the one received as an argument.
+     *
+     * If a single node matches the content, the returned list will have a single element.
+     * @param content
+     * @return
+     */
+    public List<BSTNode> findByContent(String content) {
+        List<BSTNode> results = new ArrayList<>();
+        findByContent(content, root, results);
+        return results;
+    }
+
+    private void findByContent(String content, BSTNode root, List<BSTNode> results) {
+        if (root == null) {
+            return;
+        }
+        if (root.getContent() != null && content.equals(root.getContent())) {
+            results.add(root);
+        }
+        findByContent(content, root.leftChild(), results);
+        findByContent(content, root.rightChild(), results);
+    }
+
+    private void findRange(BSTNode current, List<String> result) {
         if (current == null) {
             return;
         }

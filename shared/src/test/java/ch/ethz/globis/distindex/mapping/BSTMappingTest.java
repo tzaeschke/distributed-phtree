@@ -37,10 +37,10 @@ public class BSTMappingTest {
         mapping.split(hostId1, hostId3, sizeMoved);
         sizeHostId1 -= sizeMoved;
         sizeHostId3 = sizeMoved;
-        BST<long[]> internal = mapping.getBst();
-        assertEquals(sizeHostId1, internal.findByContent(hostId1).getSize());
-        assertEquals(sizeHostId2, internal.findByContent(hostId2).getSize());
-        assertEquals(sizeHostId3, internal.findByContent(hostId3).getSize());
+        BST internal = mapping.getBst();
+        assertEquals(sizeHostId1, internal.findFirstByContent(hostId1).getSize());
+        assertEquals(sizeHostId2, internal.findFirstByContent(hostId2).getSize());
+        assertEquals(sizeHostId3, internal.findFirstByContent(hostId3).getSize());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BSTMappingTest {
         }
 
         for (int i = 0; i < size; i++) {
-            int sz = mapping.getBst().findByContent(keys[i]).getSize();
+            int sz = mapping.getBst().findFirstByContent(keys[i]).getSize();
             assertEquals(i + 1, sz);
         }
 

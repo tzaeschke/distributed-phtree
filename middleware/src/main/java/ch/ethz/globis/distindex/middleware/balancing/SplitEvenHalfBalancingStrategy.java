@@ -36,6 +36,18 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         this.indexContext = indexContext;
     }
 
+    /**
+     * Perform the balancing operation. This operation has the following steps:
+     *
+     * 1.   Find the host that will be the receiver of the extra entries.
+     * 2.   Perform the split and determine which entries will be moved.
+     * 3.   Initialize the balancing operation through an init-balancing request.
+     * 4.   Send the entries, one at a time
+     * 5.   Send a commit balancing message to the host
+     * 6.   Update the mapping server.
+     * 7.
+     *
+     */
     @Override
     public void balance() {
         KeyMapping<long[]> mapping = getMapping();
