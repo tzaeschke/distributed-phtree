@@ -1,6 +1,8 @@
 package ch.ethz.globis.disindex.codec.io;
 
 import ch.ethz.globis.disindex.codec.util.BitUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
@@ -14,6 +16,9 @@ import java.util.*;
  * Furthermore, when reading the reply from the server, it expects a similar header to be present. *
  */
 public class TCPClient implements Transport {
+
+    /** The logger used by this class*/
+    private static final Logger LOG = LoggerFactory.getLogger(TCPClient.class);
 
     /** A map of host id's and open sockets*/
     private Map<String, Socket> connections = new HashMap<>();
@@ -29,6 +34,7 @@ public class TCPClient implements Transport {
      */
     @Override
     public byte[] sendAndReceive(String host, byte[] payload) {
+        LOG.debug("Sending request to host {}", host);
 
         byte[] response = null;
         try {
