@@ -65,8 +65,8 @@ public class ZKClusterService implements ClusterService<long[]> {
         return mapping;
     }
 
-    public void readCurrentMapping() {
-        CuratorWatcher mappingChangedWatcher = new CuratorWatcher() {
+    private CuratorWatcher mappingChangedWatcher() {
+        return new CuratorWatcher() {
             @Override
             public void process(WatchedEvent watchedEvent) {
                 if (isRunning && (Watcher.Event.EventType.NodeChildrenChanged == watchedEvent.getType()
@@ -75,12 +75,15 @@ public class ZKClusterService implements ClusterService<long[]> {
                 }
             }
         };
+    }
+    public void readCurrentMapping() {
+
 
         try {
             if (client.checkExists().forPath(MAPPING_PATH) == null) {
                 mapping = new MultidimMapping();
             } else {
-                byte[] data = client.getData().usingWatcher(mappingChangedWatcher).forPath(MAPPING_PATH);
+                byte[] data = client.getData().usingWatcher(mappingChangedWatcher()).forPath(MAPPING_PATH);
                 mapping = MultidimMapping.deserialize(data);
             }
         } catch (KeeperException.ConnectionLossException cle) {
@@ -126,6 +129,7 @@ public class ZKClusterService implements ClusterService<long[]> {
             client.create().forPath(MAPPING_PATH);
         }
         client.setData().forPath(MAPPING_PATH, data);
+        client.checkExists().usingWatcher(mappingChangedWatcher()).forPath(MAPPING_PATH);
     }
 
     public void unregisterHost(String hostId) {

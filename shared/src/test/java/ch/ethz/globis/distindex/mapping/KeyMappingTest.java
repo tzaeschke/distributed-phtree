@@ -103,6 +103,14 @@ public class KeyMappingTest {
     }
 
     @Test
+    public void testSplittingCandidates_NotCurrentHostId() {
+        String currentHostId = "0";
+        mapping.add(currentHostId);
+        String candidate = mapping.getHostForSplitting(currentHostId);
+        assertNull(candidate);
+    }
+
+    @Test
     public void testSize() {
         int nrHosts = 200;
         String hostId;

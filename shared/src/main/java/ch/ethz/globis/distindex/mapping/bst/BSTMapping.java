@@ -81,6 +81,8 @@ public class BSTMapping<K> implements KeyMapping<K> {
             if (hostId.equals(currentHost)) {
                 if (nodes.size() > 1) {
                     hostId = nodes.get(1).getContent();
+                } else {
+                    hostId = null;
                 }
             }
         }

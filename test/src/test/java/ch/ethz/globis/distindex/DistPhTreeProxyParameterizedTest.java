@@ -255,7 +255,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testPutAndGetRandom2D() throws Exception {
-        int nrEntries = 1000;
+        int nrEntries = 500;
         Random random = new Random();
 
         long[] key;

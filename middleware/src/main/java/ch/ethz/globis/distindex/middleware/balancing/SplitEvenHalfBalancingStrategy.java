@@ -26,6 +26,8 @@ import ch.ethz.globis.pht.BitTools;
 import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The simple balancing strategy.
@@ -38,8 +40,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
     /** The request dispatcher */
     private RequestDispatcher<long[], byte[]> requestDispatcher;
 
-    /** The entries that are currently moved to another host. */
-    private IndexEntryList<long[], byte[]> buffer;
+    private static final Logger LOG = LoggerFactory.getLogger(SplitEvenHalfBalancingStrategy.class);
 
     public SplitEvenHalfBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
@@ -66,7 +67,10 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         KeyMapping<long[]> mapping = getMapping();
         String currentHostId = indexContext.getHostId();
         String receiverHostId = mapping.getHostForSplitting(currentHostId);
-
+        if (receiverHostId == null) {
+            LOG.error("Failed to find a proper host for balancing");
+            return;
+        }
         IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId);
         initBalancing(entries.size(), receiverHostId);
         sendEntries(entries, receiverHostId);
