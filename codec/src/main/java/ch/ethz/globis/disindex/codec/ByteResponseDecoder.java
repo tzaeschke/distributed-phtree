@@ -26,8 +26,34 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
         this.valueDecoder = valueDecoder;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Response decode(byte[] payload) {
+    public <R extends Response> R decode(byte[] payload, Class<R> clazz) {
+        Byte code = ResponseCode.getCode(clazz);
+        if (code == null) {
+            throw new IllegalArgumentException("Illegal response type specified");
+        }
+        R response = null;
+        switch (code) {
+            case ResponseCode.BASE:
+                response = (R) decodeBase(payload);
+                break;
+            case ResponseCode.INTEGER:
+                response = (R) decodeInteger(payload);
+                break;
+            case ResponseCode.MAP:
+                response = (R) decodeMap(payload);
+                break;
+            case ResponseCode.RESULT:
+                response = (R) decodeResult(payload);
+                break;
+
+        }
+        return response;
+    }
+
+    @Override
+    public Response decodeBase(byte[] payload) {
         ByteBuffer buffer = ByteBuffer.wrap(payload);
 
         byte opCode = buffer.get();

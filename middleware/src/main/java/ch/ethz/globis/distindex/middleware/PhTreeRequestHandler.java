@@ -154,7 +154,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         if (previous != null) {
             results.add(key, previous);
-
+        } else {
             //only need to check balancing if we actually inserted something
             checkBalancing();
         }

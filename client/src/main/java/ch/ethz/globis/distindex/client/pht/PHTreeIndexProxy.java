@@ -81,7 +81,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         GetRangeRequest<long[]> request = Requests.newGetRange(start, end, distance);
-        List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         return combine(responses);
     }
 
@@ -114,7 +114,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
         return extractKeys(response);
     }
 
@@ -129,7 +129,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        List<ResultResponse<long[], V>> responses = requestDispatcher.send(hostIds, request);
+        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 

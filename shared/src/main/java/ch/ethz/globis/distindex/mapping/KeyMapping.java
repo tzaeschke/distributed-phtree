@@ -104,7 +104,7 @@ public interface KeyMapping<K> {
      *
      * @return
      */
-    public String getHostForSplitting();
+    public String getHostForSplitting(String currentHostId);
 
     /**
      * Return the number of hosts within the mapping.

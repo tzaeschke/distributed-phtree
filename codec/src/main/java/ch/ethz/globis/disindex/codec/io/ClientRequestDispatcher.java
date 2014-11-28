@@ -3,6 +3,7 @@ package ch.ethz.globis.disindex.codec.io;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 
@@ -35,59 +36,88 @@ public class ClientRequestDispatcher<K, V> implements RequestDispatcher<K, V> {
         this.decoder = decoder;
     }
 
-    /**
-     * Send a request to the host identified by hostId and return the response.
-     *
-     * The request is first encoded to a byte array which is then sent to the client via the available transport.
-     * The byte array received as a response is the decoded to a Response object and returned to the caller.
-     *
-     * @param hostId                                The destination host identifier.
-     * @param request                               The request to be sent.
-     * @return                                      The decoded response.
-     */
     @Override
-    public ResultResponse<K, V> send(String hostId, Request request) {
+    public <R extends Response> R send(String hostId, Request request, Class<R> clazz) {
         byte[] requestBytes = encoder.encode(request);
         byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
-        return decoder.decodeResult(responseBytes);
+        return decoder.decode(responseBytes, clazz);
     }
 
-    /**
-     * Send a request to a number of remote hosts. This method works as the previous one, with the exception
-     * that multiple responses are received, decoded and then returned to the caller.
-     *
-     * @param hostIds                               The identifiers of the destination hosts.
-     * @param request                               The request to be sent.
-     * @return                                      The decoded responses.
-     */
     @Override
-    public List<ResultResponse<K, V>> send(Collection<String> hostIds, Request request) {
+    public <R extends Response> List<R> send(Collection<String> hostIds, Request request, Class<R> clazz) {
         byte[] requestBytes = encoder.encode(request);
         List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
-        List<ResultResponse<K, V>> responses = new ArrayList<>();
+        List<R> responses = new ArrayList<>();
         for (byte[] responseBytes : responseList) {
-            responses.add(decoder.decodeResult(responseBytes));
+            responses.add(decoder.decode(responseBytes, clazz));
         }
         return responses;
     }
 
-    @Override
-    public SimpleResponse sendSimple(String hostId, Request request) {
-        byte[] requestBytes = encoder.encode(request);
-        byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
-        return decoder.decodeInteger(responseBytes);
-    }
+//    @Override
+//    public List<Response> send(Collection<String> hostIds, Request request, Class<? extends Response> clazz) {
+//        byte[] requestBytes = encoder.encode(request);
+//        List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
+//        List<Response> responses = new ArrayList<>();
+//        for (byte[] responseBytes : responseList) {
+//            responses.add(decoder.decode(responseBytes, clazz));
+//        }
+//        return responses;
+//    }
 
-    @Override
-    public List<SimpleResponse> sendSimple(Collection<String> hostIds, Request request) {
-        byte[] requestBytes = encoder.encode(request);
-        List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
-        List<SimpleResponse> responses = new ArrayList<>();
-        for (byte[] responseBytes : responseList) {
-            responses.add(decoder.decodeInteger(responseBytes));
-        }
-        return responses;
-    }
+//    /**
+//     * Send a request to the host identified by hostId and return the response.
+//     *
+//     * The request is first encoded to a byte array which is then sent to the client via the available transport.
+//     * The byte array received as a response is the decoded to a Response object and returned to the caller.
+//     *
+//     * @param hostId                                The destination host identifier.
+//     * @param request                               The request to be sent.
+//     * @return                                      The decoded response.
+//     */
+//    @Override
+//    public ResultResponse<K, V> send(String hostId, Request request) {
+//        byte[] requestBytes = encoder.encode(request);
+//        byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
+//        return decoder.decodeResult(responseBytes);
+//    }
+//
+//    /**
+//     * Send a request to a number of remote hosts. This method works as the previous one, with the exception
+//     * that multiple responses are received, decoded and then returned to the caller.
+//     *
+//     * @param hostIds                               The identifiers of the destination hosts.
+//     * @param request                               The request to be sent.
+//     * @return                                      The decoded responses.
+//     */
+//    @Override
+//    public List<ResultResponse<K, V>> send(Collection<String> hostIds, Request request) {
+//        byte[] requestBytes = encoder.encode(request);
+//        List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
+//        List<ResultResponse<K, V>> responses = new ArrayList<>();
+//        for (byte[] responseBytes : responseList) {
+//            responses.add(decoder.decodeResult(responseBytes));
+//        }
+//        return responses;
+//    }
+//
+//    @Override
+//    public SimpleResponse sendSimple(String hostId, Request request) {
+//        byte[] requestBytes = encoder.encode(request);
+//        byte[] responseBytes = transport.sendAndReceive(hostId, requestBytes);
+//        return decoder.decodeInteger(responseBytes);
+//    }
+//
+//    @Override
+//    public List<SimpleResponse> sendSimple(Collection<String> hostIds, Request request) {
+//        byte[] requestBytes = encoder.encode(request);
+//        List<byte[]> responseList = transport.sendAndReceive(hostIds, requestBytes);
+//        List<SimpleResponse> responses = new ArrayList<>();
+//        for (byte[] responseBytes : responseList) {
+//            responses.add(decoder.decodeInteger(responseBytes));
+//        }
+//        return responses;
+//    }
 
     @Override
     public void close() throws IOException {

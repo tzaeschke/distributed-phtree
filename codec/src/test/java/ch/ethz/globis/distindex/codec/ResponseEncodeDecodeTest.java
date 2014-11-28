@@ -61,7 +61,7 @@ public class ResponseEncodeDecodeTest {
         Response response = new BaseResponse(opCode, requestId, opStatus);
 
         byte[] data = encoder.encode(response);
-        Response decodedResponse = decoder.decode(data);
+        Response decodedResponse = decoder.decodeBase(data);
         assertEquals(response, decodedResponse);
     }
 

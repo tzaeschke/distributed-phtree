@@ -15,7 +15,9 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
  */
 public interface ResponseDecoder<K, V> {
 
-    public Response decode(byte[] payload);
+    public <R extends Response> R decode(byte[] payload, Class<R> clazz);
+
+    public Response decodeBase(byte[] payload);
 
     public ResultResponse<K, V> decodeResult(byte[] payload);
 

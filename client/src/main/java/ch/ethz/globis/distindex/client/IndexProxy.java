@@ -11,6 +11,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
@@ -59,8 +60,8 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         List<String> hostIds = keyMapping.getHostIds();
 
         CreateRequest request = Requests.newCreate(dim, depth);
-        List<ResultResponse<K, V>> responses = requestDispatcher.send(hostIds, request);
-        for (ResultResponse<K, V> response : responses) {
+        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
+        for (Response response : responses) {
             if (response.getStatus() != OpStatus.SUCCESS) {
                 return false;
             }
@@ -74,7 +75,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         String hostId = keyMapping.getHostId(key);
 
         PutRequest<K, V> request = Requests.newPut(key, value);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
         check(request, response);
         return getSingleEntryValue(response);
     }
@@ -84,7 +85,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         String hostId = keyMapping.getHostId(key);
         ContainsRequest<K> request = Requests.newContains(key);
-        SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
+        SimpleResponse response = requestDispatcher.send(hostId, request, IntegerResponse.class);
         check(request, response);
         return ((int) response.getContent() == 1);
     }
@@ -95,7 +96,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         String hostId = keyMapping.getHostId(key);
 
         GetRequest<K> request = Requests.newGet(key);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
         check(request, response);
         return getSingleEntryValue(response);
@@ -107,7 +108,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         String hostId = keyMapping.getHostId(key);
 
         DeleteRequest<K> request = Requests.newDelete(key);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
         check(request, response);
         return getSingleEntryValue(response);
@@ -119,13 +120,13 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         List<String> hostIds = keyMapping.getHostIds(start, end);
 
         GetRangeRequest<K> request = Requests.newGetRange(start, end);
-        List<ResultResponse<K, V>> responses = requestDispatcher.send(hostIds, request);
+        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         return combine(responses);
     }
 
     public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
         GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size, start, end);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
         check(request, response);
         return response;
@@ -133,7 +134,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size) {
         GetIteratorBatchRequest<K> request = Requests.newGetBatch(iteratorId, size);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request);
+        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
         check(request, response);
         return response;
@@ -143,7 +144,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         try {
             MapRequest request = Requests.newMap(OpCode.CLOSE_ITERATOR);
             request.addParamater("iteratorId", iteratorId);
-            SimpleResponse response = requestDispatcher.sendSimple(hostId, request);
+            SimpleResponse response = requestDispatcher.send(hostId, request, IntegerResponse.class);
             check(request, response);
         } finally {
             openIterators.remove(it);
@@ -171,10 +172,10 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         List<String> hostIds = keyMapping.getHostIds();
         BaseRequest request = Requests.newGetSize();
 
-        List<SimpleResponse> responses = requestDispatcher.sendSimple(hostIds, request);
+        List<IntegerResponse> responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
         int size = 0;
-        for (SimpleResponse simpleResponse : responses) {
-            size += (int) simpleResponse.getContent();
+        for (IntegerResponse simpleResponse : responses) {
+            size += simpleResponse.getContent();
         }
         return size;
     }
@@ -184,13 +185,13 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         List<String> hostIds = keyMapping.getHostIds();
         BaseRequest request = Requests.newGetDim();
 
-        List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
+        List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
         int dim = -1;
-        for (SimpleResponse simpleResponse : responses) {
+        for (IntegerResponse simpleResponse : responses) {
             if (dim == -1) {
-                dim = (int) simpleResponse.getContent();
+                dim = simpleResponse.getContent();
             } else {
-                if (dim != (int) simpleResponse.getContent()) {
+                if (dim != simpleResponse.getContent()) {
                     throw new RuntimeException("Inconsistent index meta-data across cluster");
                 }
             }
@@ -203,13 +204,13 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         List<String> hostIds = keyMapping.getHostIds();
         BaseRequest request = Requests.newGetDepth();
 
-        List<SimpleResponse> responses= requestDispatcher.sendSimple(hostIds, request);
+        List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
         int depth = -1;
-        for (SimpleResponse simpleResponse : responses) {
+        for (IntegerResponse simpleResponse : responses) {
             if (depth == -1) {
-                depth = (int) simpleResponse.getContent();
+                depth = simpleResponse.getContent();
             } else {
-                if (depth != (int) simpleResponse.getContent()) {
+                if (depth != simpleResponse.getContent()) {
                     throw new RuntimeException("Inconsistent index meta-data across cluster");
                 }
             }
@@ -225,7 +226,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return results;
     }
 
-    protected List<K> combineKeys(List<ResultResponse<K, V>> responses) {
+    protected List<K> combineKeys(List<ResultResponse> responses) {
         List<K> results = new ArrayList<>();
         for (ResultResponse<K,V> response : responses) {
             for (IndexEntry<K, V> entry : response.getEntries()) {
@@ -243,7 +244,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return keys;
     }
 
-    protected IndexEntryList<K, V> combine(List<ResultResponse<K, V>> responses) {
+    protected IndexEntryList<K, V> combine(List<ResultResponse> responses) {
         IndexEntryList<K, V> results = new IndexEntryList<>();
         for (ResultResponse<K,V> response : responses) {
             results.addAll(response.getEntries());

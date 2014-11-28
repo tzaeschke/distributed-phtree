@@ -22,6 +22,7 @@ import java.util.Random;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +44,7 @@ public class IndexProxyTest {
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
         IndexEntryList<long[], String> singleEntry = new IndexEntryList<>(key, value);
-        when(dispatcher.send(anyString(), any(GetRequest.class))).thenAnswer(entryResponse(singleEntry));
+        when(dispatcher.send(anyString(), any(GetRequest.class), eq(ResultResponse.class))).thenAnswer(entryResponse(singleEntry));
 
         String retrieved = indexProxy.get(key);
         assertEquals(value, retrieved);
@@ -61,7 +62,7 @@ public class IndexProxyTest {
     public void testGet_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(BaseRequest.class), eq(ResultResponse.class))).thenAnswer(failureResponse());
 
         long[] key = { 1, 2, 3 };
         indexProxy.get(key);
@@ -71,7 +72,7 @@ public class IndexProxyTest {
     public void testGet_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(BaseRequest.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(BaseRequest.class), eq(ResultResponse.class))).thenAnswer(invalidIdResponse());
 
         long[] key = { 1, 2, 3 };
         indexProxy.get(key);
@@ -85,7 +86,7 @@ public class IndexProxyTest {
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
         IndexEntryList<long[], String> singleEntry = new IndexEntryList<>(key, value);
-        when(dispatcher.send(anyString(), any(PutRequest.class))).thenAnswer(entryResponse(singleEntry));
+        when(dispatcher.send(anyString(), any(PutRequest.class), eq(ResultResponse.class))).thenAnswer(entryResponse(singleEntry));
 
         String retrieved = indexProxy.put(key, value);
         assertEquals(value, retrieved);
@@ -107,7 +108,7 @@ public class IndexProxyTest {
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
-        when(dispatcher.send(anyString(), any(PutRequest.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(PutRequest.class), eq(ResultResponse.class))).thenAnswer(failureResponse());
 
         indexProxy.put(key, value);
     }
@@ -119,7 +120,7 @@ public class IndexProxyTest {
 
         long[] key = {1, 2 , 3};
         String value = new BigInteger(30, new Random()).toString();
-        when(dispatcher.send(anyString(), any(PutRequest.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(PutRequest.class), eq(ResultResponse.class))).thenAnswer(invalidIdResponse());
 
         indexProxy.put(key, value);
     }
@@ -137,7 +138,7 @@ public class IndexProxyTest {
             add( new long[] {1, 0}, "baz" );
         }};
 
-        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(entryResponse(entries));
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class), eq(ResultResponse.class))).thenAnswer(entryResponse(entries));
 
         Iterator<IndexEntry<long[], String>> expected = entries.iterator();
         Iterator<IndexEntry<long[], String>> it = indexProxy.query(start, end);
@@ -165,7 +166,7 @@ public class IndexProxyTest {
     public void testRange_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class), eq(ResultResponse.class))).thenAnswer(failureResponse());
 
         long[] start = new long[] {1, 2, 3};
         long[] end = new long[] {1, 2, 3};
@@ -176,7 +177,7 @@ public class IndexProxyTest {
     public void testRange_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class), eq(ResultResponse.class))).thenAnswer(invalidIdResponse());
 
         long[] start = new long[] {1, 2, 3};
         long[] end = new long[] {1, 2, 3};
@@ -192,7 +193,7 @@ public class IndexProxyTest {
         String value = new BigInteger(30, new Random()).toString();
         IndexEntryList<long[], String> singleEntry = new IndexEntryList<>(key, value);
 
-        when(dispatcher.send(anyString(), any(DeleteRequest.class))).thenAnswer(entryResponse(singleEntry));
+        when(dispatcher.send(anyString(), any(DeleteRequest.class), eq(ResultResponse.class))).thenAnswer(entryResponse(singleEntry));
         String retrieved = indexProxy.remove(key);
         assertEquals(value, retrieved);
     }
@@ -209,7 +210,7 @@ public class IndexProxyTest {
     public void testDelete_Failure() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(failureResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class), eq(ResultResponse.class))).thenAnswer(failureResponse());
 
         long[] key = new long[] {1, 2, 3};
         indexProxy.remove(key);
@@ -219,7 +220,7 @@ public class IndexProxyTest {
     public void testDelete_IllegalResponse() {
         RequestDispatcher<long[], String> dispatcher = mockDispatcher();
         IndexProxy<long[], String> indexProxy = mockIndexProxy(dispatcher);
-        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class))).thenAnswer(invalidIdResponse());
+        when(dispatcher.send(anyString(), any(GetIteratorBatchRequest.class), eq(ResultResponse.class))).thenAnswer(invalidIdResponse());
 
         long[] key = new long[] {1, 2, 3};
         indexProxy.remove(key);

@@ -5,6 +5,7 @@ package ch.ethz.globis.distindex.operation.response;
  */
 public class BaseResponse implements Response {
 
+    private byte type;
     private byte opCode;
     private int requestId;
     private byte status;
@@ -12,6 +13,14 @@ public class BaseResponse implements Response {
     public BaseResponse() { }
 
     public BaseResponse(byte opCode, int requestId, byte status) {
+        this.type = ResponseCode.BASE;
+        this.opCode = opCode;
+        this.requestId = requestId;
+        this.status = status;
+    }
+
+    public BaseResponse(byte type, byte opCode, int requestId, byte status) {
+        this.type = type;
         this.opCode = opCode;
         this.requestId = requestId;
         this.status = status;
@@ -30,6 +39,11 @@ public class BaseResponse implements Response {
     @Override
     public int getRequestId() {
         return requestId;
+    }
+
+    @Override
+    public byte getType() {
+        return type;
     }
 
     @Override

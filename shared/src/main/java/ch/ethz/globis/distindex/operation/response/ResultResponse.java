@@ -5,6 +5,8 @@ import ch.ethz.globis.distindex.api.IndexEntryList;
 
 public class ResultResponse<K, V> implements Response {
 
+    private byte type = ResponseCode.RESULT;
+
     private byte opCode;
     private int requestId;
     private byte status;
@@ -52,6 +54,11 @@ public class ResultResponse<K, V> implements Response {
     @Override
     public byte getStatus() {
         return status;
+    }
+
+    @Override
+    public byte getType() {
+        return type;
     }
 
     public int getNrEntries() {

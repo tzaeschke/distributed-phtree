@@ -97,7 +97,7 @@ public class KeyMappingTest {
         for (int i = nrHosts - 1; i >= 0; i--) {
             hostId = toHostId(i);
             mapping.setSize(hostId, 2 * nrHosts - i);
-            candidate = mapping.getHostForSplitting();
+            candidate = mapping.getHostForSplitting(toHostId(i + 1));
             assertEquals(hostId, candidate);
         }
     }

@@ -5,6 +5,7 @@ package ch.ethz.globis.distindex.operation.response;
  */
 public class SimpleResponse<T> implements Response {
 
+    private byte type = ResponseCode.INTEGER;
     private byte opCode;
     private int requestId;
     private byte status;
@@ -21,6 +22,11 @@ public class SimpleResponse<T> implements Response {
     @Override
     public byte getOpCode() {
         return opCode;
+    }
+
+    @Override
+    public byte getType() {
+        return type;
     }
 
     @Override

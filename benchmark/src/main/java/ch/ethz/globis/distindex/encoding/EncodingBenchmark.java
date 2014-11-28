@@ -59,7 +59,7 @@ public class EncodingBenchmark {
     public Object encodeResponseDefault(BenchmarkState state) {
         ResultResponse<long[], byte[]> response = createResult();
         byte[] data =  state.responseEncoder.encode(response);
-        Object object = state.responseDecoder.decode(data);
+        Object object = state.responseDecoder.decodeBase(data);
         return object;
     }
 

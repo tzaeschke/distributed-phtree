@@ -1,6 +1,14 @@
 package ch.ethz.globis.distindex.middleware.balancing;
 
+import ch.ethz.globis.disindex.codec.ByteRequestEncoder;
+import ch.ethz.globis.disindex.codec.ByteResponseDecoder;
+import ch.ethz.globis.disindex.codec.api.RequestEncoder;
+import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
+import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
+import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
+import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
+import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
@@ -12,6 +20,7 @@ import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.pht.BitTools;
 import ch.ethz.globis.pht.PVEntry;
@@ -27,13 +36,17 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
     private IndexContext indexContext;
 
     /** The request dispatcher */
-    private ClientRequestDispatcher<long[], byte[]> requestDispatcher;
+    private RequestDispatcher<long[], byte[]> requestDispatcher;
 
     /** The entries that are currently moved to another host. */
     private IndexEntryList<long[], byte[]> buffer;
 
     public SplitEvenHalfBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
+        RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
+        ResponseDecoder<long[], byte[]> responseDecoder = new ByteResponseDecoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<byte[]>());
+
+        this.requestDispatcher = new ClientRequestDispatcher<>(new TCPClient(), requestEncoder, responseDecoder);
     }
 
     /**
@@ -51,8 +64,8 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
     @Override
     public void balance() {
         KeyMapping<long[]> mapping = getMapping();
-        String receiverHostId = mapping.getHostForSplitting();
         String currentHostId = indexContext.getHostId();
+        String receiverHostId = mapping.getHostForSplitting(currentHostId);
 
         IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId);
         initBalancing(entries.size(), receiverHostId);
@@ -96,7 +109,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         Response response;
         for (IndexEntry<long[], byte[]> entry : entries) {
             request = Requests.newPutBalancing(entry.getKey(), entry.getValue());
-            response = requestDispatcher.send(receivedHostId, request);
+            response = requestDispatcher.send(receivedHostId, request, BaseResponse.class);
             if (response.getStatus() != OpStatus.SUCCESS) {
                 throw new RuntimeException("Receiving host did not accept entry initialization");
             }
@@ -111,7 +124,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      */
     private void initBalancing(int entriesToSend, String receiverHostId) {
         InitBalancingRequest request = Requests.newInitBalancing(entriesToSend);
-        Response response = requestDispatcher.send(receiverHostId, request);
+        Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing initialization");
         }
@@ -124,7 +137,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      */
     private void commitBalancing( String receiverHostId) {
         CommitBalancingRequest request = Requests.newCommitBalancing();
-        Response response = requestDispatcher.send(receiverHostId, request);
+        Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing commit");
         }

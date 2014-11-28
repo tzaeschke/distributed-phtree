@@ -10,8 +10,9 @@ public class MapResponse extends BaseResponse {
     public MapResponse() {
         super();
     }
+
     public MapResponse(byte opCode, int requestId, byte status) {
-        super(opCode, requestId, status);
+        super(ResponseCode.MAP, opCode, requestId, status);
     }
 
     public void addParameter(String key, Object object) {

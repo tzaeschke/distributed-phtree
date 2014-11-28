@@ -57,7 +57,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
     @Override
-    public String getHostForSplitting() {
+    public String getHostForSplitting(String currentHost) {
         List<BSTNode> nodes = bst.nodes();
         Collections.sort(nodes, new Comparator<BSTNode>() {
             @Override
@@ -75,10 +75,16 @@ public class BSTMapping<K> implements KeyMapping<K> {
                 }
             }
         });
+        String hostId = null;
         if (nodes.size() > 0) {
-            return nodes.get(0).getContent();
+            hostId = nodes.get(0).getContent();
+            if (hostId.equals(currentHost)) {
+                if (nodes.size() > 1) {
+                    hostId = nodes.get(1).getContent();
+                }
+            }
         }
-        return null;
+        return hostId;
     }
 
     @Override
@@ -104,7 +110,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
                 maxSize = node.getSize();
             }
         }
-        return (largest == null) ? null : largest.getPrefix();
+        return (largest == null) ? "" : largest.getPrefix();
     }
 
     private BSTNode remove(BSTNode node, String host) {
