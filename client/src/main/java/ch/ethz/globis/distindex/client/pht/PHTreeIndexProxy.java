@@ -23,6 +23,8 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeQStats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +195,30 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
         return knnStrategy.radiusSearch(key, k, candidates, this);
+    }
+
+    public PhTree.Stats getStats() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
+
+    public PhTree.Stats getStatsIdealNoNode() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
+
+    public PhTreeQStats getQuality() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
+
+    public int getNodeCount() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
+
+    public String toStringPlain() {
+        throw new UnsupportedOperationException("Not yet implemented.");
+    }
+
+    public String toStringTree() {
+        throw new UnsupportedOperationException("Not yet implemented.");
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {

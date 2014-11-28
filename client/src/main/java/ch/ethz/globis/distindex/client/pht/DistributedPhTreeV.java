@@ -28,22 +28,22 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public int getNodeCount() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getNodeCount();
     }
 
     @Override
     public PhTreeQStats getQuality() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getQuality();
     }
 
     @Override
     public PhTree.Stats getStats() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getStats();
     }
 
     @Override
     public PhTree.Stats getStatsIdealNoNode() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return proxy.getStatsIdealNoNode();
     }
 
     @Override
@@ -68,11 +68,15 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public String toStringPlain() {
+        //ToDo implement toStringPlain()
+        //return proxy.toStringPlain();
         return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
     }
 
     @Override
     public String toStringTree() {
+        //ToDo implement toStringTree()
+        //return proxy.toStringTree();
         return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
     }
 
