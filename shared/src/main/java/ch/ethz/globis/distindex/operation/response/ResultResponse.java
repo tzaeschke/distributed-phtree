@@ -2,14 +2,10 @@ package ch.ethz.globis.distindex.operation.response;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
 
-public class ResultResponse<K, V> implements Response {
+public class ResultResponse<K, V> extends BaseResponse {
 
-    private byte type = ResponseCode.RESULT;
-
-    private byte opCode;
-    private int requestId;
-    private byte status;
     private int nrEntries;
     private String iteratorId = "";
 
@@ -18,26 +14,20 @@ public class ResultResponse<K, V> implements Response {
     public ResultResponse() {}
 
     public ResultResponse(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries) {
-        this.opCode = opCode;
-        this.requestId = requestId;
-        this.status = status;
+        super(ResponseCode.RESULT, opCode, requestId, status);
         this.nrEntries = entries.size();
         this.entries = entries;
     }
 
     public ResultResponse(byte opCode, int requestId, byte status, IndexEntryList<K, V> entries, String iteratorId) {
-        this.opCode = opCode;
-        this.requestId = requestId;
-        this.status = status;
+        super(ResponseCode.RESULT, opCode, requestId, status);
         this.nrEntries = entries.size();
         this.entries = entries;
         this.iteratorId = iteratorId;
     }
 
     public ResultResponse(byte opCode, int requestId, byte status) {
-        this.opCode = opCode;
-        this.requestId = requestId;
-        this.status = status;
+        super(ResponseCode.RESULT, opCode, requestId, status);
         this.nrEntries = 0;
         this.entries = new IndexEntryList<>();
     }
@@ -46,28 +36,8 @@ public class ResultResponse<K, V> implements Response {
         return iteratorId;
     }
 
-    @Override
-    public byte getOpCode() {
-        return opCode;
-    }
-
-    @Override
-    public byte getStatus() {
-        return status;
-    }
-
-    @Override
-    public byte getType() {
-        return type;
-    }
-
     public int getNrEntries() {
         return nrEntries;
-    }
-
-    @Override
-    public int getRequestId() {
-        return requestId;
     }
 
     public IndexEntryList<K, V> getEntries() {
@@ -82,24 +52,20 @@ public class ResultResponse<K, V> implements Response {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ResultResponse)) return false;
+        if (!super.equals(o)) return false;
 
-        ResultResponse response = (ResultResponse) o;
+        ResultResponse that = (ResultResponse) o;
 
-        if (nrEntries != response.nrEntries) return false;
-        if (opCode != response.opCode) return false;
-        if (requestId != response.requestId) return false;
-        if (status != response.status) return false;
-        if (entries != null ? !entries.equals(response.entries) : response.entries != null) return false;
-        if (iteratorId != null ? !iteratorId.equals(response.iteratorId) : response.iteratorId != null) return false;
+        if (nrEntries != that.nrEntries) return false;
+        if (entries != null ? !entries.equals(that.entries) : that.entries != null) return false;
+        if (iteratorId != null ? !iteratorId.equals(that.iteratorId) : that.iteratorId != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) opCode;
-        result = 31 * result + requestId;
-        result = 31 * result + (int) status;
+        int result = super.hashCode();
         result = 31 * result + nrEntries;
         result = 31 * result + (iteratorId != null ? iteratorId.hashCode() : 0);
         result = 31 * result + (entries != null ? entries.hashCode() : 0);
