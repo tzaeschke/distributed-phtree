@@ -98,6 +98,17 @@ This is an example of how to cite a scientific publication~\cite{murolo2013} fro
 
 \chapter{Design and Implementation}
 \section{Algorithms}
+\subsection{Requirements}
+The distributed index has the following requirements:
+\begin{enumerate}
+    \item Eventual consistency. The index is eventual consistent, meaning that the following assumptions are true:
+        \begin{enumerate}
+            \item Any entries that are inserted at some point t in time will eventually be returned in results at a following point in time t + $\epsilon$ .
+            \item In the case that a client starts an insert operation at time t and another client, in a separate thread or a separate, issues a query at time t + $\epsilon$, the response of the query of the second client is not guaranteed to contain the point inserted by the first client.
+        \end{enumerate} 
+    \item Re-balancing transparency. The balancing process should be transparent with respect to the client. This means that the client API should not know that there might be multiple versions of the key mapping available due to any on-going balances. 
+\end{enumerate} 
+
 \subsection{Data partitioning}
 
 Describe here how the key-value pairs are partitioned across the hosts.
