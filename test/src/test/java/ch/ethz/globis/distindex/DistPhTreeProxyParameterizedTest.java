@@ -264,7 +264,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
             key = new long[]{random.nextLong(), random.nextLong()};
             value = new BigInteger(50, random).toString();
             phTree.put(key, value);
-            //assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
+            assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
         }
     }
 
@@ -282,7 +282,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         for (int i = 0; i < 100; i++) {
             long[] q = randomKey();
             List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
-           // equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
+            equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
     }
 
