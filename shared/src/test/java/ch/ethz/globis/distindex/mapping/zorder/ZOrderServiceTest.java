@@ -17,7 +17,13 @@ public class ZOrderServiceTest {
         long[] end = { 3L, 3L};
         ZOrderService service = new ZOrderService(depth);
         Set<HBox> boxes = service.regionEnvelope(start, end);
-        System.out.println(boxes);
+        Set<HBox> expected = new HashSet<HBox>() {{
+            add(new HBox("0001"));
+            add(new HBox("0010"));
+            add(new HBox("00110"));
+            add(new HBox("001110"));
+        }};
+        assertEquals(expected, boxes);
     }
 
     @Test
