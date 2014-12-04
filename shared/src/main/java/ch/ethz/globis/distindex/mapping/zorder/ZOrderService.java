@@ -1,61 +1,105 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ZOrderService {
 
-    private List<HBox> computeIntersections(long[] start, long[] end) {
-        ZAddress alpha = new ZAddress(start);
-        ZAddress beta = new ZAddress(end);
+    private int depth = Long.SIZE;
+
+    public ZOrderService() { }
+
+    public ZOrderService(int depth) {
+        this.depth = depth;
+    }
+
+    public Set<HBox> regionEnvelope(long[] start, long[] end) {
+        int dim = start.length;
+        if (dim != end.length) {
+            throw new IllegalArgumentException("The range query endpoints should have the same dimension");
+        }
+
+        ZAddress alpha = new ZAddress(start, depth);
+        ZAddress beta = new ZAddress(end, depth);
         //phase 1 - first reduce the spaceBox to the smallest hquad entirely containing the Z-region
 
         int i = 0;
         HQuad space = new HQuad("");
         while (alpha.getQuad(i).equals(beta.getQuad(i))) {
             space = space.getSubQuad(alpha.getQuad(i));
+            i++;
         }
+
+        //phase 1.5 - get regions between border regions of alpha and beta
+        String betaBoxCode = space.getCode() + beta.getQuad(i);
+        String alphaBoxCode = space.getCode() + alpha.getQuad(i);
+
+        Set<HBox> results = getRegionsBetween(alphaBoxCode, betaBoxCode);
 
         //phase 2 - perform intersection of half-envelopes
-        HBox spaceBox = new HBox(space.getCode());
+        Set<HBox> resultsLowerHalf = lowerHalfEnvelope(new HBox(betaBoxCode), beta, dim);
+        Set<HBox> resultsUpperHalf = upperHalfEnvelope(new HBox(alphaBoxCode), alpha, dim);
 
-        List<HBox> resultsLowerHalf = lowerHalfEnvelope(spaceBox, alpha, beta, start, end);
-        List<HBox> resultsUpperHalf = upperHalfEnvelope(spaceBox, alpha, beta, start, end);
 
-        resultsLowerHalf.addAll(resultsUpperHalf);
+        results.addAll(resultsLowerHalf);
+        results.addAll(resultsUpperHalf);
 
-        return resultsLowerHalf;
+        return results;
     }
 
-    private List<HBox> lowerHalfEnvelope(HBox actualBox, ZAddress alpha, ZAddress beta, long[] start, long[] end) {
-        int dim = start.length;
-        int depth = Long.SIZE;
-        List<HBox> results = new ArrayList<>();
-        for (int i = 0; i < depth; i++) {
-            for (int j = dim - 1; j >= 0; j--) {
-                if (alpha.getQuad(i).charAt(j) == '1') {
-                    actualBox = actualBox.getUpperHalf();
-                } else {
-                    if (intersectionTest(actualBox.getUpperHalf(), start, end )) {
-                        results.add(actualBox.getUpperHalf());
-                    }
+    public Set<HBox> getRegionsBetween(String alphaBoxCode, String betaBoxCode) {
+        int startBorder = new BigInteger(alphaBoxCode, 2).intValue();
+        int endBorder = new BigInteger(betaBoxCode, 2).intValue();
+
+        Set<HBox> results = new TreeSet<>();
+        for (int j = startBorder + 1; j < endBorder; j++) {
+            String quadCode = longToString(j, betaBoxCode.length());
+            results.add(new HBox(quadCode));
+        }
+
+        return results;
+    }
+
+    public static String longToString(long l, int depth) {
+        String bitString = Long.toBinaryString(l);
+        int padding = depth - bitString.length();
+        String output = "";
+        while (padding > 0) {
+            padding--;
+            output += "0";
+        }
+        return output + bitString;
+    }
+
+    public Set<HBox> lowerHalfEnvelope(HBox actualBox, ZAddress beta, int dim) {
+        Set<HBox> results = new TreeSet<>();
+        String currentQuad;
+        int start = actualBox.getCode().length() / dim;
+        for (int i = start; i < depth; i++) {
+            currentQuad = beta.getQuad(i);
+            for (int j = 0; j < dim; j++) {
+                if (currentQuad.charAt(j) == '0') {
                     actualBox = actualBox.getLowerHalf();
+                } else {
+                    results.add(actualBox.getLowerHalf());
+                    actualBox = actualBox.getUpperHalf();
                 }
             }
         }
         return results;
     }
 
-    private List<HBox> upperHalfEnvelope(HBox actualBox, ZAddress alpha, ZAddress beta, long[] start, long[] end) {
-        int dim = start.length;
-        int depth = Long.SIZE;
-        List<HBox> results = new ArrayList<>();
-        for (int i = 0; i < depth; i++) {
-            for (int j = dim - 1; j >= 0; j--) {
-                if (alpha.getQuad(i).charAt(j) == '0') {
-                    if (intersectionTest(actualBox.getLowerHalf(), start, end )) {
-                        results.add(actualBox.getLowerHalf());
-                    }
+    public Set<HBox> upperHalfEnvelope(HBox actualBox, ZAddress alpha, int dim) {
+        Set<HBox> results = new TreeSet<>();
+        String currentQuad;
+        int start = actualBox.getCode().length() / dim;
+        for (int i = start; i < depth; i++) {
+            currentQuad = alpha.getQuad(i);
+            for (int j = 0; j < dim; j++) {
+                if (currentQuad.charAt(j) == '0') {
+                    results.add(actualBox.getUpperHalf());
                     actualBox = actualBox.getLowerHalf();
                 } else {
                     actualBox = actualBox.getUpperHalf();
@@ -65,7 +109,7 @@ public class ZOrderService {
         return results;
     }
 
-    private boolean intersectionTest(HBox upperHalf, long[] start, long[] end) {
+    boolean intersectionTest(HBox upperHalf, long[] start, long[] end) {
         int dim = start.length;
         long[] startBox = generateRangeStart(upperHalf.getCode(), dim);
         long[] endBox = generateRangeEnd(upperHalf.getCode(), dim);
@@ -78,12 +122,11 @@ public class ZOrderService {
         return true;
     }
 
-    private long[] generateRangeStart(String code, int dim) {
+    long[] generateRangeStart(String code, int dim) {
         long[] key = new long[dim];
         for (int i = 0; i < dim; i++) {
             key[i] = 0L;
         }
-        int depth = Long.SIZE;
         for (int i = 0; i < code.length(); i++) {
             int dimIndex = i % dim;
             int bitIndex = depth - 1 - (i / dim);
@@ -94,7 +137,7 @@ public class ZOrderService {
         return key;
     }
 
-    private long[] generateRangeEnd(String code, int dim) {
+    long[] generateRangeEnd(String code, int dim) {
         long[] key = new long[dim];
         for (int i = 0; i < dim; i++) {
             key[i] = -1L;
@@ -109,5 +152,4 @@ public class ZOrderService {
         }
         return key;
     }
-
 }

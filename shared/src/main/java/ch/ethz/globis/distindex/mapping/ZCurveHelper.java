@@ -126,13 +126,17 @@ public class ZCurveHelper {
         return StringUtils.getCommonPrefix(queryZ, neighZ);
     }
 
-    public static String getZRepresentation(long[] point) {
-        long[] mergedBits = BitTools.mergeLong(64, point);
+    public static String getZRepresentation(long[] point, int depth) {
+        long[] mergedBits = BitTools.mergeLong(depth, point);
         String bitString = "";
         for (long value : mergedBits) {
             bitString += longToString(value);
         }
         return bitString;
+    }
+
+    public static String getZRepresentation(long[] point) {
+        return getZRepresentation(point, Long.SIZE);
     }
 
     public static boolean willAdditionOverflow(long left, long right) {
