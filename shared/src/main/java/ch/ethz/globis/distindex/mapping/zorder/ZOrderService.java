@@ -53,6 +53,13 @@ public class ZOrderService {
         int startBorder = new BigInteger(alphaBoxCode, 2).intValue();
         int endBorder = new BigInteger(betaBoxCode, 2).intValue();
 
+        //make sure zorder respected for negative range as well
+        int aux;
+        if (startBorder > endBorder) {
+            aux = startBorder;
+            startBorder = endBorder;
+            endBorder = aux;
+        }
         Set<HBox> results = new TreeSet<>();
         for (int j = startBorder + 1; j < endBorder; j++) {
             String quadCode = longToString(j, betaBoxCode.length());

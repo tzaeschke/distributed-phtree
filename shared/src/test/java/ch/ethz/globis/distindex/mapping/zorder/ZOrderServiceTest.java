@@ -27,6 +27,22 @@ public class ZOrderServiceTest {
     }
 
     @Test
+    public void testEnvelope_FullRange() {
+        int depth = 3;
+        long[] start = { -1L, -1L};
+        long[] end = { 1L, 1L};
+        ZOrderService service = new ZOrderService(depth);
+        Set<HBox> boxes = service.regionEnvelope(start, end);
+        Set<HBox> expected = new HashSet<HBox>() {{
+            add(new HBox("01"));
+            add(new HBox("10"));
+            add(new HBox("00000"));
+            add(new HBox("000010"));
+        }};
+        assertEquals(expected, boxes);
+    }
+
+    @Test
     public void testLowerGroupConstruction_Small_0() {
         int dim = 2;
         int depth = 1;
