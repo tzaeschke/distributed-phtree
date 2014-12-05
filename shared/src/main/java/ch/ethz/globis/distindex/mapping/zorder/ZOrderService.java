@@ -15,14 +15,12 @@ public class ZOrderService {
         this.depth = depth;
     }
 
-    public Set<HBox> regionEnvelope(long[] start, long[] end) {
-        int dim = start.length;
-        if (dim != end.length) {
+    public Set<HBox> regionEnvelope(ZAddress alpha, ZAddress beta) {
+        int dim =   alpha.getDim();
+        if (dim != beta.getDim()) {
             throw new IllegalArgumentException("The range query endpoints should have the same dimension");
         }
 
-        ZAddress alpha = new ZAddress(start, depth);
-        ZAddress beta = new ZAddress(end, depth);
         //phase 1 - first reduce the spaceBox to the smallest hquad entirely containing the Z-region
 
         int i = 0;
@@ -47,6 +45,17 @@ public class ZOrderService {
         results.addAll(resultsUpperHalf);
 
         return results;
+    }
+
+    public Set<HBox> regionEnvelope(long[] start, long[] end) {
+        int dim = start.length;
+        if (dim != end.length) {
+            throw new IllegalArgumentException("The range query endpoints should have the same dimension");
+        }
+
+        ZAddress alpha = new ZAddress(start, depth);
+        ZAddress beta = new ZAddress(end, depth);
+        return regionEnvelope(alpha, beta);
     }
 
     public Set<HBox> getRegionsBetween(String alphaBoxCode, String betaBoxCode) {

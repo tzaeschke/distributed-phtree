@@ -48,4 +48,8 @@ public class ZAddress {
                 "code='" + code + '\'' +
                 '}';
     }
+
+    public int getDim() {
+        return dim;
+    }
 }
