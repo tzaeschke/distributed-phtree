@@ -1,9 +1,6 @@
 package ch.ethz.globis.distindex.mapping.bst;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /***
  * A binary search tree implementation.
@@ -111,14 +108,14 @@ public class BST {
         getNodes(root.rightChild(), results);
     }
 
-    public static  BST fromArray(String[] array) {
+    public static BST fromArray(String[] array) {
         BSTNode node = fromArray(array, 0, array.length - 1);
         BST bst =  new BST();
         bst.setRoot(node);
         return bst;
     }
 
-    private static  BSTNode fromArray(String[] array, int start, int end) {
+    private static BSTNode fromArray(String[] array, int start, int end) {
         if (start > end) {
             return null;
         }
@@ -196,6 +193,22 @@ public class BST {
             result.add(current.getContent());
         }
         findRange(current.rightChild(), result);
+    }
+
+    public Map<String, String> asMap() {
+        Map<String, String> codeHosts = new HashMap<>();
+        getHosts("", root, codeHosts);
+        return codeHosts;
+    }
+
+    private void getHosts(String partial, BSTNode node, Map<String, String> map) {
+        if (node != null) {
+            getHosts(partial + "0", node.leftChild(), map);
+            if (node.getContent() != null) {
+                map.put(partial, node.getContent());
+            }
+            getHosts(partial + "1", node.rightChild(), map);
+        }
     }
 
     @Override

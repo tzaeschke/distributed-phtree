@@ -29,13 +29,6 @@ public interface KeyMapping<K> {
     public List<String> getHostIds(K start, K end);
 
     /**
-     * Get all the host id's which holds keys having the bit prefix received as an argument.
-     * @param prefix
-     * @return
-     */
-    public List<String> getHostIds(String prefix);
-
-    /**
      * Obtain all the host ids.
      * @return
      */
