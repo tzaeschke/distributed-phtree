@@ -3,7 +3,9 @@ package ch.ethz.globis.distindex.mapping.zorder;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -81,5 +83,22 @@ public class ZMappingTest {
         assertEquals(4, hosts.size());
     }
 
+    @Test
+    public void serializeDeserializeTest() {
+        int dim = 3;
+        ZMapping mapping = new ZMapping(dim);
 
+        //create the mapping
+        String hostId;
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            hostId = new BigInteger(32, random).toString();
+            mapping.add(hostId);
+        }
+
+        //test that the serialization and de-serialization work
+        byte[] serializedBytes = mapping.serialize();
+        ZMapping deSerializedMapping = ZMapping.deserialize(serializedBytes);
+        assertEquals("The decoded mapping is not equal to the original mapping", mapping, deSerializedMapping);
+    }
 }

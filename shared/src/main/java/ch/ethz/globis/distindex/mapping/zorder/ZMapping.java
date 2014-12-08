@@ -2,7 +2,12 @@ package ch.ethz.globis.distindex.mapping.zorder;
 
 import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.pht.PhTreeRangeVD;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import org.objenesis.strategy.StdInstantiatorStrategy;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 /**
@@ -16,6 +21,13 @@ public class ZMapping {
     private PhTreeRangeVD<String> tree;
     private Map<String, Integer> sizes;
     private Map<String, Integer> order;
+
+    /**
+     * No-arg constructor, needed for Kryo deserialization.
+     * Should not be called.
+     */
+    public ZMapping() {
+    }
 
     public ZMapping(int dim) {
         this.dim = dim;
@@ -154,6 +166,31 @@ public class ZMapping {
         return null;
     }
 
+    /**
+     * Serialize the current mapping object into an array of bytes.
+     *
+     * @return                                  The array of bytes.
+     */
+    public byte[] serialize() {
+        Kryo kryo = new Kryo();
+        Output output = new Output(new ByteArrayOutputStream());
+        kryo.writeClassAndObject(output, this);
+        return output.toBytes();
+    }
+
+    /**
+     * Create a mapping object from a serialized representation of a mapping.
+     *
+     * @param data                              The byte array obtained by serializing a previous mapping.
+     * @return                                  A mapping object.
+     */
+    public static ZMapping deserialize(byte[] data) {
+        Kryo kryo = new Kryo();
+        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+        return (ZMapping) kryo.readClassAndObject(new Input(data));
+    }
+
+
     private void checkConsistency() {
         if (!consistent) {
             throw new IllegalStateException("Mapping is inconsistent!");
@@ -168,11 +205,33 @@ public class ZMapping {
         return d;
     }
 
-    private long[] convert(double[] key) {
-        long[] l = new long[key.length];
-        for (int i = 0; i < key.length; i++) {
-            l[i] = (long) key[i];
-        }
-        return l;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ZMapping)) return false;
+
+        ZMapping mapping = (ZMapping) o;
+
+        if (consistent != mapping.consistent) return false;
+        if (dim != mapping.dim) return false;
+        if (order != null ? !order.equals(mapping.order) : mapping.order != null) return false;
+        if (service != null ? !service.equals(mapping.service) : mapping.service != null) return false;
+        if (sizes != null ? !sizes.equals(mapping.sizes) : mapping.sizes != null) return false;
+
+        //FIXME need to also compare the tree
+        // if (tree != null ? !tree.toString().equals(mapping.tree.toString()) : mapping.tree != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dim;
+        result = 31 * result + (service != null ? service.hashCode() : 0);
+        result = 31 * result + (consistent ? 1 : 0);
+        result = 31 * result + (tree != null ? tree.hashCode() : 0);
+        result = 31 * result + (sizes != null ? sizes.hashCode() : 0);
+        result = 31 * result + (order != null ? order.hashCode() : 0);
+        return result;
     }
 }

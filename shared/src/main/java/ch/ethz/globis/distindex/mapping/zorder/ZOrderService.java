@@ -168,4 +168,21 @@ public class ZOrderService {
         }
         return key;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ZOrderService)) return false;
+
+        ZOrderService service = (ZOrderService) o;
+
+        if (depth != service.depth) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return depth;
+    }
 }
