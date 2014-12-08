@@ -195,6 +195,12 @@ public class BST {
         findRange(current.rightChild(), result);
     }
 
+    /**
+     * Return a map containing the prefix codes of the content is each leaf node.
+     *
+     * @return                                      A map containing the aforementioned prefix-leaf
+     *                                              mapping.
+     */
     public Map<String, String> asMap() {
         Map<String, String> codeHosts = new HashMap<>();
         getHosts("", root, codeHosts);

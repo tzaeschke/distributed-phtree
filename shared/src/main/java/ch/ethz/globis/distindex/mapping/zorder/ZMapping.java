@@ -25,18 +25,50 @@ public class ZMapping {
         this.order = new TreeMap<>();
     }
 
+    /**
+     * Add the current host id to the mapping. Following the addition, the new host should also
+     * be mapped to an interval on the z-order curve.
+     *
+     *
+     * @param hostId                                    The id of the new host.
+     * @return                                          The mapping as a Map object. Each entry contains the prefix
+     *                                                  as the key and the hostId as the value.
+     */
     public Map<String, String> add(String hostId) {
         checkConsistency();
 
-        tree = new PhTreeRangeVD<>(dim);
+        //add the nest hostId to the mapping
+        Map<String, String> mapping = constructNewMapping(hostId);
 
+        //reconstruct the set of regions mapped to each host
+        updateRegions(mapping);
+        return mapping;
+    }
+
+    /**
+     * Add the new host to the mapping.
+     * @param newHostId
+     * @return
+     */
+    private Map<String, String> constructNewMapping(String newHostId) {
         Set<String> hosts = sizes.keySet();
         BST bst = new BST();
         for (String host : hosts) {
             bst.add(host);
         }
-        bst.add(hostId);
+        bst.add(newHostId);
         Map<String, String> mapping = bst.asMap();
+        return mapping;
+    }
+
+    /**
+     * Reconstruct the set of hquad regions associated with each host
+     * based on the new mapping.
+     *
+     * @param mapping
+     */
+    private void updateRegions(Map<String, String> mapping) {
+        tree = new PhTreeRangeVD<>(dim);
         String prefix, host;
         int orderCount = 0;
         for (Map.Entry<String, String> entry : mapping.entrySet()) {
@@ -50,13 +82,18 @@ public class ZMapping {
             order.put(host, orderCount++);
             sizes.put(host, 1);
         }
-        return mapping;
     }
 
     public void remove(String hostId) {
         this.consistent = false;
     }
 
+    /**
+     * Return the host id mapped to the zone of which the key k belongs to.
+     *
+     * @param k                                 The input key.
+     * @return
+     */
     public String get(long[] k) {
         checkConsistency();
 
@@ -80,6 +117,14 @@ public class ZMapping {
         return host;
     }
 
+    /**
+     * Return the list of host id's whose zones intersect with the hyper-cubic range determined by the
+     * parameters l and u.
+     *
+     * @param l
+     * @param u
+     * @return
+     */
     public List<String> get(long[] l, long[] u) {
         checkConsistency();
 
