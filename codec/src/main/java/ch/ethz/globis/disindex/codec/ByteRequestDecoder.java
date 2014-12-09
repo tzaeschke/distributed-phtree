@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
 
-    private static final Splitter.MapSplitter splitter = Splitter.on(",").withKeyValueSeparator("=");
+    private static final Splitter.MapSplitter splitter = Splitter.on(",").withKeyValueSeparator("=>");
 
     /** The decoder used for the key.*/
     private FieldDecoder<K> keyDecoder;

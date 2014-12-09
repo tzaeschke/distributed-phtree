@@ -30,12 +30,24 @@ public class ZMapping implements KeyMapping<long[]>{
     public ZMapping() {
     }
 
-    public ZMapping(int dim) {
+    public ZMapping(int dim, int depth) {
         this.dim = dim;
-        this.service = new ZOrderService();
+        this.service = new ZOrderService(depth);
         this.tree = new PhTreeRangeVD<>(dim);
         this.sizes = new TreeMap<>();
         this.order = new TreeMap<>();
+    }
+
+    /**
+     * Add multiple host id's at once.
+     *
+     *  @param hostIds
+     */
+    public void add(List<String> hostIds) {
+        String[] hosts = hostIds.toArray(new String[hostIds.size()]);
+        BST bst = BST.fromArray(hosts);
+
+        updateRegions(bst.asMap());
     }
 
     /**
@@ -173,7 +185,7 @@ public class ZMapping implements KeyMapping<long[]>{
 
     @Override
     public List<String> get() {
-        throw new UnsupportedOperationException();
+        return new ArrayList<>(order.keySet());
     }
 
     @Override

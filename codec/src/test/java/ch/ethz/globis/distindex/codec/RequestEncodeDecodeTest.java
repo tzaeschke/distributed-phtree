@@ -114,9 +114,11 @@ public class RequestEncodeDecodeTest {
         int dim = 5;
         int depth = 64;
 
-        CreateRequest request = Requests.newCreate(dim, depth);
-        byte[] encodedRequest = requestEncoder.encodeCreate(request);
-        CreateRequest decodedRequest = requestDecoder.decodeCreate(ByteBuffer.wrap(encodedRequest));
+        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
+        request.addParamater("dim", dim);
+        request.addParamater("depth", depth);
+        byte[] encodedRequest = requestEncoder.encodeMap(request);
+        MapRequest decodedRequest = requestDecoder.decodeMap(ByteBuffer.wrap(encodedRequest));
         assertEquals("Create requests do not match", request, decodedRequest);
     }
 
@@ -130,8 +132,9 @@ public class RequestEncodeDecodeTest {
         byte[] encodedRequest = requestEncoder.encodeMap(request);
         MapRequest decoded = requestDecoder.decodeMap(ByteBuffer.wrap(encodedRequest));
         assertEquals(request, decoded);
-        assertEquals(Integer.toString(dim), request.getParameter("dim"));
-        assertEquals(Integer.toString(depth), request.getParameter("depth"));
+
+        assertEquals((long) dim, (long) Integer.valueOf(decoded.getParameter("dim")));
+        assertEquals((long) depth, (long) Integer.valueOf(decoded.getParameter("depth")));
     }
 
     @Test

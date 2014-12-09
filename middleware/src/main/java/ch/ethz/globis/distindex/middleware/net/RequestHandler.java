@@ -6,7 +6,7 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 
 public interface RequestHandler<K, V> {
 
-    public ResultResponse<K, V> handleCreate(CreateRequest request);
+    public ResultResponse<K, V> handleCreate(MapRequest request);
 
     public ResultResponse<K, V> handleGet(GetRequest<K> request);
 

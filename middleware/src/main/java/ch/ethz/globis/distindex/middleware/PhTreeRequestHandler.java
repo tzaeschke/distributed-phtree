@@ -41,9 +41,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleCreate(CreateRequest request) {
-        int dim  = request.getDim();
-        int depth = request.getDepth();
+    public ResultResponse<long[], byte[]> handleCreate(MapRequest request) {
+        int dim  = Integer.parseInt(request.getParameter("dim"));
+        int depth = Integer.parseInt(request.getParameter("depth"));
         PhTreeV<byte[]> tree = new PhTree3<>(dim, depth);
         indexContext.setTree(tree);
         return createResponse(request);

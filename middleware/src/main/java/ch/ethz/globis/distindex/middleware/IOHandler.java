@@ -159,7 +159,7 @@ public class IOHandler<K, V> {
     }
 
     private ByteBuffer handleCreateRequest(ByteBuffer buf) {
-        CreateRequest request = decoder.decodeCreate(buf);
+        MapRequest request = decoder.decodeMap(buf);
         ResultResponse<K, V> response = requestHandler.handleCreate(request);
         return encodeResponse(response);
     }

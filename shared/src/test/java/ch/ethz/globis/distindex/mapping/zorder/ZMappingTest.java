@@ -14,7 +14,8 @@ public class ZMappingTest {
     @Test
     public void testRangeQuerySimple() {
         int dim = 2;
-        ZMapping mapping = new ZMapping(dim);
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
         mapping.add("one");
         mapping.add("two");
         mapping.add("three");
@@ -68,7 +69,8 @@ public class ZMappingTest {
          */
         //ToDo handle wrong square bounds
         int dim = 2;
-        ZMapping mapping = new ZMapping(dim);
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
         mapping.add("one");
         mapping.add("two");
         mapping.add("three");
@@ -86,7 +88,8 @@ public class ZMappingTest {
     @Test
     public void serializeDeserializeTest() {
         int dim = 3;
-        ZMapping mapping = new ZMapping(dim);
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
 
         //create the mapping
         String hostId;

@@ -51,10 +51,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 PutRequest<K, V> p = (PutRequest<K, V>) request;
                 encodedRequest = encodePut(p);
                 break;
-            case OpCode.CREATE_INDEX:
-                CreateRequest cr = (CreateRequest) request;
-                encodedRequest = encodeCreate(cr);
-                break;
             case OpCode.DELETE:
                 DeleteRequest dr = (DeleteRequest) request;
                 encodedRequest = encodeDelete(dr);
@@ -74,6 +70,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 PutBalancingRequest<K> pbr = (PutBalancingRequest) request;
                 encodedRequest = encodePutBalancingRequest(pbr);
                 break;
+            case OpCode.CREATE_INDEX:
             case OpCode.CLOSE_ITERATOR:
                 MapRequest mr = (MapRequest) request;
                 encodedRequest = encodeMap(mr);
@@ -222,18 +219,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         } else {
             buffer.putInt(0);
         }
-        return buffer.array();
-    }
-
-    public byte[] encodeCreate(CreateRequest request) {
-        int dim = request.getDim();
-        int depth = request.getDepth();
-        int outputSize = 4 + 4 + request.metadataSize();
-
-        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
-        writeMeta(buffer, request);
-        buffer.putInt(dim);
-        buffer.putInt(depth);
         return buffer.array();
     }
 

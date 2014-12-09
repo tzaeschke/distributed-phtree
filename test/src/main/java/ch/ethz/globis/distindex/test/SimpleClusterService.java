@@ -6,12 +6,19 @@ import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
 import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 
+import java.util.Map;
+
 public class SimpleClusterService implements ClusterService<long[]> {
 
     BSTMapping<long[]> mapping;
 
     public SimpleClusterService(int bitWidth) {
         this.mapping = new MultidimMapping();
+    }
+
+    @Override
+    public void createIndex(Map<String, String> options) {
+        //nothing to do here, we are offline
     }
 
     @Override

@@ -2,7 +2,16 @@ package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 
+import java.util.Map;
+
 public interface ClusterService<K> {
+
+    /**
+     * Handle the creation of a new index.
+     *
+     * @param options
+     */
+    public void createIndex(Map<String, String> options);
 
     /**
      * Reads the current key-to-machine mapping from the distributed cluster configuration.

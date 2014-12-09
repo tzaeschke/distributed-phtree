@@ -59,13 +59,16 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.get();
 
-        CreateRequest request = Requests.newCreate(dim, depth);
+        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
+        request.addParamater("dim", dim);
+        request.addParamater("depth", depth);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         for (Response response : responses) {
             if (response.getStatus() != OpStatus.SUCCESS) {
                 return false;
             }
         }
+        this.clusterService.createIndex(request.getContents());
         return true;
     }
 

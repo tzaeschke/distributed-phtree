@@ -12,6 +12,8 @@ import org.apache.zookeeper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * Implementation of the cluster service using Zookeeper.
  */
@@ -46,6 +48,11 @@ public class BSTMapClusterService implements ClusterService<long[]> {
 
     public BSTMapClusterService(String hostPort) {
         this.hostPort = hostPort;
+    }
+
+    @Override
+    public void createIndex(Map<String, String> options) {
+        //no need to do anything here
     }
 
     public KeyMapping<long[]> getMapping() {
