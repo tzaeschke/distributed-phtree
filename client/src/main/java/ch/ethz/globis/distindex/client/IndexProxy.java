@@ -226,7 +226,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return results;
     }
 
-    protected List<K> combineKeys(List<ResultResponse> responses) {
+    public List<K> combineKeys(List<ResultResponse> responses) {
         List<K> results = new ArrayList<>();
         for (ResultResponse<K,V> response : responses) {
             for (IndexEntry<K, V> entry : response.getEntries()) {
@@ -236,7 +236,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return results;
     }
 
-    protected List<K> extractKeys(ResultResponse<K, V> response) {
+    public List<K> extractKeys(ResultResponse<K, V> response) {
         List<K> keys = new ArrayList<>();
         for (IndexEntry<K, V> entry : response.getEntries()) {
             keys.add(entry.getKey());

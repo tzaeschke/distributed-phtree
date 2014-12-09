@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn))
  * and perform a range query in those areas. Then apply an additional knn to combine candidates.
  */
-public class RangeKNNStrategy implements KNNStrategy {
+public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
 
     /**
      * Perform a radius search to check if there are any neighbours nearer to the query point than the
@@ -22,8 +23,12 @@ public class RangeKNNStrategy implements KNNStrategy {
      * @param candidates                The nearest neighbours on the query point's host server.
      * @return                          The k nearest neighbour points.
      */
+
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates,
+                                         MultidimMapping mapping,
+                                         BSTMappingKNNStrategy<V> knnStrategy,
+                                         PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);

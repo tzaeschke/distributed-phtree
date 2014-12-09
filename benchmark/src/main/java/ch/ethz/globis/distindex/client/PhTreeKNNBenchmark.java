@@ -33,32 +33,32 @@ public class PhTreeKNNBenchmark {
 
     private static Logger LOG = LoggerFactory.getLogger(PhTreeKNNBenchmark.class);
 
-    private static KNNStrategy basic = new BasicKNNStrategy();
-    private static KNNStrategy range = new RangeKNNStrategy();
-    private static KNNStrategy rangeKNN = new RangeHostsKNNStrategy();
-    private static KNNStrategy rangeFilter = new RangeFilteredKNNStrategy();
+    private static KNNRadiusStrategy basic = new BasicKNNRadiusStrategy();
+    private static KNNRadiusStrategy range = new RangeKNNRadiusStrategy();
+    private static KNNRadiusStrategy rangeKNN = new RangeHostsKNNRadiusStrategy();
+    private static KNNRadiusStrategy rangeFilter = new RangeFilteredKNNRadiusStrategy();
 
     @Benchmark
     public Object basicSearchAllNeighbours(BenchmarkState state) {
-        state.indexProxy.setKnnStrategy(basic);
+        state.indexProxy.setKnnRadiusStrategy(basic);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
     @Benchmark
     public Object rectangleRangeSearch(BenchmarkState state) {
-        state.indexProxy.setKnnStrategy(range);
+        state.indexProxy.setKnnRadiusStrategy(range);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
     @Benchmark
     public Object rectangleRangeSearchFiltered(BenchmarkState state) {
-        state.indexProxy.setKnnStrategy(rangeFilter);
+        state.indexProxy.setKnnRadiusStrategy(rangeFilter);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 
     @Benchmark
     public Object rectangleRangeKNNSearch(BenchmarkState state) {
-        state.indexProxy.setKnnStrategy(rangeKNN);
+        state.indexProxy.setKnnRadiusStrategy(rangeKNN);
         return state.indexProxy.getNearestNeighbors(randomKey(), 10);
     }
 

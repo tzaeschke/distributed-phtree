@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTNode;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ZKCClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -28,8 +29,8 @@ public class ZKClusterServiceTest {
 
     private static final int ZK_PORT = 2181;
     private static final String ZK_HOST = "localhost";
-    private static final String ZK_HOST_PORT = ZK_HOST + ":" + ZK_PORT;
-    private static final String ZK_PATH = "/mapping";
+
+    private static final String MAPPING_PATH = "/mapping";
 
     private static Kryo kryo;
 
@@ -38,7 +39,7 @@ public class ZKClusterServiceTest {
         ClusterService<long[]> clusterService = null;
         try (TestingServer zk = newZK(ZK_PORT)) {
             zk.start();
-            clusterService  = new ZKClusterService(ZK_HOST, ZK_PORT);
+            clusterService  = new ZKCClusterService(ZK_HOST, ZK_PORT);
             clusterService.connect();
             clusterService.registerHost("1");
             clusterService.registerHost("2");
@@ -70,6 +71,7 @@ public class ZKClusterServiceTest {
         BSTMapping<long[]> deserializedMapping = (BSTMapping<long[]>) deserialize(serializedBytes);
         assertEquals(mapping, deserializedMapping);
     }
+
     private byte[] serialize(KeyMapping<long[]> mapping) {
         Output output = new Output(new ByteArrayOutputStream());
         getKryo().writeObject(output, mapping);

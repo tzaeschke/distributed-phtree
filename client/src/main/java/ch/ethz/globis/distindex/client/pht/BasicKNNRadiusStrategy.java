@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Set;
  * After finding the furthest neighbour fn in the hosts holding the key, look into all neighbouring ares and check for
  * neighbours that are closer to q than fn.
  */
-public class BasicKNNStrategy implements KNNStrategy {
+public class BasicKNNRadiusStrategy implements KNNRadiusStrategy {
 
     /**
      * Perform a radius search to check if there are any neighbours nearer to the query point than the
@@ -25,14 +25,15 @@ public class BasicKNNStrategy implements KNNStrategy {
      * @return                          The k nearest neighbour points.
      */
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
-        KeyMapping<long[]> keyMapping = indexProxy.getMapping();
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, MultidimMapping mapping,
+                                         BSTMappingKNNStrategy<V> knnStrategy,
+                                         PHTreeIndexProxy<V> indexProxy) {
 
         long[] farthestNeighbor = candidates.get(k - 1);
         List<long[]> neighbors = ZCurveHelper.getProjectedNeighbours(key, farthestNeighbor);
-        Set<String> neighbourHosts = keyMapping.getHostsContaining(neighbors);
+        Set<String> neighbourHosts = mapping.getHostsContaining(neighbors);
 
-        List<long[]> nearestNeighbors = indexProxy.getNearestNeighbors(neighbourHosts, key, k);
+        List<long[]> nearestNeighbors = knnStrategy.getNearestNeighbors(neighbourHosts, key, k, indexProxy);
         return MultidimUtil.nearestNeighbours(key, k, nearestNeighbors);
     }
 }

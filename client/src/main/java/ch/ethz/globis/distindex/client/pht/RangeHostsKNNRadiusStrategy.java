@@ -1,5 +1,7 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
  * find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a knn query into those areas.
  * Then apply an additional knn to combine candidates.
  */
-public class RangeHostsKNNStrategy implements KNNStrategy {
+public class RangeHostsKNNRadiusStrategy implements KNNRadiusStrategy {
 
     /**
      * Perform a radius search to check if there are any neighbours nearer to the query point than the
@@ -23,13 +25,15 @@ public class RangeHostsKNNStrategy implements KNNStrategy {
      * @return                          The k nearest neighbour points.
      */
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, MultidimMapping mapping,
+                                         BSTMappingKNNStrategy<V> knnStrategy,
+                                         PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);
         long[] end = MultidimUtil.transpose(key, distance);
-        List<String> hostIds = indexProxy.getMapping().getHostIds(start, end);
-        List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
+        List<String> hostIds = mapping.getHostIds(start, end);
+        List<long[]> expandedCandidates = knnStrategy.getNearestNeighbors(hostIds, key, k, indexProxy);
         return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
     }
 }

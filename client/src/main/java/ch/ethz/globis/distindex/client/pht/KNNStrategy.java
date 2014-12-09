@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.client.pht;
 
 import java.util.List;
 
-public interface KNNStrategy {
+public interface KNNStrategy<V> {
 
-    <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy);
+    public List<long[]> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy);
 }

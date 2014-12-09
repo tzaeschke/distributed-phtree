@@ -43,7 +43,9 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private int depth = -1;
     private int dim = -1;
 
-    private KNNStrategy knnStrategy = new RangeKNNStrategy();
+    private KNNRadiusStrategy knnRadiusStrategy = new RangeKNNRadiusStrategy();
+
+    private KNNStrategy knnStrategy = new BSTMappingKNNStrategy();
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
@@ -104,97 +106,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     @Override
     public List<long[]> getNearestNeighbors(long[] key, int k) {
-        LOG.debug("KNN request started for key={} and k={}", Arrays.toString(key), k);
-        KeyMapping<long[]> keyMapping = clusterService.getMapping();
-        String keyHostId = keyMapping.getHostId(key);
-        List<long[]> candidates = getNearestNeighbors(keyHostId, key, k);
-        List<long[]> neighbours;
-        if (candidates.size() < k) {
-            neighbours = iterativeExpansion(keyMapping, key, k);
-        } else {
-            neighbours = radiusSearch(key, k, candidates);
-        }
-        LOG.debug("KNN request ended for key={} and k={}", Arrays.toString(key), k);
-        return neighbours;
-    }
-
-    /**
-     * Find the k nearest neighbours of a query point from the host with the id hostId.
-     *
-     * @param hostId                    The id of the host on which the query is run.
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @return                          The k nearest neighbours on the host.
-     */
-    List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
-        logKNNRequest(hostId, key, k);
-
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
-        return extractKeys(response);
-    }
-
-    /**
-     *  Find the k nearest neighbours of a query point from the hosts with the ids contained
-     *  int the hostIds list.
-     *
-     * @param hostIds
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @return                          The k nearest neighbours on the hosts.
-     */
-    List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
-        logKNNRequest(hostIds, key, k);
-
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
-        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
-    }
-
-    /**
-     * Perform an iterative expansion search for the nearest neighbour. This should be called if
-     * the host containing the query point does not contain K nearest neighbours.
-     *
-     * @param key                       The query point.
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     */
-    List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k) {
-        String hostId = keyMapping.getHostId(key);
-
-        List<long[]> candidates;
-        int regionBitWidth = depth - keyMapping.getDepth(hostId) / dim;
-        Set<String> currentHostIds;
-        boolean foundK = false;
-        int hops = 1;
-        do {
-            if (hops + regionBitWidth > depth) {
-                currentHostIds = new HashSet<>(keyMapping.getHostIds());
-            } else {
-                List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
-                currentHostIds = keyMapping.getHostsContaining(projections);
-            }
-            candidates = getNearestNeighbors(currentHostIds, key, k);
-            if (candidates.size() == k) {
-                foundK = true;
-            }
-            hops++;
-        } while (!foundK && (regionBitWidth + hops) <= depth);
-
-        return candidates;
-    }
-
-    /**
-     * Perform a radius search to check if there are any neighbours nearer to the query point than the
-     * neighbours found on the query host server.
-     *
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @param candidates                The nearest neighbours on the query point's host server.
-     * @return                          The k nearest neighbour points.
-     */
-    List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates) {
-        return knnStrategy.radiusSearch(key, k, candidates, this);
+        return knnStrategy.getNearestNeighbors(key, k, this);
     }
 
     public PhTree.Stats getStats() {
@@ -225,21 +137,19 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return new ZKClusterService(host + ":" + port);
     }
 
-    public void setKnnStrategy(KNNStrategy knnStrategy) {
-        this.knnStrategy = knnStrategy;
+    public void setKnnRadiusStrategy(KNNRadiusStrategy knnRadiusStrategy) {
+        this.knnRadiusStrategy = knnRadiusStrategy;
     }
 
     public KeyMapping<long[]> getMapping() {
         return clusterService.getMapping();
     }
 
-    void logKNNRequest(Collection<String> hostIds, long[] key, int k) {
-        for (String hostId : hostIds) {
-            logKNNRequest(hostId, key, k);
-        }
+    RequestDispatcher<long[], V> getRequestDispatcher() {
+        return requestDispatcher;
     }
 
-    void logKNNRequest(String hostId, long[] key, int k) {
-        LOG.debug("Sending kNN request with key = {} and k = {} to host" + hostId, Arrays.toString(key), k);
+    ClusterService<long[]> getClusterService() {
+        return clusterService;
     }
 }

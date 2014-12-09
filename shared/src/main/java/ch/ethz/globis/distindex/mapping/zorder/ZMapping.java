@@ -190,7 +190,6 @@ public class ZMapping {
         return (ZMapping) kryo.readClassAndObject(new Input(data));
     }
 
-
     private void checkConsistency() {
         if (!consistent) {
             throw new IllegalStateException("Mapping is inconsistent!");

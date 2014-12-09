@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhDistanceD;
@@ -13,10 +14,10 @@ import java.util.List;
  *
  *  Then apply an additional knn to combine candidates.
  */
-public class RangeFilteredKNNStrategy implements KNNStrategy {
+public class RangeFilteredKNNRadiusStrategy implements KNNRadiusStrategy {
 
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, MultidimMapping mapping, BSTMappingKNNStrategy<V> knnStrategy, PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);

@@ -36,7 +36,6 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         return hostList;
     }
 
-    @Override
     public List<String> getHostIds(String prefix) {
         throw new UnsupportedOperationException();
     }
