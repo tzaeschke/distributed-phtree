@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.test;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
+import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 
 public class SimpleClusterService implements ClusterService<long[]> {
@@ -10,7 +11,7 @@ public class SimpleClusterService implements ClusterService<long[]> {
     BSTMapping<long[]> mapping;
 
     public SimpleClusterService(int bitWidth) {
-        this.mapping = new BSTMapping<>(new LongArrayKeyConverter(bitWidth), new String[]{});
+        this.mapping = new MultidimMapping();
     }
 
     @Override

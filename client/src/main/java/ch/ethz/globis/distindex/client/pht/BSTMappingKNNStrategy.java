@@ -17,7 +17,7 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
     /** The logger used by this class. */
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BSTMappingKNNStrategy.class);
 
-    private KNNRadiusStrategy radiusStrategy = new RangeFilteredKNNRadiusStrategy();
+    private KNNRadiusStrategy radiusStrategy = new RangeKNNRadiusStrategy();
 
     @Override
     public List<long[]> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy) {

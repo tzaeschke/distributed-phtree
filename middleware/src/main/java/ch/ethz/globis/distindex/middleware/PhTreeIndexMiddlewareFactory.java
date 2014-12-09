@@ -5,14 +5,11 @@ import ch.ethz.globis.disindex.codec.ByteResponseEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
-import ch.ethz.globis.distindex.middleware.IOHandler;
-import ch.ethz.globis.distindex.middleware.IndexContext;
-import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.orchestration.ZKClusterService;
+import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 
 /**
  * Utility class for creating middleware nodes programatically.
@@ -33,7 +30,7 @@ public class PhTreeIndexMiddlewareFactory {
     }
 
     public static IndexMiddleware newPhTree(String host, int port, String zkHost, int zkPort) {
-        ClusterService<long[]> clusterService = new ZKClusterService(zkHost, zkPort);
+        ClusterService<long[]> clusterService = new BSTMapClusterService(zkHost, zkPort);
         return newPhTree(host, port, clusterService);
     }
 }

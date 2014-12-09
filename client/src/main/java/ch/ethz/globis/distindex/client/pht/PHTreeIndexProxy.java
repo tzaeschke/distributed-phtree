@@ -19,7 +19,7 @@ import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.orchestration.ZKClusterService;
+import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeQStats;
 import org.slf4j.Logger;
@@ -131,7 +131,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {
-        return new ZKClusterService(host + ":" + port);
+        return new BSTMapClusterService(host + ":" + port);
     }
 
     public void setKnnRadiusStrategy(KNNRadiusStrategy knnRadiusStrategy) {
