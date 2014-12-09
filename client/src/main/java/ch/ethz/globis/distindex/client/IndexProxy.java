@@ -57,7 +57,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     public boolean create(int dim, int depth) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds();
+        List<String> hostIds = keyMapping.get();
 
         CreateRequest request = Requests.newCreate(dim, depth);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
@@ -72,7 +72,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public V put(K key, V value) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.getHostId(key);
+        String hostId = keyMapping.get(key);
 
         PutRequest<K, V> request = Requests.newPut(key, value);
         ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
@@ -83,7 +83,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public boolean contains(K key) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.getHostId(key);
+        String hostId = keyMapping.get(key);
         ContainsRequest<K> request = Requests.newContains(key);
         SimpleResponse response = requestDispatcher.send(hostId, request, IntegerResponse.class);
         check(request, response);
@@ -93,7 +93,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public V get(K key) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.getHostId(key);
+        String hostId = keyMapping.get(key);
 
         GetRequest<K> request = Requests.newGet(key);
         ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
@@ -105,7 +105,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public V remove(K key) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.getHostId(key);
+        String hostId = keyMapping.get(key);
 
         DeleteRequest<K> request = Requests.newDelete(key);
         ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
@@ -117,7 +117,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     @Override
     public IndexEntryList<K, V> getRange(K start, K end) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds(start, end);
+        List<String> hostIds = keyMapping.get(start, end);
 
         GetRangeRequest<K> request = Requests.newGetRange(start, end);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
@@ -169,7 +169,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     public int size() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds();
+        List<String> hostIds = keyMapping.get();
         BaseRequest request = Requests.newGetSize();
 
         List<IntegerResponse> responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
@@ -182,7 +182,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     public int getDim() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds();
+        List<String> hostIds = keyMapping.get();
         BaseRequest request = Requests.newGetDim();
 
         List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
@@ -201,7 +201,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     public int getDepth() {
         KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds();
+        List<String> hostIds = keyMapping.get();
         BaseRequest request = Requests.newGetDepth();
 
         List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);

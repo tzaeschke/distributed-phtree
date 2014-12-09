@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
+import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.pht.PhTreeRangeVD;
 import com.esotericsoftware.kryo.Kryo;
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * Mapping for the Z-Order curve.
  */
-public class ZMapping {
+public class ZMapping implements KeyMapping<long[]>{
 
     int dim;
     private ZOrderService service;
@@ -46,7 +47,7 @@ public class ZMapping {
      * @return                                          The mapping as a Map object. Each entry contains the prefix
      *                                                  as the key and the hostId as the value.
      */
-    public Map<String, String> add(String hostId) {
+    public void add(String hostId) {
         checkConsistency();
 
         //add the nest hostId to the mapping
@@ -54,7 +55,6 @@ public class ZMapping {
 
         //reconstruct the set of regions mapped to each host
         updateRegions(mapping);
-        return mapping;
     }
 
     /**
@@ -164,6 +164,36 @@ public class ZMapping {
             return host;
         }
         return null;
+    }
+
+    @Override
+    public void setSize(String host, int size) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<String> get() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getFirst() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getNext(String hostId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException();
     }
 
     /**

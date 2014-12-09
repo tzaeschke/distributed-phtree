@@ -13,6 +13,7 @@ import ch.ethz.globis.disindex.codec.util.BitUtils;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
@@ -64,7 +65,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      */
     @Override
     public void balance() {
-        KeyMapping<long[]> mapping = getMapping();
+        BSTMapping<long[]> mapping = (BSTMapping<long[]>) getMapping();
         String currentHostId = indexContext.getHostId();
         String receiverHostId = mapping.getHostForSplitting(currentHostId);
         if (receiverHostId == null) {
@@ -87,7 +88,8 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId                    The hostId of the receiving host.
      */
     private void updateMapping(String currentHostId, String receiverHostId, int newSize) {
-        getMapping().split(currentHostId, receiverHostId, newSize);
+        BSTMapping<long[]> mapping = (BSTMapping<long[]>) getMapping();
+        mapping.split(currentHostId, receiverHostId, newSize);
     }
 
     /**
@@ -158,7 +160,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         PhTreeV<byte[]> treeV = indexContext.getTree();
         int dim = treeV.getDIM();
         int depth = treeV.getDEPTH();
-        KeyMapping<long[]> mapping = getMapping();
+        BSTMapping<long[]> mapping = (BSTMapping<long[]>) getMapping();
         String prefix = mapping.getLargestZone(currentHostId);
 
         //get the iterator over the zone that will be moved

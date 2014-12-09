@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.phtree;
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
+import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
@@ -489,21 +490,5 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         }
         out += "]";
         return out;
-    }
-
-    private void printMappingAndSizes() {
-        Map<String, String> map = clusterService.getMapping().asMap();
-
-        Map<String, String> reverse = new HashMap<>();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            reverse.put(entry.getValue(), entry.getKey());
-        }
-
-        for (Middleware middleware : middlewares) {
-            IndexMiddleware mid = (IndexMiddleware) middleware;
-            PhTreeRequestHandler rh = (PhTreeRequestHandler) mid.getHandler().getRequestHandler();
-            String hostId = String.format("%s:%s", mid.getHost(), mid.getPort());
-            System.out.println(hostId + " " + reverse.get(hostId) + " " + rh.tree().size());
-        }
     }
 }

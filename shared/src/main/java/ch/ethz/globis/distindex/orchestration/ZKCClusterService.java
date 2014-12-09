@@ -2,7 +2,6 @@ package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
-import ch.ethz.globis.distindex.mapping.zorder.ZMappingAdaptor;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -15,7 +14,6 @@ import org.apache.curator.utils.EnsurePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 public class ZKCClusterService implements ClusterService {
@@ -60,7 +58,7 @@ public class ZKCClusterService implements ClusterService {
 
     @Override
     public KeyMapping getMapping() {
-        return new ZMappingAdaptor(mapping);
+        return mapping;
     }
 
     @Override

@@ -46,27 +46,13 @@ public class KeyMappingTest {
             hosts[i] = String.valueOf(i);
             mapping.add(hosts[i]);
         }
-        List<String> leaves = mapping.getHostIds();
+        List<String> leaves = mapping.get();
         for (int i = 0; i < size - 1; i++) {
             String nextHostId = mapping.getNext(leaves.get(i));
             assertEquals(leaves.get(i + 1), nextHostId);
         }
         String hostId = leaves.get(size - 1);
         assertNull(null, mapping.getNext(hostId));
-    }
-
-    @Test
-    public void testGetDepth() {
-        int depth = 10;
-        int size = (int) Math.pow(2, depth);
-        String[] hosts = new String[size];
-        for (int i = 0; i < size; i++) {
-            hosts[i] = String.valueOf(i);
-            mapping.add(hosts[i]);
-        }
-        for (String hostId : hosts) {
-            assertEquals(depth + 1, mapping.getDepth(hostId));
-        }
     }
 
     @Test
@@ -82,32 +68,6 @@ public class KeyMappingTest {
             assertEquals(--size, mapping.size());
         }
         assertEquals(size, mapping.size());
-    }
-
-    @Test
-    public void testSplittingCandidates() {
-        int nrHosts = 200;
-        String hostId;
-        for (int i = 0; i < nrHosts; i++) {
-            hostId = toHostId(i);
-            mapping.add(hostId);
-        }
-
-        String candidate;
-        for (int i = nrHosts - 1; i >= 0; i--) {
-            hostId = toHostId(i);
-            mapping.setSize(hostId, 2 * nrHosts - i);
-            candidate = mapping.getHostForSplitting(toHostId(i + 1));
-            assertEquals(hostId, candidate);
-        }
-    }
-
-    @Test
-    public void testSplittingCandidates_NotCurrentHostId() {
-        String currentHostId = "0";
-        mapping.add(currentHostId);
-        String candidate = mapping.getHostForSplitting(currentHostId);
-        assertNull(candidate);
     }
 
     @Test

@@ -25,19 +25,35 @@ public class BSTMapping<K> implements KeyMapping<K> {
         this.bst = new BST();
     }
 
+    /**
+     * Add a hostId to the key mapping.
+     * @param host
+     */
     @Override
     public void add(String host) {
         this.bst.add(host);
         this.intervals = bst.leaves();
     }
 
+    /**
+     * Remove a hostId from the keyMapping
+     * @param host
+     */
     @Override
     public void remove(String host) {
         bst.setRoot(remove(bst.getRoot(), host));
     }
 
+    /**
+     * Split the area available to a hostId and attribute half of it to a receiving hostId.
+     *
+     * The number of entries moved is sizeMoved.
+     *
+     * @param splittingHostId                       The hostId that will be split.
+     * @param receiverHostId                        The hostId that will received the entries moved.
+     * @param sizeMoved                             The number of entries to be moved
+     */
     @SuppressWarnings("unchecked")
-    @Override
     public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
         //ToDo split the zone with the largest size
         BSTNode splitting = bst.findFirstByContent(splittingHostId);
@@ -50,13 +66,26 @@ public class BSTMapping<K> implements KeyMapping<K> {
         newZone.setSize(sizeMoved);
     }
 
+    /**
+     * Set the number of keys associated with a host.
+     *
+     * @param host
+     * @param size
+     */
     @Override
     public void setSize(String host, int size) {
         BSTNode node = bst.findFirstByContent(host);
         node.setSize(size);
     }
 
-    @Override
+    /**
+     * Return the host that can be the receiver of a split operation.
+     *
+     * Should not necessarily bet the host with the smallest number of keys, as that host could be currently
+     * part of a running re-balancing.
+     *
+     * @return
+     */
     public String getHostForSplitting(String currentHost) {
         List<BSTNode> nodes = bst.nodes();
         Collections.sort(nodes, new Comparator<BSTNode>() {
@@ -89,6 +118,10 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return hostId;
     }
 
+    /**
+     * Return the number of hosts within the mapping.
+     * @return
+     */
     @Override
     public int size() {
         //ToDo implement this properly
@@ -101,7 +134,13 @@ public class BSTMapping<K> implements KeyMapping<K> {
         this.intervals = bst.leaves();
     }
 
-    @Override
+    /**
+     * Get the zone that has the largest size from the zones owned by the host whose hostId is
+     * received as an argument.
+     *
+     * @param currentHostId                             The hostId
+     * @return
+     */
     public String getLargestZone(String currentHostId) {
         List<BSTNode> nodes = bst.findByContent(currentHostId);
         int maxSize = 0;
@@ -142,8 +181,14 @@ public class BSTMapping<K> implements KeyMapping<K> {
     }
 
 
+    /**
+     * Obtain the hostId of the machine that stores the key received as an argument.
+     *
+     * @param key
+     * @return
+     */
     @Override
-    public String getHostId(K key) {
+    public String get(K key) {
         BSTNode node = find(key);
         if (node == null) {
             return null;
@@ -151,8 +196,15 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return node.getContent();
     }
 
+    /**
+     * Obtain all hostIds that store keys between the range determined by the start and end keys
+     * received as arguments.
+     * @param start
+     * @param end
+     * @return
+     */
     @Override
-    public List<String> getHostIds(K start, K end) {
+    public List<String> get(K start, K end) {
         if (bst == null) {
             return new ArrayList<>();
         }
@@ -160,6 +212,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return getHostIds(prefix);
     }
 
+    /**
+     * Get all the host id's which holds keys having the bit prefix received as an argument.
+     * @param prefix
+     * @return
+     */
     public List<String> getHostIds(String prefix) {
         int prefixLength = prefix.length();
         BSTNode current = bst.getRoot();
@@ -180,19 +237,35 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return bst.getHosts(current);
     }
 
+
+    /**
+     * Obtain all the host ids.
+     * @return
+     */
     @Override
-    public List<String> getHostIds() {
+    public List<String> get() {
         if (bst == null) {
             return new ArrayList<>();
         }
         return bst.leaves();
     }
 
+
+    /**
+     * Get the hostId of the host that holds the first key interval.
+     * @return
+     */
     @Override
     public String getFirst() {
         return intervals.get(0);
     }
 
+    /**
+     * Get the hostUId of the host that holds the next key interval relative to the key interval
+     * of the hostId received as an argument.
+     * @param hostId
+     * @return
+     */
     @Override
     public String getNext(String hostId) {
         int index = -1;
@@ -208,17 +281,23 @@ public class BSTMapping<K> implements KeyMapping<K> {
         }
     }
 
-    @Override
+    /**
+     * Return all of the host ids that contain the keys received as arguments.
+     * @param keys
+     * @return
+     */
     public Set<String> getHostsContaining(List<K> keys) {
         Set<String> neighbourHosts = new HashSet<>();
         for (K key : keys) {
-            String hostId = getHostId(key);
+            String hostId = get(key);
             neighbourHosts.add(hostId);
         }
         return neighbourHosts;
     }
 
-    @Override
+    /**
+     * @return                  the prefix - host mapping.
+     */
     public Map<String, String> asMap() {
         Map<String, String> codeHosts = new HashMap<>();
         getHosts("", bst.getRoot(), codeHosts);
@@ -235,7 +314,11 @@ public class BSTMapping<K> implements KeyMapping<K> {
         }
     }
 
-    @Override
+    /**
+     * Get the depth of the hostId.
+     * @param hostId
+     * @return
+     */
     public int getDepth(String hostId) {
         return getDepth(hostId, bst.getRoot(), 0);
     }

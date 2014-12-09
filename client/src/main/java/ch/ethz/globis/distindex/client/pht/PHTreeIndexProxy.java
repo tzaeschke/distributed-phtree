@@ -15,14 +15,11 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.mapping.ZCurveHelper;
-import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
-import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeQStats;
 import org.slf4j.Logger;
@@ -89,7 +86,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
                 Arrays.toString(start) + "-" + Arrays.toString(end), distance);
 
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.getHostIds(start, end);
+        List<String> hostIds = keyMapping.get(start, end);
 
         GetRangeRequest<long[]> request = Requests.newGetRange(start, end, distance);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);

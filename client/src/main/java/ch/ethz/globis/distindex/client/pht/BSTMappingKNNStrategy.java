@@ -23,7 +23,7 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
     public List<long[]> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
         LOG.debug("KNN request started for key={} and k={}", Arrays.toString(key), k);
         MultidimMapping keyMapping = (MultidimMapping) indexProxy.getMapping();
-        String keyHostId = keyMapping.getHostId(key);
+        String keyHostId = keyMapping.get(key);
         List<long[]> candidates = getNearestNeighbors(keyHostId, key, k, indexProxy);
         List<long[]> neighbours;
         if (candidates.size() < k) {
@@ -77,11 +77,11 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
      * @param key                       The key to be used as query.
      * @param k                         The number of neighbours to be returned.
      */
-    <V> List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
+    <V> List<long[]> iterativeExpansion(MultidimMapping keyMapping, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
         int dim = indexProxy.getDim();
         int depth = indexProxy.getDepth();
 
-        String hostId = keyMapping.getHostId(key);
+        String hostId = keyMapping.get(key);
 
         List<long[]> candidates;
         int regionBitWidth = depth - keyMapping.getDepth(hostId) / dim;
@@ -90,7 +90,7 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
         int hops = 1;
         do {
             if (hops + regionBitWidth > depth) {
-                currentHostIds = new HashSet<>(keyMapping.getHostIds());
+                currentHostIds = new HashSet<>(keyMapping.get());
             } else {
                 List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
                 currentHostIds = keyMapping.getHostsContaining(projections);

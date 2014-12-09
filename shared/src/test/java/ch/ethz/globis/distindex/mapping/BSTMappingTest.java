@@ -3,7 +3,6 @@ package ch.ethz.globis.distindex.mapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
 import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
-import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 import static ch.ethz.globis.distindex.mapping.util.TestOperationsUtil.assertEqualsListVararg;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Test any operations that are
@@ -44,6 +44,21 @@ public class BSTMappingTest {
     }
 
     @Test
+    public void testGetDepth() {
+        BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
+        int depth = 10;
+        int size = (int) Math.pow(2, depth);
+        String[] hosts = new String[size];
+        for (int i = 0; i < size; i++) {
+            hosts[i] = String.valueOf(i);
+            mapping.add(hosts[i]);
+        }
+        for (String hostId : hosts) {
+            assertEquals(depth + 1, mapping.getDepth(hostId));
+        }
+    }
+
+    @Test
     public void testSetSize() {
         int size = 16;
         BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
@@ -58,14 +73,42 @@ public class BSTMappingTest {
             int sz = mapping.getBst().findFirstByContent(keys[i]).getSize();
             assertEquals(i + 1, sz);
         }
-
     }
+
+    @Test
+    public void testSplittingCandidates() {
+        int nrHosts = 200;
+        BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
+        String hostId;
+        for (int i = 0; i < nrHosts; i++) {
+            hostId = toHostId(i);
+            mapping.add(hostId);
+        }
+
+        String candidate;
+        for (int i = nrHosts - 1; i >= 0; i--) {
+            hostId = toHostId(i);
+            mapping.setSize(hostId, 2 * nrHosts - i);
+            candidate = mapping.getHostForSplitting(toHostId(i + 1));
+            assertEquals(hostId, candidate);
+        }
+    }
+
+    @Test
+    public void testSplittingCandidates_NotCurrentHostId() {
+        BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter());
+        String currentHostId = "0";
+        mapping.add(currentHostId);
+        String candidate = mapping.getHostForSplitting(currentHostId);
+        assertNull(candidate);
+    }
+
 
     @Test
     public void testMapping() {
         String[] hosts = { "one", "two", "three", "four", "five" };
         KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
-        assertEquals(Arrays.asList(hosts).subList(0, hosts.length), mapping.getHostIds());
+        assertEquals(Arrays.asList(hosts).subList(0, hosts.length), mapping.get());
     }
 
     @Test
@@ -76,38 +119,42 @@ public class BSTMappingTest {
             keys[i] = String.valueOf(i);
         }
         BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), keys);
-        assertEqualsListVararg(mapping.getHostIds(), keys);
+        assertEqualsListVararg(mapping.get(), keys);
     }
 
     @Test
     public void testRangeQuery() {
         String[] hosts = { "one", "two", "three", "four" };
-        KeyMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
+        BSTMapping<long[]> mapping = new BSTMapping<>(new LongArrayKeyConverter(), hosts);
         Map<String, String> directMapping = mapping.asMap();
         long[] start = {1, 1};
         long[] end = {2, 2};
-        List<String> hostIds = mapping.getHostIds(start, end);
+        List<String> hostIds = mapping.get(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("00"));
 
         start = new long[] {-1, -1};
         end = new long[] {-5, -5};
-        hostIds = mapping.getHostIds(start, end);
+        hostIds = mapping.get(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("11"));
 
         start = new long[] {-1, 1};
         end = new long[] {-5, 5};
-        hostIds = mapping.getHostIds(start, end);
+        hostIds = mapping.get(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("10"));
 
         start = new long[] {1, -1};
         end = new long[] {5, -5};
-        hostIds = mapping.getHostIds(start, end);
+        hostIds = mapping.get(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("01"));
 
         start = new long[] {-1, -1};
         end = new long[] {5, 5};
-        hostIds = mapping.getHostIds(start, end);
+        hostIds = mapping.get(start, end);
         assertEqualsListVararg(hostIds, directMapping.get("00"), directMapping.get("01"),
                 directMapping.get("10"), directMapping.get("11"));
+    }
+
+    private String toHostId(int i) {
+        return String.valueOf(i);
     }
 }

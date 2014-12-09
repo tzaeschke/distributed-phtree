@@ -21,18 +21,17 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         hostList.add(host);
     }
 
-    @Override
     public Map<String, String> asMap() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getHostId(K key) {
+    public String get(K key) {
         return host;
     }
 
     @Override
-    public List<String> getHostIds(K start, K end) {
+    public List<String> get(K start, K end) {
         return hostList;
     }
 
@@ -41,7 +40,7 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
-    public List<String> getHostIds() {
+    public List<String> get() {
         return hostList;
     }
 
@@ -60,12 +59,9 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         }
     }
 
-    @Override
     public Set<String> getHostsContaining(List<K> keys) {
         return new HashSet<>(hostList);
     }
-
-    @Override
     public int getDepth(String hostId) {
         return 0;
     }
@@ -82,7 +78,6 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         hostList.remove(index);
     }
 
-    @Override
     public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
         throw new UnsupportedOperationException();
     }
@@ -92,7 +87,6 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public String getHostForSplitting(String currentHostId) {
         throw new UnsupportedOperationException();
     }
@@ -106,7 +100,6 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     public void clear() {
     }
 
-    @Override
     public String getLargestZone(String currentHostId) {
         return null;
     }
