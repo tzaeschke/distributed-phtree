@@ -73,7 +73,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     public void createIndex(Map<String, String> options) {
         int dim = Integer.parseInt(options.get("dim"));
         int depth = Integer.parseInt(options.get("depth"));
-        this.mapping = new ZMapping(dim, depth, mapping.get());
+        this.mapping = new ZMapping(dim, depth);
         this.mapping.add(servers);
         writeMapping(mapping);
     }
@@ -97,7 +97,6 @@ public class ZKClusterService implements ClusterService<long[]> {
         } catch (Exception e) {
             LOG.error("Failed to add new server.");
         }
-        mapping.add(hostId);
     }
 
     @Override
@@ -105,6 +104,11 @@ public class ZKClusterService implements ClusterService<long[]> {
         mapping.remove(hostId);
 
         writeMapping(mapping);
+    }
+
+    @Override
+    public List<String> getOnlineHosts() {
+        return servers;
     }
 
     @Override
@@ -166,7 +170,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private ZMapping readCurrentMapping() {
         ChildData nodeData = nodeCache.getCurrentData();
         if (nodeData == null) {
-            return new ZMapping();
+            return null;
         }
         byte[] data = nodeData.getData();
         return ZMapping.deserialize(data);

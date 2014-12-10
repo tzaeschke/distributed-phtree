@@ -6,6 +6,7 @@ import ch.ethz.globis.distindex.mapping.bst.LongArrayKeyConverter;
 import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 
+import java.util.List;
 import java.util.Map;
 
 public class SimpleClusterService implements ClusterService<long[]> {
@@ -34,6 +35,11 @@ public class SimpleClusterService implements ClusterService<long[]> {
     @Override
     public void unregisterHost(String hostId) {
         throw new UnsupportedOperationException("Is this even necessary?");
+    }
+
+    @Override
+    public List<String> getOnlineHosts() {
+        return mapping.get();
     }
 
     @Override

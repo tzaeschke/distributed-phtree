@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ClusterService<K> {
@@ -31,6 +32,10 @@ public interface ClusterService<K> {
      */
     public void unregisterHost(String hostId);
 
+    /**
+     * @return                              The online hosts registered in the cluster.
+     */
+    public List<String> getOnlineHosts();
     /**
      * Connect to the cluster.
      */

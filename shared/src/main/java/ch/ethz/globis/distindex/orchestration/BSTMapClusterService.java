@@ -12,6 +12,7 @@ import org.apache.zookeeper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -140,6 +141,11 @@ public class BSTMapClusterService implements ClusterService<long[]> {
         } catch (Exception e) {
             LOG.error("Exception occurred", e);
         }
+    }
+
+    @Override
+    public List<String> getOnlineHosts() {
+        return mapping.get();
     }
 
     @Override

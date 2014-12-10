@@ -53,8 +53,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public boolean create(Map<String, String> options) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get();
+        List<String> hostIds = clusterService.getOnlineHosts();
         MapRequest request = Requests.newMap(OpCode.CREATE_INDEX, options);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         for (Response response : responses) {
@@ -178,8 +177,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public int getDim() {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get();
+        List<String> hostIds = clusterService.getOnlineHosts();
         BaseRequest request = Requests.newGetDim();
 
         List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
@@ -197,8 +195,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public int getDepth() {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get();
+        List<String> hostIds = clusterService.getOnlineHosts();
         BaseRequest request = Requests.newGetDepth();
 
         List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);

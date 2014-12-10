@@ -45,13 +45,6 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     }
 
     @Test
-    public void testRanged() {
-        ZKPHFactory factory = new ZKPHFactory(HOST, ZK_PORT);
-        PhTree tree = factory.createPHTreeSet(2, 64);
-        System.out.println(tree);
-    }
-
-    @Test
     public void testLargeValues() throws Exception {
         long[] key = {1L, 2L};
         String veryLargeString = new BigInteger(1024 * 1024, new Random()).toString();

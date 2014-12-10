@@ -295,7 +295,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public byte[] serialize() {
         Kryo kryo = new Kryo();
         Output output = new Output(new ByteArrayOutputStream());
-        kryo.writeClassAndObject(output, this);
+        kryo.writeObjectOrNull(output, this, ZMapping.class);
         return output.toBytes();
     }
 
@@ -308,7 +308,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public static ZMapping deserialize(byte[] data) {
         Kryo kryo = new Kryo();
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-        return (ZMapping) kryo.readClassAndObject(new Input(data));
+        return kryo.readObjectOrNull(new Input(data), ZMapping.class);
     }
 
     private void checkConsistency() {
