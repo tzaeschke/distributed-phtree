@@ -45,6 +45,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testLargeValues() throws Exception {
+        phTree.create(2, 64);
+
         long[] key = {1L, 2L};
         String veryLargeString = new BigInteger(1024 * 1024, new Random()).toString();
 

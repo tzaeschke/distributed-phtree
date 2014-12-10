@@ -5,11 +5,14 @@ import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.utils.EnsurePath;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +38,6 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory for the mapping.*/
     private static final String MAPPING_PATH = "/mapping";
 
-    /** The node cache associated with the mapping node */
-    private NodeCache nodeCache;
-
     /** The path cache associated with the online servers */
     private PathChildrenCache serversCache;
 
@@ -59,10 +59,9 @@ public class ZKClusterService implements ClusterService<long[]> {
     public ZKClusterService(String hostPort) {
         this.hostPort = hostPort;
 
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 3);
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 5);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
 
-        nodeCache = new NodeCache(client, MAPPING_PATH, false);
         serversCache = new PathChildrenCache(client, SERVERS_PATH, true);
     }
 
@@ -118,9 +117,8 @@ public class ZKClusterService implements ClusterService<long[]> {
     public void connect() {
         this.client.start();
 
-        initNodeCache(nodeCache);
         initServersCache(serversCache);
-
+        ensurePathExists(MAPPING_PATH);
         this.mapping = readCurrentMapping();
         this.isRunning = true;
     }
@@ -145,18 +143,6 @@ public class ZKClusterService implements ClusterService<long[]> {
     private void initServersCache(final PathChildrenCache serversCache) {
         try {
             serversCache.start();
-//            PathChildrenCacheListener listener = new PathChildrenCacheListener() {
-//                @Override
-//                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-//                    List<String> serverIds = new ArrayList<>();
-//                    for (ChildData data : serversCache.getCurrentData()) {
-//                        if (data.getData() != null) {
-//                            serverIds.add(new String(data.getData(), StandardCharsets.UTF_8));
-//                        }
-//                    }
-//                }
-//            };
-//            serversCache.getListenable().addListener(listener);
         } catch (Exception e) {
             LOG.error("Failed to start the servers cache");
         }
@@ -166,19 +152,28 @@ public class ZKClusterService implements ClusterService<long[]> {
     public void disconnect() {
         isRunning = false;
 
-        CloseableUtils.closeQuietly(nodeCache);
         CloseableUtils.closeQuietly(serversCache);
         CloseableUtils.closeQuietly(client);
     }
 
     private ZMapping readCurrentMapping() {
-        ChildData nodeData = nodeCache.getCurrentData();
-        if (nodeData == null) {
-            LOG.info("Reading null mapping.");
-            return null;
+        try {
+            byte[] data = client.getData().usingWatcher(new CuratorWatcher() {
+                @Override
+                public void process(WatchedEvent watchedEvent) throws Exception {
+                    ZMapping newMapping = readCurrentMapping();
+                    if (newMapping == null && mapping != null) {
+                        LOG.warn("An attempt was made to overwrite current mapping with a null one.");
+                    } else {
+                        mapping = newMapping;
+                    }
+                }
+            }).forPath(MAPPING_PATH);
+            return ZMapping.deserialize(data);
+        } catch (Exception e) {
+            LOG.error("Error reading current mapping: ", e);
         }
-        byte[] data = nodeData.getData();
-        return ZMapping.deserialize(data);
+        return null;
     }
 
     private void writeMapping(ZMapping mapping) {

@@ -41,7 +41,6 @@ public class BaseParameterizedTest {
         threadPool = Executors.newFixedThreadPool(32);
         zkServer = new TestingServer(ZK_PORT);
         zkServer.start();
-
     }
 
     @AfterClass

@@ -14,7 +14,7 @@
 
     <logger name="org.apache.zookeeper" level="ERROR" />
 
-    <root level="ERROR">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
