@@ -16,12 +16,30 @@ import java.util.*;
  */
 public class ZMapping implements KeyMapping<long[]>{
 
+    /** The dimension of the mapping. */
     int dim;
+
+    /** The bit width of the mapping */
+    int depth;
+
+    /** A ZOrderService instance used by this mapping */
     private ZOrderService service;
+
+    /** Consistency flag - is true only when the mapping is consistent */
     private boolean consistent = true;
+
+    /** A ranged PhTree containing geometrical zones from the z-mapping mapped to each
+     * host*/
     private PhTreeRangeVD<String> tree;
+
+    /** Mapping from the host ids to the sizes of the hosts. */
     private Map<String, Integer> sizes;
+
+    /** Mapping from the host ids to the order of the hosts in the z-order curve. */
     private Map<String, Integer> order;
+
+    /** A list of the hosts ids.*/
+    private List<String> hosts = new ArrayList<>();
 
     /**
      * No-arg constructor, needed for Kryo deserialization.
@@ -31,11 +49,17 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     public ZMapping(int dim, int depth) {
+        this(dim, depth, new ArrayList<String>());
+    }
+
+    public ZMapping(int dim, int depth, List<String> hosts) {
         this.dim = dim;
+        this.depth = depth;
         this.service = new ZOrderService(depth);
         this.tree = new PhTreeRangeVD<>(dim);
         this.sizes = new TreeMap<>();
         this.order = new TreeMap<>();
+        this.hosts = hosts;
     }
 
     /**
@@ -44,6 +68,9 @@ public class ZMapping implements KeyMapping<long[]>{
      *  @param hostIds
      */
     public void add(List<String> hostIds) {
+        checkConsistency();
+
+        this.hosts.addAll(hostIds);
         String[] hosts = hostIds.toArray(new String[hostIds.size()]);
         BST bst = BST.fromArray(hosts);
 
@@ -62,6 +89,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public void add(String hostId) {
         checkConsistency();
 
+        this.hosts.add(hostId);
         //add the nest hostId to the mapping
         Map<String, String> mapping = constructNewMapping(hostId);
 
@@ -108,8 +136,18 @@ public class ZMapping implements KeyMapping<long[]>{
         }
     }
 
+    /**
+     * Remove a host from the mapping.
+     *
+     * The mapping SHOULD be marked inconsistent and should not be able to be used following this operation.
+     *
+     * @param hostId
+     */
     public void remove(String hostId) {
         this.consistent = false;
+        this.order.remove(hostId);
+        this.sizes.remove(hostId);
+        this.hosts.remove(hostId);
     }
 
     /**
@@ -178,34 +216,75 @@ public class ZMapping implements KeyMapping<long[]>{
         return null;
     }
 
+    /**
+     * Set the size of host identified by the hostId received as an argument.
+     *
+     * @param hostId                                The target hostId.
+     * @param size                                  The new size.
+     */
     @Override
-    public void setSize(String host, int size) {
-        throw new UnsupportedOperationException();
+    public void setSize(String hostId, int size) {
+        checkConsistency();
+
+        this.sizes.put(hostId, size);
     }
 
+    /**
+     * @return                                      A List of the host id's of the hosts in the mapping.
+     */
     @Override
     public List<String> get() {
-        return new ArrayList<>(order.keySet());
+        checkConsistency();
+
+        return hosts;
     }
 
+    /**
+     * @return                                      The host id of the first host in the mapping.
+     */
     @Override
     public String getFirst() {
-        throw new UnsupportedOperationException();
+        checkConsistency();
+
+        return (hosts != null && hosts.size() > 0 ) ? hosts.get(0) : null;
     }
 
+    /**
+     * Return the id of the host whose mapped region follows the region of the host whose id was received
+     * as an argument.
+     * @param hostId                                The preceding host's id.
+     * @return                                      The next host's id.
+     */
     @Override
     public String getNext(String hostId) {
-        throw new UnsupportedOperationException();
+        checkConsistency();
+
+        int index = Collections.binarySearch(hosts, hostId);
+
+        //index of the following
+        index += 1;
+        return (hosts.size() > index) ? hosts.get(index) : null;
     }
 
+    /**
+     * @return                                      The number of hosts in the mapping.
+     */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        checkConsistency();
+
+        return hosts.size();
     }
 
+    /**
+     * Clear the mapping.
+     */
     @Override
     public void clear() {
-        throw new UnsupportedOperationException();
+        this.hosts.clear();
+        this.order.clear();
+        this.sizes.clear();
+        this.tree = null;
     }
 
     /**
