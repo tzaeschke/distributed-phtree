@@ -284,7 +284,7 @@ public class ZMapping implements KeyMapping<long[]>{
         this.hosts.clear();
         this.order.clear();
         this.sizes.clear();
-        this.tree = null;
+        //this.tree = null;
     }
 
     /**
@@ -295,7 +295,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public byte[] serialize() {
         Kryo kryo = new Kryo();
         Output output = new Output(new ByteArrayOutputStream());
-        kryo.writeObjectOrNull(output, this, ZMapping.class);
+        kryo.writeObject(output, this);
         return output.toBytes();
     }
 
@@ -306,9 +306,12 @@ public class ZMapping implements KeyMapping<long[]>{
      * @return                                  A mapping object.
      */
     public static ZMapping deserialize(byte[] data) {
+        if (data.length == 0) {
+            return null;
+        }
         Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-        return kryo.readObjectOrNull(new Input(data), ZMapping.class);
+        ((Kryo.DefaultInstantiatorStrategy) kryo.getInstantiatorStrategy()).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy());
+        return kryo.readObject(new Input(data), ZMapping.class);
     }
 
     private void checkConsistency() {

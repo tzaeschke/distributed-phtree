@@ -109,6 +109,7 @@ public class TCPClient implements Transport {
      * @throws IOException
      */
     private Socket openNewSocket(String host) throws IOException {
+        LOG.info("Opening socket to {}", host);
         String[] tokens = host.split(":");
         String hostAddress = tokens[0];
         int port = Integer.parseInt(tokens[1]);

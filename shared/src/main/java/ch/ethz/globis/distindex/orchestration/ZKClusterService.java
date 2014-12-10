@@ -52,9 +52,6 @@ public class ZKClusterService implements ClusterService<long[]> {
      */
     private boolean isRunning = false;
 
-    /** The list of the id's of the currently online hosts.*/
-    private List<String> servers;
-
     public ZKClusterService(String host, int port) {
         this(host + ":" + port);
     }
@@ -65,7 +62,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 3);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
 
-        nodeCache = new NodeCache(client, MAPPING_PATH);
+        nodeCache = new NodeCache(client, MAPPING_PATH, false);
         serversCache = new PathChildrenCache(client, SERVERS_PATH, true);
     }
 
@@ -74,7 +71,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         int dim = Integer.parseInt(options.get("dim"));
         int depth = Integer.parseInt(options.get("depth"));
         this.mapping = new ZMapping(dim, depth);
-        this.mapping.add(servers);
+        this.mapping.add(getOnlineHosts());
         writeMapping(mapping);
     }
 
@@ -108,7 +105,13 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     @Override
     public List<String> getOnlineHosts() {
-        return servers;
+        List<String> serverIds = new ArrayList<>();
+        for (ChildData data : serversCache.getCurrentData()) {
+            if (data.getData() != null) {
+                serverIds.add(new String(data.getData(), StandardCharsets.UTF_8));
+            }
+        }
+        return serverIds;
     }
 
     @Override
@@ -118,17 +121,17 @@ public class ZKClusterService implements ClusterService<long[]> {
         initNodeCache(nodeCache);
         initServersCache(serversCache);
 
-        this.servers = new ArrayList<>();
         this.mapping = readCurrentMapping();
         this.isRunning = true;
     }
 
-    private void initNodeCache(NodeCache nodeCache) {
+    private void initNodeCache(final NodeCache nodeCache) {
         try {
             nodeCache.start();
             NodeCacheListener listener = new NodeCacheListener() {
                 @Override
                 public void nodeChanged() throws Exception {
+                    nodeCache.rebuild();
                     mapping = readCurrentMapping();
                 }
             };
@@ -142,17 +145,18 @@ public class ZKClusterService implements ClusterService<long[]> {
     private void initServersCache(final PathChildrenCache serversCache) {
         try {
             serversCache.start();
-            PathChildrenCacheListener listener = new PathChildrenCacheListener() {
-                @Override
-                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                    List<String> serverIds = new ArrayList<>();
-                    for (ChildData data : serversCache.getCurrentData()) {
-                        serverIds.add(new String(data.getData(), StandardCharsets.UTF_8));
-                    }
-                    servers = serverIds;
-                }
-            };
-            serversCache.getListenable().addListener(listener);
+//            PathChildrenCacheListener listener = new PathChildrenCacheListener() {
+//                @Override
+//                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+//                    List<String> serverIds = new ArrayList<>();
+//                    for (ChildData data : serversCache.getCurrentData()) {
+//                        if (data.getData() != null) {
+//                            serverIds.add(new String(data.getData(), StandardCharsets.UTF_8));
+//                        }
+//                    }
+//                }
+//            };
+//            serversCache.getListenable().addListener(listener);
         } catch (Exception e) {
             LOG.error("Failed to start the servers cache");
         }
@@ -170,6 +174,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private ZMapping readCurrentMapping() {
         ChildData nodeData = nodeCache.getCurrentData();
         if (nodeData == null) {
+            LOG.info("Reading null mapping.");
             return null;
         }
         byte[] data = nodeData.getData();
@@ -177,6 +182,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     private void writeMapping(ZMapping mapping) {
+        LOG.info("Writing mapping.");
         byte[] data = mapping.serialize();
         ensurePathExists(MAPPING_PATH);
 

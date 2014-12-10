@@ -30,13 +30,12 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{ {2}});
+        return Arrays.asList(new Object[][]{ {4}});
     }
 
     @Before
     public void setupTree() {
         phTree = new PHTreeIndexProxy<>(HOST, ZK_PORT);
-        phTree.create(2, 64);
     }
 
     @After
@@ -55,6 +54,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testGet() throws Exception {
+        phTree.create(2, 64);
         String retrieved = phTree.get(new long[] { 1L, 2L});
 
         assertNull("Retrieved value should be null as it is not in the tree.", retrieved);
@@ -62,6 +62,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testRangedIterator() throws Exception {
+        phTree.create(2, 64);
         IndexEntryList<long[], String> expected = new IndexEntryList<>();
         IndexEntryList<long[], String> toInsert = new IndexEntryList<>();
         toInsert.add(k(0, 1), "foo");
@@ -92,6 +93,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testIterator() throws Exception {
+        phTree.create(2, 64);
         IndexEntryList<long[], String> expected = new IndexEntryList<>();
 
         expected.add(k(0, 0), "foo1");
@@ -122,6 +124,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testGetRange() throws Exception {
+        phTree.create(2, 64);
+
         phTree.put(new long[] {10, 10}, "foo");
         phTree.put(new long[] {11, 10}, "foo");
         phTree.put(new long[]{9, 10}, "foo");
@@ -150,6 +154,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testGetRange2Mid() throws Exception {
+        phTree.create(2, 64);
+
         phTree.put(new long[] {0, 0}, "foo");
         phTree.put(new long[] {1, 0}, "foo");
         phTree.put(new long[]{1, 1}, "foo");
@@ -176,6 +182,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testPutEmpty() throws Exception {
+        phTree.create(2, 64);
+
         long[] key = {1, 2};
         phTree.put(key, null);
 
@@ -184,6 +192,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testGetKNN() throws Exception {
+        phTree.create(2, 64);
+
         List<long[]> expected = new ArrayList<long[]>() {{
             add(new long[] { 0, 0});
             add(new long[] { 1, 2});
@@ -212,6 +222,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testPutAndGet2D() throws Exception {
+        phTree.create(2, 64);
+
         long[] key = new long[]{1L, 2L};
         String value = "hello";
         phTree.put(key, value);
@@ -227,6 +239,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testDeleteContains() throws Exception {
+        phTree.create(2, 64);
+
         long[] key1 = {-1, -1};
         long[] key2 = {1, 1};
         String value1 = new BigInteger(30, new Random()).toString();
@@ -248,6 +262,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testPutAndGetRandom2D() throws Exception {
+        phTree.create(2, 64);
+
         int nrEntries = 500;
         Random random = new Random();
 
@@ -263,6 +279,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testRandomInsertAndKNN() {
+        phTree.create(2, 64);
+
         Random random = new Random(42);
         List<long[]> points = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -293,6 +311,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Test
     public void testSimple() throws Exception {
+        phTree.create(2, 64);
+
         assertEquals(0, phTree.size());
         assertEquals(2, phTree.getDim());
         assertEquals(64, phTree.getDepth());

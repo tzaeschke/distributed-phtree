@@ -108,6 +108,18 @@ public class ZMappingTest {
     }
 
     @Test
+    public void testSerializeDeserialize_OK() {
+        int dim = 2;
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
+        String[] hosts = { "one", "two", "three", "four"};
+        mapping.add(Arrays.asList(hosts));
+        byte[] data = mapping.serialize();
+        ZMapping deserialized = ZMapping.deserialize(data);
+        assertEquals("The decoded mapping is not equal to the original mapping", mapping, deserialized);
+    }
+
+    @Test
     public void testPointQuery() {
         int dim = 2;
         int depth = 64;

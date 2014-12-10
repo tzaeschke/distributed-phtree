@@ -14,12 +14,4 @@ public interface RequestDispatcher<K, V> extends Closeable, AutoCloseable {
     public <R extends Response> R send(String hostId, Request request, Class<R> clazz);
 
     public <R extends Response> List<R> send(Collection<String> hostIds, Request request, Class<R> clazz);
-
-//    public ResultResponse<K, V> send(String hostId, Request request);
-//
-//    public List<ResultResponse<K, V>> send(Collection<String> hostIds, Request request);
-//
-//    public SimpleResponse sendSimple(String hostId, Request request);
-//
-//    public List<SimpleResponse> sendSimple(Collection<String> hostIds, Request request);
 }

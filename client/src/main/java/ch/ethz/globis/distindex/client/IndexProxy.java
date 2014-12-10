@@ -62,6 +62,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             }
         }
         this.clusterService.createIndex(request.getContents());
+        System.out.println("Mapping: " + clusterService.getMapping());
         return true;
     }
 
@@ -251,7 +252,8 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             throw new NullPointerException("Response should not be null");
         }
         if (request.getId() != response.getRequestId()) {
-            throw new InvalidResponseException("Response received was not intended for this request.");
+            throw new InvalidResponseException("Response received was not intended for this request." +
+                    "Response id: " + response.getRequestId() + " Request id: " + request.getId());
         }
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new ServerErrorException("Error on server side.");
