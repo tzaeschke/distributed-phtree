@@ -4,10 +4,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ZMappingTest {
 
@@ -103,5 +105,25 @@ public class ZMappingTest {
         byte[] serializedBytes = mapping.serialize();
         ZMapping deSerializedMapping = ZMapping.deserialize(serializedBytes);
         assertEquals("The decoded mapping is not equal to the original mapping", mapping, deSerializedMapping);
+    }
+
+    @Test
+    public void testPointQuery() {
+        int dim = 2;
+        int depth = 64;
+        String[] hosts = { "one", "two", "three", "four" };
+        ZMapping mapping = new ZMapping(dim, depth);
+        mapping.add(Arrays.asList(hosts));
+
+        assertHostForPoint(mapping, "one", 1L, 1L);
+        assertHostForPoint(mapping, "two", 1L, -1L);
+        assertHostForPoint(mapping, "three", -1L, 1L);
+        assertHostForPoint(mapping, "four", -1L, -1L);
+    }
+
+    private void assertHostForPoint(ZMapping mapping, String expectedHostId, long... key) {
+        String hostId = mapping.get(key);
+        assertNotNull(hostId);
+        assertEquals(expectedHostId, hostId);
     }
 }
