@@ -67,11 +67,14 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return new ClientRequestDispatcher<>(transport, encoder, decoder);
     }
 
-    @Override
-    public boolean create(int dim, int depth) {
+    public boolean create(final int dim, final int depth) {
         this.dim = dim;
         this.depth = depth;
-        return super.create(dim, depth);
+        Map<String, String> options = new HashMap<String, String>() {{
+            put("dim", String.valueOf(dim));
+            put("depth", String.valueOf(depth));
+        }};
+        return super.create(options);
     }
 
     /**

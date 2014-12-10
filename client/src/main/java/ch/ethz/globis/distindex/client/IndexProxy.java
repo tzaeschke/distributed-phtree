@@ -19,10 +19,7 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Proxy class for working with a distributed, remote index.
@@ -55,13 +52,10 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         this.openIterators = new HashSet<>();
     }
 
-    public boolean create(int dim, int depth) {
+    public boolean create(Map<String, String> options) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.get();
-
-        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
-        request.addParamater("dim", dim);
-        request.addParamater("depth", depth);
+        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX, options);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         for (Response response : responses) {
             if (response.getStatus() != OpStatus.SUCCESS) {

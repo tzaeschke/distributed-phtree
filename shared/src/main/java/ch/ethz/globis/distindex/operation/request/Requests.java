@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.operation.request;
 
 import ch.ethz.globis.distindex.operation.OpCode;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Requests {
@@ -48,6 +49,10 @@ public class Requests {
 
     public static MapRequest newMap(byte opCode) {
         return new MapRequest(nextId(), opCode, PLACEHOLDER);
+    }
+
+    public static MapRequest newMap(byte opCode, Map<String, String> options) {
+        return new MapRequest(nextId(), opCode, PLACEHOLDER, options);
     }
 
     public static BaseRequest newGetSize() {
