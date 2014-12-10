@@ -21,7 +21,7 @@ import java.util.*;
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     /** Need to make this configurable*/
-    private static final int THRESHOLD = 100;
+    private static final int THRESHOLD = 1000000000;
 
     /** The index context associated with this handler. */
     private IndexContext indexContext;

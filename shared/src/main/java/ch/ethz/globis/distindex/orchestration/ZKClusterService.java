@@ -38,11 +38,10 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory for the mapping.*/
     private static final String MAPPING_PATH = "/mapping";
 
-    /** The path cache associated with the online servers */
-    private PathChildrenCache serversCache;
-
     /** The current mapping */
     private ZMapping mapping;
+
+    private List<String> hosts = new ArrayList<>();
 
     /** The directory holding the names of the online servers */
     private static final String SERVERS_PATH = "/servers";
@@ -61,8 +60,6 @@ public class ZKClusterService implements ClusterService<long[]> {
 
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 5);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
-
-        serversCache = new PathChildrenCache(client, SERVERS_PATH, true);
     }
 
     @Override
@@ -104,55 +101,39 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     @Override
     public List<String> getOnlineHosts() {
-        List<String> serverIds = new ArrayList<>();
-        for (ChildData data : serversCache.getCurrentData()) {
-            if (data.getData() != null) {
-                serverIds.add(new String(data.getData(), StandardCharsets.UTF_8));
-            }
-        }
-        return serverIds;
+        return hosts;
     }
 
     @Override
     public void connect() {
         this.client.start();
 
-        initServersCache(serversCache);
+        ensurePathExists(SERVERS_PATH);
+        this.hosts = readCurrentHosts();
         ensurePathExists(MAPPING_PATH);
         this.mapping = readCurrentMapping();
         this.isRunning = true;
     }
 
-    private void initNodeCache(final NodeCache nodeCache) {
+    private List<String> readCurrentHosts() {
+        List<String> hostIds = new ArrayList<>();
         try {
-            nodeCache.start();
-            NodeCacheListener listener = new NodeCacheListener() {
+            hostIds = client.getChildren().usingWatcher(new CuratorWatcher() {
                 @Override
-                public void nodeChanged() throws Exception {
-                    nodeCache.rebuild();
-                    mapping = readCurrentMapping();
+                public void process(WatchedEvent watchedEvent) throws Exception {
+                    hosts = readCurrentHosts();
                 }
-            };
-
-            nodeCache.getListenable().addListener(listener);
+            }).forPath(SERVERS_PATH);
         } catch (Exception e) {
-            LOG.error("Failed to start the node cache.");
+            LOG.error("Error reading current mapping: ", e);
         }
-    }
-
-    private void initServersCache(final PathChildrenCache serversCache) {
-        try {
-            serversCache.start();
-        } catch (Exception e) {
-            LOG.error("Failed to start the servers cache");
-        }
+        return hostIds;
     }
 
     @Override
     public void disconnect() {
         isRunning = false;
 
-        CloseableUtils.closeQuietly(serversCache);
         CloseableUtils.closeQuietly(client);
     }
 
