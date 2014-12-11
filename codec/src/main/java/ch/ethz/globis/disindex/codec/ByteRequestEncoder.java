@@ -72,6 +72,8 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 break;
             case OpCode.CREATE_INDEX:
             case OpCode.CLOSE_ITERATOR:
+            case OpCode.STATS:
+            case OpCode.TO_STRING:
                 MapRequest mr = (MapRequest) request;
                 encodedRequest = encodeMap(mr);
                 break;

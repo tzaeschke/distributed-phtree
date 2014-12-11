@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.mapping.zorder;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhTreeRangeVD;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -293,10 +294,7 @@ public class ZMapping implements KeyMapping<long[]>{
      * @return                                  The array of bytes.
      */
     public byte[] serialize() {
-        Kryo kryo = new Kryo();
-        Output output = new Output(new ByteArrayOutputStream());
-        kryo.writeObject(output, this);
-        return output.toBytes();
+       return SerializerUtil.getInstance().serialize(this);
     }
 
     /**
@@ -309,9 +307,7 @@ public class ZMapping implements KeyMapping<long[]>{
         if (data.length == 0) {
             return null;
         }
-        Kryo kryo = new Kryo();
-        ((Kryo.DefaultInstantiatorStrategy) kryo.getInstantiatorStrategy()).setFallbackInstantiatorStrategy(new StdInstantiatorStrategy());
-        return kryo.readObject(new Input(data), ZMapping.class);
+        return SerializerUtil.getInstance().deserialize(data);
     }
 
     private void checkConsistency() {

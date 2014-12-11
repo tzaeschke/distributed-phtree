@@ -1,6 +1,7 @@
 package ch.ethz.globis.disindex.codec.field;
 
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -19,14 +20,10 @@ import java.util.Arrays;
  */
 public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
 
-    /** Reference to the Kryo API */
-    private final Kryo kryo;
-
     /** The class of the type of Java object,*/
     private Class<V> clazz;
 
     public SerializingEncoderDecoder() {
-        this.kryo = new Kryo();
     }
 
     @Override
@@ -34,8 +31,7 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
         if (payload.length == 0) {
             return null;
         }
-        Input input = new Input(payload);
-        return kryo.readObject(input, clazz);
+        return SerializerUtil.getInstance().deserialize(payload);
     }
 
     @Override
@@ -49,15 +45,6 @@ public class SerializingEncoderDecoder<V> implements FieldEncoderDecoder<V> {
         if (value == null) {
             return new byte[0];
         }
-        if (clazz == null) {
-            clazz = (Class<V>) value.getClass();
-            kryo.register(clazz);
-        }
-        ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
-        Output output = new Output(outputBuffer);
-        kryo.writeObject(output, value);
-
-        output.flush();
-        return outputBuffer.toByteArray();
+        return SerializerUtil.getInstance().serialize(value);
     }
 }

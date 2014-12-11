@@ -10,6 +10,7 @@ import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 
@@ -102,10 +103,7 @@ public class ByteResponseEncoder<K> implements ResponseEncoder {
      * @return
      */
     public byte[] encodeMap(MapResponse response) {
-        Output output = new Output(new ByteArrayOutputStream());
-        Kryo kryo = new Kryo();
-        kryo.writeObject(output, response);
-        return output.toBytes();
+        return SerializerUtil.getInstance().serialize(response);
     }
 
     public void encode(ByteArrayOutputStream buffer, IndexEntryList<K, byte[]> entries) {

@@ -5,6 +5,7 @@ import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.operation.response.*;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 
@@ -74,9 +75,7 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
 
     @Override
     public MapResponse decodeMap(byte[] payload) {
-        Kryo kryo = new Kryo();
-        Input input = new Input(payload);
-        return kryo.readObject(input, MapResponse.class);
+       return SerializerUtil.getInstance().deserialize(payload);
     }
 
     @Override

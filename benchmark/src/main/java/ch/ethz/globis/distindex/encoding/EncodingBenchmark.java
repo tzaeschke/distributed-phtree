@@ -12,6 +12,7 @@ import ch.ethz.globis.distindex.operation.request.MapRequest;
 import ch.ethz.globis.distindex.operation.request.Request;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -38,8 +39,6 @@ public class EncodingBenchmark {
         private ByteResponseEncoder responseEncoder;
         private ByteResponseDecoder<long[], String> responseDecoder;
 
-        private Kryo kryo;
-
         @Setup
         public void init() {
             responseEncoder = new ByteResponseEncoder<long[]>(new MultiLongEncoderDecoder());
@@ -49,8 +48,6 @@ public class EncodingBenchmark {
             requestEncoder = new ByteRequestEncoder<long[], String>(
                     new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<String>()
             );
-            kryo = new Kryo();
-            kryo.register(Request.class);
         }
     }
 
@@ -66,9 +63,7 @@ public class EncodingBenchmark {
     @Benchmark
     public Object encodeResponseKryo(BenchmarkState state) {
         ResultResponse<long[], byte[]> response = createResult();
-        byte[] data = encode(state.kryo, response);
-        Object object = decode(state.kryo, data);
-        return object;
+        return SerializerUtil.getInstance().serialize(response);
     }
 
     @Benchmark
@@ -80,9 +75,7 @@ public class EncodingBenchmark {
     @Benchmark
     public byte[] encodeMapKryo(BenchmarkState state) {
         MapRequest mapRequest = createMapRequest();
-        Output output = new Output(new ByteArrayOutputStream());
-        state.kryo.writeObject(output, mapRequest);
-        return output.toBytes();
+        return SerializerUtil.getInstance().serialize(mapRequest);
     }
 
     private byte[] encode(Kryo kryo, Object object) {
