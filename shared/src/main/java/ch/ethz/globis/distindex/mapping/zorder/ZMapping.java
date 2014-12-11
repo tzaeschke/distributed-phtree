@@ -230,6 +230,11 @@ public class ZMapping implements KeyMapping<long[]>{
         this.sizes.put(hostId, size);
     }
 
+    @Override
+    public int getSize(String host) {
+        return this.sizes.get(host);
+    }
+
     /**
      * @return                                      A List of the host id's of the hosts in the mapping.
      */

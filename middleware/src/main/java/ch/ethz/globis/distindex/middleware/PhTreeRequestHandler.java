@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.middleware;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.balancing.BalancingStrategy;
 import ch.ethz.globis.distindex.middleware.balancing.SplitEvenHalfBalancingStrategy;
+import ch.ethz.globis.distindex.middleware.balancing.ZMappingBalancing;
 import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.OpStatus;
@@ -22,8 +23,12 @@ import java.util.*;
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     /** Need to make this configurable*/
-    private static final int THRESHOLD = 1000000000;
+    private static final int THRESHOLD = 100;
 
+    /**
+     * The operation count.
+     */
+    private static int opCount = 0;
     /** The index context associated with this handler. */
     private IndexContext indexContext;
 
@@ -36,7 +41,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     public PhTreeRequestHandler(IndexContext indexContext) {
         this.indexContext = indexContext;
-        this.balancingStrategy = new SplitEvenHalfBalancingStrategy(indexContext);
+        this.balancingStrategy = new ZMappingBalancing(indexContext);
         this.iterators = new HashMap<>();
         this.clientIteratorMapping = new HashMap<>();
     }
@@ -245,6 +250,12 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     private void checkBalancing() {
+        opCount += 1;
+        if (opCount > 100) {
+            opCount = 0;
+            indexContext.getClusterService().getMapping().setSize(indexContext.getHostId(), tree().size());
+            indexContext.getClusterService().writeCurrentMapping();
+        }
         if (indexContext.getTree().size() > THRESHOLD) {
             balancingStrategy.balance();
         }

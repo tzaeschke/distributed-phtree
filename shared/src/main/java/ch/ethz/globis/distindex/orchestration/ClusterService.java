@@ -45,4 +45,6 @@ public interface ClusterService<K> {
      * Disconnect from the cluster.
      */
     public void disconnect();
+
+    public void writeCurrentMapping();
 }

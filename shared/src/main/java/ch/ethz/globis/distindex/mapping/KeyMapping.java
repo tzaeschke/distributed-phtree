@@ -27,6 +27,13 @@ public interface KeyMapping<K> {
     public void setSize(String host, int size);
 
     /**
+     * Return the number of keys associated with a host.
+     * @param host
+     * @return
+     */
+    public int getSize(String host);
+
+    /**
      * Obtain the hostId of the machine that stores the key received as an argument.
      *
      * @param key

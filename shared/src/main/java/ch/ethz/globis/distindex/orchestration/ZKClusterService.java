@@ -137,6 +137,10 @@ public class ZKClusterService implements ClusterService<long[]> {
         CloseableUtils.closeQuietly(client);
     }
 
+    public void writeCurrentMapping() {
+        writeMapping(mapping);
+    }
+
     private ZMapping readCurrentMapping() {
         try {
             byte[] data = client.getData().usingWatcher(new CuratorWatcher() {

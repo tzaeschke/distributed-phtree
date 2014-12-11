@@ -169,6 +169,15 @@ public class BSTMapClusterService implements ClusterService<long[]> {
         }
     }
 
+    @Override
+    public void writeCurrentMapping() {
+        try {
+            writeCurrentMapping(mapping);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void startZK() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 3);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);

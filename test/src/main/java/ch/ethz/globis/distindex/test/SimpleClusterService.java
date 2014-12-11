@@ -51,4 +51,9 @@ public class SimpleClusterService implements ClusterService<long[]> {
     public void disconnect() {
         //nothing to do here, we are offline
     }
+
+    @Override
+    public void writeCurrentMapping() {
+
+    }
 }

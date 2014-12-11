@@ -78,6 +78,12 @@ public class BSTMapping<K> implements KeyMapping<K> {
         node.setSize(size);
     }
 
+    @Override
+    public int getSize(String host) {
+        BSTNode node = bst.findFirstByContent(host);
+        return node.getSize();
+    }
+
     /**
      * Return the host that can be the receiver of a split operation.
      *
