@@ -280,20 +280,38 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     }
 
     @Test
+    public void testRandomKNNBug() {
+        phTree.create(2, 64);
+
+        Random random = new Random(42);
+        List<long[]> points = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            long[] key = randomKey(random);
+            points.add(key);
+            phTree.put(key, new BigInteger(64, random).toString());
+        }
+        int k = 3;
+        long[] q = {-1170105035, 234785527};
+        List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
+        equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
+    }
+
+    @Test
     public void testRandomInsertAndKNN() {
         phTree.create(2, 64);
 
         Random random = new Random(42);
         List<long[]> points = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            long[] key = randomKey();
+            long[] key = randomKey(random);
             points.add(key);
             phTree.put(key, new BigInteger(64, random).toString());
         }
 
         int k = 3;
         for (int i = 0; i < 100; i++) {
-            long[] q = randomKey();
+            long[] q = randomKey(random);
+            System.out.println(Arrays.toString(q));
             List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
             equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
@@ -306,8 +324,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         }
     }
 
-    private static long[] randomKey() {
-        Random random = new Random(42);
+    private static long[] randomKey(Random random) {
         return new long[] { random.nextInt(), random.nextInt() };
     }
 
