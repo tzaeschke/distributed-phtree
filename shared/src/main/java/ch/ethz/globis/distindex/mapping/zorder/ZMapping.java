@@ -272,6 +272,17 @@ public class ZMapping implements KeyMapping<long[]>{
         return (hosts.size() > index) ? hosts.get(index) : null;
     }
 
+    @Override
+    public String getPrevious(String hostId) {
+        checkConsistency();
+
+        int index = Collections.binarySearch(hosts, hostId);
+
+        //index of the following
+        index -= 1;
+        return (index >= 0) ? hosts.get(index) : null;
+    }
+
     /**
      * @return                                      The number of hosts in the mapping.
      */
@@ -291,6 +302,19 @@ public class ZMapping implements KeyMapping<long[]>{
         this.order.clear();
         this.sizes.clear();
         //this.tree = null;
+    }
+
+    @Override
+    public String getHostForSplitting(String currentHostId) {
+        String left = getPrevious(currentHostId);
+        String right = getNext(currentHostId);
+        if (left == null) {
+            return right;
+        }
+        if (right == null) {
+            return left;
+        }
+        return (getSize(left) < getSize(right)) ? left : right;
     }
 
     /**

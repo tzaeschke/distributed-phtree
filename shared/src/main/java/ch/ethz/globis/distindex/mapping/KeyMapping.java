@@ -71,6 +71,13 @@ public interface KeyMapping<K> {
     public String getNext(String hostId);
 
     /**
+     * Return the host id of the host preceding the host whose id was received as an argument.
+     * @param hostId
+     * @return
+     */
+    public String getPrevious(String hostId);
+
+    /**
      * Return the number of hosts within the mapping.
      * @return
      */
@@ -80,4 +87,6 @@ public interface KeyMapping<K> {
      * Clear the mapping.
      */
     public void clear();
+
+    public String getHostForSplitting(String currentHostId);
 }

@@ -59,6 +59,16 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         }
     }
 
+    @Override
+    public String getPrevious(String hostId) {
+        int index = Collections.binarySearch(hostList, hostId) - 1;
+        if (index < 0) {
+            return null;
+        } else {
+            return hostList.get(index + 1);
+        }
+    }
+
     public Set<String> getHostsContaining(List<K> keys) {
         return new HashSet<>(hostList);
     }

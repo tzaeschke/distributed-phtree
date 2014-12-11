@@ -287,6 +287,21 @@ public class BSTMapping<K> implements KeyMapping<K> {
         }
     }
 
+    @Override
+    public String getPrevious(String hostId) {
+        int index = -1;
+        for (int i = 0; i < intervals.size(); i++) {
+            if (intervals.get(i).equals(hostId)) {
+                index = i;
+            }
+        }
+        if (index - 1 >= 0) {
+            return intervals.get(index + 1);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Return all of the host ids that contain the keys received as arguments.
      * @param keys
