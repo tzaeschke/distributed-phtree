@@ -1,6 +1,5 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
 import java.util.List;
@@ -26,8 +25,6 @@ public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
 
     @Override
     public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates,
-                                         MultidimMapping mapping,
-                                         BSTMappingKNNStrategy<V> knnStrategy,
                                          PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);

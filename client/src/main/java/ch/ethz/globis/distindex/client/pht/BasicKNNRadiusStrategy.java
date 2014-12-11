@@ -25,15 +25,15 @@ public class BasicKNNRadiusStrategy implements KNNRadiusStrategy {
      * @return                          The k nearest neighbour points.
      */
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, MultidimMapping mapping,
-                                         BSTMappingKNNStrategy<V> knnStrategy,
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates,
                                          PHTreeIndexProxy<V> indexProxy) {
 
         long[] farthestNeighbor = candidates.get(k - 1);
         List<long[]> neighbors = ZCurveHelper.getProjectedNeighbours(key, farthestNeighbor);
+        MultidimMapping mapping = (MultidimMapping) indexProxy.getMapping();
         Set<String> neighbourHosts = mapping.getHostsContaining(neighbors);
 
-        List<long[]> nearestNeighbors = knnStrategy.getNearestNeighbors(neighbourHosts, key, k, indexProxy);
+        List<long[]> nearestNeighbors = indexProxy.getNearestNeighbors(neighbourHosts, key, k);
         return MultidimUtil.nearestNeighbours(key, k, nearestNeighbors);
     }
 }

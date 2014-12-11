@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 
@@ -24,15 +25,15 @@ public class RangeHostsKNNRadiusStrategy implements KNNRadiusStrategy {
      * @return                          The k nearest neighbour points.
      */
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, MultidimMapping mapping,
-                                         BSTMappingKNNStrategy<V> knnStrategy,
-                                         PHTreeIndexProxy<V> indexProxy) {
+    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);
         long[] end = MultidimUtil.transpose(key, distance);
+        KeyMapping<long[]> mapping = indexProxy.getMapping();
+
         List<String> hostIds = mapping.get(start, end);
-        List<long[]> expandedCandidates = knnStrategy.getNearestNeighbors(hostIds, key, k, indexProxy);
+        List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
         return MultidimUtil.nearestNeighbours(key, k, expandedCandidates);
     }
 }

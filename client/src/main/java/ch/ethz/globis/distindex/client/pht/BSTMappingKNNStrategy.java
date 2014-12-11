@@ -1,16 +1,13 @@
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
-import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.ZCurveHelper;
 import ch.ethz.globis.distindex.mapping.bst.MultidimMapping;
-import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
-import ch.ethz.globis.distindex.operation.request.Requests;
-import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.distindex.util.MultidimUtil;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
 
@@ -24,7 +21,7 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
         LOG.debug("KNN request started for key={} and k={}", Arrays.toString(key), k);
         MultidimMapping keyMapping = (MultidimMapping) indexProxy.getMapping();
         String keyHostId = keyMapping.get(key);
-        List<long[]> candidates = getNearestNeighbors(keyHostId, key, k, indexProxy);
+        List<long[]> candidates = indexProxy.getNearestNeighbors(keyHostId, key, k);
         List<long[]> neighbours;
         if (candidates.size() < k) {
             neighbours = iterativeExpansion(keyMapping, key, k, indexProxy);
@@ -33,40 +30,6 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
         }
         LOG.debug("KNN request ended for key={} and k={}", Arrays.toString(key), k);
         return neighbours;
-    }
-
-    /**
-     * Find the k nearest neighbours of a query point from the host with the id hostId.
-     *
-     * @param hostId                    The id of the host on which the query is run.
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @return                          The k nearest neighbours on the host.
-     */
-    List<long[]> getNearestNeighbors(String hostId, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
-        logKNNRequest(hostId, key, k);
-
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        RequestDispatcher<long[], V> requestDispatcher = indexProxy.getRequestDispatcher();
-        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
-        return indexProxy.extractKeys(response);
-    }
-
-    /**
-     *  Find the k nearest neighbours of a query point from the hosts with the ids contained
-     *  int the hostIds list.
-     *
-     * @param hostIds
-     * @param key                       The key to be used as query.
-     * @param k                         The number of neighbours to be returned.
-     * @return                          The k nearest neighbours on the hosts.
-     */
-    static <V> List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
-        logKNNRequest(hostIds, key, k);
-
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
-        List<ResultResponse> responses = indexProxy.getRequestDispatcher().send(hostIds, request, ResultResponse.class);
-        return MultidimUtil.nearestNeighbours(key, k, indexProxy.combineKeys(responses));
     }
 
     /**
@@ -95,7 +58,7 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
                 List<long[]> projections = ZCurveHelper.getProjectionsWithinHops(key, hops, regionBitWidth);
                 currentHostIds = keyMapping.getHostsContaining(projections);
             }
-            candidates = getNearestNeighbors(currentHostIds, key, k, indexProxy);
+            candidates = indexProxy.getNearestNeighbors(currentHostIds, key, k);
             if (candidates.size() == k) {
                 foundK = true;
             }
@@ -115,16 +78,6 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
      * @return                          The k nearest neighbour points.
      */
     List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
-        return radiusStrategy.radiusSearch(key, k, candidates, (MultidimMapping) indexProxy.getMapping(), this, indexProxy);
-    }
-
-    static void logKNNRequest(String hostId, long[] key, int k) {
-        LOG.debug("Sending kNN request with key = {} and k = {} to host" + hostId, Arrays.toString(key), k);
-    }
-
-    static void logKNNRequest(Collection<String> hostIds, long[] key, int k) {
-        for (String hostId : hostIds) {
-            logKNNRequest(hostId, key, k);
-        }
+        return radiusStrategy.radiusSearch(key, k, candidates, indexProxy);
     }
 }

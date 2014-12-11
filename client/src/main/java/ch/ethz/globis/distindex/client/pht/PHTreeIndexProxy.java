@@ -15,12 +15,14 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeQStats;
 import org.slf4j.Logger;
@@ -43,7 +45,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
     private KNNRadiusStrategy knnRadiusStrategy = new RangeKNNRadiusStrategy();
 
-    private KNNStrategy knnStrategy = new BSTMappingKNNStrategy();
+    private KNNStrategy<V> knnStrategy = new ZMappingKNNStrategy<>();
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
         this.clusterService = clusterService;
@@ -110,6 +112,40 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return knnStrategy.getNearestNeighbors(key, k, this);
     }
 
+    /**
+     * Find the k nearest neighbours of a query point from the host with the id hostId.
+     *
+     * @param hostId                    The id of the host on which the query is run.
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @return                          The k nearest neighbours on the host.
+     */
+    List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
+        logKNNRequest(hostId, key, k);
+
+        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        RequestDispatcher<long[], V> requestDispatcher = getRequestDispatcher();
+        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
+        return extractKeys(response);
+    }
+
+    /**
+     *  Find the k nearest neighbours of a query point from the hosts with the ids contained
+     *  int the hostIds list.
+     *
+     * @param hostIds
+     * @param key                       The key to be used as query.
+     * @param k                         The number of neighbours to be returned.
+     * @return                          The k nearest neighbours on the hosts.
+     */
+    List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
+        logKNNRequest(hostIds, key, k);
+
+        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        List<ResultResponse> responses = getRequestDispatcher().send(hostIds, request, ResultResponse.class);
+        return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
+    }
+
     public PhTree.Stats getStats() {
         throw new UnsupportedOperationException("Not yet implemented.");
     }
@@ -152,5 +188,15 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
     ClusterService<long[]> getClusterService() {
         return clusterService;
+    }
+
+    static void logKNNRequest(String hostId, long[] key, int k) {
+        LOG.debug("Sending kNN request with key = {} and k = {} to host" + hostId, Arrays.toString(key), k);
+    }
+
+    static void logKNNRequest(Collection<String> hostIds, long[] key, int k) {
+        for (String hostId : hostIds) {
+            logKNNRequest(hostId, key, k);
+        }
     }
 }

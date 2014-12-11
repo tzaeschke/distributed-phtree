@@ -295,7 +295,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         for (int i = 0; i < 100; i++) {
             long[] q = randomKey();
             List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
-            //FIXME equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
+            equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
     }
 
