@@ -128,6 +128,9 @@ public class DistIndexIterator<K, V> implements IndexIterator<K, V> {
             }
             iteratorId = response.getIteratorId();
             entryBuffer = response.getEntries();
+            if (entryBuffer == null || entryBuffer.size() == 0) {
+                getRemoteEntries();
+            }
         } else {
             entryBuffer = new IndexEntryList<>();
         }
