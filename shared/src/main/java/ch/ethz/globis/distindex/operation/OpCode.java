@@ -18,4 +18,10 @@ public class OpCode {
     public static final byte BALANCE_INIT = 30;
     public static final byte BALANCE_PUT = 31;
     public static final byte BALANCE_COMMIT = 32;
+
+    public static final byte STATS = 41;
+    public static final byte TO_STRING = 42;
+    public static final byte STATS_NO_NODE = 43;
+    public static final byte QUALITY = 44;
+    public static final byte NODE_COUNT = 45;
 }

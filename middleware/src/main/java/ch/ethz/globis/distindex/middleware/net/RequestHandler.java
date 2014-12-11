@@ -2,7 +2,11 @@ package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+
+import java.util.Map;
 
 public interface RequestHandler<K, V> {
 
@@ -31,4 +35,14 @@ public interface RequestHandler<K, V> {
     public IntegerResponse handleContains(ContainsRequest<K> request);
 
     public void cleanup(String clientHost);
+
+    public MapResponse handleNodeCount(BaseRequest request);
+
+    public MapResponse handleQuality(BaseRequest request);
+
+    public MapResponse handleStatsNoNode(BaseRequest request);
+
+    public MapResponse handleToString(BaseRequest request);
+
+    public MapResponse handleStats(BaseRequest request);
 }

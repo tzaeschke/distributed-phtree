@@ -88,6 +88,21 @@ public class IOHandler<K, V> {
                 case OpCode.BALANCE_COMMIT:
                     response = handleBalanceCommit(buffer);
                     break;
+                case OpCode.STATS:
+                    response = handleStatsRequest(buffer);
+                    break;
+                case OpCode.STATS_NO_NODE:
+                    response = handleStatsNoNodeRequest(buffer);
+                    break;
+                case OpCode.QUALITY:
+                    response = handleQualityRequest(buffer);
+                    break;
+                case OpCode.NODE_COUNT:
+                    response = handleNodeCountRequest(buffer);
+                    break;
+                case OpCode.TO_STRING:
+                    response = handleToStringRequest(buffer);
+                    break;
                 default:
                     response = handleErroneousRequest(buffer);
             }
@@ -96,6 +111,36 @@ public class IOHandler<K, V> {
             response = handleErroneousRequest(buffer);
         }
         return response;
+    }
+
+    private ByteBuffer handleNodeCountRequest(ByteBuffer buffer) {
+        BaseRequest request = decoder.decodeBase(buffer);
+        Response response = requestHandler.handleNodeCount(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleQualityRequest(ByteBuffer buffer) {
+        BaseRequest request = decoder.decodeBase(buffer);
+        Response response = requestHandler.handleQuality(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleStatsNoNodeRequest(ByteBuffer buffer) {
+        BaseRequest request = decoder.decodeBase(buffer);
+        Response response = requestHandler.handleStatsNoNode(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleToStringRequest(ByteBuffer buffer) {
+        BaseRequest request = decoder.decodeBase(buffer);
+        Response response = requestHandler.handleToString(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleStatsRequest(ByteBuffer buffer) {
+        BaseRequest request = decoder.decodeBase(buffer);
+        Response response = requestHandler.handleStats(request);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleBalanceCommit(ByteBuffer buffer) {

@@ -9,6 +9,7 @@ import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeQStats;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -326,6 +327,61 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     private static long[] randomKey(Random random) {
         return new long[] { random.nextInt(), random.nextInt() };
+    }
+
+    @Test
+    public void testStats() {
+        phTree.create(2, 64);
+        phTree.put(k(1, 1), "one");
+        phTree.put(k(1, -1), "two");
+        phTree.put(k(-1, 1), "three");
+        phTree.put(k(-1, -1), "four");
+        PhTree.Stats stats = phTree.getStats();
+        System.out.println(stats);
+    }
+
+    @Test
+    public void testStats_Ideal() {
+        phTree.create(2, 64);
+        phTree.put(k(1, 1), "one");
+        phTree.put(k(1, -1), "two");
+        phTree.put(k(-1, 1), "three");
+        phTree.put(k(-1, -1), "four");
+        PhTree.Stats stats = phTree.getStatsIdealNoNode();
+        System.out.println(stats);
+    }
+
+    @Test
+    public void testQuality() {
+        phTree.create(2, 64);
+        phTree.put(k(1, 1), "one");
+        phTree.put(k(1, -1), "two");
+        phTree.put(k(-1, 1), "three");
+        phTree.put(k(-1, -1), "four");
+        PhTreeQStats quality = phTree.getQuality();
+        System.out.println(quality);
+    }
+
+    @Test
+    public void testNodeCount() {
+        phTree.create(2, 64);
+        phTree.put(k(1, 1), "one");
+        phTree.put(k(1, -1), "two");
+        phTree.put(k(-1, 1), "three");
+        phTree.put(k(-1, -1), "four");
+        int nodeCount = phTree.getNodeCount();
+        System.out.println(nodeCount);
+    }
+
+    @Test
+    public void testToString() {
+        phTree.create(2, 64);
+        phTree.put(k(1, 1), "one");
+        phTree.put(k(1, -1), "two");
+        phTree.put(k(-1, 1), "three");
+        phTree.put(k(-1, -1), "four");
+        String toString = phTree.toStringPlain();
+        System.out.println(toString);
     }
 
     @Test

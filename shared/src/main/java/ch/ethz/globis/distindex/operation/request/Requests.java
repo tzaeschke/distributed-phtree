@@ -86,4 +86,24 @@ public class Requests {
     public static <K> ContainsRequest<K> newContains(K key) {
         return new ContainsRequest<>(nextId(), OpCode.CONTAINS, "", key);
     }
+
+    public static BaseRequest newStats() {
+        return new BaseRequest(nextId(), OpCode.STATS, "");
+    }
+
+    public static BaseRequest newStatsNoNode() {
+        return new BaseRequest(nextId(), OpCode.STATS_NO_NODE, "");
+    }
+
+    public static BaseRequest newQuality() {
+        return new BaseRequest(nextId(), OpCode.QUALITY, "");
+    }
+
+    public static BaseRequest newNodeCount() {
+        return new BaseRequest(nextId(), OpCode.NODE_COUNT, "");
+    }
+
+    public static BaseRequest newToString() {
+        return new BaseRequest(nextId(), OpCode.TO_STRING, "");
+    }
 }

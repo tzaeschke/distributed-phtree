@@ -8,6 +8,7 @@ import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
@@ -206,6 +207,41 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
                 removeIteratorForClient(clientHost, iteratorId);
             }
         }
+    }
+
+    @Override
+    public MapResponse handleNodeCount(BaseRequest request) {
+        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+        response.addParameter("nodeCount", tree().getNodeCount());
+        return response;
+    }
+
+    @Override
+    public MapResponse handleQuality(BaseRequest request) {
+        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+        response.addParameter("quality", tree().getQuality());
+        return response;
+    }
+
+    @Override
+    public MapResponse handleStatsNoNode(BaseRequest request) {
+        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+        response.addParameter("stats", tree().getStatsIdealNoNode());
+        return response;
+    }
+
+    @Override
+    public MapResponse handleToString(BaseRequest request) {
+        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+        response.addParameter("toString", tree().toStringPlain());
+        return response;
+    }
+
+    @Override
+    public MapResponse handleStats(BaseRequest request) {
+        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+        response.addParameter("stats", tree().getStats());
+        return response;
     }
 
     private void checkBalancing() {

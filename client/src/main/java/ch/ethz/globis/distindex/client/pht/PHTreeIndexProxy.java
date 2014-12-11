@@ -15,12 +15,13 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.io.Transport;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
@@ -146,28 +147,118 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 
+    /**
+     * @return                          The combined stats for the tree.
+     */
     public PhTree.Stats getStats() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        BaseRequest request = Requests.newStats();
+        List<String> hostIds = clusterService.getMapping().get();
+        PhTree.Stats global = new PhTree.Stats(), current;
+        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+        for (MapResponse response : responses) {
+            current = (PhTree.Stats) response.getParameter("stats");
+            global.nChildren += current.nChildren;
+            global.nHCP += current.nHCP;
+            global.nHCS += current.nHCS;
+            global.nInnerNodes += current.nInnerNodes;
+            global.nLeafNodes += current.nLeafNodes;
+            global.nLeafSingle += current.nLeafSingle;
+            global.nLeafSingleNoPrefix += current.nLeafSingleNoPrefix;
+            global.nLonely += current.nLonely;
+            global.nNI += current.nNI;
+            global.nNodes += current.nNodes;
+            global.nSubOnly += current.nSubOnly;
+            global.nTooLarge += current.nTooLarge;
+            global.nTooLarge2 += current.nTooLarge2;
+            global.nTooLarge4 += current.nTooLarge4;
+            global.size += current.size;
+        }
+        return global;
     }
 
+    /**
+     * @return                          The combined stats for the tree.
+     */
     public PhTree.Stats getStatsIdealNoNode() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        BaseRequest request = Requests.newStatsNoNode();
+        List<String> hostIds = clusterService.getMapping().get();
+        PhTree.Stats global = new PhTree.Stats(), current;
+        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+        for (MapResponse response : responses) {
+            current = (PhTree.Stats) response.getParameter("stats");
+            global.nChildren += current.nChildren;
+            global.nHCP += current.nHCP;
+            global.nHCS += current.nHCS;
+            global.nInnerNodes += current.nInnerNodes;
+            global.nLeafNodes += current.nLeafNodes;
+            global.nLeafSingle += current.nLeafSingle;
+            global.nLeafSingleNoPrefix += current.nLeafSingleNoPrefix;
+            global.nLonely += current.nLonely;
+            global.nNI += current.nNI;
+            global.nNodes += current.nNodes;
+            global.nSubOnly += current.nSubOnly;
+            global.nTooLarge += current.nTooLarge;
+            global.nTooLarge2 += current.nTooLarge2;
+            global.nTooLarge4 += current.nTooLarge4;
+            global.size += current.size;
+        }
+        return global;
     }
 
+    /**
+     * @return                          The combined quality stats for the tree.
+     */
     public PhTreeQStats getQuality() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        BaseRequest request = Requests.newQuality();
+        List<String> hostIds = clusterService.getMapping().get();
+        PhTreeQStats global = new PhTreeQStats(depth), current;
+        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+        for (MapResponse response : responses) {
+            current = (PhTreeQStats) response.getParameter("quality");
+            for (int i = 0; i < global.q_nPostFixN.length; i++) {
+                global.q_nPostFixN[i] += current.q_nPostFixN[i];
+            }
+            global.q_totalDepth += current.q_totalDepth;
+            global.nHCP += current.nHCP;
+            global.nHCS += current.nHCS;
+            global.nNI += current.nNI;
+            global.nNodes += current.nNodes;
+        }
+        return global;
     }
 
+    /**
+     * @return                          The combined node count for the tree.
+     */
     public int getNodeCount() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        BaseRequest request = Requests.newNodeCount();
+        List<String> hostIds = clusterService.getMapping().get();
+        Integer global = 0, current;
+        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+        for (MapResponse response : responses) {
+            current = (Integer) response.getParameter("nodeCount");
+            global += current;
+        }
+        return global;
     }
 
+    /**
+     * @return                          The combined toString for the tree.
+     */
     public String toStringPlain() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        BaseRequest request = Requests.newToString();
+        List<String> hostIds = clusterService.getMapping().get();
+        String global = "", current;
+        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+        for (MapResponse response : responses) {
+            current = (String) response.getParameter("toString");
+            global += current + "\n";
+        }
+        return global;
     }
 
     public String toStringTree() {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        return toStringTree();
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {

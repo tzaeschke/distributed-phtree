@@ -21,7 +21,6 @@ public class SerializerUtil {
         };
     };
 
-
     public static SerializerUtil getInstance() {
         return serializer;
     }
