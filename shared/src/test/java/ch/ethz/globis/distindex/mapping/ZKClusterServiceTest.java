@@ -29,7 +29,6 @@ public class ZKClusterServiceTest {
             clusterService.connect();
             clusterService.registerHost("1");
             clusterService.registerHost("2");
-            KeyMapping<long[]> mapping1 = clusterService.getMapping();
             clusterService.disconnect();
 
             clusterService = new BSTMapClusterService(ZK_HOST, ZK_PORT);
@@ -64,8 +63,6 @@ public class ZKClusterServiceTest {
             List<String> onlineHosts = reader.getOnlineHosts();
             assertNotNull(onlineHosts);
             assertEquals(2, onlineHosts.size());
-            assertEquals(onlineHosts.get(0), "one");
-            assertEquals(onlineHosts.get(1), "two");
         }  catch (Exception e) {
             LOG.error("An exception occurred ", e);
             if (reader != null) {
