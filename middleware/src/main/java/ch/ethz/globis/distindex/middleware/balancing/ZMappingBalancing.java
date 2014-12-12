@@ -39,11 +39,13 @@ public class ZMappingBalancing implements BalancingStrategy {
     /** The request dispatcher */
     private RequestDispatcher<long[], byte[]> requestDispatcher;
 
+    private Requests<long[], byte[]> requests;
+
     public ZMappingBalancing(IndexContext indexContext) {
         this.indexContext = indexContext;
         RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
         ResponseDecoder<long[], byte[]> responseDecoder = new ByteResponseDecoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<byte[]>());
-
+        this.requests = new Requests<>(indexContext.getClusterService());
         this.requestDispatcher = new ClientRequestDispatcher<>(new TCPClient(), requestEncoder, responseDecoder);
     }
 
@@ -68,8 +70,8 @@ public class ZMappingBalancing implements BalancingStrategy {
         sendEntries(entries, receiverHostId);
         commitBalancing(receiverHostId);
 
+        updateMapping(currentHostId, receiverHostId, entries.size());
         removeEntries(entries);
-        updateMapping(currentHostId);
     }
 
     /**
@@ -78,8 +80,11 @@ public class ZMappingBalancing implements BalancingStrategy {
      *
      * @param currentHostId                     The hostId of the splitting host.
      */
-    private void updateMapping(String currentHostId) {
-        getMapping().setSize(currentHostId, indexContext.getTree().size());
+    private void updateMapping(String currentHostId, String receiverHostId, int entriesMoved) {
+        KeyMapping<long[]> mapping = getMapping();
+        mapping.setSize(currentHostId, indexContext.getTree().size());
+        int receiverSize = mapping.getSize(receiverHostId) + entriesMoved;
+        mapping.setSize(receiverHostId, receiverSize);
         indexContext.getClusterService().writeCurrentMapping();
     }
 
@@ -105,7 +110,7 @@ public class ZMappingBalancing implements BalancingStrategy {
         PutBalancingRequest<long[]> request;
         Response response;
         for (IndexEntry<long[], byte[]> entry : entries) {
-            request = Requests.newPutBalancing(entry.getKey(), entry.getValue());
+            request = requests.newPutBalancing(entry.getKey(), entry.getValue());
             response = requestDispatcher.send(receivedHostId, request, BaseResponse.class);
             if (response.getStatus() != OpStatus.SUCCESS) {
                 throw new RuntimeException("Receiving host did not accept entry initialization");
@@ -120,7 +125,7 @@ public class ZMappingBalancing implements BalancingStrategy {
      * @param receiverHostId
      */
     private void initBalancing(int entriesToSend, String receiverHostId) {
-        InitBalancingRequest request = Requests.newInitBalancing(entriesToSend);
+        InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing initialization");
@@ -133,7 +138,7 @@ public class ZMappingBalancing implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
-        CommitBalancingRequest request = Requests.newCommitBalancing();
+        CommitBalancingRequest request = requests.newCommitBalancing();
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing commit");
@@ -152,7 +157,7 @@ public class ZMappingBalancing implements BalancingStrategy {
 
         int entriesToMove = (mapping.getSize(currentHostId) - mapping.getSize(receiver)) / 2;
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
-        if (mapping.getNext(receiver).equals(currentHostId)) {
+        if (mapping.getNext(receiver) != null && mapping.getNext(receiver).equals(currentHostId)) {
             //move to left
             PVIterator<byte[]> it = indexContext.getTree().queryExtent();
             for (int i = 0; i < entriesToMove; i++) {

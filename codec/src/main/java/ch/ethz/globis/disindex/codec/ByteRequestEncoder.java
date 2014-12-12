@@ -268,6 +268,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         buffer.put(request.getOpCode());
         buffer.putInt(request.getId());
         writeString(buffer, request.getIndexId());
+        buffer.putInt(request.getMappingVersion());
         return buffer;
     }
 

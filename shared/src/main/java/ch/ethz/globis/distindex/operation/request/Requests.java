@@ -1,109 +1,120 @@
 package ch.ethz.globis.distindex.operation.request;
 
 import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Requests {
+public class Requests<K, V> {
 
     private static final AtomicInteger ID = new AtomicInteger(0);
 
     private static final String PLACEHOLDER = "";
 
-    public static <K> GetRequest<K> newGet(K key) {
-        return new GetRequest<>(nextId(), OpCode.GET, "", key);
+    private ClusterService<K> clusterService;
+
+    public Requests(ClusterService<K> clusterService) {
+        this.clusterService = clusterService;
     }
 
-    public static <K, V> PutRequest<K, V> newPut(K key, V value) {
-        return new PutRequest<>(nextId(), OpCode.PUT, PLACEHOLDER, key, value);
+    public GetRequest<K> newGet(K key) {
+        return new GetRequest<>(nextId(), OpCode.GET, PLACEHOLDER, mappingVersion(), key);
     }
 
-    public static <K> GetRangeRequest<K> newGetRange(K start, K end) {
-        return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, PLACEHOLDER, start, end);
+    public PutRequest<K, V> newPut(K key, V value) {
+        return new PutRequest<>(nextId(), OpCode.PUT, PLACEHOLDER, mappingVersion(), key, value);
     }
 
-    public static <K> GetRangeRequest<K> newGetRange(K start, K end, double distance) {
-        return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, PLACEHOLDER, start, end, distance);
+    public GetRangeRequest<K> newGetRange(K start, K end) {
+        return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, PLACEHOLDER, mappingVersion(), start, end);
     }
 
-    public static <K> GetKNNRequest<K> newGetKNN(K key, int k) {
-        return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, PLACEHOLDER, key, k);
+    public GetRangeRequest<K> newGetRange(K start, K end, double distance) {
+        return new GetRangeRequest<>(nextId(), OpCode.GET_RANGE, PLACEHOLDER, mappingVersion(), start, end, distance);
     }
 
-    public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size) {
-        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, PLACEHOLDER, iteratorId, size);
+    public GetKNNRequest<K> newGetKNN(K key, int k) {
+        return new GetKNNRequest<>(nextId(), OpCode.GET_KNN, PLACEHOLDER, mappingVersion(), key, k);
     }
 
-    public static <K> GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size, K start, K end) {
-        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, PLACEHOLDER, iteratorId, size, start, end);
+    public GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size) {
+        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, PLACEHOLDER, mappingVersion(), iteratorId, size);
     }
 
-    public static <K> DeleteRequest<K> newDelete(K key) {
-        return new DeleteRequest<>(nextId(), OpCode.DELETE, PLACEHOLDER, key);
+    public GetIteratorBatchRequest<K> newGetBatch(String iteratorId, int size, K start, K end) {
+        return new GetIteratorBatchRequest<>(nextId(), OpCode.GET_BATCH, PLACEHOLDER, mappingVersion(), iteratorId, size, start, end);
     }
 
-    public static CreateRequest newCreate(int dim, int depth) {
-        return new CreateRequest(nextId(), OpCode.CREATE_INDEX, PLACEHOLDER, dim, depth);
+    public DeleteRequest<K> newDelete(K key) {
+        return new DeleteRequest<>(nextId(), OpCode.DELETE, PLACEHOLDER, mappingVersion(), key);
     }
 
-    public static MapRequest newMap(byte opCode) {
-        return new MapRequest(nextId(), opCode, PLACEHOLDER);
+    public CreateRequest newCreate(int dim, int depth) {
+        return new CreateRequest(nextId(), OpCode.CREATE_INDEX, PLACEHOLDER, mappingVersion(), dim, depth);
     }
 
-    public static MapRequest newMap(byte opCode, Map<String, String> options) {
-        return new MapRequest(nextId(), opCode, PLACEHOLDER, options);
+    public MapRequest newMap(byte opCode) {
+        return new MapRequest(nextId(), opCode, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newGetSize() {
-        return new BaseRequest(nextId(), OpCode.GET_SIZE, PLACEHOLDER);
+    public MapRequest newMap(byte opCode, Map<String, String> options) {
+        return new MapRequest(nextId(), opCode, PLACEHOLDER, mappingVersion(), options);
     }
 
-    public static BaseRequest newGetDim() {
-        return new BaseRequest(nextId(), OpCode.GET_DIM, PLACEHOLDER);
+    public BaseRequest newGetSize() {
+        return new BaseRequest(nextId(), OpCode.GET_SIZE, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newGetDepth() {
-        return new BaseRequest(nextId(), OpCode.GET_DEPTH, PLACEHOLDER);
+    public BaseRequest newGetDim() {
+        return new BaseRequest(nextId(), OpCode.GET_DIM, PLACEHOLDER, mappingVersion());
     }
 
-    public static InitBalancingRequest newInitBalancing(int size) {
-        return new InitBalancingRequest(nextId(), OpCode.BALANCE_INIT, PLACEHOLDER, size);
+    public BaseRequest newGetDepth() {
+        return new BaseRequest(nextId(), OpCode.GET_DEPTH, PLACEHOLDER, mappingVersion());
     }
 
-    public static <K> PutBalancingRequest<K> newPutBalancing(K key, byte[] value) {
-        return new PutBalancingRequest<>(nextId(), OpCode.BALANCE_PUT, PLACEHOLDER, key, value);
+    public InitBalancingRequest newInitBalancing(int size) {
+        return new InitBalancingRequest(nextId(), OpCode.BALANCE_INIT, PLACEHOLDER, mappingVersion(), size);
     }
 
-    public static CommitBalancingRequest newCommitBalancing() {
-        return new CommitBalancingRequest(nextId(), OpCode.BALANCE_COMMIT, PLACEHOLDER);
+    public PutBalancingRequest<K> newPutBalancing(K key, byte[] value) {
+        return new PutBalancingRequest<>(nextId(), OpCode.BALANCE_PUT, PLACEHOLDER, mappingVersion(), key, value);
     }
 
-    private static int nextId() {
+    public CommitBalancingRequest newCommitBalancing() {
+        return new CommitBalancingRequest(nextId(), OpCode.BALANCE_COMMIT, PLACEHOLDER, mappingVersion());
+    }
+
+    private int nextId() {
         return ID.incrementAndGet();
     }
 
-    public static <K> ContainsRequest<K> newContains(K key) {
-        return new ContainsRequest<>(nextId(), OpCode.CONTAINS, "", key);
+    public ContainsRequest<K> newContains(K key) {
+        return new ContainsRequest<>(nextId(), OpCode.CONTAINS, PLACEHOLDER, mappingVersion(), key);
     }
 
-    public static BaseRequest newStats() {
-        return new BaseRequest(nextId(), OpCode.STATS, "");
+    public BaseRequest newStats() {
+        return new BaseRequest(nextId(), OpCode.STATS, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newStatsNoNode() {
-        return new BaseRequest(nextId(), OpCode.STATS_NO_NODE, "");
+    public BaseRequest newStatsNoNode() {
+        return new BaseRequest(nextId(), OpCode.STATS_NO_NODE, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newQuality() {
-        return new BaseRequest(nextId(), OpCode.QUALITY, "");
+    public BaseRequest newQuality() {
+        return new BaseRequest(nextId(), OpCode.QUALITY, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newNodeCount() {
-        return new BaseRequest(nextId(), OpCode.NODE_COUNT, "");
+    public BaseRequest newNodeCount() {
+        return new BaseRequest(nextId(), OpCode.NODE_COUNT, PLACEHOLDER, mappingVersion());
     }
 
-    public static BaseRequest newToString() {
-        return new BaseRequest(nextId(), OpCode.TO_STRING, "");
+    public BaseRequest newToString() {
+        return new BaseRequest(nextId(), OpCode.TO_STRING, PLACEHOLDER, mappingVersion());
+    }
+
+    private int mappingVersion() {
+        return (clusterService.getMapping() == null) ? 0 : clusterService.getMapping().getVersion();
     }
 }

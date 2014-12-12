@@ -267,15 +267,23 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     public void testPutAndGetRandom2D() throws Exception {
         phTree.create(2, 64);
 
-        int nrEntries = 500;
+        int nrEntries = 200;
         Random random = new Random();
 
         long[] key;
         String value;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+
         for (int i = 0; i < nrEntries; i++) {
             key = new long[]{random.nextLong(), random.nextLong()};
             value = new BigInteger(50, random).toString();
             phTree.put(key, value);
+            entries.add(key, value);
+        }
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            key = entry.getKey();
+            value = entry.getValue();
             assertEquals("Value does not match with value retrieved from the tree.", value, phTree.get(key));
         }
     }
@@ -287,6 +295,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         Random random = new Random(42);
         List<long[]> points = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
+
             long[] key = randomKey(random);
             points.add(key);
             phTree.put(key, new BigInteger(64, random).toString());

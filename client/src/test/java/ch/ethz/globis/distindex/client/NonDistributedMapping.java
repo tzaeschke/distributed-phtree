@@ -107,6 +107,16 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
     }
 
     @Override
+    public int getVersion() {
+        return 0;
+    }
+
+    @Override
+    public void setVersion(int version) {
+
+    }
+
+    @Override
     public int size() {
         return hostList.size();
     }

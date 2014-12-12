@@ -102,7 +102,7 @@ public class EncodingBenchmark {
     }
 
     private MapRequest createMapRequest() {
-        MapRequest mapRequest = Requests.newMap(OpCode.CLOSE_ITERATOR);
+        MapRequest mapRequest = new MapRequest(1, OpCode.CLOSE_ITERATOR, "", 1);
         for (int i = 0; i < 10; i++) {
             mapRequest.addParamater(UUID.randomUUID().toString(), UUID.randomUUID());
         }

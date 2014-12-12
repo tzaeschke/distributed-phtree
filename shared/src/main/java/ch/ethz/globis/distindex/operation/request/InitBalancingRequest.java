@@ -8,8 +8,8 @@ public class InitBalancingRequest extends BaseRequest implements BalancingReques
     /** The number of size that will be moved through the balancing operation */
     private int size;
 
-    public InitBalancingRequest(int id, byte opCode, String indexId, int size) {
-        super(id, opCode, indexId);
+    public InitBalancingRequest(int id, byte opCode, String indexId, int mappingVersion, int size) {
+        super(id, opCode, indexId, mappingVersion);
         this.size = size;
     }
 

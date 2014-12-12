@@ -38,11 +38,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-
+        int mappingVersion = buffer.getInt();
         K key = decodeKey(buffer);
         assert !buffer.hasRemaining();
 
-        return new GetRequest<>(requestId, opCode, indexName, key);
+        return new GetRequest<>(requestId, opCode, indexName, mappingVersion, key);
     }
 
     /**
@@ -57,10 +57,10 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-
+        int mappingVersion = buffer.getInt();
         K key = decodeKey(buffer);
         assert !buffer.hasRemaining();
-        return new ContainsRequest<>(requestId, opCode, indexName, key);
+        return new ContainsRequest<>(requestId, opCode, indexName, mappingVersion, key);
     }
 
     /**
@@ -74,10 +74,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         K key = decodeKey(buffer);
         byte[] value = readValue(buffer);
-        return new PutRequest<>(requestId, opCode, indexName, key, value);
+        return new PutRequest<>(requestId, opCode, indexName, mappingVersion, key, value);
     }
 
     /**
@@ -91,11 +92,12 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         K start = decodeKey(buffer);
         K end = decodeKey(buffer);
         double distance = buffer.getDouble();
-        return new GetRangeRequest<>(requestId, opCode, indexName, start, end, distance);
+        return new GetRangeRequest<>(requestId, opCode, indexName, mappingVersion, start, end, distance);
     }
 
     /**
@@ -110,10 +112,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         K key = decodeKey(buffer);
         int k = buffer.getInt();
-        return new GetKNNRequest<>(requestId, opCode, indexName, key, k);
+        return new GetKNNRequest<>(requestId, opCode, indexName, mappingVersion, key, k);
     }
 
     @Override
@@ -121,6 +124,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
         String iteratorId = new String(readValue(buffer));
         int size = buffer.getInt();
 
@@ -128,9 +132,9 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         if (isRanged) {
             K start = decodeKey(buffer);
             K end = decodeKey(buffer);
-            return new GetIteratorBatchRequest<>(requestId, opCode, indexName, iteratorId, size, start, end);
+            return new GetIteratorBatchRequest<>(requestId, opCode, indexName, mappingVersion, iteratorId, size, start, end);
         }
-        return new GetIteratorBatchRequest<>(requestId, opCode, indexName, iteratorId, size);
+        return new GetIteratorBatchRequest<>(requestId, opCode, indexName, mappingVersion, iteratorId, size);
     }
 
     @Override
@@ -138,10 +142,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         int dim = buffer.getInt();
         int depth = buffer.getInt();
-        return new CreateRequest(requestId, opCode, indexName, dim, depth);
+        return new CreateRequest(requestId, opCode, indexName, mappingVersion, dim, depth);
     }
 
     @Override
@@ -149,11 +154,12 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         K key = decodeKey(buffer);
         assert !buffer.hasRemaining();
 
-        return new DeleteRequest<>(requestId, opCode, indexName, key);
+        return new DeleteRequest<>(requestId, opCode, indexName, mappingVersion, key);
     }
 
     @Override
@@ -161,7 +167,9 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-        return new BaseRequest(requestId, opCode, indexName);
+        int mappingVersion = buffer.getInt();
+
+        return new BaseRequest(requestId, opCode, indexName, mappingVersion);
     }
 
     @Override
@@ -169,9 +177,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
+
         String mapString = new String(readValue(buffer));
         Map<String, String> contents = splitter.split(mapString);
-        return new MapRequest(requestId, opCode, indexName, contents);
+        return new MapRequest(requestId, opCode, indexName, mappingVersion, contents);
     }
 
     @Override
@@ -179,8 +189,9 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
         int size = buffer.getInt();
-        return new InitBalancingRequest(requestId, opCode, indexName, size);
+        return new InitBalancingRequest(requestId, opCode, indexName, mappingVersion, size);
     }
 
     @Override
@@ -188,10 +199,11 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
 
         K key = decodeKey(buffer);
         byte[] value = readValue(buffer);
-        return new PutBalancingRequest<>(requestId, opCode, indexName, key, value);
+        return new PutBalancingRequest<>(requestId, opCode, indexName, mappingVersion, key, value);
     }
 
     @Override
@@ -199,7 +211,8 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         byte opCode = buffer.get();
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
-        return new CommitBalancingRequest(requestId, opCode, indexName);
+        int mappingVersion = buffer.getInt();
+        return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion);
     }
 
     /**

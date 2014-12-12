@@ -4,8 +4,8 @@ public class GetRequest<K> extends BaseRequest {
 
     private K key;
 
-    public GetRequest(int id, byte opCode, String indexId, K key) {
-        super(id, opCode, indexId);
+    public GetRequest(int id, byte opCode, String indexId, int mappingVersion,  K key) {
+        super(id, opCode, indexId, mappingVersion);
         this.key = key;
     }
 

@@ -42,6 +42,8 @@ public class ZMapping implements KeyMapping<long[]>{
     /** A list of the hosts ids.*/
     private List<String> hosts = new ArrayList<>();
 
+    private int version = 0;
+
     /**
      * No-arg constructor, needed for Kryo deserialization.
      * Should not be called.
@@ -315,6 +317,16 @@ public class ZMapping implements KeyMapping<long[]>{
             return left;
         }
         return (getSize(left) < getSize(right)) ? left : right;
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     /**

@@ -17,15 +17,15 @@ public class GetIteratorBatchRequest<K> extends BaseRequest {
     /** The end of the query range, if the iterator is ranged.*/
     private K end;
 
-    public GetIteratorBatchRequest(int id, byte opCode, String indexId, String iteratorId, int batchSize) {
-        super(id, opCode, indexId);
+    public GetIteratorBatchRequest(int id, byte opCode, String indexId, int mappingVersion, String iteratorId, int batchSize) {
+        super(id, opCode, indexId, mappingVersion);
         this.iteratorId = iteratorId;
         this.batchSize = batchSize;
         this.ranged = false;
     }
 
-    public GetIteratorBatchRequest(int id, byte opCode, String indexId, String iteratorId, int batchSize, K start, K end) {
-        super(id, opCode, indexId);
+    public GetIteratorBatchRequest(int id, byte opCode, String indexId, int mappingVersion, String iteratorId, int batchSize, K start, K end) {
+        super(id, opCode, indexId, mappingVersion);
         this.iteratorId = iteratorId;
         this.batchSize = batchSize;
         this.start = start;

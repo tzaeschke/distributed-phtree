@@ -7,13 +7,13 @@ public class MapRequest extends BaseRequest {
 
     Map<String, String> contents;
 
-    public MapRequest(int id, byte opCode, String indexId) {
-        super(id, opCode, indexId);
+    public MapRequest(int id, byte opCode, String indexId, int mappingVersion) {
+        super(id, opCode, indexId, mappingVersion);
         this.contents = new HashMap<>();
     }
 
-    public MapRequest(int id, byte opCode, String indexId, Map<String, String> contents) {
-        super(id, opCode, indexId);
+    public MapRequest(int id, byte opCode, String indexId, int mappingVersion, Map<String, String> contents) {
+        super(id, opCode, indexId, mappingVersion);
         this.contents = contents;
     }
 

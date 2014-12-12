@@ -9,6 +9,7 @@ public class BSTMapping<K> implements KeyMapping<K> {
     private BST bst;
     private KeyConverter<K> converter;
     private List<String> intervals;
+    private int version = 0;
 
     public BSTMapping() {
         //this should not be used, but is needed for Kryo
@@ -122,6 +123,16 @@ public class BSTMapping<K> implements KeyMapping<K> {
             }
         }
         return hostId;
+    }
+
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     /**

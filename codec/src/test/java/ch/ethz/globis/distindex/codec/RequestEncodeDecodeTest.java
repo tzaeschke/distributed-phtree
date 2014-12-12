@@ -8,6 +8,7 @@ import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -29,7 +30,7 @@ public class RequestEncodeDecodeTest {
     public void encodeDecodeGetRequest() {
         long[] key = {-1000, 0, 10000, 1, -1};
 
-        GetRequest<long[]> request = Requests.newGet(key);
+        GetRequest<long[]> request = new GetRequest<>(1, OpCode.GET, "", 1, key);
         byte[] encodedRequest = requestEncoder.encodeGet(request);
 
         GetRequest<long[]> decodedRequest = requestDecoder.decodeGet(ByteBuffer.wrap(encodedRequest));
@@ -41,7 +42,7 @@ public class RequestEncodeDecodeTest {
     public void encodeDeleteRequest() {
         long[] key = {-1000, 0, 10000, 1, -1};
 
-        DeleteRequest<long[]> request = Requests.newDelete(key);
+        DeleteRequest<long[]> request = new DeleteRequest<>(1, OpCode.DELETE, "", 1, key);
         byte[] encodedRequest = requestEncoder.encodeDelete(request);
 
         DeleteRequest<long[]> decodedRequest = requestDecoder.decodeDelete(ByteBuffer.wrap(encodedRequest));
@@ -56,7 +57,7 @@ public class RequestEncodeDecodeTest {
         String iteratorId = "test-iterator";
         int size = 100;
 
-        GetIteratorBatchRequest<long[]> request = Requests.newGetBatch(iteratorId, 100, start, end);
+        GetIteratorBatchRequest<long[]> request = new GetIteratorBatchRequest<>(1, OpCode.GET_BATCH, "", 1, iteratorId, size, start, end);
         byte[] encodedRequest = requestEncoder.encodeGetBatch(request);
 
         GetIteratorBatchRequest<long[]> decodedRequest = requestDecoder.decodeGetBatch(ByteBuffer.wrap(encodedRequest));
@@ -72,7 +73,7 @@ public class RequestEncodeDecodeTest {
         long[] start = {-1000, 0, 10000, 1, -1};
         long[] end = {1000, 0, 10000, -1, 1};
 
-        GetRangeRequest<long[]> request = Requests.newGetRange(start, end);
+        GetRangeRequest<long[]> request = new GetRangeRequest<long[]>(1, OpCode.GET_RANGE, "", 1, start, end);
         byte[] encodedRequest = requestEncoder.encodeGetRange(request);
 
         GetRangeRequest<long[]> decodedRequest = requestDecoder.decodeGetRange(ByteBuffer.wrap(encodedRequest));
@@ -86,7 +87,7 @@ public class RequestEncodeDecodeTest {
         long[] start = {-1000, 0, 10000, 1, -1};
         int k = 10;
 
-        GetKNNRequest<long[]> request = Requests.newGetKNN(start, k);
+        GetKNNRequest<long[]> request = new GetKNNRequest<>(1, OpCode.GET_KNN, "", 1, start, k);
         byte[] encodedRequest = requestEncoder.encodeGetKNN(request);
 
         GetKNNRequest<long[]> decodedRequest = requestDecoder.decodeGetKNN(ByteBuffer.wrap(encodedRequest));
@@ -100,7 +101,7 @@ public class RequestEncodeDecodeTest {
         long[] key = {-1000, 0, 10000, 1, -1};
         String value = new BigInteger(100, new Random()).toString();
 
-        PutRequest<long[], String> request = Requests.newPut(key, value);
+        PutRequest<long[], String> request = new PutRequest<>(1, OpCode.PUT, "", 1, key, value);
         byte[] encodedRequest = requestEncoder.encodePut(request);
 
         PutRequest<long[], byte[]> decodedRequest = requestDecoder.decodePut(ByteBuffer.wrap(encodedRequest));
@@ -114,10 +115,10 @@ public class RequestEncodeDecodeTest {
         int dim = 5;
         int depth = 64;
 
-        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
+        MapRequest request = new MapRequest(1, OpCode.CREATE_INDEX, "", 1);
         request.addParamater("dim", dim);
         request.addParamater("depth", depth);
-        byte[] encodedRequest = requestEncoder.encodeMap(request);
+        byte[] encodedRequest = requestEncoder.encode(request);
         MapRequest decodedRequest = requestDecoder.decodeMap(ByteBuffer.wrap(encodedRequest));
         assertEquals("Create requests do not match", request, decodedRequest);
     }
@@ -126,7 +127,7 @@ public class RequestEncodeDecodeTest {
     public void encodeDecodeMapRequest() {
         int dim = 5;
         int depth = 64;
-        MapRequest request = Requests.newMap(OpCode.CREATE_INDEX);
+        MapRequest request = new MapRequest(1, OpCode.CREATE_INDEX, "", 1);
         request.addParamater("dim", dim);
         request.addParamater("depth", depth);
         byte[] encodedRequest = requestEncoder.encodeMap(request);
@@ -140,7 +141,7 @@ public class RequestEncodeDecodeTest {
     @Test
     public void encodeDecodeInitBalancingRequest() {
         int size = new Random().nextInt();
-        InitBalancingRequest request = Requests.newInitBalancing(size);
+        InitBalancingRequest request = new InitBalancingRequest(1, OpCode.BALANCE_INIT, "", 1, size);
         byte[] encodedRequest = requestEncoder.encode(request);
         InitBalancingRequest decoded = requestDecoder.decodeInitBalancing(ByteBuffer.wrap(encodedRequest));
         assertEquals(request, decoded);
@@ -148,7 +149,7 @@ public class RequestEncodeDecodeTest {
 
     @Test
     public void encodeDecodeCommitBalancingRequest() {
-        CommitBalancingRequest request = Requests.newCommitBalancing();
+        CommitBalancingRequest request = new CommitBalancingRequest(1, OpCode.BALANCE_COMMIT, "", 1);
         byte[] encodedRequest = requestEncoder.encode(request);
         CommitBalancingRequest decoded = requestDecoder.decodeCommitBalancing(ByteBuffer.wrap(encodedRequest));
         assertEquals(request, decoded);
@@ -158,7 +159,7 @@ public class RequestEncodeDecodeTest {
     public void encodeDecodePutBalancingRequest() {
         long[] key = {-1000, 0, 10000, 1, -1};
         String value = new BigInteger(100, new Random()).toString();
-        PutBalancingRequest<long[]> request = Requests.newPutBalancing(key, value.getBytes());
+        PutBalancingRequest<long[]> request = new PutBalancingRequest<>(1, OpCode.BALANCE_PUT, "", 1, key, value.getBytes());
 
         byte[] encodedRequest = requestEncoder.encode(request);
         PutBalancingRequest<long[]> decoded = requestDecoder.decodePutBalancing(ByteBuffer.wrap(encodedRequest));
@@ -169,19 +170,19 @@ public class RequestEncodeDecodeTest {
 
     @Test
     public void encodeDecodeGetSize() {
-        BaseRequest request = Requests.newGetSize();
+        BaseRequest request = new BaseRequest(1, OpCode.GET_SIZE, "", 1);
         encodeDecodeBasicRequest(request);
     }
 
     @Test
     public void encodeDecodeGetDim() {
-        BaseRequest request = Requests.newGetDim();
+        BaseRequest request = new BaseRequest(1, OpCode.GET_DIM, "", 1);
         encodeDecodeBasicRequest(request);
     }
 
     @Test
     public void encodeDecodeGetDepth() {
-        BaseRequest request = Requests.newGetDepth();
+        BaseRequest request = new BaseRequest(1, OpCode.GET_DEPTH, "", 1);
         encodeDecodeBasicRequest(request);
     }
 

@@ -88,5 +88,16 @@ public interface KeyMapping<K> {
      */
     public void clear();
 
+    /**
+     * Return the id of the node that will receive the entries after the splitting of node with the
+     * host id received as an argument.
+     *
+     * @param currentHostId                             The id of the node to be split.
+     * @return
+     */
     public String getHostForSplitting(String currentHostId);
+
+    public int getVersion();
+
+    public void setVersion(int version);
 }

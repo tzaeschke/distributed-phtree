@@ -33,7 +33,9 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
     }
 
     private List<long[]> getNearestNeighbors(String hostId, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        Requests<long[], byte[]> requests = new Requests<>(indexProxy.getClusterService());
+
+        GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
         RequestDispatcher<long[], V> requestDispatcher = indexProxy.getRequestDispatcher();
         ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
         return indexProxy.extractKeys(response);

@@ -138,6 +138,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     public void writeCurrentMapping() {
+        mapping.setVersion(mapping.getVersion() + 1);
         writeMapping(mapping);
     }
 

@@ -52,12 +52,14 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         this.clusterService = clusterService;
         this.requestDispatcher = setupDispatcher();
         this.clusterService.connect();
+        this.requests = new Requests<>(this.clusterService);
     }
 
     public PHTreeIndexProxy(String host, int port) {
         requestDispatcher = setupDispatcher();
         clusterService = setupClusterService(host, port);
         clusterService.connect();
+        this.requests = new Requests<>(clusterService);
     }
 
     private RequestDispatcher<long[], V> setupDispatcher() {
@@ -95,7 +97,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         KeyMapping<long[]> keyMapping = clusterService.getMapping();
         List<String> hostIds = keyMapping.get(start, end);
 
-        GetRangeRequest<long[]> request = Requests.newGetRange(start, end, distance);
+        GetRangeRequest<long[]> request = requests.newGetRange(start, end, distance);
         List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
         LOG.debug("Get Range request ended on interval {} and distance {}",
                 Arrays.toString(start) + "-" + Arrays.toString(end), distance);
@@ -124,7 +126,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
         logKNNRequest(hostId, key, k);
 
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
         RequestDispatcher<long[], V> requestDispatcher = getRequestDispatcher();
         ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
         return extractKeys(response);
@@ -142,7 +144,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         logKNNRequest(hostIds, key, k);
 
-        GetKNNRequest<long[]> request = Requests.newGetKNN(key, k);
+        GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
         List<ResultResponse> responses = getRequestDispatcher().send(hostIds, request, ResultResponse.class);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
@@ -151,7 +153,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined stats for the tree.
      */
     public PhTree.Stats getStats() {
-        BaseRequest request = Requests.newStats();
+        BaseRequest request = requests.newStats();
         List<String> hostIds = clusterService.getMapping().get();
         PhTree.Stats global = new PhTree.Stats(), current;
         List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
@@ -180,7 +182,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined stats for the tree.
      */
     public PhTree.Stats getStatsIdealNoNode() {
-        BaseRequest request = Requests.newStatsNoNode();
+        BaseRequest request = requests.newStatsNoNode();
         List<String> hostIds = clusterService.getMapping().get();
         PhTree.Stats global = new PhTree.Stats(), current;
         List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
@@ -209,7 +211,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined quality stats for the tree.
      */
     public PhTreeQStats getQuality() {
-        BaseRequest request = Requests.newQuality();
+        BaseRequest request = requests.newQuality();
         List<String> hostIds = clusterService.getMapping().get();
         PhTreeQStats global = new PhTreeQStats(depth), current;
         List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
@@ -231,7 +233,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined node count for the tree.
      */
     public int getNodeCount() {
-        BaseRequest request = Requests.newNodeCount();
+        BaseRequest request = requests.newNodeCount();
         List<String> hostIds = clusterService.getMapping().get();
         Integer global = 0, current;
         List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
@@ -246,7 +248,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined toString for the tree.
      */
     public String toStringPlain() {
-        BaseRequest request = Requests.newToString();
+        BaseRequest request = requests.newToString();
         List<String> hostIds = clusterService.getMapping().get();
         String global = "", current;
         List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);

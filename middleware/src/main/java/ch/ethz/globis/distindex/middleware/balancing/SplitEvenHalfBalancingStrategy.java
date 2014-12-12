@@ -41,13 +41,14 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
     /** The request dispatcher */
     private RequestDispatcher<long[], byte[]> requestDispatcher;
 
+    private Requests<long[], byte[]> requests;
     private static final Logger LOG = LoggerFactory.getLogger(SplitEvenHalfBalancingStrategy.class);
 
     public SplitEvenHalfBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
         RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
         ResponseDecoder<long[], byte[]> responseDecoder = new ByteResponseDecoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<byte[]>());
-
+        this.requests = new Requests<>(indexContext.getClusterService());
         this.requestDispatcher = new ClientRequestDispatcher<>(new TCPClient(), requestEncoder, responseDecoder);
     }
 
@@ -114,7 +115,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         PutBalancingRequest<long[]> request;
         Response response;
         for (IndexEntry<long[], byte[]> entry : entries) {
-            request = Requests.newPutBalancing(entry.getKey(), entry.getValue());
+            request = requests.newPutBalancing(entry.getKey(), entry.getValue());
             response = requestDispatcher.send(receivedHostId, request, BaseResponse.class);
             if (response.getStatus() != OpStatus.SUCCESS) {
                 throw new RuntimeException("Receiving host did not accept entry initialization");
@@ -129,7 +130,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void initBalancing(int entriesToSend, String receiverHostId) {
-        InitBalancingRequest request = Requests.newInitBalancing(entriesToSend);
+        InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing initialization");
@@ -142,7 +143,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
-        CommitBalancingRequest request = Requests.newCommitBalancing();
+        CommitBalancingRequest request = requests.newCommitBalancing();
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing commit");

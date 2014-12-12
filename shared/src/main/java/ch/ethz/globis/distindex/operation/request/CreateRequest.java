@@ -6,8 +6,8 @@ public class CreateRequest extends BaseRequest {
     private int dim;
     private int depth;
 
-    public CreateRequest(int id, byte opCode, String indexId, int dim, int depth) {
-        super(id, opCode, indexId);
+    public CreateRequest(int id, byte opCode, String indexId, int mappingVersion, int dim, int depth) {
+        super(id, opCode, indexId, mappingVersion);
         this.dim = dim;
         this.depth = depth;
     }

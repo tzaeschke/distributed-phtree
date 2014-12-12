@@ -6,14 +6,14 @@ public class GetRangeRequest<K> extends BaseRequest {
     private K end;
     private double distance = -1;
 
-    public GetRangeRequest(int id, byte opCode, String indexId, K start, K end) {
-        super(id, opCode, indexId);
+    public GetRangeRequest(int id, byte opCode, String indexId, int mappingVersion, K start, K end) {
+        super(id, opCode, indexId, mappingVersion);
         this.start = start;
         this.end = end;
     }
 
-    public GetRangeRequest(int id, byte opCode, String indexId, K start, K end, double distance) {
-        super(id, opCode, indexId);
+    public GetRangeRequest(int id, byte opCode, String indexId, int mappingVersion, K start, K end, double distance) {
+        super(id, opCode, indexId, mappingVersion);
         this.start = start;
         this.end = end;
         this.distance = distance;

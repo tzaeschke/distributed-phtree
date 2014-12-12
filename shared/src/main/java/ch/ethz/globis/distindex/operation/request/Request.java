@@ -10,4 +10,6 @@ public interface Request {
     byte getOpCode();
 
     String getIndexId();
+
+    int getMappingVersion();
 }

@@ -8,11 +8,13 @@ public class BaseRequest implements Request {
     private final int id;
     private final byte opCode;
     private final String indexId;
+    private final int mappingVersion;
 
-    public BaseRequest(int id, byte opCode, String indexId) {
+    public BaseRequest(int id, byte opCode, String indexId, int mappingVersion) {
         this.id = id;
         this.opCode = opCode;
         this.indexId = indexId;
+        this.mappingVersion = mappingVersion;
     }
 
     @Override
@@ -30,8 +32,13 @@ public class BaseRequest implements Request {
         return indexId;
     }
 
+    @Override
+    public int getMappingVersion() {
+        return mappingVersion;
+    }
+
     public int metadataSize() {
-        return 4 + 1 + indexId.getBytes().length + 4;
+        return 4 + 1 + indexId.getBytes().length + 4 + 4;
     }
 
     @Override

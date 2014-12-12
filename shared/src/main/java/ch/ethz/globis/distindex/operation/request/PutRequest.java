@@ -5,8 +5,8 @@ public class PutRequest<K, V> extends BaseRequest {
     private K key;
     private V value;
 
-    public PutRequest(int id, byte opCode, String indexId, K key, V value) {
-        super(id, opCode, indexId);
+    public PutRequest(int id, byte opCode, String indexId, int mappingVersion, K key, V value) {
+        super(id, opCode, indexId, mappingVersion);
         this.key = key;
         this.value = value;
     }

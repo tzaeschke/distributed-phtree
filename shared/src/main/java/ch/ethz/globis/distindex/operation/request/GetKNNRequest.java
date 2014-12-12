@@ -5,8 +5,8 @@ public class GetKNNRequest<K> extends BaseRequest {
     private K key;
     private int k;
 
-    public GetKNNRequest(int id, byte opCode, String indexId, K key, int k) {
-        super(id, opCode, indexId);
+    public GetKNNRequest(int id, byte opCode, String indexId, int mappingVersion, K key, int k) {
+        super(id, opCode, indexId, mappingVersion);
         this.key = key;
         this.k = k;
     }
