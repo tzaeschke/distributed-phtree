@@ -37,8 +37,9 @@ public class ZMapping implements KeyMapping<long[]>{
     /** Mapping from the host ids to the sizes of the hosts. */
     private Map<String, Integer> sizes;
 
-    /** Mapping from the host ids to the order of the hosts in the z-order curve. */
-    private Map<String, Integer> order;
+    private Map<String, long[]> startKeys;
+
+    private Map<String, long[]> endKeys;
 
     /** A list of the hosts ids.*/
     private List<String> hosts = new ArrayList<>();
@@ -61,8 +62,9 @@ public class ZMapping implements KeyMapping<long[]>{
         this.depth = depth;
         this.service = new ZOrderService(depth);
         this.tree = new PhTreeRangeVD<>(dim);
+        this.startKeys = new TreeMap<>();
+        this.endKeys = new TreeMap<>();
         this.sizes = new TreeMap<>();
-        this.order = new TreeMap<>();
         this.hosts = hosts;
     }
 
@@ -79,6 +81,7 @@ public class ZMapping implements KeyMapping<long[]>{
         BST bst = BST.fromArray(hosts);
 
         updateRegions(bst.asMap());
+        updateTreeSquares();
     }
 
     /**
@@ -99,6 +102,31 @@ public class ZMapping implements KeyMapping<long[]>{
 
         //reconstruct the set of regions mapped to each host
         updateRegions(mapping);
+        updateTreeSquares();
+    }
+
+    public void updateTree() {
+        this.tree = new PhTreeRangeVD<>(dim);
+        long[] start, end;
+        for (String hostId : hosts) {
+            start = startKeys.get(hostId);
+            end = endKeys.get(hostId);
+            Set<HBox> regions = service.regionEnvelope(start, end);
+            for (HBox region : regions) {
+                tree.put(convert(service.generateRangeStart(region.getCode(), dim)),
+                        convert(service.generateRangeEnd(region.getCode(), dim)),
+                        hostId);
+            }
+        }
+    }
+
+    private void updateTreeSquares() {
+        long[] start, end;
+        for (String hostId : hosts) {
+            start = startKeys.get(hostId);
+            end = endKeys.get(hostId);
+            tree.put(convert(start), convert(end), hostId);
+        }
     }
 
     /**
@@ -126,17 +154,16 @@ public class ZMapping implements KeyMapping<long[]>{
     private void updateRegions(Map<String, String> mapping) {
         tree = new PhTreeRangeVD<>(dim);
         String prefix, host;
-        int orderCount = 0;
         for (Map.Entry<String, String> entry : mapping.entrySet()) {
             prefix = entry.getKey();
             host = entry.getValue();
 
             //for each host
             long[] start = service.generateRangeStart(prefix, dim);
+            startKeys.put(host, start);
             long[] end = service.generateRangeEnd(prefix, dim);
-            tree.put(convert(start), convert(end), host);
-            order.put(host, orderCount++);
-            sizes.put(host, 1);
+            endKeys.put(host, end);
+            sizes.put(host, 0);
         }
     }
 
@@ -149,7 +176,6 @@ public class ZMapping implements KeyMapping<long[]>{
      */
     public void remove(String hostId) {
         this.consistent = false;
-        this.order.remove(hostId);
         this.sizes.remove(hostId);
         this.hosts.remove(hostId);
     }
@@ -302,9 +328,9 @@ public class ZMapping implements KeyMapping<long[]>{
     @Override
     public void clear() {
         this.hosts.clear();
-        this.order.clear();
         this.sizes.clear();
-        //this.tree = null;
+        this.startKeys.clear();
+        this.endKeys.clear();
     }
 
     @Override
@@ -318,6 +344,14 @@ public class ZMapping implements KeyMapping<long[]>{
             return left;
         }
         return (getSize(left) < getSize(right)) ? left : right;
+    }
+
+    public void changeIntervalStart(String host, long[] start) {
+        this.startKeys.put(host, start);
+    }
+
+    public void changeIntervalEnd(String host, long[] end) {
+        this.endKeys.put(host, end);
     }
 
     @Override
@@ -375,7 +409,6 @@ public class ZMapping implements KeyMapping<long[]>{
 
         if (consistent != mapping.consistent) return false;
         if (dim != mapping.dim) return false;
-        if (order != null ? !order.equals(mapping.order) : mapping.order != null) return false;
         if (service != null ? !service.equals(mapping.service) : mapping.service != null) return false;
         if (sizes != null ? !sizes.equals(mapping.sizes) : mapping.sizes != null) return false;
 
@@ -392,7 +425,6 @@ public class ZMapping implements KeyMapping<long[]>{
         result = 31 * result + (consistent ? 1 : 0);
         result = 31 * result + (tree != null ? tree.hashCode() : 0);
         result = 31 * result + (sizes != null ? sizes.hashCode() : 0);
-        result = 31 * result + (order != null ? order.hashCode() : 0);
         return result;
     }
 }

@@ -16,7 +16,7 @@ public class ZOrderService {
     }
 
     public Set<HBox> regionEnvelope(ZAddress alpha, ZAddress beta) {
-        int dim =   alpha.getDim();
+        int dim =  alpha.getDim();
         if (dim != beta.getDim()) {
             throw new IllegalArgumentException("The range query endpoints should have the same dimension");
         }

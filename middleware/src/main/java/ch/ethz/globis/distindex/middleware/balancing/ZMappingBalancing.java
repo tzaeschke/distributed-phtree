@@ -12,6 +12,7 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
@@ -40,6 +41,8 @@ public class ZMappingBalancing implements BalancingStrategy {
     private RequestDispatcher<long[], byte[]> requestDispatcher;
 
     private Requests<long[], byte[]> requests;
+
+    private boolean movedToRight = false;
 
     public ZMappingBalancing(IndexContext indexContext) {
         this.indexContext = indexContext;
@@ -70,7 +73,7 @@ public class ZMappingBalancing implements BalancingStrategy {
         sendEntries(entries, receiverHostId);
         commitBalancing(receiverHostId);
 
-        updateMapping(currentHostId, receiverHostId, entries.size());
+        updateMapping(currentHostId, receiverHostId, entries);
         removeEntries(entries);
     }
 
@@ -80,11 +83,23 @@ public class ZMappingBalancing implements BalancingStrategy {
      *
      * @param currentHostId                     The hostId of the splitting host.
      */
-    private void updateMapping(String currentHostId, String receiverHostId, int entriesMoved) {
+    private void updateMapping(String currentHostId, String receiverHostId, IndexEntryList<long[], byte[]> entries) {
+        int entriesMoved = entries.size();
         KeyMapping<long[]> mapping = getMapping();
         mapping.setSize(currentHostId, indexContext.getTree().size());
         int receiverSize = mapping.getSize(receiverHostId) + entriesMoved;
         mapping.setSize(receiverHostId, receiverSize);
+        ZMapping zmap = (ZMapping) mapping;
+        if (entriesMoved != 0) {
+            if (movedToRight) {
+                zmap.changeIntervalStart(receiverHostId, entries.get(0).getKey());
+                zmap.changeIntervalEnd(currentHostId, entries.get(0).getKey());
+            } else {
+                zmap.changeIntervalEnd(receiverHostId, entries.get(entriesMoved - 1).getKey());
+                zmap.changeIntervalStart(currentHostId, entries.get(entriesMoved - 1).getKey());
+            }
+            zmap.updateTree();
+        }
         indexContext.getClusterService().writeCurrentMapping();
     }
 
@@ -159,6 +174,7 @@ public class ZMappingBalancing implements BalancingStrategy {
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
         if (mapping.getNext(receiver) != null && mapping.getNext(receiver).equals(currentHostId)) {
             //move to left
+            movedToRight = false;
             PVIterator<byte[]> it = indexContext.getTree().queryExtent();
             for (int i = 0; i < entriesToMove; i++) {
                 PVEntry<byte[]> e = it.nextEntry();
@@ -169,6 +185,7 @@ public class ZMappingBalancing implements BalancingStrategy {
             }
         } else {
             //move to right
+            movedToRight = true;
             PVIterator<byte[]> it = indexContext.getTree().queryExtent();
             for (int i = 0; i < mapping.getSize(currentHostId) - entriesToMove; i++) {
                 it.next();
