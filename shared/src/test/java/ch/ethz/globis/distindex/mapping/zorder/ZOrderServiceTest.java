@@ -11,6 +11,19 @@ import static org.junit.Assert.assertEquals;
 public class ZOrderServiceTest {
 
     @Test
+    public void testEnvelope_Inclusive() {
+        int depth = 4;
+        long[] start = { 0L, 0L};
+        long[] end = { 7L, 7L};
+        ZOrderService service = new ZOrderService(depth);
+        Set<HBox> boxes = service.regionEnvelopeInclusive(start, end);
+        Set<HBox> expected = new HashSet<HBox>() {{
+            add(new HBox("0"));
+        }};
+        assertEquals(expected, boxes);
+    }
+
+    @Test
     public void testEnvelope_PositiveRange() {
         int depth = 3;
         long[] start = { 1L, 1L};

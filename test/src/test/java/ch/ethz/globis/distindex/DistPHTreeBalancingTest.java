@@ -39,10 +39,8 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
         phTree.close();
     }
 
-
     @Test
-    @Ignore
-    public void insertSameHost() {
+    public void insertSameHost() throws InterruptedException {
         phTree.create(2, 64);
 
         int size = 101;
@@ -52,6 +50,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             phTree.put(key, Arrays.toString(key));
             entries.add(key, Arrays.toString(key));
         }
+        Thread.sleep(2000);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);

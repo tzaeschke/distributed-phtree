@@ -7,6 +7,38 @@ import static org.junit.Assert.assertEquals;
 public class ZAddressTest {
 
     @Test
+    public void testZAddress_Previous() {
+        String code, expected;
+        code = "1001";
+        expected = "1000";
+        assertEquals(expected, ZAddress.previous(code));
+
+        code = "1000";
+        expected = "0111";
+        assertEquals(expected, ZAddress.previous(code));
+
+        code = "0000";
+        expected = "1111";
+        assertEquals(expected, ZAddress.previous(code));
+    }
+
+    @Test
+    public void testZAddress_Next() {
+        String code, expected;
+        code = "1000";
+        expected = "1001";
+        assertEquals(expected, ZAddress.next(code));
+
+        code = "0111";
+        expected = "1000";
+        assertEquals(expected, ZAddress.next(code));
+
+        code = "1111";
+        expected = "0000";
+        assertEquals(expected, ZAddress.next(code));
+    }
+
+    @Test
     public void testCreateZAddress_Positive_Small() {
         long[] key = {1, 1, 1};
         ZAddress zAddress = new ZAddress(key, 1);

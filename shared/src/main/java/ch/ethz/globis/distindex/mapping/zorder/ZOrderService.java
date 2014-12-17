@@ -47,6 +47,19 @@ public class ZOrderService {
         return results;
     }
 
+    public Set<HBox> regionEnvelopeInclusive(long[] start, long[] end) {
+        int dim = start.length;
+        if (dim != end.length) {
+            throw new IllegalArgumentException("The range query endpoints should have the same dimension");
+        }
+
+        ZAddress alpha = new ZAddress(start, depth);
+        ZAddress beta = new ZAddress(end, depth);
+        alpha = new ZAddress(ZAddress.previous(alpha.getCode()), alpha.getDim());
+        beta = new ZAddress(ZAddress.next(beta.getCode()), beta.getDim());
+        return regionEnvelope(alpha, beta);
+
+    }
     public Set<HBox> regionEnvelope(long[] start, long[] end) {
         int dim = start.length;
         if (dim != end.length) {
@@ -123,19 +136,6 @@ public class ZOrderService {
             }
         }
         return results;
-    }
-
-    boolean intersectionTest(HBox upperHalf, long[] start, long[] end) {
-        int dim = start.length;
-        long[] startBox = generateRangeStart(upperHalf.getCode(), dim);
-        long[] endBox = generateRangeEnd(upperHalf.getCode(), dim);
-        for (int i = 0; i < dim; i++) {
-            if ((Math.abs(start[i] - startBox[i]) + Math.abs(end[i] - endBox[i])) >
-                    (Math.abs(start[i] - endBox[i]) + Math.abs(startBox[i] - end[i]))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     long[] generateRangeStart(String code, int dim) {

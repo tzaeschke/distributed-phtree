@@ -73,8 +73,8 @@ public class ZMappingBalancing implements BalancingStrategy {
         sendEntries(entries, receiverHostId);
         commitBalancing(receiverHostId);
 
-        updateMapping(currentHostId, receiverHostId, entries);
         removeEntries(entries);
+        updateMapping(currentHostId, receiverHostId, entries);
     }
 
     /**

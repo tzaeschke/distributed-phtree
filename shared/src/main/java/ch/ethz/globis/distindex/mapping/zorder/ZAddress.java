@@ -42,6 +42,38 @@ public class ZAddress {
         return code.substring(i * dim, (i + 1) * dim);
     }
 
+    public static String previous(String code) {
+        char[] codeArr = code.toCharArray();
+        int index = codeArr.length - 1;
+        boolean done = false;
+        while (!done && index >= 0) {
+            if (codeArr[index] == '1') {
+                codeArr[index] = '0';
+                done = true;
+            } else {
+                codeArr[index] = '1';
+                index--;
+            }
+        }
+        return String.valueOf(codeArr);
+    }
+
+    public static String next(String code) {
+        char[] codeArr = code.toCharArray();
+        int index = codeArr.length - 1;
+        boolean done = false;
+        while (!done && index >= 0) {
+            if (codeArr[index] == '0') {
+                codeArr[index] = '1';
+                done = true;
+            } else {
+                codeArr[index] = '0';
+                index--;
+            }
+        }
+        return String.valueOf(codeArr);
+    }
+
     @Override
     public String toString() {
         return "ZAddress{" +
