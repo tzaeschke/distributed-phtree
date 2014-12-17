@@ -267,7 +267,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     public void testPutAndGetRandom2D() throws Exception {
         phTree.create(2, 64);
 
-        int nrEntries = 200;
+        int nrEntries = 400;
         Random random = new Random();
 
         long[] key;

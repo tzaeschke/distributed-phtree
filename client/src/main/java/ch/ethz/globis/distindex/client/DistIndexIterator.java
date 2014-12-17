@@ -99,6 +99,11 @@ public class DistIndexIterator<K, V> implements IndexIterator<K, V> {
         return entryBuffer.get(position++);
     }
 
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Remove operation not currently supported.");
+    }
+
     /**
      * Get a batch of entries from the remote hosts and keep them in the entryBuffer.
      *

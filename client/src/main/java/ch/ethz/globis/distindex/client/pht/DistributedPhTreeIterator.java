@@ -43,4 +43,9 @@ public class DistributedPhTreeIterator<V> implements PVIterator<V> {
     public V next() {
         return proxyIterator.next().getValue();
     }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Remove operation not currently supported.");
+    }
 }

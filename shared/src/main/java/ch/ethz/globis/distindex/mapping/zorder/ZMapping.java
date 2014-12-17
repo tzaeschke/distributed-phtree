@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.mapping.zorder;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
+import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhTreeRangeVD;
 import com.esotericsoftware.kryo.Kryo;
@@ -267,7 +268,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public String getNext(String hostId) {
         checkConsistency();
 
-        int index = Collections.binarySearch(hosts, hostId);
+        int index = CollectionUtil.search(hosts, hostId);
 
         //index of the following
         index += 1;
@@ -278,7 +279,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public String getPrevious(String hostId) {
         checkConsistency();
 
-        int index = Collections.binarySearch(hosts, hostId);
+        int index = CollectionUtil.search(hosts, hostId);
 
         //index of the following
         index -= 1;

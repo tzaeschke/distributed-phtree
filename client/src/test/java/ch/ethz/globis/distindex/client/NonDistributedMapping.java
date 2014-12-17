@@ -1,6 +1,7 @@
 package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.util.CollectionUtil;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     @Override
     public String getNext(String hostId) {
-        int index = Collections.binarySearch(hostList, hostId) + 1;
+        int index = CollectionUtil.search(hostList, hostId) + 1;
         if (index >= hostList.size()) {
             return null;
         } else {
@@ -61,7 +62,7 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     @Override
     public String getPrevious(String hostId) {
-        int index = Collections.binarySearch(hostList, hostId) - 1;
+        int index = CollectionUtil.search(hostList, hostId) - 1;
         if (index < 0) {
             return null;
         } else {
@@ -69,27 +70,16 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
         }
     }
 
-    public Set<String> getHostsContaining(List<K> keys) {
-        return new HashSet<>(hostList);
-    }
-    public int getDepth(String hostId) {
-        return 0;
-    }
-
     @Override
     public void add(String hostId) {
-        int index = Collections.binarySearch(hostList, hostId);
+        int index = CollectionUtil.search(hostList, hostId);
         hostList.add(index, hostId);
     }
 
     @Override
     public void remove(String hostId) {
-        int index = Collections.binarySearch(hostList, hostId);
+        int index = CollectionUtil.search(hostList, hostId);
         hostList.remove(index);
-    }
-
-    public void split(String splittingHostId, String receiverHostId, int sizeMoved) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -123,9 +113,5 @@ public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     @Override
     public void clear() {
-    }
-
-    public String getLargestZone(String currentHostId) {
-        return null;
     }
 }
