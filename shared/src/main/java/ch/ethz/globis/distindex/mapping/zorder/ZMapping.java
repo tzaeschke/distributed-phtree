@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
+import ch.ethz.globis.pht.PhTreeRangeV;
 import ch.ethz.globis.pht.PhTreeRangeVD;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -32,7 +33,7 @@ public class ZMapping implements KeyMapping<long[]>{
 
     /** A ranged PhTree containing geometrical zones from the z-mapping mapped to each
      * host*/
-    private PhTreeRangeVD<String> tree;
+    private PhTreeRangeV<String> tree;
 
     /** Mapping from the host ids to the sizes of the hosts. */
     private Map<String, Integer> sizes;
@@ -61,7 +62,7 @@ public class ZMapping implements KeyMapping<long[]>{
         this.dim = dim;
         this.depth = depth;
         this.service = new ZOrderService(depth);
-        this.tree = new PhTreeRangeVD<>(dim);
+        this.tree = new PhTreeRangeV<>(dim);
         this.startKeys = new TreeMap<>();
         this.endKeys = new TreeMap<>();
         this.sizes = new TreeMap<>();
@@ -106,15 +107,15 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     public void updateTree() {
-        this.tree = new PhTreeRangeVD<>(dim);
+        this.tree = new PhTreeRangeV<>(dim);
         long[] start, end;
         for (String hostId : hosts) {
             start = startKeys.get(hostId);
             end = endKeys.get(hostId);
             Set<HBox> regions = service.regionEnvelope(start, end);
             for (HBox region : regions) {
-                tree.put(convert(service.generateRangeStart(region.getCode(), dim)),
-                        convert(service.generateRangeEnd(region.getCode(), dim)),
+                tree.put(service.generateRangeStart(region.getCode(), dim),
+                        service.generateRangeEnd(region.getCode(), dim),
                         hostId);
             }
         }
@@ -125,7 +126,7 @@ public class ZMapping implements KeyMapping<long[]>{
         for (String hostId : hosts) {
             start = startKeys.get(hostId);
             end = endKeys.get(hostId);
-            tree.put(convert(start), convert(end), hostId);
+            tree.put(start, end, hostId);
         }
     }
 
@@ -152,7 +153,7 @@ public class ZMapping implements KeyMapping<long[]>{
      * @param mapping
      */
     private void updateRegions(Map<String, String> mapping) {
-        tree = new PhTreeRangeVD<>(dim);
+        tree = new PhTreeRangeV<>(dim);
         String prefix, host;
         for (Map.Entry<String, String> entry : mapping.entrySet()) {
             prefix = entry.getKey();
@@ -189,12 +190,10 @@ public class ZMapping implements KeyMapping<long[]>{
     public String get(long[] k) {
         checkConsistency();
 
-        double[] key = convert(k);
-
-        PhTreeRangeVD<String>.PHREntryIterator it = tree.queryIntersect(key, key);
-        double[] start;
-        double[] end;
-        PhTreeRangeVD.PHREntry entry;
+        PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(k, k);
+        long[] start;
+        long[] end;
+        PhTreeRangeV.PHREntry entry;
 
         String host = null;
         if (it.hasNext()) {
@@ -220,13 +219,10 @@ public class ZMapping implements KeyMapping<long[]>{
     public List<String> get(long[] l, long[] u) {
         checkConsistency();
 
-        double[] lower = convert(l);
-        double[] upper = convert(u);
-
-        PhTreeRangeVD<String>.PHREntryIterator it = tree.queryIntersect(lower, upper);
+        PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(l, u);
         List<String> unsortedHosts = new ArrayList<>();
         String host;
-        PhTreeRangeVD.PHREntry e;
+        PhTreeRangeV.PHREntry e;
         while (it.hasNext()) {
             e = it.next();
             host = getValueFromTree(e.lower(), e.upper());
@@ -237,7 +233,7 @@ public class ZMapping implements KeyMapping<long[]>{
         return unsortedHosts;
     }
 
-    private String getValueFromTree(double[] lower, double[] upper) {
+    private String getValueFromTree(long[] lower, long[] upper) {
         String host = tree.put(lower, upper, null);
         if (host != null) {
             tree.put(lower, upper, host);
@@ -390,14 +386,6 @@ public class ZMapping implements KeyMapping<long[]>{
         if (!consistent) {
             throw new IllegalStateException("Mapping is inconsistent!");
         }
-    }
-
-    private double[] convert(long[] key) {
-        double[] d = new double[key.length];
-        for (int i = 0; i < d.length; i++) {
-            d[i] = key[i];
-        }
-        return d;
     }
 
     @Override
