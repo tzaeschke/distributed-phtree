@@ -2,15 +2,15 @@ package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.balancing.BalancingStrategy;
-import ch.ethz.globis.distindex.middleware.balancing.SplitEvenHalfBalancingStrategy;
-import ch.ethz.globis.distindex.middleware.balancing.ZMappingBalancing;
-import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
+import ch.ethz.globis.distindex.middleware.balancing.ZMappingBalancingStrategy;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
@@ -22,32 +22,31 @@ import java.util.*;
  */
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
-    /** Need to make this configurable*/
+    /** Need to make this configurable. */
     private static final int THRESHOLD = 100;
-
-    /**
-     * The operation count.
-     */
+    /** The operation count. */
     private static int opCount = 0;
     /** The index context associated with this handler. */
     private IndexContext indexContext;
-
     /** The balancing strategy used */
     private BalancingStrategy balancingStrategy;
 
     private Map<String, PVIterator<byte[]>> iterators;
-
     private Map<String, Set<String>> clientIteratorMapping;
 
     public PhTreeRequestHandler(IndexContext indexContext) {
         this.indexContext = indexContext;
-        this.balancingStrategy = new ZMappingBalancing(indexContext);
+        this.balancingStrategy = new ZMappingBalancingStrategy(indexContext);
         this.iterators = new HashMap<>();
         this.clientIteratorMapping = new HashMap<>();
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleCreate(MapRequest request) {
+    public Response handleCreate(MapRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         int dim  = Integer.parseInt(request.getParameter("dim"));
         int depth = Integer.parseInt(request.getParameter("depth"));
         PhTreeV<byte[]> tree = new PhTree3<>(dim, depth);
@@ -56,7 +55,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleGet(GetRequest<long[]> request) {
+    public Response handleGet(GetRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] key = request.getKey();
         byte[] value = tree().get(key);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
@@ -64,7 +67,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public IntegerResponse handleContains(ContainsRequest<long[]> request) {
+    public Response handleContains(ContainsRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] key = request.getKey();
         boolean contains = tree().contains(key);
         int content = contains ? 1 : 0;
@@ -72,7 +79,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleGetRange(GetRangeRequest<long[]> request) {
+    public Response handleGetRange(GetRangeRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] start = request.getStart();
         long[] end = request.getEnd();
         double distance = request.getDistance();
@@ -87,7 +98,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleGetKNN(GetKNNRequest<long[]> request) {
+    public Response handleGetKNN(GetKNNRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] key = request.getKey();
         int k = request.getK();
 
@@ -96,7 +111,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<long[]> request) {
+    public Response handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         String iteratorId = request.getIteratorId();
         int batchSize= request.getBatchSize();
 
@@ -151,7 +170,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handlePut(PutRequest<long[], byte[]> request) {
+    public Response handlePut(PutRequest<long[], byte[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] key = request.getKey();
         byte[] value = request.getValue();
 
@@ -168,7 +191,11 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public ResultResponse<long[], byte[]> handleDelete(DeleteRequest<long[]> request) {
+    public Response handleDelete(DeleteRequest<long[]> request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         long[] key = request.getKey();
         byte[] value = tree().remove(key);
         if (value != null) {
@@ -179,25 +206,41 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public IntegerResponse handleGetSize(BaseRequest request) {
+    public Response handleGetSize(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         int size = tree().size();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, size);
     }
 
     @Override
-    public IntegerResponse handleGetDim(BaseRequest request) {
+    public Response handleGetDim(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         int dim = tree().getDIM();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, dim);
     }
 
     @Override
-    public IntegerResponse handleGetDepth(BaseRequest request) {
+    public Response handleGetDepth(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         int depth = tree().getDEPTH();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, depth);
     }
 
     @Override
-    public IntegerResponse handleCloseIterator(String clientHost, MapRequest request) {
+    public Response handleCloseIterator(String clientHost, MapRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         String iteratorId = request.getParameter("iteratorId");
         iterators.remove(iteratorId);
         removeIteratorForClient(clientHost, iteratorId);
@@ -215,35 +258,55 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public MapResponse handleNodeCount(BaseRequest request) {
+    public Response handleNodeCount(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
         response.addParameter("nodeCount", tree().getNodeCount());
         return response;
     }
 
     @Override
-    public MapResponse handleQuality(BaseRequest request) {
+    public Response handleQuality(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
         response.addParameter("quality", tree().getQuality());
         return response;
     }
 
     @Override
-    public MapResponse handleStatsNoNode(BaseRequest request) {
+    public Response handleStatsNoNode(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
         response.addParameter("stats", tree().getStatsIdealNoNode());
         return response;
     }
 
     @Override
-    public MapResponse handleToString(BaseRequest request) {
+    public Response handleToString(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
         response.addParameter("toString", tree().toStringPlain());
         return response;
     }
 
     @Override
-    public MapResponse handleStats(BaseRequest request) {
+    public Response handleStats(BaseRequest request) {
+        if (isVersionOutDate(request)) {
+            return createOutdateVersionResponse(request);
+        }
+
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
         response.addParameter("stats", tree().getStats());
         return response;
@@ -253,27 +316,35 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         opCount += 1;
         if (opCount > 100) {
             opCount = 0;
-            indexContext.getClusterService().getMapping().setSize(indexContext.getHostId(), tree().size());
-            indexContext.getClusterService().writeCurrentMapping();
+            ClusterService<long[]> cluster = indexContext.getClusterService();
+            cluster.getMapping().setSize(indexContext.getHostId(), tree().size());
+            cluster.writeCurrentMapping();
         }
-        if (indexContext.getTree().size() > THRESHOLD) {
+        if (tree().size() > THRESHOLD) {
             balancingStrategy.balance();
         }
     }
 
-    private ResultResponse<long[], byte[]> createError(BaseRequest request) {
+    private boolean isVersionOutDate(Request request) {
+        return request.getMappingVersion() < indexContext.getLastBalancingVersion();
+    }
+    private Response createOutdateVersionResponse(Request request) {
+        return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.OUTDATED_VERSION);
+    }
+
+    private Response createError(BaseRequest request) {
         return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.FAILURE);
     }
 
-    private ResultResponse<long[], byte[]> createResponse(BaseRequest request) {
+    private Response createResponse(BaseRequest request) {
         return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
     }
 
-    private ResultResponse<long[], byte[]> createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results, String iteratorId) {
+    private Response createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results, String iteratorId) {
         return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results, iteratorId);
     }
 
-    private ResultResponse<long[], byte[]> createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results) {
+    private Response createResponse(BaseRequest request, IndexEntryList<long[], byte[]> results) {
         return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
     }
 

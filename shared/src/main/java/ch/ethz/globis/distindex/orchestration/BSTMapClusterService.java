@@ -170,6 +170,16 @@ public class BSTMapClusterService implements ClusterService<long[]> {
     }
 
     @Override
+    public int getVersion() {
+        return 0;
+    }
+
+    @Override
+    public int incrementVersion() {
+        return 0;
+    }
+
+    @Override
     public void writeCurrentMapping() {
         try {
             writeCurrentMapping(mapping);

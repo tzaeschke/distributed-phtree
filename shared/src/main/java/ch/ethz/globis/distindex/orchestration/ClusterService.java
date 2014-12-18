@@ -36,6 +36,7 @@ public interface ClusterService<K> {
      * @return                              The online hosts registered in the cluster.
      */
     public List<String> getOnlineHosts();
+
     /**
      * Connect to the cluster.
      */
@@ -45,6 +46,10 @@ public interface ClusterService<K> {
      * Disconnect from the cluster.
      */
     public void disconnect();
+
+    public int getVersion();
+
+    public int incrementVersion();
 
     public void writeCurrentMapping();
 }

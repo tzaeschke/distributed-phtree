@@ -1,5 +1,7 @@
 package ch.ethz.globis.distindex.util;
 
+import ch.ethz.globis.distindex.mapping.zorder.ZAddress;
+import ch.ethz.globis.distindex.mapping.zorder.ZOrderService;
 import ch.ethz.globis.pht.PhTree;
 
 import java.math.BigDecimal;
@@ -81,5 +83,39 @@ public class MultidimUtil {
             result[i] += offset;
         }
         return result;
+    }
+
+    public static long[] next(long[] key, int depth) {
+        long[] nextKey = Arrays.copyOf(key, key.length);
+        for (int bitPos = 0; bitPos < depth; bitPos++) {
+            for (int dimPos = key.length - 1; dimPos >= 0; dimPos--) {
+                if ((nextKey[dimPos] & (1L << bitPos)) != 0) {
+                    //bit was 1, set to 0 and continue
+                    nextKey[dimPos] = nextKey[dimPos] & ~(1L << bitPos);
+                } else {
+                    //bit was 0, set bit to 1 and be done with it
+                    nextKey[dimPos] = nextKey[dimPos] | (1L << bitPos);
+                    return nextKey;
+                }
+            }
+        }
+        return nextKey;
+    }
+
+    public static long[] previous(long[] key, int depth) {
+        long[] nextKey = Arrays.copyOf(key, key.length);
+        for (int bitPos = 0; bitPos < depth; bitPos++) {
+            for (int dimPos = key.length - 1; dimPos >= 0; dimPos--) {
+                if ((nextKey[dimPos] & (1L << bitPos)) != 0) {
+                    //bit was 1, set to 0 and stop
+                    nextKey[dimPos] = nextKey[dimPos] & ~(1L << bitPos);
+                    return nextKey;
+                } else {
+                    //bit was 0, set bit to 1 and continue
+                    nextKey[dimPos] = nextKey[dimPos] | (1L << bitPos);
+                }
+            }
+        }
+        return nextKey;
     }
 }

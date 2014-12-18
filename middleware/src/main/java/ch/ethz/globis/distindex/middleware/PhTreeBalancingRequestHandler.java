@@ -65,7 +65,15 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
                 tree.put(entry.getKey(), entry.getValue());
             }
         }
+        updateBalancingVersion(request);
+
         return ackResponse(request);
+    }
+
+    private void updateBalancingVersion(CommitBalancingRequest request) {
+        String versionString = request.getParameter("balancingVersion");
+        int balancingVersion = Integer.parseInt(versionString);
+        indexContext.setLastBalancingVersion(balancingVersion);
     }
 
     private Response ackResponse(Request request) {

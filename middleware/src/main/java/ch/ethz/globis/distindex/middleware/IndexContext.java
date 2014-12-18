@@ -23,6 +23,9 @@ public class IndexContext {
     /** The hostId of the current middleware, currently host:port */
     private final String hostId;
 
+    /** The version of the last balancing. */
+    private int lastBalancingVersion = 0;
+
     public IndexContext(String host, int port) {
         this.host = host;
         this.port = port;
@@ -55,5 +58,13 @@ public class IndexContext {
 
     public String getHostId() {
         return hostId;
+    }
+
+    public int getLastBalancingVersion() {
+        return lastBalancingVersion;
+    }
+
+    public void setLastBalancingVersion(int lastBalancingVersion) {
+        this.lastBalancingVersion = lastBalancingVersion;
     }
 }

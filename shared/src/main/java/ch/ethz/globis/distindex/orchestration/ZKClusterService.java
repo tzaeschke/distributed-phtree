@@ -7,6 +7,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.recipes.shared.SharedCount;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.utils.EnsurePath;
@@ -16,6 +17,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,21 +37,26 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The connection string used to connect to Zookeeper. */
     private String hostPort;
 
-    /** The directory for the mapping.*/
+    /** The directory for the mapping. */
     private static final String MAPPING_PATH = "/mapping";
 
-    /** The current mapping */
+    /** The current mapping. */
     private ZMapping mapping;
 
+    /** The list of online hosts. */
     private List<String> hosts = new ArrayList<>();
 
-    /** The directory holding the names of the online servers */
+    /** The directory holding the names of the online servers. */
     private static final String SERVERS_PATH = "/servers";
 
-    /**
-     * Flag determining if the current service is running or not.
-     */
+    /** The directory holding the version of the mapping. */
+    private static final String VERSION_PATH = "/version";
+
+    /** Flag determining if the current service is running or not. */
     private boolean isRunning = false;
+
+    /** The version of the current mapping. */
+    private SharedCount version;
 
     public ZKClusterService(String host, int port) {
         this(host + ":" + port);
@@ -106,40 +113,60 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     @Override
     public void connect() {
-        this.client.start();
+        initResources();
 
-        ensurePathExists(SERVERS_PATH);
         this.hosts = readCurrentHosts();
-        ensurePathExists(MAPPING_PATH);
         this.mapping = readCurrentMapping();
         this.isRunning = true;
-    }
-
-    private List<String> readCurrentHosts() {
-        List<String> hostIds = new ArrayList<>();
-        try {
-            hostIds = client.getChildren().usingWatcher(new CuratorWatcher() {
-                @Override
-                public void process(WatchedEvent watchedEvent) throws Exception {
-                    hosts = readCurrentHosts();
-                }
-            }).forPath(SERVERS_PATH);
-        } catch (Exception e) {
-            LOG.error("Error reading current mapping: ", e);
-        }
-        return hostIds;
     }
 
     @Override
     public void disconnect() {
         isRunning = false;
-
-        CloseableUtils.closeQuietly(client);
+        closeResources();
     }
 
+    @Override
+    public int getVersion() {
+        return version.getCount();
+    }
+
+    @Override
+    public int incrementVersion() {
+        boolean succeeded = false;
+        int count = 0;
+        try {
+            while (!succeeded) {
+                count = version.getCount() + 1;
+                succeeded = version.trySetCount(count);
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to increment mapping version on ZK.");
+        }
+        return count;
+    }
+
+    @Override
     public void writeCurrentMapping() {
         mapping.setVersion(mapping.getVersion() + 1);
         writeMapping(mapping);
+    }
+
+    private void initResources() {
+        try {
+            this.client.start();
+            this.version = new SharedCount(client, VERSION_PATH, 0);
+            this.version.start();
+            ensurePathExists(SERVERS_PATH);
+            ensurePathExists(MAPPING_PATH);
+        } catch (Exception e) {
+            LOG.error("Error initializing resource.", e);
+        }
+    }
+
+    private void closeResources() {
+        CloseableUtils.closeQuietly(client);
+        CloseableUtils.closeQuietly(version);
     }
 
     private ZMapping readCurrentMapping() {
@@ -160,6 +187,21 @@ public class ZKClusterService implements ClusterService<long[]> {
             LOG.error("Error reading current mapping: ", e);
         }
         return null;
+    }
+
+    private List<String> readCurrentHosts() {
+        List<String> hostIds = new ArrayList<>();
+        try {
+            hostIds = client.getChildren().usingWatcher(new CuratorWatcher() {
+                @Override
+                public void process(WatchedEvent watchedEvent) throws Exception {
+                    hosts = readCurrentHosts();
+                }
+            }).forPath(SERVERS_PATH);
+        } catch (Exception e) {
+            LOG.error("Error reading current mapping: ", e);
+        }
+        return hostIds;
     }
 
     private void writeMapping(ZMapping mapping) {

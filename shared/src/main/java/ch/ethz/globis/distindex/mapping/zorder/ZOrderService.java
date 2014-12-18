@@ -138,7 +138,7 @@ public class ZOrderService {
         return results;
     }
 
-    long[] generateRangeStart(String code, int dim) {
+    public long[] generateRangeStart(String code, int dim) {
         long[] key = new long[dim];
         for (int i = 0; i < dim; i++) {
             key[i] = 0L;
@@ -153,7 +153,7 @@ public class ZOrderService {
         return key;
     }
 
-    long[] generateRangeEnd(String code, int dim) {
+    public long[] generateRangeEnd(String code, int dim) {
         long[] key = new long[dim];
         for (int i = 0; i < dim; i++) {
             key[i] = -1L;

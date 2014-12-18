@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.util.MultidimUtil;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -48,6 +49,48 @@ public class MultidimUtilTest {
             List<long[]> nearestNeighbors = MultidimUtil.nearestNeighbours(q, k, points);
             equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
+    }
+
+    @Test
+    public void testNextLong() {
+        long[] key = {0, 0};
+        int size = Long.SIZE;
+        assertArrayEquals(new long[]{0, 1}, MultidimUtil.next(key, size));
+
+        key = new long[] {0, 1};
+        assertArrayEquals(new long[]{1, 0}, MultidimUtil.next(key, size));
+
+        key = new long[] {1, 1};
+        assertArrayEquals(new long[]{0, 2}, MultidimUtil.next(key, size));
+
+        key = new long[] {3, 3};
+        size = 2;
+        assertArrayEquals(new long[]{0, 0}, MultidimUtil.next(key, size));
+
+        key = new long[] {Long.MAX_VALUE, Long.MAX_VALUE};
+        size = Long.SIZE;
+        assertArrayEquals(new long[]{0,  -1 * (Long.MAX_VALUE) - 1}, MultidimUtil.next(key, size));
+    }
+
+    @Test
+    public void testPreviousLong() {
+        long[] key = {0, 1};
+        int size = Long.SIZE;
+        assertArrayEquals(new long[] {0, 0}, MultidimUtil.previous(key, size));
+
+        key = new long[] {1, 0};
+        assertArrayEquals(new long[] {0, 1}, MultidimUtil.previous(key, size));
+
+        key = new long[] {0, 2};
+        assertArrayEquals(new long[] {1, 1}, MultidimUtil.previous(key, size));
+
+        key = new long[] {0, 0};
+        size = 2;
+        assertArrayEquals(new long[] {3, 3}, MultidimUtil.previous(key, size));
+
+        key = new long[] {0,  -1 * (Long.MAX_VALUE) - 1};
+        size = Long.SIZE;
+        assertArrayEquals(new long[]{Long.MAX_VALUE, Long.MAX_VALUE}, MultidimUtil.previous(key, size));
     }
 
     private void equalsList(List<long[]> a, List<long[]> b) {

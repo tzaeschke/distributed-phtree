@@ -10,39 +10,39 @@ import java.util.Map;
 
 public interface RequestHandler<K, V> {
 
-    public ResultResponse<K, V> handleCreate(MapRequest request);
+    public Response handleCreate(MapRequest request);
 
-    public ResultResponse<K, V> handleGet(GetRequest<K> request);
+    public Response handleGet(GetRequest<K> request);
 
-    public ResultResponse<K, V> handleGetRange(GetRangeRequest<K> request);
+    public Response handleGetRange(GetRangeRequest<K> request);
 
-    public ResultResponse<K, V> handleGetKNN(GetKNNRequest<K> request);
+    public Response handleGetKNN(GetKNNRequest<K> request);
 
-    public ResultResponse<K, V> handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<K> request);
+    public Response handleGetIteratorBatch(String clientHost, GetIteratorBatchRequest<K> request);
 
-    public ResultResponse<K, V> handlePut(PutRequest<K, V> request);
+    public Response handlePut(PutRequest<K, V> request);
 
-    public ResultResponse<K,V> handleDelete(DeleteRequest<K> request);
+    public Response handleDelete(DeleteRequest<K> request);
 
-    public IntegerResponse handleGetSize(BaseRequest request);
+    public Response handleGetSize(BaseRequest request);
 
-    public IntegerResponse handleGetDim(BaseRequest request);
+    public Response handleGetDim(BaseRequest request);
 
-    public IntegerResponse handleGetDepth(BaseRequest request);
+    public Response handleGetDepth(BaseRequest request);
 
-    public IntegerResponse handleCloseIterator(String clientHost, MapRequest request);
+    public Response handleCloseIterator(String clientHost, MapRequest request);
 
-    public IntegerResponse handleContains(ContainsRequest<K> request);
+    public Response handleContains(ContainsRequest<K> request);
+
+    public Response handleNodeCount(BaseRequest request);
+
+    public Response handleQuality(BaseRequest request);
+
+    public Response handleStatsNoNode(BaseRequest request);
+
+    public Response handleToString(BaseRequest request);
+
+    public Response handleStats(BaseRequest request);
 
     public void cleanup(String clientHost);
-
-    public MapResponse handleNodeCount(BaseRequest request);
-
-    public MapResponse handleQuality(BaseRequest request);
-
-    public MapResponse handleStatsNoNode(BaseRequest request);
-
-    public MapResponse handleToString(BaseRequest request);
-
-    public MapResponse handleStats(BaseRequest request);
 }

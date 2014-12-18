@@ -163,73 +163,73 @@ public class IOHandler<K, V> {
 
     private ByteBuffer handleContains(ByteBuffer buffer) {
         ContainsRequest<K> request = decoder.decodeContains(buffer);
-        IntegerResponse response = requestHandler.handleContains(request);
+        Response response = requestHandler.handleContains(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleCloseIterator(String clientHost, ByteBuffer buffer) {
         MapRequest request = decoder.decodeMap(buffer);
-        IntegerResponse response = requestHandler.handleCloseIterator(clientHost, request);
+        Response response = requestHandler.handleCloseIterator(clientHost, request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetDimRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
-        IntegerResponse response = requestHandler.handleGetDim(request);
+        Response response = requestHandler.handleGetDim(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetDepthRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
-        IntegerResponse response = requestHandler.handleGetDepth(request);
+        Response response = requestHandler.handleGetDepth(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetSizeRequest(ByteBuffer buffer) {
         BaseRequest request = decoder.decodeBase(buffer);
-        IntegerResponse response = requestHandler.handleGetSize(request);
+        Response response = requestHandler.handleGetSize(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleDeleteRequest(ByteBuffer buf) {
         DeleteRequest<K> request = decoder.decodeDelete(buf);
-        ResultResponse<K, V> response = requestHandler.handleDelete(request);
+        Response response = requestHandler.handleDelete(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetBatchRequest(String clientHost, ByteBuffer buf) {
         GetIteratorBatchRequest<K> request = decoder.decodeGetBatch(buf);
-        ResultResponse<K, V> response = requestHandler.handleGetIteratorBatch(clientHost, request);
+        Response response = requestHandler.handleGetIteratorBatch(clientHost, request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleCreateRequest(ByteBuffer buf) {
         MapRequest request = decoder.decodeMap(buf);
-        ResultResponse<K, V> response = requestHandler.handleCreate(request);
+        Response response = requestHandler.handleCreate(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handlePutRequest(ByteBuffer buf) {
         PutRequest<K, V> request = decoder.decodePut(buf);
-        ResultResponse<K, V> response = requestHandler.handlePut(request);
+        Response response = requestHandler.handlePut(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetRequest(ByteBuffer buf) {
         GetRequest<K> request = decoder.decodeGet(buf);
-        ResultResponse<K, V> response = requestHandler.handleGet(request);
+        Response response = requestHandler.handleGet(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetRangeRequest(ByteBuffer buf) {
         GetRangeRequest<K> request = decoder.decodeGetRange(buf);
-        ResultResponse<K, V> response = requestHandler.handleGetRange(request);
+        Response response = requestHandler.handleGetRange(request);
         return encodeResponse(response);
     }
 
     private ByteBuffer handleGetKNNRequest(ByteBuffer buf) {
         GetKNNRequest<K> request = decoder.decodeGetKNN(buf);
-        ResultResponse<K, V> response = requestHandler.handleGetKNN(request);
+        Response response = requestHandler.handleGetKNN(request);
         return encodeResponse(response);
     }
 

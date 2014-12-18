@@ -212,7 +212,10 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         int requestId = buffer.getInt();
         String indexName = new String(readValue(buffer));
         int mappingVersion = buffer.getInt();
-        return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion);
+        String mapString = new String(readValue(buffer));
+        Map<String, String> contents = splitter.split(mapString);
+
+        return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion, contents);
     }
 
     /**

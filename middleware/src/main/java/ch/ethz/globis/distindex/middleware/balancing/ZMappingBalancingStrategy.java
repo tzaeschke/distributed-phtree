@@ -12,6 +12,7 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
+import ch.ethz.globis.distindex.mapping.zorder.ZAddress;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpStatus;
@@ -21,6 +22,8 @@ import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
@@ -29,10 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class ZMappingBalancing implements BalancingStrategy {
+public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     /** The logger used for this class */
-    private static final Logger LOG = LoggerFactory.getLogger(ZMappingBalancing.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ZMappingBalancingStrategy.class);
 
     /** The in-memory index context */
     private IndexContext indexContext;
@@ -44,7 +47,7 @@ public class ZMappingBalancing implements BalancingStrategy {
 
     private boolean movedToRight = false;
 
-    public ZMappingBalancing(IndexContext indexContext) {
+    public ZMappingBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
         RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
         ResponseDecoder<long[], byte[]> responseDecoder = new ByteResponseDecoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<byte[]>());
@@ -90,13 +93,17 @@ public class ZMappingBalancing implements BalancingStrategy {
         int receiverSize = mapping.getSize(receiverHostId) + entriesMoved;
         mapping.setSize(receiverHostId, receiverSize);
         ZMapping zmap = (ZMapping) mapping;
+        int depth = indexContext.getTree().getDEPTH();
+        long[] key;
         if (entriesMoved != 0) {
             if (movedToRight) {
-                zmap.changeIntervalStart(receiverHostId, entries.get(0).getKey());
-                zmap.changeIntervalEnd(currentHostId, entries.get(0).getKey());
+                key = entries.get(0).getKey();
+                zmap.changeIntervalStart(receiverHostId, key);
+                zmap.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
             } else {
-                zmap.changeIntervalEnd(receiverHostId, entries.get(entriesMoved - 1).getKey());
-                zmap.changeIntervalStart(currentHostId, entries.get(entriesMoved - 1).getKey());
+                key = entries.get(entriesMoved - 1).getKey();
+                zmap.changeIntervalEnd(receiverHostId, MultidimUtil.next(key, depth));
+                zmap.changeIntervalStart(currentHostId, key);
             }
             zmap.updateTree();
         }
@@ -153,7 +160,13 @@ public class ZMappingBalancing implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
+        ClusterService<long[]> cluster = indexContext.getClusterService();
+        int currentVersion = cluster.incrementVersion();
+        indexContext.setLastBalancingVersion(currentVersion);
+
         CommitBalancingRequest request = requests.newCommitBalancing();
+        request.addParamater("balancingVersion", currentVersion);
+
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             throw new RuntimeException("Receiving host did not accept balancing commit");

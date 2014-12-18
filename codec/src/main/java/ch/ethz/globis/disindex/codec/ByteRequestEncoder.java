@@ -58,7 +58,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             case OpCode.GET_DEPTH:
             case OpCode.GET_DIM:
             case OpCode.GET_SIZE:
-            case OpCode.BALANCE_COMMIT:
             case OpCode.STATS:
             case OpCode.STATS_NO_NODE:
             case OpCode.QUALITY:
@@ -77,6 +76,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 break;
             case OpCode.CREATE_INDEX:
             case OpCode.CLOSE_ITERATOR:
+            case OpCode.BALANCE_COMMIT:
                 MapRequest mr = (MapRequest) request;
                 encodedRequest = encodeMap(mr);
                 break;
