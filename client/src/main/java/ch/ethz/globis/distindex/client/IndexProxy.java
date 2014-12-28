@@ -16,7 +16,6 @@ import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -262,7 +261,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             throw new ServerErrorException("Error on server side.");
         }
         if (response.getStatus() == OpStatus.OUTDATED_VERSION) {
-            throw new InvalidStateException("Current mapping version is outdated.");
+            throw new IllegalStateException("Current mapping version is outdated.");
         }
     }
 

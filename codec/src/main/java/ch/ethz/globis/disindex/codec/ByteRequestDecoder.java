@@ -4,6 +4,7 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.distindex.operation.request.*;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -213,9 +214,12 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         String indexName = new String(readValue(buffer));
         int mappingVersion = buffer.getInt();
         String mapString = new String(readValue(buffer));
-        Map<String, String> contents = splitter.split(mapString);
-
-        return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion, contents);
+        if (Strings.isNullOrEmpty(mapString)) {
+            return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion);
+        } else {
+            Map<String, String> contents = splitter.split(mapString);
+            return new CommitBalancingRequest(requestId, opCode, indexName, mappingVersion, contents);
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.util.SerializerUtil;
 import com.google.common.base.Joiner;
 
 import java.nio.ByteBuffer;

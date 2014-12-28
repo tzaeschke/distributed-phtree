@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class ZOrderServiceTest {
 
     @Test
+    @Ignore
     public void testEnvelope_Inclusive() {
         int depth = 4;
         long[] start = { 0L, 0L};
