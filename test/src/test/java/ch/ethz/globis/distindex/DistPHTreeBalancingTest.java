@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -17,6 +19,8 @@ import java.util.Collection;
 import static org.junit.Assert.assertEquals;
 
 public class DistPHTreeBalancingTest extends BaseParameterizedTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistPHTreeBalancingTest.class);
 
     private PHTreeIndexProxy<String> phTree;
 
@@ -50,7 +54,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             phTree.put(key, Arrays.toString(key));
             entries.add(key, Arrays.toString(key));
         }
-        Thread.sleep(2000);
+        LOG.info("Done inserting {} randomly generated entries.", size);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);

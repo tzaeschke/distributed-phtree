@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -60,6 +61,58 @@ public class ZMappingTest {
         hosts = mapping.get(new long[]{-1L, -1L}, new long[] {1L, 1L});
         System.out.println(hosts);
         assertEquals(4, hosts.size());
+    }
+
+    @Test
+    public void testChangeBounds_MoveToRight() {
+        int dim = 2;
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
+        mapping.add("one");
+        mapping.add("two");
+        mapping.add("three");
+        mapping.add("four");
+
+        System.out.println(mapping.get());
+        String currentHostId = "one";
+        String receiverHostId = "two";
+        assertEquals(receiverHostId, mapping.getNext(currentHostId));
+
+        long[] key = { 50L, 50L};
+        assertEquals(currentHostId, mapping.get(key));
+
+        mapping.changeIntervalStart(receiverHostId, key);
+        mapping.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
+
+        assertEquals(receiverHostId, mapping.get(key));
+        assertEquals(receiverHostId, mapping.get(MultidimUtil.next(key, depth)));
+        assertEquals(currentHostId, mapping.get(MultidimUtil.previous(key, depth)));
+    }
+
+    @Test
+    public void testChangeBounds_MoveToLeft() {
+        int dim = 2;
+        int depth = 64;
+        ZMapping mapping = new ZMapping(dim, depth);
+        mapping.add("one");
+        mapping.add("two");
+        mapping.add("three");
+        mapping.add("four");
+
+        System.out.println(mapping.get());
+        String currentHostId = "two";
+        String receiverHostId = "one";
+        assertEquals(receiverHostId, mapping.getPrevious(currentHostId));
+
+        long[] key = { -50L, -50L};
+        assertEquals(currentHostId, mapping.get(key));
+
+        mapping.changeIntervalEnd(receiverHostId, key);
+        mapping.changeIntervalStart(currentHostId, MultidimUtil.next(key, depth));
+
+        assertEquals(receiverHostId, mapping.get(key));
+        assertEquals(receiverHostId, mapping.get(MultidimUtil.previous(key, depth)));
+        assertEquals(currentHostId, mapping.get(MultidimUtil.next(key, depth)));
     }
 
     @Test
