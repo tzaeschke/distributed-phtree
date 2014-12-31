@@ -106,7 +106,7 @@ public class ZMapping implements KeyMapping<long[]>{
         for (String hostId : hosts) {
             start = startKeys.get(hostId);
             end = endKeys.get(hostId);
-            Set<HBox> regions = service.regionEnvelope(start, end);
+            Set<HBox> regions = service.regionEnvelopeInclusive(start, end);
             for (HBox region : regions) {
                 tree.put(service.generateRangeStart(region.getCode(), dim),
                         service.generateRangeEnd(region.getCode(), dim),

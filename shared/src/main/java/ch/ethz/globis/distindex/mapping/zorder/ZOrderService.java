@@ -55,11 +55,12 @@ public class ZOrderService {
 
         ZAddress alpha = new ZAddress(start, depth);
         ZAddress beta = new ZAddress(end, depth);
-        alpha = new ZAddress(ZAddress.previous(alpha.getCode()), alpha.getDim());
-        beta = new ZAddress(ZAddress.next(beta.getCode()), beta.getDim());
-        return regionEnvelope(alpha, beta);
-
+        Set<HBox> regions = regionEnvelope(alpha, beta);
+        regions.add(new HBox(alpha.getCode()));
+        regions.add(new HBox(beta.getCode()));
+        return regions;
     }
+
     public Set<HBox> regionEnvelope(long[] start, long[] end) {
         int dim = start.length;
         if (dim != end.length) {

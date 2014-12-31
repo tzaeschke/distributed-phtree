@@ -55,6 +55,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             entries.add(key, Arrays.toString(key));
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
+        Thread.sleep(1000);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);

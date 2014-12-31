@@ -83,6 +83,7 @@ public class ZMappingTest {
 
         mapping.changeIntervalStart(receiverHostId, key);
         mapping.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
+        mapping.updateTree();
 
         assertEquals(receiverHostId, mapping.get(key));
         assertEquals(receiverHostId, mapping.get(MultidimUtil.next(key, depth)));
@@ -100,8 +101,8 @@ public class ZMappingTest {
         mapping.add("four");
 
         System.out.println(mapping.get());
-        String currentHostId = "two";
-        String receiverHostId = "one";
+        String currentHostId = "four";
+        String receiverHostId = "three";
         assertEquals(receiverHostId, mapping.getPrevious(currentHostId));
 
         long[] key = { -50L, -50L};
@@ -109,6 +110,7 @@ public class ZMappingTest {
 
         mapping.changeIntervalEnd(receiverHostId, key);
         mapping.changeIntervalStart(currentHostId, MultidimUtil.next(key, depth));
+        mapping.updateTree();
 
         assertEquals(receiverHostId, mapping.get(key));
         assertEquals(receiverHostId, mapping.get(MultidimUtil.previous(key, depth)));
