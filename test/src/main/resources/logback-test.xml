@@ -13,7 +13,7 @@
     </appender>
 
     <!-- Debug for current project code -->
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
 

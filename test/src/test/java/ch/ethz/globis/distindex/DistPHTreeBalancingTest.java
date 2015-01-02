@@ -63,10 +63,48 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
     }
 
     @Test
+    public void insertSameHost_AllPositive_Multiple() throws InterruptedException {
+        phTree.create(2, 64);
+
+        int size = 201;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+        for (int i = 0; i < size; i++) {
+            long[] key = {i, i};
+            phTree.put(key, Arrays.toString(key));
+            entries.add(key, Arrays.toString(key));
+        }
+        LOG.info("Done inserting {} randomly generated entries.", size);
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            String retrieved = phTree.get(entry.getKey());
+            assertEquals(entry.getValue(), retrieved);
+        }
+    }
+
+    @Test
     public void insertSameHost_AllNegative() throws InterruptedException {
         phTree.create(2, 64);
 
         int size = 101;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+        for (int i = 1; i <= size; i++) {
+            long[] key = {-i, -i};
+            phTree.put(key, Arrays.toString(key));
+            entries.add(key, Arrays.toString(key));
+        }
+        LOG.info("Done inserting {} randomly generated entries.", size);
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            String retrieved = phTree.get(entry.getKey());
+            assertEquals(entry.getValue(), retrieved);
+        }
+    }
+
+    @Test
+    public void insertSameHost_AllNegative_Multiple() throws InterruptedException {
+        phTree.create(2, 64);
+
+        int size = 201;
         IndexEntryList<long[], String> entries = new IndexEntryList<>();
         for (int i = 1; i <= size; i++) {
             long[] key = {-i, -i};

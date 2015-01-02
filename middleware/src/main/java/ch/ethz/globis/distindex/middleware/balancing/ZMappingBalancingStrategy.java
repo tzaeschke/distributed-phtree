@@ -105,13 +105,15 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         long[] key;
         if (entriesMoved != 0) {
             if (movedToRight) {
+                LOG.info("Balancing to the right interval");
                 key = entries.get(0).getKey();
                 zmap.changeIntervalStart(receiverHostId, key);
                 zmap.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
             } else {
+                LOG.info("Balancing to the right interval");
                 key = entries.get(entriesMoved - 1).getKey();
-                zmap.changeIntervalEnd(receiverHostId, MultidimUtil.next(key, depth));
-                zmap.changeIntervalStart(currentHostId, key);
+                zmap.changeIntervalEnd(receiverHostId, key);
+                zmap.changeIntervalStart(currentHostId, MultidimUtil.next(key, depth));
             }
             zmap.updateTree();
         }
