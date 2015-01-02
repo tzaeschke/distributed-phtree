@@ -75,6 +75,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
         removeEntries(entries);
         updateMapping(currentHostId, receiverHostId, entries);
+
         printSizes("Sizes after balancing");
     }
 
@@ -170,6 +171,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         ClusterService<long[]> cluster = indexContext.getClusterService();
         int currentVersion = cluster.incrementVersion();
         indexContext.setLastBalancingVersion(currentVersion);
+        cluster.getMapping().setVersion(currentVersion);
 
         CommitBalancingRequest request = requests.newCommitBalancing();
         request.addParamater("balancingVersion", currentVersion);

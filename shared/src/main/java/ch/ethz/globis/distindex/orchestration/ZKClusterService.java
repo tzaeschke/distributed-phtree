@@ -145,7 +145,7 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     @Override
     public void writeCurrentMapping() {
-        mapping.setVersion(mapping.getVersion() + 1);
+        //mapping.setVersion(mapping.getVersion() + 1);
         writeMapping(mapping);
     }
 

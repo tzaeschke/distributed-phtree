@@ -9,8 +9,12 @@ import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.pht.PhTreeV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<long[], byte[]> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PhTreeBalancingRequestHandler.class);
 
     private IndexContext indexContext;
     private IndexEntryList<long[], byte[]> buffer;
@@ -66,7 +70,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
             }
         }
         updateBalancingVersion(request);
-
+        LOG.info("Commit finished.");
         return ackResponse(request);
     }
 

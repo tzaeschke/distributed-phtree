@@ -16,6 +16,8 @@ import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -31,6 +33,8 @@ import java.util.*;
  * @param <V>
  */
 public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(IndexProxy.class);
 
     /** The request dispatcher for the messages to the index servers */
     protected RequestDispatcher<K, V> requestDispatcher;
@@ -64,13 +68,13 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             }
         }
         this.clusterService.createIndex(request.getContents());
-        System.out.println("Mapping: " + clusterService.getMapping());
         return true;
     }
 
     @Override
     public V put(K key, V value) {
         KeyMapping<K> keyMapping = clusterService.getMapping();
+        LOG.debug("Mapping version before PUT request: {}", keyMapping.getVersion());
         String hostId = keyMapping.get(key);
 
         PutRequest<K, V> request = requests.newPut(key, value);
@@ -91,13 +95,19 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     @Override
     public V get(K key) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.get(key);
+        boolean versionOutdated;
+        ResultResponse<K, V> response;
+        do {
+            KeyMapping<K> keyMapping = clusterService.getMapping();
+            LOG.debug("Mapping version before GET request: {}", keyMapping.getVersion());
+            String hostId = keyMapping.get(key);
 
-        GetRequest<K> request = requests.newGet(key);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
+            GetRequest<K> request = requests.newGet(key);
+            response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
-        check(request, response);
+            versionOutdated = check(request, response);
+        } while (versionOutdated);
+
         return getSingleEntryValue(response);
     }
 
@@ -249,7 +259,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return results;
     }
 
-    private void check(Request request, Response response) {
+    private boolean check(Request request, Response response) {
         if (response == null) {
             throw new NullPointerException("Response should not be null");
         }
@@ -261,8 +271,10 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             throw new ServerErrorException("Error on server side.");
         }
         if (response.getStatus() == OpStatus.OUTDATED_VERSION) {
-            throw new IllegalStateException("Current mapping version is outdated.");
+            LOG.debug("Current mapping version is outdated.");
+            return true;
         }
+        return false;
     }
 
     private V getSingleEntryValue(ResultResponse<K, V> response) {

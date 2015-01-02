@@ -12,9 +12,15 @@
         </encoder>
     </appender>
 
-    <logger name="org.apache.zookeeper" level="ERROR" />
-
+    <!-- Debug for current project code -->
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
+
+    <!-- Additional framework loggers set on ERROR -->
+    <logger name="org.apache.zookeeper" level="error" />
+
+    <logger name="io.netty" level="error"/>
+
+    <logger name="org.apache.curator" level="error"/>
 </configuration>
