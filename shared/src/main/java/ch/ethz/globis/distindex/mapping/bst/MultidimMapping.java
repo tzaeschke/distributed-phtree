@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.mapping.bst;
 
 import ch.ethz.globis.distindex.util.SerializerUtil;
 
+@Deprecated
 public class MultidimMapping extends BSTMapping<long[]> {
 
     public MultidimMapping() {

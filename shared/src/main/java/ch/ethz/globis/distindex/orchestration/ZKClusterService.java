@@ -207,7 +207,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     private void writeMapping(ZMapping mapping) {
-        LOG.info("Writing mapping.");
+        LOG.info("Writing mapping with version {}", mapping.getVersion());
         byte[] data = mapping.serialize();
         ensurePathExists(MAPPING_PATH);
 

@@ -11,6 +11,7 @@ import java.util.*;
  * Might want to even remove it.
  * @param <K>
  */
+@Deprecated
 public class NonDistributedMapping<K> implements KeyMapping<K> {
 
     private final String host;

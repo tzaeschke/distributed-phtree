@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 
 import java.util.*;
 
+@Deprecated
 public class BSTMapping<K> implements KeyMapping<K> {
 
     private BST bst;

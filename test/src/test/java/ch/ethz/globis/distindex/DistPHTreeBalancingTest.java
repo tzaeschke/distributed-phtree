@@ -44,7 +44,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
     }
 
     @Test
-    public void insertSameHost() throws InterruptedException {
+    public void insertSameHost_AllPositive() throws InterruptedException {
         phTree.create(2, 64);
 
         int size = 101;
@@ -55,7 +55,50 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             entries.add(key, Arrays.toString(key));
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
-        //Thread.sleep(1000);
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            String retrieved = phTree.get(entry.getKey());
+            assertEquals(entry.getValue(), retrieved);
+        }
+    }
+
+    @Test
+    public void insertSameHost_AllNegative() throws InterruptedException {
+        phTree.create(2, 64);
+
+        int size = 101;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+        for (int i = 1; i <= size; i++) {
+            long[] key = {-i, -i};
+            phTree.put(key, Arrays.toString(key));
+            entries.add(key, Arrays.toString(key));
+        }
+        LOG.info("Done inserting {} randomly generated entries.", size);
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            String retrieved = phTree.get(entry.getKey());
+            assertEquals(entry.getValue(), retrieved);
+        }
+    }
+
+    @Test
+    public void insertRandomlyWithinCluster() throws InterruptedException {
+        phTree.create(2, 64);
+
+        int size = 300;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+        long[][] signs = {{1L, 1L}, {1L, -1L}, {-1L, 1L}, {-1L, -1L}};
+        for (int i = 0; i < size; i++) {
+            long[] key = {i, i};
+            for (int j = 0; j < key.length; j++) {
+                key[j] = key[j] * signs[i % key.length][j];
+            }
+            phTree.put(key, Arrays.toString(key));
+            entries.add(key, Arrays.toString(key));
+        }
+        LOG.info("Done inserting {} randomly generated entries.", size);
+
+        //Thread.sleep(10000);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);
