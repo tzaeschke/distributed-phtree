@@ -6,19 +6,16 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
-import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.shared.SharedCount;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.utils.EnsurePath;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -192,12 +189,17 @@ public class ZKClusterService implements ClusterService<long[]> {
     private List<String> readCurrentHosts() {
         List<String> hostIds = new ArrayList<>();
         try {
-            hostIds = client.getChildren().usingWatcher(new CuratorWatcher() {
-                @Override
-                public void process(WatchedEvent watchedEvent) throws Exception {
-                    hosts = readCurrentHosts();
-                }
-            }).forPath(SERVERS_PATH);
+            CuratorFrameworkState state = client.getState();
+            if (CuratorFrameworkState.STARTED.equals(state)) {
+                hostIds = client.getChildren().usingWatcher(new CuratorWatcher() {
+                    @Override
+                    public void process(WatchedEvent watchedEvent) throws Exception {
+                        hosts = readCurrentHosts();
+                    }
+                }).forPath(SERVERS_PATH);
+            } else {
+                LOG.warn("Attempting to read current hosts when the Zookeeper client is in state {}", state);
+            }
         } catch (Exception e) {
             LOG.error("Error reading current mapping: ", e);
         }

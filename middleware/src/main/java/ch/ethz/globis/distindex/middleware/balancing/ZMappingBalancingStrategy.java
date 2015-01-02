@@ -57,13 +57,10 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     @Override
     public void balance() {
-        List<String> hosts = indexContext.getClusterService().getOnlineHosts();
+
         KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
 
-        System.out.println("Sizes");
-        for (String host : hosts) {
-            System.out.println(host + ": " + mapping.getSize(host));
-        }
+        printSizes("Sizes before balancing");
 
         String currentHostId = indexContext.getHostId();
         String receiverHostId = mapping.getHostForSplitting(currentHostId);
@@ -78,6 +75,16 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
         removeEntries(entries);
         updateMapping(currentHostId, receiverHostId, entries);
+        printSizes("Sizes after balancing");
+    }
+
+    private void printSizes(String message) {
+        System.out.println(message);
+        List<String> hosts = indexContext.getClusterService().getOnlineHosts();
+        KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
+        for (String host : hosts) {
+            System.out.println(host + ": " + mapping.getSize(host));
+        }
     }
 
     /**
