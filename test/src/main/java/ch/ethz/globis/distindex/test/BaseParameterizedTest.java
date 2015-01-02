@@ -54,17 +54,15 @@ public class BaseParameterizedTest {
 
     public BaseParameterizedTest(int nrServers) throws IOException {
         this.nrServers = nrServers;
-        if (nrServers != middlewares.size()) {
-            for (Middleware middleware : middlewares) {
-                middleware.close();
-            }
-            middlewares.clear();
+        for (Middleware middleware : middlewares) {
+            middleware.close();
+        }
+        middlewares.clear();
 
-            for (int i = 0; i < nrServers; i++) {
-                Middleware current = createMiddleware(i, HOST, S_BASE_PORT + i * 2, HOST, ZK_PORT);
-                MiddlewareUtil.startMiddleware(threadPool, current);
-                middlewares.add(current);
-            }
+        for (int i = 0; i < nrServers; i++) {
+            Middleware current = createMiddleware(i, HOST, S_BASE_PORT + i * 2, HOST, ZK_PORT);
+            MiddlewareUtil.startMiddleware(threadPool, current);
+            middlewares.add(current);
         }
     }
 

@@ -1,19 +1,25 @@
 package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
-import ch.ethz.globis.pht.test.util.TestSuite;
+import ch.ethz.globis.pht.test.TestIndexInsertion;
+import ch.ethz.globis.pht.test.TestIndexQueries;
+import ch.ethz.globis.pht.test.TestRangeDouble;
 import ch.ethz.globis.pht.test.util.TestUtil;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class TestPhtreeSuite extends TestSuite {
+@RunWith(org.junit.runners.Suite.class)
+@Suite.SuiteClasses({TestIndexQueries.class})
+public class TestSuiteSelective {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
 
-    static final int NUMBER_OF_SERVERS = 16;
+    static final int NUMBER_OF_SERVERS = 4;
 
     @BeforeClass
     public static void init() {

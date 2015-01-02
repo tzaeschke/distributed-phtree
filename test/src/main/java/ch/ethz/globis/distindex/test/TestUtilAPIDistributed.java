@@ -90,7 +90,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
     @Override
     public void beforeSuite() {
         try {
-            threadPool = Executors.newFixedThreadPool(4);
+            threadPool = Executors.newFixedThreadPool(16);
             zkServer = new TestingServer(ZK_PORT);
             zkServer.start();
 
