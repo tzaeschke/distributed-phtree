@@ -30,8 +30,8 @@ public class BSTMapClusterServiceTest {
             clusterService = new BSTMapClusterService(ZK_HOST, ZK_PORT);
             clusterService.connect();
             KeyMapping<long[]> mapping2 = clusterService.getMapping();
-            clusterService.unregisterHost("1");
-            clusterService.unregisterHost("2");
+            clusterService.deregisterHost("1");
+            clusterService.deregisterHost("2");
             assertEquals(0, mapping2.size());
             clusterService.disconnect();
         } catch (Exception e) {

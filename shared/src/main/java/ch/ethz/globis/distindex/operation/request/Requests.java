@@ -115,6 +115,6 @@ public class Requests<K, V> {
     }
 
     private int mappingVersion() {
-        return (clusterService.getMapping() == null) ? 0 : clusterService.getMapping().getVersion();
+        return (clusterService.getMapping() == null) ? 0 : clusterService.getVersion();
     }
 }

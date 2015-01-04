@@ -70,6 +70,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
             }
         }
         updateBalancingVersion(request);
+        indexContext.getClusterService().setSize(indexContext.getHostId(), indexContext.getTree().size());
         LOG.info("Commit finished.");
         return ackResponse(request);
     }

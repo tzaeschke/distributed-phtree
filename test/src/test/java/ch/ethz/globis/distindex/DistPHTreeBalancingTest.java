@@ -6,7 +6,6 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
@@ -56,6 +55,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
 
+        Thread.sleep(1000L);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);
@@ -68,13 +68,13 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
 
         int size = 201;
         IndexEntryList<long[], String> entries = new IndexEntryList<>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 1; i <= size; i++) {
             long[] key = {i, i};
             phTree.put(key, Arrays.toString(key));
             entries.add(key, Arrays.toString(key));
         }
-        LOG.info("Done inserting {} randomly generated entries.", size);
 
+        LOG.info("Done inserting {} randomly generated entries.", size);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);
@@ -93,7 +93,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             entries.add(key, Arrays.toString(key));
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
-
+        Thread.sleep(1000L);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);
@@ -112,7 +112,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
             entries.add(key, Arrays.toString(key));
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
-
+        Thread.sleep(1000L);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);
@@ -120,7 +120,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
     }
 
     @Test
-    public void insertRandomlyWithinCluster() throws InterruptedException {
+    public void insertHashedWithinCluster() throws InterruptedException {
         phTree.create(2, 64);
 
         int size = 300;
@@ -136,7 +136,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
         }
         LOG.info("Done inserting {} randomly generated entries.", size);
 
-        //Thread.sleep(10000);
+        Thread.sleep(1000L);
         for (IndexEntry<long[], String> entry :  entries) {
             String retrieved = phTree.get(entry.getKey());
             assertEquals(entry.getValue(), retrieved);

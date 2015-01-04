@@ -14,6 +14,8 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.v3.PhTree3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -22,6 +24,8 @@ import java.util.*;
  */
 public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
+    /** Logger */
+    private static final Logger LOG = LoggerFactory.getLogger(PhTreeRequestHandler.class);
     /** Need to make this configurable. */
     private static final int THRESHOLD = 100;
     /** The operation count. */
@@ -317,7 +321,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         if (opCount > 100) {
             opCount = 0;
             ClusterService<long[]> cluster = indexContext.getClusterService();
-            cluster.getMapping().setSize(indexContext.getHostId(), tree().size());
+            LOG.info("Writing mapping with version {} for size update.", cluster.getVersion());
+            cluster.setSize(indexContext.getHostId(), tree().size());
             cluster.writeCurrentMapping();
         }
         if (tree().size() > THRESHOLD) {

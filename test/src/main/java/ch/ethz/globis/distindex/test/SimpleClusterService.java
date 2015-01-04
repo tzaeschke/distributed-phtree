@@ -33,7 +33,7 @@ public class SimpleClusterService implements ClusterService<long[]> {
     }
 
     @Override
-    public void unregisterHost(String hostId) {
+    public void deregisterHost(String hostId) {
         throw new UnsupportedOperationException("Is this even necessary?");
     }
 
@@ -64,6 +64,16 @@ public class SimpleClusterService implements ClusterService<long[]> {
 
     @Override
     public void writeCurrentMapping() {
+
+    }
+
+    @Override
+    public int getSize(String hostId) {
+        return 0;
+    }
+
+    @Override
+    public void setSize(String hostId, int size) {
 
     }
 }

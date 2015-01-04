@@ -16,10 +16,8 @@ import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 public class ZKClusterService implements ClusterService<long[]> {
 
@@ -36,6 +34,9 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     /** The directory for the mapping. */
     private static final String MAPPING_PATH = "/mapping";
+
+    /** The directory for the sizes. */
+    private static final String SIZE_PATH = "/sizes";
 
     /** The current mapping. */
     private ZMapping mapping;
@@ -55,6 +56,9 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The version of the current mapping. */
     private SharedCount version;
 
+    /** Contains the sizes of each host. */
+    private Map<String, Integer> sizes = new HashMap<>();
+
     public ZKClusterService(String host, int port) {
         this(host + ":" + port);
     }
@@ -72,6 +76,8 @@ public class ZKClusterService implements ClusterService<long[]> {
         int depth = Integer.parseInt(options.get("depth"));
         this.mapping = new ZMapping(dim, depth);
         this.mapping.add(getOnlineHosts());
+
+        LOG.info("Writing mapping with version {} at create.", getVersion());
         writeMapping(mapping);
     }
 
@@ -91,15 +97,37 @@ public class ZKClusterService implements ClusterService<long[]> {
         String path = SERVERS_PATH + "/" + hostId;
         try {
             client.create().withMode(CreateMode.EPHEMERAL).forPath(path, content);
+
+            initSizeCounter(hostId);
         } catch (Exception e) {
             LOG.error("Failed to add new server.");
         }
     }
 
+    private void initSizeCounter(String hostId) throws Exception {
+        if (sizes.containsKey(hostId)) {
+            throw new IllegalStateException("Host size should not be initialized");
+        }
+        int value = 0;
+        sizes.put(hostId, value);
+        String path = sizePath(hostId);
+        ensurePathExists(path);
+        client.setData().forPath(path, intToByte(value));
+    }
+
+    private byte[] intToByte(int value) {
+        return ByteBuffer.allocate(Integer.SIZE).putInt(value).array();
+    }
+
+    private int byteToInt(byte[] array) {
+        return ByteBuffer.wrap(array).getInt();
+    }
+
     @Override
-    public void unregisterHost(String hostId) {
+    public void deregisterHost(String hostId) {
         mapping.remove(hostId);
 
+        LOG.info("Writing mapping with version {} on de-registration ", getVersion());
         writeMapping(mapping);
     }
 
@@ -145,8 +173,54 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     @Override
     public void writeCurrentMapping() {
-        //mapping.setVersion(mapping.getVersion() + 1);
         writeMapping(mapping);
+    }
+
+    @Override
+    public int getSize(String hostId) {
+        if (!sizes.containsKey(hostId)) {
+            readSize(hostId);
+        }
+        return sizes.get(hostId);
+    }
+
+    @Override
+    public void setSize(String hostId, int size) {
+        if (!sizes.containsKey(hostId)) {
+            try {
+                initSizeCounter(hostId);
+            } catch (Exception e) {
+                LOG.error("Failed to initialize size counter.");
+            }
+        }
+        String path = sizePath(hostId);
+        try {
+            ensurePathExists(path);
+            client.setData().forPath(path, intToByte(size));
+            sizes.put(hostId, size);
+        } catch (Exception e) {
+            LOG.error("Could not update path {} with value {}.", path, size);
+        }
+    }
+
+    private void readSize(final String hostId) {
+        String path = sizePath(hostId);
+
+        try {
+            byte[] data = client.getData().usingWatcher(new CuratorWatcher() {
+                @Override
+                public void process(WatchedEvent watchedEvent) throws Exception {
+                    readSize(hostId);
+                }
+            }).forPath(path);
+            this.sizes.put(hostId, byteToInt(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String sizePath(String hostId) {
+        return SIZE_PATH + "/" + hostId;
     }
 
     private void initResources() {
@@ -207,7 +281,6 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     private void writeMapping(ZMapping mapping) {
-        LOG.info("Writing mapping with version {}", mapping.getVersion());
         byte[] data = mapping.serialize();
         ensurePathExists(MAPPING_PATH);
 

@@ -30,7 +30,7 @@ public interface ClusterService<K> {
      * Register the host with the hostId as an index peer.
      * @param hostId
      */
-    public void unregisterHost(String hostId);
+    public void deregisterHost(String hostId);
 
     /**
      * @return                              The online hosts registered in the cluster.
@@ -52,4 +52,8 @@ public interface ClusterService<K> {
     public int incrementVersion();
 
     public void writeCurrentMapping();
+
+    public int getSize(String hostId);
+
+    public void setSize(String hostId, int size);
 }

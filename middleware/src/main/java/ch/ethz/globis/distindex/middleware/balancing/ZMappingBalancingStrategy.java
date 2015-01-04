@@ -12,7 +12,6 @@ import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.mapping.zorder.ZAddress;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpStatus;
@@ -27,6 +26,7 @@ import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
+import org.apache.commons.math.stat.clustering.Cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +60,15 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
         KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
 
-        printSizes("Sizes before balancing");
+        printSizes("Initializing balancing operation on host " + indexContext.getHostId() +". Sizes before balancing");
 
         String currentHostId = indexContext.getHostId();
-        String receiverHostId = mapping.getHostForSplitting(currentHostId);
+        String receiverHostId = getHostForSplitting(currentHostId, indexContext.getClusterService(), mapping);
         if (receiverHostId == null) {
             LOG.error("Failed to find a proper host for balancing");
             return;
         }
-        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId);
+        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId, receiverHostId);
         initBalancing(entries.size(), receiverHostId);
         sendEntries(entries, receiverHostId);
         commitBalancing(receiverHostId);
@@ -79,12 +79,30 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         printSizes("Sizes after balancing");
     }
 
+    private String getHostForSplitting(String currentHostId, ClusterService<long[]> cluster, KeyMapping<long[]> mapping) {
+        String prevId = mapping.getPrevious(currentHostId);
+        String nextId = mapping.getNext(currentHostId);
+        if (prevId == null) {
+            movedToRight = true;
+            return nextId;
+        }
+        if (nextId == null) {
+            movedToRight = false;
+            return prevId;
+        }
+        int sizePrev = cluster.getSize(prevId);
+        int sizeNext = cluster.getSize(nextId);
+        String resultId = (sizePrev > sizeNext) ? prevId : nextId;
+        movedToRight = resultId.equals(nextId);
+        return resultId;
+    }
+
     private void printSizes(String message) {
         System.out.println(message);
-        List<String> hosts = indexContext.getClusterService().getOnlineHosts();
-        KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
+        ClusterService<long[]> cluster = indexContext.getClusterService();
+        List<String> hosts = cluster.getOnlineHosts();
         for (String host : hosts) {
-            System.out.println(host + ": " + mapping.getSize(host));
+            System.out.println(host + ": " + cluster.getSize(host));
         }
     }
 
@@ -96,10 +114,11 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private void updateMapping(String currentHostId, String receiverHostId, IndexEntryList<long[], byte[]> entries) {
         int entriesMoved = entries.size();
+        ClusterService<long[]> cluster = indexContext.getClusterService();
         KeyMapping<long[]> mapping = getMapping();
-        mapping.setSize(currentHostId, indexContext.getTree().size());
-        int receiverSize = mapping.getSize(receiverHostId) + entriesMoved;
-        mapping.setSize(receiverHostId, receiverSize);
+
+        cluster.setSize(currentHostId, indexContext.getTree().size());
+
         ZMapping zmap = (ZMapping) mapping;
         int depth = indexContext.getTree().getDEPTH();
         long[] key;
@@ -117,6 +136,8 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             }
             zmap.updateTree();
         }
+        LOG.info("Writing mapping with version {} on balancing commit.",
+                indexContext.getClusterService().getVersion());
         indexContext.getClusterService().writeCurrentMapping();
     }
 
@@ -173,7 +194,6 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         ClusterService<long[]> cluster = indexContext.getClusterService();
         int currentVersion = cluster.incrementVersion();
         indexContext.setLastBalancingVersion(currentVersion);
-        cluster.getMapping().setVersion(currentVersion);
 
         CommitBalancingRequest request = requests.newCommitBalancing();
         request.addParamater("balancingVersion", currentVersion);
@@ -190,11 +210,11 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param currentHostId
      * @return
      */
-    private IndexEntryList<long[], byte[]> getEntriesForSplitting(String currentHostId) {
+    private IndexEntryList<long[], byte[]> getEntriesForSplitting(String currentHostId, String receiver) {
         KeyMapping<long[]> mapping = getMapping();
-        String receiver = getMapping().getHostForSplitting(currentHostId);
+        ClusterService<long[]> cluster = indexContext.getClusterService();
+        int entriesToMove = (cluster.getSize(currentHostId) - cluster.getSize(receiver)) / 2;
 
-        int entriesToMove = (mapping.getSize(currentHostId) - mapping.getSize(receiver)) / 2;
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
         if (mapping.getNext(receiver) != null && mapping.getNext(receiver).equals(currentHostId)) {
             //move to left
@@ -211,7 +231,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             //move to right
             movedToRight = true;
             PVIterator<byte[]> it = indexContext.getTree().queryExtent();
-            for (int i = 0; i < mapping.getSize(currentHostId) - entriesToMove; i++) {
+            for (int i = 0; i < cluster.getSize(currentHostId) - entriesToMove; i++) {
                 it.next();
             }
             while (it.hasNext()) {

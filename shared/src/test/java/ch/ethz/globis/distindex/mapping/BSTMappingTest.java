@@ -30,9 +30,9 @@ public class BSTMappingTest {
         int sizeMoved = 5;
 
         mapping.add(hostId1);
-        mapping.setSize(hostId1, sizeHostId1);
+        //mapping.setSize(hostId1, sizeHostId1);
         mapping.add(hostId2);
-        mapping.setSize(hostId2, sizeHostId2);
+        //mapping.setSize(hostId2, sizeHostId2);
 
         mapping.split(hostId1, hostId3, sizeMoved);
         sizeHostId1 -= sizeMoved;
@@ -66,7 +66,7 @@ public class BSTMappingTest {
         for (int i = 0; i < size; i++) {
             keys[i] = String.valueOf(i);
             mapping.add(keys[i]);
-            mapping.setSize(keys[i], i + 1);
+            //mapping.setSize(keys[i], i + 1);
         }
 
         for (int i = 0; i < size; i++) {
@@ -88,7 +88,7 @@ public class BSTMappingTest {
         String candidate;
         for (int i = nrHosts - 1; i >= 0; i--) {
             hostId = toHostId(i);
-            mapping.setSize(hostId, 2 * nrHosts - i);
+            //mapping.setSize(hostId, 2 * nrHosts - i);
             candidate = mapping.getHostForSplitting(toHostId(i + 1));
             assertEquals(hostId, candidate);
         }

@@ -127,7 +127,7 @@ public class BSTMapClusterService implements ClusterService<long[]> {
         client.checkExists().usingWatcher(mappingChangedWatcher()).forPath(MAPPING_PATH);
     }
 
-    public void unregisterHost(String hostId) {
+    public void deregisterHost(String hostId) {
         validateHostId(hostId);
 
         try {
@@ -186,6 +186,16 @@ public class BSTMapClusterService implements ClusterService<long[]> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getSize(String hostId) {
+        return 0;
+    }
+
+    @Override
+    public void setSize(String hostId, int size) {
+
     }
 
     private void startZK() {

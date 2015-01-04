@@ -68,23 +68,23 @@ public class BSTMapping<K> implements KeyMapping<K> {
         newZone.setSize(sizeMoved);
     }
 
-    /**
-     * Set the number of keys associated with a host.
-     *
-     * @param host
-     * @param size
-     */
-    @Override
-    public void setSize(String host, int size) {
-        BSTNode node = bst.findFirstByContent(host);
-        node.setSize(size);
-    }
-
-    @Override
-    public int getSize(String host) {
-        BSTNode node = bst.findFirstByContent(host);
-        return node.getSize();
-    }
+//    /**
+//     * Set the number of keys associated with a host.
+//     *
+//     * @param host
+//     * @param size
+//     */
+//    @Override
+//    public void setSize(String host, int size) {
+//        BSTNode node = bst.findFirstByContent(host);
+//        node.setSize(size);
+//    }
+//
+//    @Override
+//    public int getSize(String host) {
+//        BSTNode node = bst.findFirstByContent(host);
+//        return node.getSize();
+//    }
 
     /**
      * Return the host that can be the receiver of a split operation.
@@ -126,15 +126,15 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return hostId;
     }
 
-    @Override
-    public int getVersion() {
-        return version;
-    }
-
-    @Override
-    public void setVersion(int version) {
-        this.version = version;
-    }
+//    @Override
+//    public int getVersion() {
+//        return version;
+//    }
+//
+//    @Override
+//    public void setVersion(int version) {
+//        this.version = version;
+//    }
 
     /**
      * Return the number of hosts within the mapping.
