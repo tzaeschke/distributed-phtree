@@ -47,10 +47,6 @@ public interface ClusterService<K> {
      */
     public void disconnect();
 
-    public int getVersion();
-
-    public int incrementVersion();
-
     public void writeCurrentMapping();
 
     public int getSize(String hostId);

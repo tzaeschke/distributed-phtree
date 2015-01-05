@@ -126,15 +126,13 @@ public class BSTMapping<K> implements KeyMapping<K> {
         return hostId;
     }
 
-//    @Override
-//    public int getVersion() {
-//        return version;
-//    }
-//
-//    @Override
-//    public void setVersion(int version) {
-//        this.version = version;
-//    }
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     /**
      * Return the number of hosts within the mapping.

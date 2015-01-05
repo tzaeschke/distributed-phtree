@@ -88,6 +88,9 @@ public interface KeyMapping<K> {
      */
     public void clear();
 
+    public int getVersion();
+
+    public void setVersion(int version);
 //    /**
 //     * Return the id of the node that will receive the entries after the splitting of node with the
 //     * host id received as an argument.

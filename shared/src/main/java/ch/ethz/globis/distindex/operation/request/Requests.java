@@ -1,5 +1,6 @@
 package ch.ethz.globis.distindex.operation.request;
 
+import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 
@@ -115,6 +116,7 @@ public class Requests<K, V> {
     }
 
     private int mappingVersion() {
-        return (clusterService.getMapping() == null) ? 0 : clusterService.getVersion();
+        KeyMapping<K> mapping = clusterService.getMapping();
+        return (mapping == null) ? 0 : mapping.getVersion();
     }
 }

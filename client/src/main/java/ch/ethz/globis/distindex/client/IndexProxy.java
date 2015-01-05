@@ -77,7 +77,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         ResultResponse<K, V> response;
         do {
             KeyMapping<K> keyMapping = clusterService.getMapping();
-            LOG.debug("Mapping version before PUT request: {}", clusterService.getVersion());
+            LOG.debug("Mapping version before PUT request: {}", keyMapping.getVersion());
             String hostId = keyMapping.get(key);
 
             PutRequest<K, V> request = requests.newPut(key, value);
@@ -103,7 +103,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         ResultResponse<K, V> response;
         do {
             KeyMapping<K> keyMapping = clusterService.getMapping();
-            LOG.debug("Mapping version before GET request: {}", clusterService.getVersion());
+            LOG.debug("Mapping version before GET request: {}", keyMapping.getVersion());
             String hostId = keyMapping.get(key);
 
             GetRequest<K> request = requests.newGet(key);

@@ -47,14 +47,8 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory holding the names of the online servers. */
     private static final String SERVERS_PATH = "/servers";
 
-    /** The directory holding the version of the mapping. */
-    private static final String VERSION_PATH = "/version";
-
     /** Flag determining if the current service is running or not. */
     private boolean isRunning = false;
-
-    /** The version of the current mapping. */
-    private SharedCount version;
 
     /** Contains the sizes of each host. */
     private Map<String, Integer> sizes = new HashMap<>();
@@ -77,7 +71,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         this.mapping = new ZMapping(dim, depth);
         this.mapping.add(getOnlineHosts());
 
-        LOG.info("Writing mapping with version {} at create.", getVersion());
+        LOG.info("Writing mapping with version {} at create.", mapping.getVersion());
         writeMapping(mapping);
     }
 
@@ -127,7 +121,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     public void deregisterHost(String hostId) {
         mapping.remove(hostId);
 
-        LOG.info("Writing mapping with version {} on de-registration ", getVersion());
+        LOG.info("Writing mapping with version {} on de-registration ", mapping.getVersion());
         writeMapping(mapping);
     }
 
@@ -151,27 +145,6 @@ public class ZKClusterService implements ClusterService<long[]> {
         closeResources();
     }
 
-    @Override
-    public int getVersion() {
-        return version.getCount();
-    }
-
-    @Override
-    public int incrementVersion() {
-        boolean succeeded = false;
-        int count = 0;
-        try {
-            while (!succeeded) {
-                count = version.getCount() + 1;
-                succeeded = version.trySetCount(count);
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to increment mapping version on ZK.");
-        }
-        return count;
-    }
-
-    @Override
     public void writeCurrentMapping() {
         writeMapping(mapping);
     }
@@ -226,8 +199,6 @@ public class ZKClusterService implements ClusterService<long[]> {
     private void initResources() {
         try {
             this.client.start();
-            this.version = new SharedCount(client, VERSION_PATH, 0);
-            this.version.start();
             ensurePathExists(SERVERS_PATH);
             ensurePathExists(MAPPING_PATH);
         } catch (Exception e) {
@@ -237,7 +208,6 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     private void closeResources() {
         CloseableUtils.closeQuietly(client);
-        CloseableUtils.closeQuietly(version);
     }
 
     private ZMapping readCurrentMapping() {

@@ -321,9 +321,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         if (opCount > 100) {
             opCount = 0;
             ClusterService<long[]> cluster = indexContext.getClusterService();
-            LOG.info("Writing mapping with version {} for size update.", cluster.getVersion());
             cluster.setSize(indexContext.getHostId(), tree().size());
-            cluster.writeCurrentMapping();
         }
         if (tree().size() > THRESHOLD) {
             balancingStrategy.balance();

@@ -236,24 +236,6 @@ public class ZMapping implements KeyMapping<long[]>{
         return null;
     }
 
-//    /**
-//     * Set the size of host identified by the hostId received as an argument.
-//     *
-//     * @param hostId                                The target hostId.
-//     * @param size                                  The new size.
-//     */
-//    @Override
-//    public void setSize(String hostId, int size) {
-//        checkConsistency();
-//
-//        this.sizes.put(hostId, size);
-//    }
-//
-//    @Override
-//    public int getSize(String host) {
-//        return this.sizes.get(host);
-//    }
-
     /**
      * @return                                      A List of the host id's of the hosts in the mapping.
      */
@@ -323,18 +305,15 @@ public class ZMapping implements KeyMapping<long[]>{
         this.endKeys.clear();
     }
 
-//    @Override
-//    public String getHostForSplitting(String currentHostId) {
-//        String left = getPrevious(currentHostId);
-//        String right = getNext(currentHostId);
-//        if (left == null) {
-//            return right;
-//        }
-//        if (right == null) {
-//            return left;
-//        }
-//        return (getSize(left) < getSize(right)) ? left : right;
-//    }
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     public void changeIntervalStart(String host, long[] start) {
         this.startKeys.put(host, start);
@@ -343,16 +322,6 @@ public class ZMapping implements KeyMapping<long[]>{
     public void changeIntervalEnd(String host, long[] end) {
         this.endKeys.put(host, end);
     }
-
-//    @Override
-//    public int getVersion() {
-//        return version;
-//    }
-//
-//    @Override
-//    public void setVersion(int version) {
-//        this.version = version;
-//    }
 
     /**
      * Serialize the current mapping object into an array of bytes.

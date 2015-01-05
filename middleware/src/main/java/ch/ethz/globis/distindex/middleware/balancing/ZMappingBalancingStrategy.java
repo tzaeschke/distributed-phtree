@@ -92,7 +92,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         }
         int sizePrev = cluster.getSize(prevId);
         int sizeNext = cluster.getSize(nextId);
-        String resultId = (sizePrev > sizeNext) ? prevId : nextId;
+        String resultId = (sizePrev < sizeNext) ? prevId : nextId;
         movedToRight = resultId.equals(nextId);
         return resultId;
     }
@@ -136,8 +136,8 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             }
             zmap.updateTree();
         }
-        LOG.info("Writing mapping with version {} on balancing commit.",
-                indexContext.getClusterService().getVersion());
+        LOG.info("Writing mapping with version {} on balancing commit.", mapping.getVersion());
+        zmap.setVersion(zmap.getVersion() + 1);
         indexContext.getClusterService().writeCurrentMapping();
     }
 
@@ -191,8 +191,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
-        ClusterService<long[]> cluster = indexContext.getClusterService();
-        int currentVersion = cluster.incrementVersion();
+        int currentVersion = getMapping().getVersion() + 1;
         indexContext.setLastBalancingVersion(currentVersion);
 
         CommitBalancingRequest request = requests.newCommitBalancing();
