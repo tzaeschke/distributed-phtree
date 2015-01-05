@@ -52,12 +52,10 @@ public class SimpleClusterService implements ClusterService<long[]> {
         //nothing to do here, we are offline
     }
 
-    @Override
     public int getVersion() {
         return 0;
     }
 
-    @Override
     public int incrementVersion() {
         return 0;
     }

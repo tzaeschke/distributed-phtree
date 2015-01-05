@@ -48,6 +48,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
 
     public TestUtilAPIDistributed(int nrServers) throws IOException {
         this.nrServers = nrServers;
+        beforeSuite();
     }
 
     private ZKPHFactory factory = new ZKPHFactory(ZK_HOST, ZK_PORT);

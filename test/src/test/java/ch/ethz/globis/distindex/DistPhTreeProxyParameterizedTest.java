@@ -26,7 +26,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     private PHTreeIndexProxy<String> phTree;
 
     public DistPhTreeProxyParameterizedTest(int nrServers) throws IOException {
-        super(nrServers);
+        super(nrServers, true);
     }
 
     @Parameterized.Parameters

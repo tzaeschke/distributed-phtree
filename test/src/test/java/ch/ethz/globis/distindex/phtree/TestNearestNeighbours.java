@@ -38,7 +38,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     private PHFactory factory;
 
     public TestNearestNeighbours(int nrServers) throws IOException {
-        super(nrServers);
+        super(nrServers, false);
         factory = new SimplePhFactory(clusterService);
     }
 

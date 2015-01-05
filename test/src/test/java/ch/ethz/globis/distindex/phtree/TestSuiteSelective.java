@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 @RunWith(org.junit.runners.Suite.class)
-@Suite.SuiteClasses({TestIndexQueries.class})
+@Suite.SuiteClasses({TestIndexInsertion.class})
 public class TestSuiteSelective {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
