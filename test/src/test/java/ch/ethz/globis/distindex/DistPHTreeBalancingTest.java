@@ -29,7 +29,7 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{{4}});
+        return Arrays.asList(new Object[][]{{5}});
     }
 
     @Before
@@ -43,7 +43,26 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
     }
 
     @Test
-    public void insertSameHost_AllPositive() throws InterruptedException {
+    public void insertSameHost_AllPositive_1D() throws InterruptedException {
+        phTree.create(1, 64);
+
+        int size = 101;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+        for (int i = 0; i < size; i++) {
+            long[] key = {i};
+            phTree.put(key, Arrays.toString(key));
+            entries.add(key, Arrays.toString(key));
+        }
+        LOG.info("Done inserting {} randomly generated entries.", size);
+
+        for (IndexEntry<long[], String> entry :  entries) {
+            String retrieved = phTree.get(entry.getKey());
+            assertEquals(entry.getValue(), retrieved);
+        }
+    }
+
+    @Test
+    public void insertSameHost_AllPositive_2D() throws InterruptedException {
         phTree.create(2, 64);
 
         int size = 101;

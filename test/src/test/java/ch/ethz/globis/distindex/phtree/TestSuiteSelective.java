@@ -2,8 +2,6 @@ package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
 import ch.ethz.globis.pht.test.TestIndexInsertion;
-import ch.ethz.globis.pht.test.TestIndexQueries;
-import ch.ethz.globis.pht.test.TestRangeDouble;
 import ch.ethz.globis.pht.test.util.TestUtil;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;

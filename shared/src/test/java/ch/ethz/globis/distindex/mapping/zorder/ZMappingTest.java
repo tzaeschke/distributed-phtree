@@ -5,6 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -61,6 +62,30 @@ public class ZMappingTest {
         hosts = mapping.get(new long[]{-1L, -1L}, new long[] {1L, 1L});
         System.out.println(hosts);
         assertEquals(4, hosts.size());
+    }
+
+    @Test
+    public void testGet_2D_FewHosts() {
+        int dim = 2;
+        int depth = 64;
+        List<String> hosts = generateHosts(2);
+        ZMapping mapping = new ZMapping(dim, depth);
+        mapping.add(hosts);
+
+        String hostId;
+        long[][] keys = {{1L, 1L}, {1L, -1L}, {-1L, 1L}, {-1L, -1L}};
+        for (long[] key : keys) {
+            hostId = mapping.get(key);
+            assertNotNull(hostId);
+        }
+    }
+
+    private List<String> generateHosts(int n) {
+        List<String> hosts = new ArrayList<>(n);
+        for (int i = 1; i <= n; i++) {
+            hosts.add(String.valueOf(i));
+        }
+        return hosts;
     }
 
     @Test

@@ -45,6 +45,16 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
     }
 
     @Test
+    public void testInsert20() {
+        phTree.create(3, 32);
+        long[] a = {3925440664L, 684358198, 1584853918};
+        long[] b = {181670012, 3271367910L, 2679941640L};
+
+        phTree.put(a, Arrays.toString(a));
+        phTree.put(b, Arrays.toString(b));
+        phTree.contains(a);
+    }
+    @Test
     public void testLargeValues() throws Exception {
         phTree.create(2, 64);
 

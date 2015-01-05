@@ -76,7 +76,7 @@ public class ZMapping implements KeyMapping<long[]>{
         BST bst = BST.fromArray(hosts);
 
         updateRegions(bst.asMap());
-        updateTreeSquares();
+        updateTree();
     }
 
     /**
@@ -97,7 +97,7 @@ public class ZMapping implements KeyMapping<long[]>{
 
         //reconstruct the set of regions mapped to each host
         updateRegions(mapping);
-        updateTreeSquares();
+        updateTree();
     }
 
     public void updateTree() {
@@ -185,19 +185,15 @@ public class ZMapping implements KeyMapping<long[]>{
         checkConsistency();
 
         PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(k, k);
-        long[] start;
-        long[] end;
-        PhTreeRangeV.PHREntry entry;
+        PhTreeRangeV.PHREntry<String> entry;
 
         String host = null;
         if (it.hasNext()) {
             entry = it.next();
-            start = entry.lower();
-            end = entry.upper();
             if (it.hasNext()) {
                 throw new IllegalStateException("Areas not overlapping, more intersections returned for " + Arrays.toString(k));
             }
-            host = getValueFromTree(start, end);
+            host = entry.value();
         }
         return host;
     }
