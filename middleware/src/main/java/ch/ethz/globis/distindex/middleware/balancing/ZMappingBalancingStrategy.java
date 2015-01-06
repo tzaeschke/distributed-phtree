@@ -47,6 +47,8 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     private boolean movedToRight = false;
 
+    private int newVersion = 0;
+
     public ZMappingBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
         RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
@@ -60,14 +62,18 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
         KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
 
-        printSizes("Initializing balancing operation on host " + indexContext.getHostId() +". Sizes before balancing");
-
         String currentHostId = indexContext.getHostId();
+        printSizes("Initializing balancing operation on host " + currentHostId +". Sizes before balancing");
         String receiverHostId = getHostForSplitting(currentHostId, indexContext.getClusterService(), mapping);
         if (receiverHostId == null) {
             LOG.error("Failed to find a proper host for balancing");
             return;
         }
+        doBalancing(currentHostId, receiverHostId);
+        printSizes("Sizes after balancing");
+    }
+
+    private void doBalancing(String currentHostId, String receiverHostId) {
         IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId, receiverHostId);
         initBalancing(entries.size(), receiverHostId);
         sendEntries(entries, receiverHostId);
@@ -75,11 +81,13 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
         removeEntries(entries);
         updateMapping(currentHostId, receiverHostId, entries);
-
-        printSizes("Sizes after balancing");
     }
 
     private String getHostForSplitting(String currentHostId, ClusterService<long[]> cluster, KeyMapping<long[]> mapping) {
+        if (mapping == null) {
+            LOG.warn("Mapping is currently not initialized for {}, cannot proceed with balancing.", currentHostId);
+            return null;
+        }
         String prevId = mapping.getPrevious(currentHostId);
         String nextId = mapping.getNext(currentHostId);
         if (prevId == null) {
@@ -129,15 +137,16 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
                 zmap.changeIntervalStart(receiverHostId, key);
                 zmap.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
             } else {
-                LOG.info("Balancing to the right interval");
+                LOG.info("Balancing to the left interval");
                 key = entries.get(entriesMoved - 1).getKey();
                 zmap.changeIntervalEnd(receiverHostId, key);
                 zmap.changeIntervalStart(currentHostId, MultidimUtil.next(key, depth));
             }
             zmap.updateTree();
         }
+        zmap.setVersion(newVersion);
+
         LOG.info("Writing mapping with version {} on balancing commit.", mapping.getVersion());
-        zmap.setVersion(zmap.getVersion() + 1);
         indexContext.getClusterService().writeCurrentMapping();
     }
 
@@ -191,11 +200,11 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
-        int currentVersion = getMapping().getVersion() + 1;
-        indexContext.setLastBalancingVersion(currentVersion);
+        newVersion = getMapping().getVersion() + 1;
+        indexContext.setLastBalancingVersion(newVersion);
 
         CommitBalancingRequest request = requests.newCommitBalancing();
-        request.addParamater("balancingVersion", currentVersion);
+        request.addParamater("balancingVersion", newVersion);
 
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
