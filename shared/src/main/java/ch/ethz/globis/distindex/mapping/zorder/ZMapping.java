@@ -56,7 +56,7 @@ public class ZMapping implements KeyMapping<long[]>{
         this.dim = dim;
         this.depth = depth;
         this.service = new ZOrderService(depth);
-        this.tree = new PhTreeRangeV<>(dim);
+        this.tree = new PhTreeRangeV<>(dim, depth);
         this.startKeys = new TreeMap<>();
         this.endKeys = new TreeMap<>();
         this.sizes = new TreeMap<>();
@@ -101,7 +101,7 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     public void updateTree() {
-        this.tree = new PhTreeRangeV<>(dim);
+        this.tree = new PhTreeRangeV<>(dim, depth);
         long[] start, end;
         for (String hostId : hosts) {
             start = startKeys.get(hostId);
@@ -210,7 +210,8 @@ public class ZMapping implements KeyMapping<long[]>{
         checkConsistency();
 
         PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(l, u);
-        List<String> unsortedHosts = new ArrayList<>();
+
+        TreeSet<String> unsortedHosts = new TreeSet<>();
         String host;
         PhTreeRangeV.PHREntry e;
         while (it.hasNext()) {
@@ -220,7 +221,7 @@ public class ZMapping implements KeyMapping<long[]>{
         }
 
         //ToDO sort the hosts according to the z-order
-        return unsortedHosts;
+        return new ArrayList<>(unsortedHosts);
     }
 
     private String getValueFromTree(long[] lower, long[] upper) {

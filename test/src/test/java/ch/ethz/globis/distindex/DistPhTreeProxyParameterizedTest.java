@@ -10,6 +10,7 @@ import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTreeQStats;
+import ch.ethz.globis.pht.PhTreeV;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,16 +45,6 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         phTree.close();
     }
 
-    @Test
-    public void testInsert20() {
-        phTree.create(3, 32);
-        long[] a = {3925440664L, 684358198, 1584853918};
-        long[] b = {181670012, 3271367910L, 2679941640L};
-
-        phTree.put(a, Arrays.toString(a));
-        phTree.put(b, Arrays.toString(b));
-        phTree.contains(a);
-    }
     @Test
     public void testLargeValues() throws Exception {
         phTree.create(2, 64);
@@ -186,7 +177,7 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         expected.add(new IndexEntry<>(new long[] { -1L, 0L}, "foo"));
         expected.add(new IndexEntry<>(new long[] { -2L, 2L}, "foo"));
 
-        assertEquals(result.size(), expected.size());
+        assertEquals(expected.size(), result.size());
         for (int i = 0; i < result.size(); i++) {
             assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
             assertEquals(expected.get(i).getValue(), result.get(i).getValue());

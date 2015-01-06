@@ -157,9 +157,12 @@ public class ZOrderService {
     public long[] generateRangeEnd(String code, int dim) {
         long[] key = new long[dim];
         for (int i = 0; i < dim; i++) {
-            key[i] = -1L;
+            if (depth == Long.SIZE) {
+                key[i] = -1L;
+            } else {
+                key[i] = (long) (Math.pow(2, depth) - 1);
+            }
         }
-        int depth = Long.SIZE;
         for (int i = 0; i < code.length(); i++) {
             int dimIndex = i % dim;
             int bitIndex = depth - 1 - (i / dim);
@@ -168,6 +171,21 @@ public class ZOrderService {
             }
         }
         return key;
+    }
+
+    private void correctRangesForDepth(long[] key, int depth) {
+        if (depth == Long.SIZE) {
+            return;
+        }
+        for (int i = 0; i < key.length; i++) {
+            if (depth <= Byte.SIZE) {
+                key[i] = (byte) key[i];
+            } else if (depth <= Short.SIZE) {
+                key[i] = (short) key[i];
+            } else if (depth <= Integer.SIZE) {
+                key[i] = (byte) key[i];
+            }
+        }
     }
 
     @Override
