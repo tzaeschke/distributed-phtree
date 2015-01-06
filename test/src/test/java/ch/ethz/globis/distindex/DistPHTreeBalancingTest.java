@@ -3,10 +3,9 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
+import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,16 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
 
     public DistPHTreeBalancingTest(int nrServers) throws IOException {
         super(nrServers, true);
+    }
+
+    @BeforeClass
+    public static void changeBalancingParameters() {
+        PhTreeRequestHandler.THRESHOLD = 100;
+    }
+
+    @AfterClass
+    public static void restoredBalancingParameters() {
+        PhTreeRequestHandler.THRESHOLD = Integer.MAX_VALUE;
     }
 
     @Parameterized.Parameters

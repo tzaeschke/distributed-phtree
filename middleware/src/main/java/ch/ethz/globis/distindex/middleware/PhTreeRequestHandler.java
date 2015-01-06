@@ -27,7 +27,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     /** Logger */
     private static final Logger LOG = LoggerFactory.getLogger(PhTreeRequestHandler.class);
     /** Need to make this configurable. */
-    private static final int THRESHOLD = 100;
+    public static int THRESHOLD = Integer.MAX_VALUE;
     /** The operation count. */
     private static int opCount = 0;
     /** The index context associated with this handler. */
