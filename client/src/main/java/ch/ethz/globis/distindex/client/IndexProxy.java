@@ -89,11 +89,15 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     @Override
     public boolean contains(K key) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.get(key);
-        ContainsRequest<K> request = requests.newContains(key);
-        SimpleResponse response = requestDispatcher.send(hostId, request, IntegerResponse.class);
-        check(request, response);
+        boolean versionOutdated;
+        SimpleResponse response;
+            do {
+                KeyMapping<K> keyMapping = clusterService.getMapping();
+                String hostId = keyMapping.get(key);
+                ContainsRequest<K> request = requests.newContains(key);
+                response = requestDispatcher.send(hostId, request, IntegerResponse.class);
+                versionOutdated = check(request, response);
+            } while (versionOutdated);
         return ((int) response.getContent() == 1);
     }
 
@@ -117,39 +121,54 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
 
     @Override
     public V remove(K key) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        String hostId = keyMapping.get(key);
+        boolean versionOutdated;
+        ResultResponse<K, V> response;
+        do {
+            KeyMapping<K> keyMapping = clusterService.getMapping();
+            String hostId = keyMapping.get(key);
 
-        DeleteRequest<K> request = requests.newDelete(key);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
-
-        check(request, response);
+            DeleteRequest<K> request = requests.newDelete(key);
+            response = requestDispatcher.send(hostId, request, ResultResponse.class);
+            versionOutdated = check(request, response);
+        } while (versionOutdated);
         return getSingleEntryValue(response);
     }
 
     @Override
     public IndexEntryList<K, V> getRange(K start, K end) {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get(start, end);
+        boolean versionOutdated;
+        List<ResultResponse> responses;
+        do {
+            KeyMapping<K> keyMapping = clusterService.getMapping();
+            List<String> hostIds = keyMapping.get(start, end);
 
-        GetRangeRequest<K> request = requests.newGetRange(start, end);
-        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
+            GetRangeRequest<K> request = requests.newGetRange(start, end);
+            responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
         return combine(responses);
     }
 
     public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size, K start, K end) {
-        GetIteratorBatchRequest<K> request = requests.newGetBatch(iteratorId, size, start, end);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
-
-        check(request, response);
+        boolean versionOutdated;
+        ResultResponse<K, V> response;
+        do {
+            GetIteratorBatchRequest<K> request = requests.newGetBatch(iteratorId, size, start, end);
+            response = requestDispatcher.send(hostId, request, ResultResponse.class);
+            versionOutdated = check(request, response);
+        } while (versionOutdated);
         return response;
     }
 
     public ResultResponse<K, V> getNextBatch(String hostId, String iteratorId, int size) {
-        GetIteratorBatchRequest<K> request = requests.newGetBatch(iteratorId, size);
-        ResultResponse<K, V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
+        boolean versionOutdated;
+        ResultResponse<K, V> response;
+        do {
+            GetIteratorBatchRequest<K> request = requests.newGetBatch(iteratorId, size);
+            response = requestDispatcher.send(hostId, request, ResultResponse.class);
 
-        check(request, response);
+            versionOutdated = check(request, response);
+        } while (versionOutdated);
         return response;
     }
 
@@ -181,11 +200,17 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public int size() {
-        KeyMapping<K> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get();
-        BaseRequest request = requests.newGetSize();
+        boolean versionOutdated;
+        List<IntegerResponse> responses;
+        do {
+            KeyMapping<K> keyMapping = clusterService.getMapping();
+            List<String> hostIds = keyMapping.get();
+            BaseRequest request = requests.newGetSize();
 
-        List<IntegerResponse> responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
         int size = 0;
         for (IntegerResponse simpleResponse : responses) {
             size += simpleResponse.getContent();
@@ -194,10 +219,16 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public int getDim() {
-        List<String> hostIds = clusterService.getOnlineHosts();
-        BaseRequest request = requests.newGetDim();
+        boolean versionOutdated;
+        List<IntegerResponse> responses;
+        do {
+            List<String> hostIds = clusterService.getOnlineHosts();
+            BaseRequest request = requests.newGetDim();
 
-        List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
         int dim = -1;
         for (IntegerResponse simpleResponse : responses) {
             if (dim == -1) {
@@ -212,10 +243,16 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
     }
 
     public int getDepth() {
-        List<String> hostIds = clusterService.getOnlineHosts();
-        BaseRequest request = requests.newGetDepth();
+        boolean versionOutdated;
+        List<IntegerResponse> responses;
+        do {
+            List<String> hostIds = clusterService.getOnlineHosts();
+            BaseRequest request = requests.newGetDepth();
 
-        List<IntegerResponse> responses= requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
         int depth = -1;
         for (IntegerResponse simpleResponse : responses) {
             if (depth == -1) {
@@ -263,7 +300,18 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         return results;
     }
 
-    private boolean check(Request request, Response response) {
+    protected boolean check(Request request, List<? extends Response> responses) {
+        boolean versionOutdated;
+        for (Response response : responses) {
+            versionOutdated = check(request, response);
+            if (versionOutdated) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean check(Request request, Response response) {
         if (response == null) {
             throw new NullPointerException("Response should not be null");
         }

@@ -75,8 +75,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     public boolean create(final int dim, final int depth) {
         this.dim = dim;
         this.depth = depth;
-        //ToDo fix depth tests
-        this.depth = 64;
         Map<String, String> options = new HashMap<>();
         options.put("dim", String.valueOf(this.dim));
         options.put("depth", String.valueOf(this.depth));
@@ -92,16 +90,22 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return
      */
     public IndexEntryList<long[], V> getRange(long[] start, long[] end, double distance) {
-        LOG.debug("Get Range request started on interval {} and distance {}",
-                Arrays.toString(start) + "-" + Arrays.toString(end), distance);
+        boolean versionOutdated;
+        List<ResultResponse> responses;
+        do {
+            LOG.debug("Get Range request started on interval {} and distance {}",
+                    Arrays.toString(start) + "-" + Arrays.toString(end), distance);
 
-        KeyMapping<long[]> keyMapping = clusterService.getMapping();
-        List<String> hostIds = keyMapping.get(start, end);
+            KeyMapping<long[]> keyMapping = clusterService.getMapping();
+            List<String> hostIds = keyMapping.get(start, end);
 
-        GetRangeRequest<long[]> request = requests.newGetRange(start, end, distance);
-        List<ResultResponse> responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
-        LOG.debug("Get Range request ended on interval {} and distance {}",
-                Arrays.toString(start) + "-" + Arrays.toString(end), distance);
+            GetRangeRequest<long[]> request = requests.newGetRange(start, end, distance);
+            responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
+            versionOutdated = check(request, responses);
+            LOG.debug("Get Range request ended on interval {} and distance {}",
+                    Arrays.toString(start) + "-" + Arrays.toString(end), distance);
+        } while (versionOutdated);
+
         return combine(responses);
     }
 
@@ -126,10 +130,15 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> getNearestNeighbors(String hostId, long[] key, int k) {
         logKNNRequest(hostId, key, k);
+        boolean versionOutdated;
+        ResultResponse<long[], V> response;
+        do {
+            GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
+            RequestDispatcher<long[], V> requestDispatcher = getRequestDispatcher();
+            response = requestDispatcher.send(hostId, request, ResultResponse.class);
+            versionOutdated = check(request, response);
+        } while (versionOutdated);
 
-        GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
-        RequestDispatcher<long[], V> requestDispatcher = getRequestDispatcher();
-        ResultResponse<long[], V> response = requestDispatcher.send(hostId, request, ResultResponse.class);
         return extractKeys(response);
     }
 
@@ -144,9 +153,14 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      */
     List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         logKNNRequest(hostIds, key, k);
+        boolean versionOutdated;
+        List<ResultResponse> responses;
+        do {
+            GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
+            responses = getRequestDispatcher().send(hostIds, request, ResultResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
 
-        GetKNNRequest<long[]> request = requests.newGetKNN(key, k);
-        List<ResultResponse> responses = getRequestDispatcher().send(hostIds, request, ResultResponse.class);
         return MultidimUtil.nearestNeighbours(key, k, combineKeys(responses));
     }
 
@@ -154,39 +168,34 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined stats for the tree.
      */
     public PhTree.Stats getStats() {
-        BaseRequest request = requests.newStats();
-        List<String> hostIds = clusterService.getMapping().get();
-        PhTree.Stats global = new PhTree.Stats(), current;
-        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
-        for (MapResponse response : responses) {
-            current = (PhTree.Stats) response.getParameter("stats");
-            global.nChildren += current.nChildren;
-            global.nHCP += current.nHCP;
-            global.nHCS += current.nHCS;
-            global.nInnerNodes += current.nInnerNodes;
-            global.nLeafNodes += current.nLeafNodes;
-            global.nLeafSingle += current.nLeafSingle;
-            global.nLeafSingleNoPrefix += current.nLeafSingleNoPrefix;
-            global.nLonely += current.nLonely;
-            global.nNI += current.nNI;
-            global.nNodes += current.nNodes;
-            global.nSubOnly += current.nSubOnly;
-            global.nTooLarge += current.nTooLarge;
-            global.nTooLarge2 += current.nTooLarge2;
-            global.nTooLarge4 += current.nTooLarge4;
-            global.size += current.size;
-        }
-        return global;
+        boolean versionOutdated;
+        List<MapResponse> responses;
+        do {
+            BaseRequest request = requests.newStats();
+            List<String> hostIds = clusterService.getMapping().get();
+            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+        return combineStats(responses);
     }
 
     /**
      * @return                          The combined stats for the tree.
      */
     public PhTree.Stats getStatsIdealNoNode() {
-        BaseRequest request = requests.newStatsNoNode();
-        List<String> hostIds = clusterService.getMapping().get();
+        boolean versionOutdated;
+        List<MapResponse> responses;
+        do {
+            BaseRequest request = requests.newStatsNoNode();
+            List<String> hostIds = clusterService.getMapping().get();
+            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+        return combineStats(responses);
+    }
+
+    private PhTree.Stats combineStats(List<MapResponse> responses) {
         PhTree.Stats global = new PhTree.Stats(), current;
-        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
         for (MapResponse response : responses) {
             current = (PhTree.Stats) response.getParameter("stats");
             global.nChildren += current.nChildren;
@@ -212,10 +221,19 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined quality stats for the tree.
      */
     public PhTreeQStats getQuality() {
-        BaseRequest request = requests.newQuality();
-        List<String> hostIds = clusterService.getMapping().get();
+        boolean versionOutdated;
+        List<MapResponse> responses;
+        do {
+            BaseRequest request = requests.newQuality();
+            List<String> hostIds = clusterService.getMapping().get();
+            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+        return combineQualityStats(responses);
+    }
+
+    private PhTreeQStats combineQualityStats(List<MapResponse> responses) {
         PhTreeQStats global = new PhTreeQStats(depth), current;
-        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
         for (MapResponse response : responses) {
             current = (PhTreeQStats) response.getParameter("quality");
             for (int i = 0; i < global.q_nPostFixN.length; i++) {
@@ -234,10 +252,17 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined node count for the tree.
      */
     public int getNodeCount() {
-        BaseRequest request = requests.newNodeCount();
-        List<String> hostIds = clusterService.getMapping().get();
+        boolean versionOutdated;
+        List<MapResponse> responses;
+        do {
+            BaseRequest request = requests.newNodeCount();
+            List<String> hostIds = clusterService.getMapping().get();
+
+            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
         Integer global = 0, current;
-        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
         for (MapResponse response : responses) {
             current = (Integer) response.getParameter("nodeCount");
             global += current;
@@ -249,10 +274,17 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return                          The combined toString for the tree.
      */
     public String toStringPlain() {
-        BaseRequest request = requests.newToString();
-        List<String> hostIds = clusterService.getMapping().get();
+        boolean versionOutdated;
+        List<MapResponse> responses;
+        do {
+            BaseRequest request = requests.newToString();
+            List<String> hostIds = clusterService.getMapping().get();
+
+            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
         String global = "", current;
-        List<MapResponse> responses = requestDispatcher.send(hostIds, request, MapResponse.class);
         for (MapResponse response : responses) {
             current = (String) response.getParameter("toString");
             global += current + "\n";
