@@ -102,7 +102,6 @@ public class DistPHTreeBalancingTest extends BaseParameterizedTest {
     @Test
     public void insertSameHost_AllNegative() throws InterruptedException {
         phTree.create(2, 64);
-
         int size = 101;
         IndexEntryList<long[], String> entries = new IndexEntryList<>();
         for (int i = 1; i <= size; i++) {

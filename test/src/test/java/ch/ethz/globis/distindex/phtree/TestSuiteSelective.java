@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
 import ch.ethz.globis.pht.test.TestIndexInsertion;
+import ch.ethz.globis.pht.test.TestValues;
 import ch.ethz.globis.pht.test.util.TestUtil;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 @RunWith(org.junit.runners.Suite.class)
-@Suite.SuiteClasses({TestIndexInsertion.class})
+@Suite.SuiteClasses({TestValues.class})
 public class TestSuiteSelective {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
