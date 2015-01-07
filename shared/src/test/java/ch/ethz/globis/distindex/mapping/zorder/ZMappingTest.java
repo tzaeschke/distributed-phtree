@@ -47,8 +47,9 @@ public class ZMappingTest {
         System.out.println(hosts);
         assertEquals(1, hosts.size());
 
-        hosts = mapping.get(new long[]{-1L, -1L}, new long[]{-100L, -100L});
+        hosts = mapping.get(new long[]{-100L, -100L}, new long[]{-1L, -1L});
         System.out.println(hosts);
+
         assertEquals(1, hosts.size());
 
         hosts = mapping.get(new long[]{-1L, -1L}, new long[] {-1L, 1L});
