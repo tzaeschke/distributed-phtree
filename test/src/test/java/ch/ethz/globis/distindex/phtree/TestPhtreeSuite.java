@@ -4,11 +4,13 @@ import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
 import ch.ethz.globis.pht.test.util.TestSuite;
 import ch.ethz.globis.pht.test.util.TestUtil;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Ignore
 public class TestPhtreeSuite extends TestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
