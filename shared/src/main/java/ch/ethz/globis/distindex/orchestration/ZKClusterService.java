@@ -60,7 +60,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     public ZKClusterService(String hostPort) {
         this.hostPort = hostPort;
 
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 5);
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 15);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
     }
 

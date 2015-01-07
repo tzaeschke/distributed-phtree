@@ -45,7 +45,7 @@ public class DistPhTreeSmallerSize extends BaseParameterizedTest {
                 {0b00100000, 0b10110101},//   v=null
                 {0b00100001, 0b10110100},//   v=null
         };
-        phTree.create(2, 16);
+        phTree.create(2, 8);
 
         phTree.put(keys[0], 0);
         assertNotNull(phTree.get(keys[0]));
@@ -60,7 +60,7 @@ public class DistPhTreeSmallerSize extends BaseParameterizedTest {
     }
 
     @Test
-    public void testInsert_32bits() {
+    public void testInsert_32bits() throws InterruptedException {
         phTree.create(2, 32);
         long[][] keys = {
                 {Integer.MAX_VALUE, Integer.MAX_VALUE},
