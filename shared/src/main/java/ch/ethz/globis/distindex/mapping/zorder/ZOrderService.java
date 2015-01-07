@@ -1,7 +1,6 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -144,6 +143,16 @@ public class ZOrderService {
         for (int i = 0; i < dim; i++) {
             key[i] = 0L;
         }
+        generateRangeStart(code, key, dim, depth);
+        return key;
+    }
+
+    private void generateRangeStart(String code, long[] key, int dim, int depth) {
+        applyRangeStartMask(code, key, dim, depth);
+    }
+
+    private void applyRangeStartMask(String code, long[] key, int dim, int depth) {
+        //set remaining bits
         for (int i = 0; i < code.length(); i++) {
             int dimIndex = i % dim;
             int bitIndex = depth - 1 - (i / dim);
@@ -151,7 +160,6 @@ public class ZOrderService {
                 key[dimIndex] = key[dimIndex] | (1L << bitIndex);
             }
         }
-        return key;
     }
 
     public long[] generateRangeEnd(String code, int dim) {
@@ -163,27 +171,21 @@ public class ZOrderService {
                 key[i] = (long) (Math.pow(2, depth) - 1);
             }
         }
+        generateRangeEnd(code, key, dim, depth);
+        return key;
+    }
+
+    private void generateRangeEnd(String code, long[] key, int dim, int depth) {
+        applyRangeStartEnd(code, key, dim, depth);
+    }
+
+    private void applyRangeStartEnd(String code, long[] key, int dim, int depth) {
+        //set remaining bits
         for (int i = 0; i < code.length(); i++) {
             int dimIndex = i % dim;
             int bitIndex = depth - 1 - (i / dim);
             if (code.charAt(i) == '0') {
                 key[dimIndex] = key[dimIndex] & ~(1L << bitIndex);
-            }
-        }
-        return key;
-    }
-
-    private void correctRangesForDepth(long[] key, int depth) {
-        if (depth == Long.SIZE) {
-            return;
-        }
-        for (int i = 0; i < key.length; i++) {
-            if (depth <= Byte.SIZE) {
-                key[i] = (byte) key[i];
-            } else if (depth <= Short.SIZE) {
-                key[i] = (short) key[i];
-            } else if (depth <= Integer.SIZE) {
-                key[i] = (byte) key[i];
             }
         }
     }

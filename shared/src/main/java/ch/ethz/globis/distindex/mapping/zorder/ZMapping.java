@@ -56,7 +56,8 @@ public class ZMapping implements KeyMapping<long[]>{
     public ZMapping(int dim, int depth, List<String> hosts) {
         this.dim = dim;
         this.depth = depth;
-        this.service = new ZOrderService(depth);
+        //FIXME the depth is always set to 64 because the PhTree storing the rectangles only works with 64 bits
+        this.service = new ZOrderService(Long.SIZE);
         this.tree = new PhTreeRangeV<>(dim, depth);
         this.startKeys = new TreeMap<>();
         this.endKeys = new TreeMap<>();
