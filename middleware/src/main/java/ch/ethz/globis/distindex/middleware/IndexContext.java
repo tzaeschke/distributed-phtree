@@ -3,6 +3,8 @@ package ch.ethz.globis.distindex.middleware;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.pht.PhTreeV;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * The in-memory context associated with the index.
  */
@@ -25,6 +27,8 @@ public class IndexContext {
 
     /** The version of the last balancing. */
     private int lastBalancingVersion = 0;
+
+    private AtomicBoolean isBalancing = new AtomicBoolean(false);
 
     public IndexContext(String host, int port) {
         this.host = host;
@@ -66,5 +70,13 @@ public class IndexContext {
 
     public void setLastBalancingVersion(int lastBalancingVersion) {
         this.lastBalancingVersion = lastBalancingVersion;
+    }
+
+    public boolean canStartBalancing() {
+        return isBalancing.compareAndSet(false, true);
+    }
+
+    public boolean endBalancing() {
+        return isBalancing.compareAndSet(true, false);
     }
 }

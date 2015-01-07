@@ -75,12 +75,14 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     private void doBalancing(String currentHostId, String receiverHostId) {
         IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId, receiverHostId);
-        initBalancing(entries.size(), receiverHostId);
-        sendEntries(entries, receiverHostId);
-        commitBalancing(receiverHostId);
+        boolean canBalance = initBalancing(entries.size(), receiverHostId);
+        if (canBalance) {
+            sendEntries(entries, receiverHostId);
+            commitBalancing(receiverHostId);
 
-        removeEntries(entries);
-        updateMapping(currentHostId, receiverHostId, entries);
+            removeEntries(entries);
+            updateMapping(currentHostId, receiverHostId, entries);
+        }
     }
 
     private String getHostForSplitting(String currentHostId, ClusterService<long[]> cluster, KeyMapping<long[]> mapping) {
@@ -186,12 +188,14 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param entriesToSend
      * @param receiverHostId
      */
-    private void initBalancing(int entriesToSend, String receiverHostId) {
+    private boolean initBalancing(int entriesToSend, String receiverHostId) {
         InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
-            throw new RuntimeException("Receiving host did not accept balancing initialization");
+            LOG.error("Receiving host {} did not accept balancing initialization.", receiverHostId);
+            return false;
         }
+        return true;
     }
 
     /**

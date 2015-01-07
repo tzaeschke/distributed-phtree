@@ -46,10 +46,14 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
 
     @Override
     public Response handleInit(InitBalancingRequest request) {
-        int size = request.getSize();
-        buffer = new IndexEntryList<>(size);
+        if (indexContext.canStartBalancing()) {
+            int size = request.getSize();
+            buffer = new IndexEntryList<>(size);
 
-        return ackResponse(request);
+            return ackResponse(request);
+        } else {
+            return errorResponse(request);
+        }
     }
 
     @Override
@@ -65,12 +69,16 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
     public Response handleCommit(CommitBalancingRequest request) {
         PhTreeV<byte[]> tree = indexContext.getTree();
         synchronized (tree) {
+
             for (IndexEntry<long[], byte[]> entry : buffer) {
                 tree.put(entry.getKey(), entry.getValue());
             }
         }
         updateBalancingVersion(request);
         indexContext.getClusterService().setSize(indexContext.getHostId(), indexContext.getTree().size());
+        if (!indexContext.endBalancing()) {
+            throw new RuntimeException("Another execution thread is performing balancing in parallel!");
+        }
         LOG.info("Commit finished.");
         return ackResponse(request);
     }
@@ -83,5 +91,9 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
 
     private Response ackResponse(Request request) {
         return new BaseResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
+    }
+
+    private Response errorResponse(Request request) {
+        return new BaseResponse(request.getOpCode(), request.getId(), OpStatus.FAILURE);
     }
 }
