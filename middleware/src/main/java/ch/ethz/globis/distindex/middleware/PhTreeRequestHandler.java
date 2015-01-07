@@ -280,7 +280,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        response.addParameter("quality", tree().getQuality());
+        PhTreeQStats quality = (tree().size() == 0) ? new PhTreeQStats(tree().getDEPTH()) : tree().getQuality();
+        response.addParameter("quality", quality);
         return response;
     }
 
@@ -291,7 +292,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        response.addParameter("stats", tree().getStatsIdealNoNode());
+        PhTree.Stats stats = (tree().size() == 0) ? new PhTree.Stats() : tree().getStatsIdealNoNode();
+        response.addParameter("stats", stats);
         return response;
     }
 
@@ -313,7 +315,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        response.addParameter("stats", tree().getStats());
+        PhTree.Stats stats = (tree().size() == 0) ? new PhTree.Stats() : tree().getStats();
+        response.addParameter("stats", stats);
         return response;
     }
 
