@@ -52,4 +52,12 @@ public interface ClusterService<K> {
     public int getSize(String hostId);
 
     public void setSize(String hostId, int size);
+
+    public void lockForReading();
+
+    public void releaseAfterReading();
+
+    public void lockForWriting();
+
+    public void releaseAfterWriting();
 }

@@ -7,6 +7,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.utils.EnsurePath;
@@ -46,8 +47,9 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory holding the names of the online servers. */
     private static final String SERVERS_PATH = "/servers";
 
-    /** Flag determining if the current service is running or not. */
-    private boolean isRunning = false;
+    private static final String RW_LOCK_PATH = "/rw_lock";
+
+    private InterProcessReadWriteLock rwLock;
 
     /** Contains the sizes of each host. */
     private Map<String, Integer> sizes = new HashMap<>();
@@ -71,7 +73,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         this.mapping.add(getOnlineHosts());
 
         LOG.info("Writing mapping with version {} at create.", mapping.getVersion());
-        writeMapping(mapping);
+        writeCurrentMapping();
     }
 
     @Override
@@ -121,7 +123,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         mapping.remove(hostId);
 
         LOG.info("Writing mapping with version {} on de-registration ", mapping.getVersion());
-        writeMapping(mapping);
+        writeCurrentMapping();
     }
 
     @Override
@@ -135,17 +137,17 @@ public class ZKClusterService implements ClusterService<long[]> {
 
         this.hosts = readCurrentHosts();
         this.mapping = readCurrentMapping();
-        this.isRunning = true;
     }
 
     @Override
     public void disconnect() {
-        isRunning = false;
         closeResources();
     }
 
     public void writeCurrentMapping() {
+        lockForWriting();
         writeMapping(mapping);
+        releaseAfterWriting();
     }
 
     @Override
@@ -175,6 +177,42 @@ public class ZKClusterService implements ClusterService<long[]> {
         }
     }
 
+    @Override
+    public void lockForReading() {
+        try {
+            this.rwLock.readLock().acquire();
+        } catch (Exception e) {
+            LOG.error("Failed to acquire RW lock for reading.");
+        }
+    }
+
+    @Override
+    public void releaseAfterReading() {
+        try {
+            this.rwLock.readLock().release();
+        } catch (Exception e) {
+            LOG.error("Failed to release RW lock for reading.");
+        }
+    }
+
+    @Override
+    public void lockForWriting() {
+        try {
+            this.rwLock.writeLock().acquire();
+        } catch (Exception e) {
+            LOG.error("Failed to acquire RW lock for writing.");
+        }
+    }
+
+    @Override
+    public void releaseAfterWriting() {
+        try {
+            this.rwLock.writeLock().release();
+        } catch (Exception e) {
+            LOG.error("Failed to release RW lock for writing.");
+        }
+    }
+
     private void readSize(final String hostId) {
         String path = sizePath(hostId);
 
@@ -200,6 +238,8 @@ public class ZKClusterService implements ClusterService<long[]> {
             this.client.start();
             ensurePathExists(SERVERS_PATH);
             ensurePathExists(MAPPING_PATH);
+            ensurePathExists(RW_LOCK_PATH);
+            this.rwLock = new InterProcessReadWriteLock(client, RW_LOCK_PATH);
         } catch (Exception e) {
             LOG.error("Error initializing resource.", e);
         }
@@ -210,7 +250,9 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     private ZMapping readCurrentMapping() {
+        ZMapping zMap = null;
         try {
+            lockForReading();
             byte[] data = client.getData().usingWatcher(new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent watchedEvent) throws Exception {
@@ -222,11 +264,13 @@ public class ZKClusterService implements ClusterService<long[]> {
                     }
                 }
             }).forPath(MAPPING_PATH);
-            return ZMapping.deserialize(data);
+            zMap = ZMapping.deserialize(data);
         } catch (Exception e) {
             LOG.error("Error reading current mapping: ", e);
+        } finally {
+            releaseAfterReading();
         }
-        return null;
+        return zMap;
     }
 
     private List<String> readCurrentHosts() {
