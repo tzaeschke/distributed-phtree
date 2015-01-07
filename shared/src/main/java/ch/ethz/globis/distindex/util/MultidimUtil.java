@@ -1,8 +1,14 @@
 package ch.ethz.globis.distindex.util;
 
+import ch.ethz.globis.distindex.api.IndexEntry;
+import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.zorder.ZAddress;
 import ch.ethz.globis.distindex.mapping.zorder.ZOrderService;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.v4.PhTree4;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -34,6 +40,29 @@ public class MultidimUtil {
         }
         PhTree tree = createTree(points);
         return tree.nearestNeighbour(k, q);
+    }
+
+    public static <V> IndexEntryList<long[], V> sort(IndexEntryList<long[], V> entries) {
+        if (entries.size() == 0) {
+            return new IndexEntryList<>();
+        }
+        PhTreeV<V> tree = createTree(entries);
+        IndexEntryList<long[], V> output = new IndexEntryList<>();
+        PVIterator<V> it = tree.queryExtent();
+        while (it.hasNext()) {
+            PVEntry<V> entry = it.nextEntry();
+            output.add(entry.getKey(), entry.getValue());
+        }
+        return output;
+    }
+
+    private static <V> PhTreeV<V> createTree(IndexEntryList<long[], V> entries) {
+        int dim = entries.get(0).getKey().length;
+        PhTreeV<V> tree = new PhTree4<>(dim, Long.SIZE);
+        for (IndexEntry<long[], V> entry : entries) {
+            tree.put(entry.getKey(), entry.getValue());
+        }
+        return tree;
     }
 
     public static List<long[]> sort(List<long[]> points) {

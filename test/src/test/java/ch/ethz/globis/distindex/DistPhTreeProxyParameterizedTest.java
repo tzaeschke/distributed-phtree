@@ -32,7 +32,12 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{ {4}});
+        return Arrays.asList(new Object[][]{
+                {7},
+                {4},
+                {5},
+                {13}
+        });
     }
 
     @Before
@@ -150,6 +155,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         expected.add(new IndexEntry<>(new long[] { 11L, 10L}, "foo"));
 
         assertEquals(expected.size(), result.size());
+        expected = MultidimUtil.sort(expected);
+        result = MultidimUtil.sort(result);
         for (int i = 0; i < result.size(); i++) {
             assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
             assertEquals(expected.get(i).getValue(), result.get(i).getValue());
@@ -178,6 +185,8 @@ public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
         expected.add(new IndexEntry<>(new long[] { -2L, 2L}, "foo"));
 
         assertEquals(expected.size(), result.size());
+        expected = MultidimUtil.sort(expected);
+        result = MultidimUtil.sort(result);
         for (int i = 0; i < result.size(); i++) {
             assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
             assertEquals(expected.get(i).getValue(), result.get(i).getValue());
