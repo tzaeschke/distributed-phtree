@@ -27,7 +27,8 @@ public class ZMapping implements KeyMapping<long[]>{
 
     /** A ranged PhTree containing geometrical zones from the z-mapping mapped to each
      * host*/
-    private PhTreeRangeV<String> tree;
+
+    private transient PhTreeRangeV<String> tree;
 
     /** Mapping from the host ids to the sizes of the hosts. */
     private Map<String, Integer> sizes;
@@ -101,7 +102,7 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     public void updateTree() {
-        this.tree = new PhTreeRangeV<>(dim, depth);
+        this.tree = new PhTreeRangeV<>(dim);
         long[] start, end;
         for (String hostId : hosts) {
             start = startKeys.get(hostId);
@@ -112,15 +113,6 @@ public class ZMapping implements KeyMapping<long[]>{
                         service.generateRangeEnd(region.getCode(), dim),
                         hostId);
             }
-        }
-    }
-
-    private void updateTreeSquares() {
-        long[] start, end;
-        for (String hostId : hosts) {
-            start = startKeys.get(hostId);
-            end = endKeys.get(hostId);
-            tree.put(start, end, hostId);
         }
     }
 
@@ -339,7 +331,9 @@ public class ZMapping implements KeyMapping<long[]>{
         if (data.length == 0) {
             return null;
         }
-        return SerializerUtil.getInstance().deserialize(data);
+        ZMapping mapping = SerializerUtil.getInstance().deserialize(data);
+        mapping.updateTree();
+        return mapping;
     }
 
     private void checkConsistency() {
