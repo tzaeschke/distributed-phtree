@@ -1,23 +1,18 @@
 package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
-import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.mapping.bst.BSTMapping;
-import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
-import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
-import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
-import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
-import ch.ethz.globis.distindex.test.SimpleClusterService;
-import ch.ethz.globis.distindex.test.SimplePhFactory;
 import ch.ethz.globis.pht.*;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -28,24 +23,27 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     private static final long EPSILON = 100;
 
     private PhDistance metric = new PhDistanceL();
-    private static ClusterService<long[]> clusterService = new SimpleClusterService(BIT_WIDTH);
+    private PHTreeIndexProxy<Object> phTree;
+
+    @Before
+    public void setupTree() {
+        phTree = new PHTreeIndexProxy<>(HOST, ZK_PORT);
+    }
+
+    @After
+    public void closeTree() throws IOException {
+        phTree.close();
+    }
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] { {16} });
     }
 
-    private PHFactory factory;
-
     public TestNearestNeighbours(int nrServers) throws IOException {
-        super(nrServers, false);
-        factory = new SimplePhFactory(clusterService);
+        super(nrServers, true);
     }
 
-    @Override
-    protected Middleware createMiddleware(int i, String host, int port, String zkHost, int zkPort) {
-        return PhTreeIndexMiddlewareFactory.newPhTree(host, port, clusterService);
-    }
 
     /**
      * Configuration presented below:
@@ -74,9 +72,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across1() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
-
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
         long[] B = {side, side};
@@ -121,8 +118,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across2() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -167,8 +164,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across3() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -213,8 +210,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across4() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -259,8 +256,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across5() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -306,8 +303,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across6() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -353,8 +350,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across7() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -400,8 +397,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
      */
     @Test
     public void testFind16Hosts_Across8() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -422,8 +419,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
 
     @Test
     public void testFind16Hosts_NotEnough() {
-        PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 16);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(proxy));
+        phTree.create(2, BIT_WIDTH);
+        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side * 2, 0};
