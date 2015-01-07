@@ -195,24 +195,24 @@ public class BSTMapClusterService implements ClusterService<long[]> {
 
     }
 
-    @Override
     public void lockForReading() {
-        //do nothing
+
     }
 
-    @Override
     public void releaseAfterReading() {
-        //do nothing
+
     }
 
-    @Override
     public void lockForWriting() {
-        //do nothing
+
     }
 
-    @Override
     public void releaseAfterWriting() {
-        //do nothing
+
+    }
+
+    public void sync() {
+        readCurrentMapping();
     }
 
     private void startZK() {

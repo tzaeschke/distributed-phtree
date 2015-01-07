@@ -213,6 +213,11 @@ public class ZKClusterService implements ClusterService<long[]> {
         }
     }
 
+    @Override
+    public void sync() {
+        readCurrentMapping();
+    }
+
     private void readSize(final String hostId) {
         String path = sizePath(hostId);
 
@@ -262,6 +267,7 @@ public class ZKClusterService implements ClusterService<long[]> {
                     } else {
                         mapping = newMapping;
                     }
+                    LOG.info("Host {} just updated its mapping to version {}", hostPort, (mapping != null ) ? mapping.getVersion() : -1);
                 }
             }).forPath(MAPPING_PATH);
             zMap = ZMapping.deserialize(data);

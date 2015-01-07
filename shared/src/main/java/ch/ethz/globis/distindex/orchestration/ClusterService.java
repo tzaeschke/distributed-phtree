@@ -60,4 +60,6 @@ public interface ClusterService<K> {
     public void lockForWriting();
 
     public void releaseAfterWriting();
+
+    public void sync();
 }

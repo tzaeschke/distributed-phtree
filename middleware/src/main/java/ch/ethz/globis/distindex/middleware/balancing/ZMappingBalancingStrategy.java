@@ -59,18 +59,23 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     @Override
     public void balance() {
+        ClusterService<long[]> cluster = indexContext.getClusterService();
+        cluster.lockForWriting();
+        cluster.sync();
+        KeyMapping<long[]> mapping = cluster.getMapping();
 
-        KeyMapping<long[]> mapping = indexContext.getClusterService().getMapping();
-
+        LOG.info("Host {} started balancing with version {}", indexContext.getHostId(), mapping.getVersion());
         String currentHostId = indexContext.getHostId();
-        printSizes("Initializing balancing operation on host " + currentHostId +". Sizes before balancing");
-        String receiverHostId = getHostForSplitting(currentHostId, indexContext.getClusterService(), mapping);
-        if (receiverHostId == null) {
-            LOG.error("Failed to find a proper host for balancing");
-            return;
+        //printSizes("Initializing balancing operation on host " + currentHostId +". Sizes before balancing");
+        String receiverHostId = getHostForSplitting(currentHostId, cluster, mapping);
+        if (receiverHostId != null) {
+            doBalancing(currentHostId, receiverHostId);
+        } else {
+            LOG.warn("Failed to find a proper host for balancing.");
         }
-        doBalancing(currentHostId, receiverHostId);
-        printSizes("Sizes after balancing");
+
+        cluster.releaseAfterWriting();
+        //printSizes("Sizes after balancing");
     }
 
     private void doBalancing(String currentHostId, String receiverHostId) {

@@ -297,7 +297,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {
-        return new ZKClusterService(host + ":" + port);
+        return new ZKClusterService(host, port);
     }
 
     public void setKnnRadiusStrategy(KNNRadiusStrategy knnRadiusStrategy) {
