@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-@Ignore
 @RunWith(org.junit.runners.Suite.class)
 @Suite.SuiteClasses({TestIndexQueries.class})
 public class TestSuiteSelective {

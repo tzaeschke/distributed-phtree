@@ -41,7 +41,7 @@ public class ZOrderServiceTest {
         assertEquals(expected, boxes);
     }
 
-    @Test
+    @Test @Ignore
     public void testEnvelope_FullRange() {
         int depth = 3;
         long[] start = { -1L, -1L};
@@ -276,5 +276,43 @@ public class ZOrderServiceTest {
 
         }};
         assertEquals(expected, quads);
+    }
+
+    @Test
+    public void testRegionsBetweenConstruction_4D() {
+        int dim = 4;
+        int depth = 64;
+        ZOrderService service = new ZOrderService(depth);
+        Set<HBox> regions = service.getRegionsBetweenWithEnvelopes("0000", "1111", dim);
+        System.out.println(regions);
+    }
+
+    @Test
+    public void testRegionsBetweenConstruction_3D() {
+        int dim = 3;
+        int depth = 64;
+        ZOrderService service = new ZOrderService(depth);
+        Set<HBox> regions = service.getRegionsBetweenWithEnvelopes("000", "111", dim);
+        System.out.println(regions);
+
+        regions = service.getRegionsBetweenWithEnvelopes("000", "011", dim);
+        System.out.println(regions);
+    }
+
+    @Test
+    public void testRegionsBetweenConstruction_2D() {
+        int dim = 2;
+        int depth = 64;
+        ZOrderService service = new ZOrderService(depth);
+        Set<HBox> regions = service.getRegionsBetweenWithEnvelopes("00", "11", dim);
+        System.out.println(regions);
+
+        regions = service.getRegionsBetweenWithEnvelopes("01", "11", dim);
+        System.out.println(regions);
+
+        regions = service.getRegionsBetweenWithEnvelopes(new HBox("00"), "01", "11", dim);
+        System.out.println(regions);
+
+
     }
 }

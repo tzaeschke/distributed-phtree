@@ -38,7 +38,7 @@ public class TestHighDimensions extends BaseParameterizedTest {
 
     @Test
     public void testDim_20() {
-        int dim = 20;
+        int dim = 100;
         int depth = 64;
         phTree.create(dim, depth);
         assertEquals(0, phTree.size());

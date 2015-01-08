@@ -1,6 +1,9 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -19,6 +22,11 @@ public class ZOrderService {
         if (dim != beta.getDim()) {
             throw new IllegalArgumentException("The range query endpoints should have the same dimension");
         }
+        if (alpha.getCode().compareTo(beta.getCode()) == 1) {
+            ZAddress tmp = alpha;
+            alpha = beta;
+            beta = tmp;
+        }
 
         //phase 1 - first reduce the spaceBox to the smallest hquad entirely containing the Z-region
 
@@ -33,12 +41,11 @@ public class ZOrderService {
         String betaBoxCode = space.getCode() + beta.getQuad(i);
         String alphaBoxCode = space.getCode() + alpha.getQuad(i);
 
-        Set<HBox> results = getRegionsBetween(alphaBoxCode, betaBoxCode);
+        Set<HBox> results = getRegionsBetweenWithEnvelopes(new HBox(space.getCode()), alpha.getQuad(i), beta.getQuad(i), dim);
 
         //phase 2 - perform intersection of half-envelopes
-        Set<HBox> resultsLowerHalf = lowerHalfEnvelope(new HBox(betaBoxCode), beta, dim);
-        Set<HBox> resultsUpperHalf = upperHalfEnvelope(new HBox(alphaBoxCode), alpha, dim);
-
+        Set<HBox> resultsLowerHalf = lowerHalfEnvelope(new HBox(betaBoxCode), new ZAddress(beta.getCode().substring(betaBoxCode.length()), dim), dim);
+        Set<HBox> resultsUpperHalf = upperHalfEnvelope(new HBox(alphaBoxCode), new ZAddress(alpha.getCode().substring(alphaBoxCode.length()), dim), dim);
 
         results.addAll(resultsLowerHalf);
         results.addAll(resultsUpperHalf);
@@ -54,6 +61,21 @@ public class ZOrderService {
 
         ZAddress alpha = new ZAddress(start, depth);
         ZAddress beta = new ZAddress(end, depth);
+//        String common = StringUtils.getCommonPrefix(alpha.getCode(), beta.getCode());
+//        String alphaSuffix = alpha.getCode().substring(common.length());
+//        String betaSuffix = beta.getCode().substring(common.length());
+//        boolean border = true;
+//        for (int i = 0; i < alphaSuffix.length(); i++) {
+//            if (alphaSuffix.charAt(i) != '0' || betaSuffix.charAt(i) != '1') {
+//                border = false;
+//                break;
+//            }
+//        }
+//        if (border) {
+//            Set<HBox> singleRegion = new HashSet<>();
+//            singleRegion.add(new HBox(common));
+//            return singleRegion;
+//        }
         Set<HBox> regions = regionEnvelope(alpha, beta);
         regions.add(new HBox(alpha.getCode()));
         regions.add(new HBox(beta.getCode()));
@@ -71,7 +93,55 @@ public class ZOrderService {
         return regionEnvelope(alpha, beta);
     }
 
-    public Set<HBox> getRegionsBetween(String alphaBoxCode, String betaBoxCode) {
+    public Set<HBox> getRegionsBetweenWithEnvelopes(String alphaBoxCode, String betaBoxCode, int dim) {
+        return getRegionsBetweenWithEnvelopes(new HBox(""), alphaBoxCode, betaBoxCode, dim);
+    }
+
+    public Set<HBox> getRegionsBetweenWithEnvelopes(HBox space, String alphaBoxCode, String betaBoxCode, int dim) {
+        //need upper half envelope of alpha
+        Set<HBox> results = new TreeSet<>();
+
+        String commonZone = StringUtils.getCommonPrefix(alphaBoxCode, betaBoxCode);
+        String currentQuad = alphaBoxCode.substring(commonZone.length());
+        HBox actualBox = new HBox(space.getCode() + commonZone);
+        for (int j = 0; j < currentQuad.length(); j++) {
+            if (currentQuad.charAt(j) == '0') {
+                if (j != 0) {
+                    results.add(actualBox.getUpperHalf());
+                }
+                actualBox = actualBox.getLowerHalf();
+            } else {
+                actualBox = actualBox.getUpperHalf();
+            }
+        }
+
+        //and lower half envelope of beta
+        currentQuad = betaBoxCode.substring(commonZone.length());
+        actualBox = new HBox(space.getCode() + commonZone);
+        for (int j = 0; j < currentQuad.length(); j++) {
+            if (currentQuad.charAt(j) == '0') {
+                actualBox = actualBox.getLowerHalf();
+            } else {
+                if (j != 0) {
+                    results.add(actualBox.getLowerHalf());
+                }
+                actualBox = actualBox.getUpperHalf();
+            }
+        }
+//
+//        Set<HBox> lowerEnvelope = upperHalfEnvelope(space, new ZAddress(alphaBoxCode, dim), dim);
+//        lowerEnvelope.addAll(lowerHalfEnvelope(space, new ZAddress(alphaBoxCode, dim), dim));
+//        Set<HBox> upperEnvelope = lowerHalfEnvelope(space, new ZAddress(betaBoxCode, dim), dim);
+//        lowerEnvelope.addAll(upperHalfEnvelope(space, new ZAddress(betaBoxCode, dim), dim));
+//        lowerEnvelope.addAll(upperEnvelope);
+//
+//        lowerEnvelope.remove(space.getLowerHalf());
+//        lowerEnvelope.remove(space.getUpperHalf());
+
+        return results;
+    }
+
+    public Set<HBox> getRegionsBetween(String alphaBoxCode, String betaBoxCode, int dim) {
         int startBorder = new BigInteger(alphaBoxCode, 2).intValue();
         int endBorder = new BigInteger(betaBoxCode, 2).intValue();
 
@@ -103,10 +173,14 @@ public class ZOrderService {
     }
 
     public Set<HBox> lowerHalfEnvelope(HBox actualBox, ZAddress beta, int dim) {
+        return lowerHalfEnvelope(actualBox, beta, dim, depth);
+    }
+
+    public Set<HBox> lowerHalfEnvelope(HBox actualBox, ZAddress beta, int dim, int depth) {
         Set<HBox> results = new TreeSet<>();
         String currentQuad;
-        int start = actualBox.getCode().length() / dim;
-        for (int i = start; i < depth; i++) {
+        int length = beta.getCode().length() / dim;
+        for (int i = 0; i < length; i++) {
             currentQuad = beta.getQuad(i);
             for (int j = 0; j < dim; j++) {
                 if (currentQuad.charAt(j) == '0') {
@@ -121,10 +195,14 @@ public class ZOrderService {
     }
 
     public Set<HBox> upperHalfEnvelope(HBox actualBox, ZAddress alpha, int dim) {
+        return upperHalfEnvelope(actualBox, alpha, dim, depth);
+    }
+
+    public Set<HBox> upperHalfEnvelope(HBox actualBox, ZAddress alpha, int dim, int depth) {
         Set<HBox> results = new TreeSet<>();
         String currentQuad;
-        int start = actualBox.getCode().length() / dim;
-        for (int i = start; i < depth; i++) {
+        int length = alpha.getCode().length() / dim;
+        for (int i = 0; i < length; i++) {
             currentQuad = alpha.getQuad(i);
             for (int j = 0; j < dim; j++) {
                 if (currentQuad.charAt(j) == '0') {

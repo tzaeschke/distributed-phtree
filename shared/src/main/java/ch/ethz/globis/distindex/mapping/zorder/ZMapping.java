@@ -369,4 +369,17 @@ public class ZMapping implements KeyMapping<long[]>{
         result = 31 * result + (sizes != null ? sizes.hashCode() : 0);
         return result;
     }
+
+    public static void main(String[] args) {
+        ZMapping mapping = new ZMapping(5, 64);
+        mapping.add("1");
+        mapping.add("2");
+        mapping.add("3");
+        mapping.updateTree();
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
