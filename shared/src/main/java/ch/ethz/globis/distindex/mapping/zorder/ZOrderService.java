@@ -61,21 +61,21 @@ public class ZOrderService {
 
         ZAddress alpha = new ZAddress(start, depth);
         ZAddress beta = new ZAddress(end, depth);
-//        String common = StringUtils.getCommonPrefix(alpha.getCode(), beta.getCode());
-//        String alphaSuffix = alpha.getCode().substring(common.length());
-//        String betaSuffix = beta.getCode().substring(common.length());
-//        boolean border = true;
-//        for (int i = 0; i < alphaSuffix.length(); i++) {
-//            if (alphaSuffix.charAt(i) != '0' || betaSuffix.charAt(i) != '1') {
-//                border = false;
-//                break;
-//            }
-//        }
-//        if (border) {
-//            Set<HBox> singleRegion = new HashSet<>();
-//            singleRegion.add(new HBox(common));
-//            return singleRegion;
-//        }
+        String common = StringUtils.getCommonPrefix(alpha.getCode(), beta.getCode());
+        String alphaSuffix = alpha.getCode().substring(common.length());
+        String betaSuffix = beta.getCode().substring(common.length());
+        boolean border = true;
+        for (int i = 0; i < alphaSuffix.length(); i++) {
+            if (alphaSuffix.charAt(i) != '0' || betaSuffix.charAt(i) != '1') {
+                border = false;
+                break;
+            }
+        }
+        if (border) {
+            Set<HBox> singleRegion = new HashSet<>();
+            singleRegion.add(new HBox(common));
+            return singleRegion;
+        }
         Set<HBox> regions = regionEnvelope(alpha, beta);
         regions.add(new HBox(alpha.getCode()));
         regions.add(new HBox(beta.getCode()));

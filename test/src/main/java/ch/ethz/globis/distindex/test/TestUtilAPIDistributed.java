@@ -92,8 +92,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
     public void beforeSuite() {
         try {
             threadPool = Executors.newFixedThreadPool(32);
-            zkServer = new TestingServer(ZK_PORT);
-            zkServer.start();
+            startZK();
 
             for (Middleware middleware : middlewares) {
                 middleware.close();
@@ -117,9 +116,28 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
                 middleware.close();
             }
             threadPool.shutdown();
-            zkServer.close();
+            stopZK();
         } catch (Exception e) {
             LOG.error("Exception during suite shutdown. ", e);
+        }
+    }
+
+    private void startZK() {
+        try {
+            zkServer = new TestingServer(ZK_PORT);
+            zkServer.start();
+        } catch (Exception e) {
+            LOG.warn("Cannot open testing ZK. Attempting to use possible running ZK");
+        }
+    }
+
+    private void stopZK() {
+        try {
+            zkServer.stop();
+        } catch (NullPointerException npe) {
+            LOG.error("ZK was not initialized.");
+        } catch (IOException e) {
+            LOG.error("Failed to close ZK.", e);
         }
     }
 

@@ -110,11 +110,30 @@ public class ZMapping implements KeyMapping<long[]>{
             end = endKeys.get(hostId);
             Set<HBox> regions = service.regionEnvelopeInclusive(start, end);
             for (HBox region : regions) {
-                tree.put(service.generateRangeStart(region.getCode(), dim),
-                        service.generateRangeEnd(region.getCode(), dim),
-                        hostId);
+                addRectangleForRegion(hostId, region, dim);
             }
         }
+    }
+
+    private void addRectangleForRegion(String hostId, HBox region, int dim) {
+        String regionCode = region.getCode();
+        long[] start, end;
+        if (regionCode.length() >= dim) {
+            start = service.generateRangeStart(regionCode, dim);
+            end = service.generateRangeEnd(regionCode, dim);
+        } else {
+            int missingCharsNr = dim - regionCode.length();
+            start = service.generateRangeStart(padWithChar(regionCode, '1', missingCharsNr), dim);
+            end = service.generateRangeEnd(padWithChar(regionCode, '0', missingCharsNr), dim);
+        }
+        tree.put(start, end, hostId);
+    }
+
+    private String padWithChar(String str, char chr, int nr) {
+        for (int i = 0; i < nr; i++) {
+            str = str + chr;
+        }
+        return str;
     }
 
     /**
