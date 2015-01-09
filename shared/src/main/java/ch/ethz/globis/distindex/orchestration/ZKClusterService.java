@@ -2,6 +2,9 @@ package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
+import org.apache.curator.CuratorConnectionLossException;
+import org.apache.curator.CuratorZookeeperClient;
+import org.apache.curator.RetryLoop;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -61,7 +64,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     public ZKClusterService(String hostPort) {
         this.hostPort = hostPort;
 
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 15);
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TIMEOUT, 3);
         client = CuratorFrameworkFactory.newClient(hostPort, retryPolicy);
     }
 
@@ -182,7 +185,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         try {
             this.rwLock.readLock().acquire();
         } catch (Exception e) {
-            LOG.error("Failed to acquire RW lock for reading.");
+            LOG.error("Failed to acquire RW lock for reading.", e);
         }
     }
 
@@ -191,7 +194,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         try {
             this.rwLock.readLock().release();
         } catch (Exception e) {
-            LOG.error("Failed to release RW lock for reading.");
+            LOG.error("Failed to release RW lock for reading.", e);
         }
     }
 
@@ -200,7 +203,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         try {
             this.rwLock.writeLock().acquire();
         } catch (Exception e) {
-            LOG.error("Failed to acquire RW lock for writing.");
+            LOG.error("Failed to acquire RW lock for writing.", e);
         }
     }
 
@@ -209,7 +212,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         try {
             this.rwLock.writeLock().release();
         } catch (Exception e) {
-            LOG.error("Failed to release RW lock for writing.");
+            LOG.error("Failed to release RW lock for writing.", e);
         }
     }
 
@@ -241,6 +244,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private void initResources() {
         try {
             this.client.start();
+            ensurePathExists(SIZE_PATH);
             ensurePathExists(SERVERS_PATH);
             ensurePathExists(MAPPING_PATH);
             ensurePathExists(RW_LOCK_PATH);
@@ -273,6 +277,11 @@ public class ZKClusterService implements ClusterService<long[]> {
             zMap = ZMapping.deserialize(data);
         } catch (Exception e) {
             LOG.error("Error reading current mapping: ", e);
+//            if (!client.getState().equals(CuratorFrameworkState.STARTED)) {
+//                System.out.println("Client was somehow closed.");
+//                initResources();
+//                readCurrentMapping();
+//            }
         } finally {
             releaseAfterReading();
         }
@@ -315,11 +324,27 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     private void ensurePathExists(String path) {
-        EnsurePath ep = new EnsurePath(path);
         try {
-            ep.ensure(client.getZookeeperClient());
+            if (client.checkExists().forPath(path) == null) {
+                String result = client.create().forPath(path, new byte[0]);
+            }
         } catch (Exception e) {
-            LOG.error("Failed to ensure path {} on {}", MAPPING_PATH, hostPort);
+            LOG.error("Problem ensuring that the path exists", e);
         }
+//        EnsurePath ep = new EnsurePath(path);
+//        CuratorZookeeperClient zkClient = client.getZookeeperClient();
+//        try {
+//            RetryLoop retryLoop = zkClient.newRetryLoop();
+//            while (retryLoop.shouldContinue()) {
+//                try {
+//                    ep.ensure(zkClient);
+//                    retryLoop.markComplete();
+//                } catch (Exception e) {
+//                    retryLoop.takeException(e);
+//                }
+//            }
+//        } catch (Exception e) {
+//            LOG.error("Failed to ensure path {} on {}", MAPPING_PATH, hostPort);
+//        }
     }
 }

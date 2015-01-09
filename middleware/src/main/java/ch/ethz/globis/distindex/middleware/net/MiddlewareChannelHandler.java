@@ -48,7 +48,7 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         String clientHost = ctx.channel().remoteAddress().toString();
-        LOG.info("Client " + clientHost + " disconnected.");
+        LOG.debug("Client " + clientHost + " disconnected.");
         ioHandler.cleanup(clientHost);
         super.channelInactive(ctx);
     }
@@ -56,7 +56,7 @@ public abstract class MiddlewareChannelHandler<K, V> extends ChannelInboundHandl
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         String clientHost = ctx.channel().remoteAddress().toString();
-        LOG.info("Client " + clientHost + " disconnected.");
+        LOG.debug("Client " + clientHost + " disconnected.");
         ioHandler.cleanup(clientHost);
         super.exceptionCaught(ctx, cause);
     }

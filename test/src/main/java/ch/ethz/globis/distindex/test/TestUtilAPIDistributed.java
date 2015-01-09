@@ -1,5 +1,7 @@
 package ch.ethz.globis.distindex.test;
 
+import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
+import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
@@ -43,6 +45,7 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
 
     /** Zookeeper server*/
     private static TestingServer zkServer;
+    private List<DistributedPhTreeV> trees = new ArrayList<>();
 
     private int nrServers;
 
@@ -60,7 +63,10 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
 
     @Override
     public <T> PhTreeV<T> newTreeV(int dim, int depth) {
-        return factory.createPHTreeMap(dim, depth);
+
+        PhTreeV<T> tree = factory.createPHTreeMap(dim, depth);
+        trees.add((DistributedPhTreeV) tree);
+        return tree;
     }
 
     @Override
@@ -75,6 +81,16 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
 
     @Override
     public void beforeTest() {
+        System.out.println("Clearing trees.");
+        try {
+            for (DistributedPhTreeV tree : trees) {
+                tree.getProxy().close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            trees.clear();
+        }
         //currently not needed
     }
 
