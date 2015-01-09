@@ -10,12 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-@Ignore
 public class TestPhtreeSuite extends TestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);
 
-    static final int NUMBER_OF_SERVERS = 16;
+    static final int NUMBER_OF_SERVERS = 4;
 
     @BeforeClass
     public static void init() {
