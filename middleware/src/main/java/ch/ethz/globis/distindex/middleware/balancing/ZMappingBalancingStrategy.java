@@ -249,7 +249,9 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             movedToRight = true;
             PVIterator<byte[]> it = indexContext.getTree().queryExtent();
             for (int i = 0; i < cluster.getSize(currentHostId) - entriesToMove; i++) {
-                it.next();
+                if (it.hasNext()) {
+                    it.next();
+                }
             }
             while (it.hasNext()) {
                 PVEntry<byte[]> e = it.nextEntry();
