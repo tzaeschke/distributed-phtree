@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 @RunWith(org.junit.runners.Suite.class)
 @Suite.SuiteClasses({TestNearestNeighbour.class})
 public class TestSuiteSelective {

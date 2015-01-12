@@ -139,7 +139,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         initResources();
 
         this.hosts = readCurrentHosts();
-        this.mapping = readCurrentMapping();
+        this.mapping = readCurrentMappingAndLock();
     }
 
     @Override
@@ -258,10 +258,21 @@ public class ZKClusterService implements ClusterService<long[]> {
         CloseableUtils.closeQuietly(client);
     }
 
+    private ZMapping readCurrentMappingAndLock() {
+
+        lockForReading();
+        ZMapping zMapping = null;
+        try {
+            zMapping = readCurrentMapping();
+        } finally {
+            releaseAfterReading();
+        }
+        return zMapping;
+    }
+
     private ZMapping readCurrentMapping() {
         ZMapping zMap = null;
         try {
-            lockForReading();
             byte[] data = client.getData().usingWatcher(new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent watchedEvent) throws Exception {
@@ -277,13 +288,6 @@ public class ZKClusterService implements ClusterService<long[]> {
             zMap = ZMapping.deserialize(data);
         } catch (Exception e) {
             LOG.error("Error reading current mapping: ", e);
-//            if (!client.getState().equals(CuratorFrameworkState.STARTED)) {
-//                System.out.println("Client was somehow closed.");
-//                initResources();
-//                readCurrentMapping();
-//            }
-        } finally {
-            releaseAfterReading();
         }
         return zMap;
     }

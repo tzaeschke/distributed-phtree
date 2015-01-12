@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Ignore
 public class TestPhtreeSuite extends TestSuite {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);

@@ -5,6 +5,8 @@ import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhTreeRangeV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,6 +14,8 @@ import java.util.*;
  * Mapping for the Z-Order curve.
  */
 public class ZMapping implements KeyMapping<long[]>{
+
+    private static final transient Logger LOG = LoggerFactory.getLogger(ZMapping.class);
 
     /** The dimension of the mapping. */
     int dim;
@@ -202,7 +206,8 @@ public class ZMapping implements KeyMapping<long[]>{
         if (it.hasNext()) {
             entry = it.next();
             if (it.hasNext()) {
-                throw new IllegalStateException("Areas not overlapping, more intersections returned for " + Arrays.toString(k));
+                LOG.info("Zmapping: " + this);
+                throw new IllegalStateException("Areas overlapping, more intersections returned for " + Arrays.toString(k));
             }
             host = entry.value();
         }
@@ -387,6 +392,14 @@ public class ZMapping implements KeyMapping<long[]>{
         result = 31 * result + (tree != null ? tree.hashCode() : 0);
         result = 31 * result + (sizes != null ? sizes.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ZMapping{" +
+                "startKeys=" + startKeys +
+                ", endKeys=" + endKeys +
+                '}';
     }
 
     public static void main(String[] args) {

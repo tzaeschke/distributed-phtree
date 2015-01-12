@@ -22,11 +22,11 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class DistPhTreeProxyParameterizedTest extends BaseParameterizedTest {
+public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
 
     private PHTreeIndexProxy<String> phTree;
 
-    public DistPhTreeProxyParameterizedTest(int nrServers) throws IOException {
+    public TestDistPhTreeProxyParameterized(int nrServers) throws IOException {
         super(nrServers, true);
     }
 

@@ -13,9 +13,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertTrue;
+
 public class TestConcurrent extends BaseParameterizedTest {
 
-    private PHTreeIndexProxy<Integer> phTree;
+    private static final int NR_CLIENTS = 2;
+
+    private PHTreeIndexProxy<Integer>[] phTrees = new PHTreeIndexProxy[NR_CLIENTS];
 
     public TestConcurrent(int nrServers) throws IOException {
         super(nrServers, true);
@@ -28,12 +32,16 @@ public class TestConcurrent extends BaseParameterizedTest {
 
     @Before
     public void setupTree() {
-        phTree = new PHTreeIndexProxy<>(HOST, ZK_PORT);
+        for (int i = 0; i < NR_CLIENTS; i++) {
+            phTrees[i] = new PHTreeIndexProxy<>(HOST, ZK_PORT);
+        }
     }
 
     @After
     public void closeTree() throws IOException {
-        phTree.close();
+        for (int i = 0; i < NR_CLIENTS; i++) {
+            phTrees[i].close();
+        }
     }
 
     @BeforeClass
@@ -50,10 +58,11 @@ public class TestConcurrent extends BaseParameterizedTest {
     public void testConcurrentInserts() {
         int dim = 3;
         int depth = 64;
-        phTree.create(dim, depth);
-        ExecutorService pool = Executors.newFixedThreadPool(2);
+        phTrees[0].create(dim, depth);
+        phTrees[1].create(dim, depth);
+        ExecutorService pool = Executors.newFixedThreadPool(NR_CLIENTS);
 
-        int entries = 300;
+        int entries = 103;
         long[][] keyPositive = new long[entries][dim], keysNegative = new long[entries][dim];
         for (int i = 1; i < entries; i++) {
             for (int j = 0; j < dim; j++) {
@@ -61,16 +70,25 @@ public class TestConcurrent extends BaseParameterizedTest {
                 keysNegative[i][j] = -i;
             }
         }
-        ThreadedInserter pos = new ThreadedInserter(keyPositive, phTree);
-        ThreadedInserter neg = new ThreadedInserter(keysNegative, phTree);
+        ThreadedInserter pos = new ThreadedInserter(keyPositive, phTrees[0]);
+        ThreadedInserter neg = new ThreadedInserter(keysNegative, phTrees[1]);
+
+        pool.execute(pos);
+        pool.execute(neg);
+        pool.shutdown();
         try {
-            pool.execute(pos);
-            pool.execute(neg);
-            pool.awaitTermination(30, TimeUnit.SECONDS);
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            pool.shutdown();
+        }
+
+        for (long[] key : keyPositive) {
+            assertTrue(phTrees[0].contains(key));
+            assertTrue(phTrees[1].contains(key));
+        }
+        for (long[] key : keysNegative) {
+            assertTrue(phTrees[0].contains(key));
+            assertTrue(phTrees[1].contains(key));
         }
     }
 
