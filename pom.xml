@@ -31,7 +31,7 @@
         <phtree.version>0.2.1-SNAPSHOT</phtree.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
-        <curator.version>2.6.0</curator.version>
+        <curator.version>2.7.0</curator.version>
         <guava.version>18.0</guava.version>
     </properties>
 
