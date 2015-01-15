@@ -4,6 +4,7 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
@@ -13,6 +14,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class TestHighDimensions extends BaseParameterizedTest {
 
     private PHTreeIndexProxy<Integer> phTree;
