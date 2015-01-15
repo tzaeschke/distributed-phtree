@@ -176,14 +176,18 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     @Override
     public Response handlePut(PutRequest<long[], byte[]> request) {
-        if (isVersionOutDate(request)) {
+        if (isVersionOutDate(request) || currentlyBalancing()) {
             return createOutdateVersionResponse(request);
         }
 
         long[] key = request.getKey();
         byte[] value = request.getValue();
 
-        byte[] previous = tree().put(key, value);
+        PhTreeV<byte[]> phTree = tree();
+        byte[] previous;
+        synchronized (phTree) {
+            previous = phTree.put(key, value);
+        }
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
 
         if (previous != null) {
@@ -197,12 +201,16 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     @Override
     public Response handleDelete(DeleteRequest<long[]> request) {
-        if (isVersionOutDate(request)) {
+        if (isVersionOutDate(request)|| currentlyBalancing()) {
             return createOutdateVersionResponse(request);
         }
 
+        PhTreeV<byte[]> phTree = tree();
         long[] key = request.getKey();
-        byte[] value = tree().remove(key);
+        byte[] value;
+        synchronized (phTree) {
+            value = phTree.remove(key);
+        }
         if (value != null) {
             checkBalancing();
         }
@@ -331,6 +339,10 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         if (tree().size() > THRESHOLD) {
             balancingStrategy.balance();
         }
+    }
+
+    private boolean currentlyBalancing() {
+        return indexContext.isBalancing();
     }
 
     private boolean isVersionOutDate(Request request) {

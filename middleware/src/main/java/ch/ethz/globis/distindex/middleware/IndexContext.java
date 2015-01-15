@@ -79,4 +79,8 @@ public class IndexContext {
     public boolean endBalancing() {
         return isBalancing.compareAndSet(true, false);
     }
+
+    public boolean isBalancing() {
+        return isBalancing.get();
+    }
 }
