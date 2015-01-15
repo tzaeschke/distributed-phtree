@@ -59,6 +59,9 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     @Override
     public void balance() {
+        if (!indexContext.canStartBalancing()) {
+            return;
+        }
         ClusterService<long[]> cluster = indexContext.getClusterService();
         cluster.lockForWriting();
         cluster.sync();
@@ -75,6 +78,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         }
 
         cluster.releaseAfterWriting();
+        indexContext.endBalancing();
         //printSizes("Sizes after balancing");
     }
 

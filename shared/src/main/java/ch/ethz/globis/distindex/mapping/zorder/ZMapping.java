@@ -77,11 +77,12 @@ public class ZMapping implements KeyMapping<long[]>{
     public void add(List<String> hostIds) {
         checkConsistency();
 
-        this.hosts.addAll(hostIds);
         String[] hosts = hostIds.toArray(new String[hostIds.size()]);
         BST bst = BST.fromArray(hosts);
 
         updateRegions(bst.asMap());
+        this.hosts = bst.leaves();
+
         updateTree();
     }
 
@@ -97,9 +98,11 @@ public class ZMapping implements KeyMapping<long[]>{
     public void add(String hostId) {
         checkConsistency();
 
-        this.hosts.add(hostId);
         //add the nest hostId to the mapping
-        Map<String, String> mapping = constructNewMapping(hostId);
+        BST bst = constructNewMapping(hostId);
+
+        Map<String, String> mapping = bst.asMap();
+        this.hosts = bst.leaves();
 
         //reconstruct the set of regions mapped to each host
         updateRegions(mapping);
@@ -145,14 +148,14 @@ public class ZMapping implements KeyMapping<long[]>{
      * @param newHostId
      * @return
      */
-    private Map<String, String> constructNewMapping(String newHostId) {
+    private BST constructNewMapping(String newHostId) {
         Set<String> hosts = sizes.keySet();
         BST bst = new BST();
         for (String host : hosts) {
             bst.add(host);
         }
         bst.add(newHostId);
-        return bst.asMap();
+        return bst;
     }
 
     /**
