@@ -255,4 +255,18 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         buffer.get(valueBytes);
         return valueBytes;
     }
+
+    public RollbackBalancingRequest decodeRollbackBalancing(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
+        String mapString = new String(readValue(buffer));
+        if (Strings.isNullOrEmpty(mapString)) {
+            return new RollbackBalancingRequest(requestId, opCode, indexName, mappingVersion);
+        } else {
+            Map<String, String> contents = splitter.split(mapString);
+            return new RollbackBalancingRequest(requestId, opCode, indexName, mappingVersion, contents);
+        }
+    }
 }

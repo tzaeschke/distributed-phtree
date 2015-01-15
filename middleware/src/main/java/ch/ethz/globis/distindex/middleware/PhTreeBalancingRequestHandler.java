@@ -37,11 +37,20 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
             case OpCode.BALANCE_COMMIT:
                 response = handleCommit((CommitBalancingRequest) request);
                 break;
+            case OpCode.BALANCE_ROLLBACK:
+                response = handleRollback((RollbackBalancingRequest) request);
+                break;
             default:
                 response = null;
                 break;
         }
         return response;
+    }
+
+    private Response handleRollback(RollbackBalancingRequest request) {
+        buffer.clear();
+        indexContext.endBalancing();
+        return ackResponse(request);
     }
 
     @Override

@@ -154,6 +154,14 @@ public class RequestEncodeDecodeTest {
     }
 
     @Test
+    public void encodeDecodeRollbackBalancingRequest() {
+        RollbackBalancingRequest request = new RollbackBalancingRequest(1, OpCode.BALANCE_ROLLBACK, "", 1);
+        byte[] encodedRequest = requestEncoder.encode(request);
+        RollbackBalancingRequest decoded = requestDecoder.decodeRollbackBalancing(ByteBuffer.wrap(encodedRequest));
+        assertEquals(request, decoded);
+    }
+
+    @Test
     public void encodeDecodePutBalancingRequest() {
         long[] key = {-1000, 0, 10000, 1, -1};
         String value = new BigInteger(100, new Random()).toString();

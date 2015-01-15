@@ -15,10 +15,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
-import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
-import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
-import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
@@ -61,20 +58,29 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         if (!indexContext.canStartBalancing()) {
             return;
         }
-        ClusterService<long[]> cluster = indexContext.getClusterService();
-        KeyMapping<long[]> mapping = cluster.getMapping();
+        String receiverHostId = null;
+        try {
+            ClusterService<long[]> cluster = indexContext.getClusterService();
+            KeyMapping<long[]> mapping = cluster.getMapping();
 
-        String currentHostId = indexContext.getHostId();
-        String receiverHostId = getHostForSplitting(currentHostId, cluster, mapping);
+            String currentHostId = indexContext.getHostId();
+            receiverHostId = getHostForSplitting(currentHostId, cluster, mapping);
 
-        if (receiverHostId != null) {
-            LOG.info("Host {} attempts balancing to host {} with mapping version " + mapping.getVersion(),
-                    indexContext.getHostId(), receiverHostId);
-            doBalancing(currentHostId, receiverHostId);
-        } else {
-            LOG.warn("Failed to find a proper host for balancing.");
+            if (receiverHostId != null) {
+                LOG.info("Host {} attempts balancing to host {} with mapping version " + mapping.getVersion(),
+                        indexContext.getHostId(), receiverHostId);
+                doBalancing(currentHostId, receiverHostId);
+            } else {
+                LOG.warn("Failed to find a proper host for balancing.");
+            }
+        } catch (Exception e) {
+            LOG.error("Exception encountered during re-balancing.", e);
+            if (receiverHostId != null) {
+                rollbackBalancing(receiverHostId);
+            }
+        } finally {
+            indexContext.endBalancing();
         }
-        indexContext.endBalancing();
         //printSizes("Sizes after balancing");
     }
 
@@ -222,6 +228,19 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         if (response.getStatus() != OpStatus.SUCCESS) {
             String message = String.format("[%s] Receiving host %s did not accept balancing commit", currentHostId, receiverHostId);
             throw new RuntimeException(message);
+        }
+    }
+
+    /**
+     * Send a rollback balancing request.
+     * @param receiverHostId
+     */
+    private void rollbackBalancing(String receiverHostId) {
+        String currentHostId = indexContext.getHostId();
+        RollbackBalancingRequest request = requests.newRollbackBalancing();
+        Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
+        if (response.getStatus() != OpStatus.SUCCESS) {
+            LOG.error("[{}] Receiving host {} did not accept balancing rollback.", currentHostId, receiverHostId);
         }
     }
 

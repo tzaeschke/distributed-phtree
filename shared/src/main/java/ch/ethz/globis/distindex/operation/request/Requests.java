@@ -87,6 +87,10 @@ public class Requests<K, V> {
         return new CommitBalancingRequest(nextId(), OpCode.BALANCE_COMMIT, PLACEHOLDER, mappingVersion());
     }
 
+    public RollbackBalancingRequest newRollbackBalancing() {
+        return new RollbackBalancingRequest(nextId(), OpCode.BALANCE_ROLLBACK, PLACEHOLDER, mappingVersion());
+    }
+
     private int nextId() {
         return ID.incrementAndGet();
     }
