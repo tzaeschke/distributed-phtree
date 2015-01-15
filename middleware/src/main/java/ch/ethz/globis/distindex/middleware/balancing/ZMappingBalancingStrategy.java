@@ -83,7 +83,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     }
 
     private void doBalancing(String currentHostId, String receiverHostId) {
-        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId, receiverHostId);
+        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(currentHostId);
         boolean canBalance = initBalancing(entries.size(), receiverHostId);
         if (canBalance) {
             sendEntries(entries, receiverHostId);
@@ -143,15 +143,13 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         long[] key;
         if (entriesMoved != 0) {
             if (movedToRight) {
-                LOG.info("Balancing to the right interval.");
+                LOG.info("Balancing {} entries to the right interval.", entriesMoved);
                 key = entries.get(0).getKey();
-                zmap.changeIntervalStart(receiverHostId, key);
                 zmap.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
             } else {
-                LOG.info("Balancing to the left interval.");
+                LOG.info("Balancing {} entries to the left interval.", entriesMoved);
                 key = entries.get(entriesMoved - 1).getKey();
                 zmap.changeIntervalEnd(receiverHostId, key);
-                zmap.changeIntervalStart(currentHostId, MultidimUtil.next(key, depth));
             }
             zmap.updateTree();
         }
@@ -231,16 +229,14 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param currentHostId
      * @return
      */
-    private IndexEntryList<long[], byte[]> getEntriesForSplitting(String currentHostId, String receiver) {
-        KeyMapping<long[]> mapping = getMapping();
-        ClusterService<long[]> cluster = indexContext.getClusterService();
-        int entriesToMove = (cluster.getSize(currentHostId) - cluster.getSize(receiver)) / 2;
+    private IndexEntryList<long[], byte[]> getEntriesForSplitting(String currentHostId) {
+        PhTreeV<byte[]> phTree = indexContext.getTree();
+        int treeSize = phTree.size();
+        int entriesToMove = treeSize / 2;
 
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
-        if (mapping.getNext(receiver) != null && mapping.getNext(receiver).equals(currentHostId)) {
-            //move to left
-            movedToRight = false;
-            PVIterator<byte[]> it = indexContext.getTree().queryExtent();
+        PVIterator<byte[]> it = phTree.queryExtent();
+        if (!movedToRight) {
             for (int i = 0; i < entriesToMove; i++) {
                 PVEntry<byte[]> e = it.nextEntry();
                 entries.add(e.getKey(), e.getValue());
@@ -249,10 +245,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
                 it.next();
             }
         } else {
-            //move to right
-            movedToRight = true;
-            PVIterator<byte[]> it = indexContext.getTree().queryExtent();
-            for (int i = 0; i < cluster.getSize(currentHostId) - entriesToMove; i++) {
+            for (int i = 0; i < treeSize - entriesToMove; i++) {
                 if (it.hasNext()) {
                     it.next();
                 }
