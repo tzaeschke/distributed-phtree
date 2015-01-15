@@ -8,6 +8,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ import java.util.concurrent.Executors;
 
 @RunWith(Parameterized.class)
 public class BaseParameterizedTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BaseParameterizedTest.class);
 
     protected static final String HOST = "localhost";
     protected static final int ZK_PORT = 2181;
@@ -39,8 +43,12 @@ public class BaseParameterizedTest {
     @BeforeClass
     public static void initExecutor() throws Exception {
         threadPool = Executors.newFixedThreadPool(32);
-        zkServer = new TestingServer(ZK_PORT);
-        zkServer.start();
+        try {
+            zkServer = new TestingServer(ZK_PORT);
+            zkServer.start();
+        } catch (Exception e) {
+            LOG.warn("Cannot open testing ZK. Attempting to use possible running ZK");
+        }
     }
 
     @AfterClass
@@ -49,7 +57,9 @@ public class BaseParameterizedTest {
             middleware.close();
         }
         threadPool.shutdown();
-        zkServer.close();
+        if (zkServer != null) {
+            zkServer.close();
+        }
     }
 
     public BaseParameterizedTest(int nrServers) throws IOException {
