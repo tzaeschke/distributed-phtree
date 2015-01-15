@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.mapping.zorder;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.util.CollectionUtil;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhTreeRangeV;
 import org.slf4j.Logger;
@@ -34,11 +35,6 @@ public class ZMapping implements KeyMapping<long[]>{
 
     private transient PhTreeRangeV<String> tree;
 
-    /** Mapping from the host ids to the sizes of the hosts. */
-    private Map<String, Integer> sizes;
-
-    private Map<String, long[]> startKeys;
-
     private Map<String, long[]> endKeys;
 
     /** A list of the hosts ids.*/
@@ -63,9 +59,7 @@ public class ZMapping implements KeyMapping<long[]>{
         //FIXME the depth is always set to 64 because the PhTree storing the rectangles only works with 64 bits
         this.service = new ZOrderService(Long.SIZE);
         this.tree = new PhTreeRangeV<>(dim);
-        this.startKeys = new TreeMap<>();
         this.endKeys = new TreeMap<>();
-        this.sizes = new TreeMap<>();
         this.hosts = hosts;
     }
 
@@ -112,13 +106,15 @@ public class ZMapping implements KeyMapping<long[]>{
     public void updateTree() {
         this.tree = new PhTreeRangeV<>(dim);
         long[] start, end;
+        String prevHostId = null;
         for (String hostId : hosts) {
-            start = startKeys.get(hostId);
+            start = getStartKey(prevHostId);
             end = endKeys.get(hostId);
             Set<HBox> regions = service.regionEnvelopeInclusive(start, end);
             for (HBox region : regions) {
                 addRectangleForRegion(hostId, region, dim);
             }
+            prevHostId = hostId;
         }
     }
 
@@ -143,13 +139,27 @@ public class ZMapping implements KeyMapping<long[]>{
         return str;
     }
 
+    private long[] getStartKey(String prevHostId) {
+        if (prevHostId == null) {
+            return getFirstStartKey(dim);
+        } else {
+            long[] key = endKeys.get(prevHostId);
+            return MultidimUtil.next(key, depth);
+        }
+    }
+
+    private long[] getFirstStartKey(int dim) {
+        long[] key = new long[dim];
+        Arrays.fill(key, 0L);
+        return key;
+    }
+
     /**
      * Add the new host to the mapping.
      * @param newHostId
      * @return
      */
     private BST constructNewMapping(String newHostId) {
-        Set<String> hosts = sizes.keySet();
         BST bst = new BST();
         for (String host : hosts) {
             bst.add(host);
@@ -170,13 +180,9 @@ public class ZMapping implements KeyMapping<long[]>{
         for (Map.Entry<String, String> entry : mapping.entrySet()) {
             prefix = entry.getKey();
             host = entry.getValue();
-
-            //for each host
-            long[] start = service.generateRangeStart(prefix, dim);
-            startKeys.put(host, start);
+            //for each host, store the end key
             long[] end = service.generateRangeEnd(prefix, dim);
             endKeys.put(host, end);
-            sizes.put(host, 0);
         }
     }
 
@@ -189,7 +195,6 @@ public class ZMapping implements KeyMapping<long[]>{
      */
     public void remove(String hostId) {
         this.consistent = false;
-        this.sizes.remove(hostId);
         this.hosts.remove(hostId);
     }
 
@@ -210,6 +215,11 @@ public class ZMapping implements KeyMapping<long[]>{
             entry = it.next();
             if (it.hasNext()) {
                 LOG.info("Zmapping: " + this);
+                LOG.info("Lower: " + Arrays.toString(entry.lower()) + " , Upper: " + Arrays.toString(entry.upper()));
+                while (it.hasNext()) {
+                    entry = it.next();
+                    LOG.info("Lower: " + Arrays.toString(entry.lower()) + " , Upper: " + Arrays.toString(entry.upper()));
+                }
                 throw new IllegalStateException("Areas overlapping, more intersections returned for " + Arrays.toString(k));
             }
             host = entry.value();
@@ -316,8 +326,6 @@ public class ZMapping implements KeyMapping<long[]>{
     @Override
     public void clear() {
         this.hosts.clear();
-        this.sizes.clear();
-        this.startKeys.clear();
         this.endKeys.clear();
     }
 
@@ -329,10 +337,6 @@ public class ZMapping implements KeyMapping<long[]>{
     @Override
     public void setVersion(int version) {
         this.version = version;
-    }
-
-    public void changeIntervalStart(String host, long[] start) {
-        this.startKeys.put(host, start);
     }
 
     public void changeIntervalEnd(String host, long[] end) {
@@ -379,7 +383,6 @@ public class ZMapping implements KeyMapping<long[]>{
         if (consistent != mapping.consistent) return false;
         if (dim != mapping.dim) return false;
         if (service != null ? !service.equals(mapping.service) : mapping.service != null) return false;
-        if (sizes != null ? !sizes.equals(mapping.sizes) : mapping.sizes != null) return false;
 
         //FIXME need to also compare the tree
         // if (tree != null ? !tree.toString().equals(mapping.tree.toString()) : mapping.tree != null) return false;
@@ -393,16 +396,22 @@ public class ZMapping implements KeyMapping<long[]>{
         result = 31 * result + (service != null ? service.hashCode() : 0);
         result = 31 * result + (consistent ? 1 : 0);
         result = 31 * result + (tree != null ? tree.hashCode() : 0);
-        result = 31 * result + (sizes != null ? sizes.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "ZMapping{" +
-                "startKeys=" + startKeys +
-                ", endKeys=" + endKeys +
-                '}';
+        String str = "ZMapping: {";
+        str += " version: " + this.getVersion();
+        str += ", ";
+        str += "Mapping: ";
+        str += Arrays.toString(getFirstStartKey(dim));
+        for (String host : hosts) {
+            str += " "  + host + " ";
+            str += Arrays.toString(endKeys.get(host));
+        }
+        str += "\n";
+        return str;
     }
 
     public static void main(String[] args) {
