@@ -47,19 +47,9 @@ public interface ClusterService<K> {
      */
     public void disconnect();
 
-    public void writeCurrentMapping();
-
     public int getSize(String hostId);
 
     public void setSize(String hostId, int size);
 
-    public void lockForReading();
-
-    public void releaseAfterReading();
-
-    public void lockForWriting();
-
-    public void releaseAfterWriting();
-
-    public void sync();
+    public int setIntervalEnd(String hostId, long[] key);
 }

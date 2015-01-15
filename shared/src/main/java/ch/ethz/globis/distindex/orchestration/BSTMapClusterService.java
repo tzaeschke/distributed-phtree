@@ -195,6 +195,11 @@ public class BSTMapClusterService implements ClusterService<long[]> {
 
     }
 
+    @Override
+    public int setIntervalEnd(String hostId, long[] key) {
+        throw new UnsupportedOperationException();
+    }
+
     public void lockForReading() {
 
     }

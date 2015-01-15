@@ -16,6 +16,7 @@ import org.apache.curator.utils.CloseableUtils;
 import org.apache.curator.utils.EnsurePath;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +50,6 @@ public class ZKClusterService implements ClusterService<long[]> {
 
     /** The directory holding the names of the online servers. */
     private static final String SERVERS_PATH = "/servers";
-
-    private static final String RW_LOCK_PATH = "/rw_lock";
-
-    private InterProcessReadWriteLock rwLock;
 
     /** Contains the sizes of each host. */
     private Map<String, Integer> sizes = new HashMap<>();
@@ -139,7 +136,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         initResources();
 
         this.hosts = readCurrentHosts();
-        this.mapping = readCurrentMappingAndLock();
+        this.mapping = readCurrentMapping();
     }
 
     @Override
@@ -147,10 +144,8 @@ public class ZKClusterService implements ClusterService<long[]> {
         closeResources();
     }
 
-    public void writeCurrentMapping() {
-        lockForWriting();
+    private void writeCurrentMapping() {
         writeMapping(mapping);
-        releaseAfterWriting();
     }
 
     @Override
@@ -181,44 +176,23 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     @Override
-    public void lockForReading() {
-        try {
-            this.rwLock.readLock().acquire();
-        } catch (Exception e) {
-            LOG.error("Failed to acquire RW lock for reading.", e);
+    public int setIntervalEnd(String hostId, long[] key) {
+        boolean writeFailed = true;
+        Stat stat = new Stat();
+        while (writeFailed) {
+            this.mapping = readCurrentMapping(stat);
+            this.mapping.changeIntervalEnd(hostId, key);
+            this.mapping.setVersion(this.mapping.getVersion() + 1);
+            try {
+                int version = stat.getVersion();
+                if (null != client.setData().withVersion(version).forPath(MAPPING_PATH, mapping.serialize())) {
+                    writeFailed = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to get stat for path {}", MAPPING_PATH);
+            }
         }
-    }
-
-    @Override
-    public void releaseAfterReading() {
-        try {
-            this.rwLock.readLock().release();
-        } catch (Exception e) {
-            LOG.error("Failed to release RW lock for reading.", e);
-        }
-    }
-
-    @Override
-    public void lockForWriting() {
-        try {
-            this.rwLock.writeLock().acquire();
-        } catch (Exception e) {
-            LOG.error("Failed to acquire RW lock for writing.", e);
-        }
-    }
-
-    @Override
-    public void releaseAfterWriting() {
-        try {
-            this.rwLock.writeLock().release();
-        } catch (Exception e) {
-            LOG.error("Failed to release RW lock for writing.", e);
-        }
-    }
-
-    @Override
-    public void sync() {
-        readCurrentMapping();
+        return mapping.getVersion();
     }
 
     private void readSize(final String hostId) {
@@ -247,8 +221,6 @@ public class ZKClusterService implements ClusterService<long[]> {
             ensurePathExists(SIZE_PATH);
             ensurePathExists(SERVERS_PATH);
             ensurePathExists(MAPPING_PATH);
-            ensurePathExists(RW_LOCK_PATH);
-            this.rwLock = new InterProcessReadWriteLock(client, RW_LOCK_PATH);
         } catch (Exception e) {
             LOG.error("Error initializing resource.", e);
         }
@@ -258,22 +230,14 @@ public class ZKClusterService implements ClusterService<long[]> {
         CloseableUtils.closeQuietly(client);
     }
 
-    private ZMapping readCurrentMappingAndLock() {
-
-        lockForReading();
-        ZMapping zMapping = null;
-        try {
-            zMapping = readCurrentMapping();
-        } finally {
-            releaseAfterReading();
-        }
-        return zMapping;
+    private ZMapping readCurrentMapping() {
+        return readCurrentMapping(new Stat());
     }
 
-    private ZMapping readCurrentMapping() {
+    private ZMapping readCurrentMapping(Stat stat) {
         ZMapping zMap = null;
         try {
-            byte[] data = client.getData().usingWatcher(new CuratorWatcher() {
+            byte[] data = client.getData().storingStatIn(stat).usingWatcher(new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent watchedEvent) throws Exception {
                     ZMapping newMapping = readCurrentMapping();
@@ -282,7 +246,7 @@ public class ZKClusterService implements ClusterService<long[]> {
                     } else {
                         mapping = newMapping;
                     }
-                    LOG.debug("Host {} just updated its mapping to version {}", hostPort, (mapping != null ) ? mapping.getVersion() : -1);
+                    LOG.debug("Host {} just updated its mapping to version {}", hostPort, (mapping != null) ? mapping.getVersion() : -1);
                 }
             }).forPath(MAPPING_PATH);
             zMap = ZMapping.deserialize(data);
@@ -335,20 +299,5 @@ public class ZKClusterService implements ClusterService<long[]> {
         } catch (Exception e) {
             LOG.error("Problem ensuring that the path exists", e);
         }
-//        EnsurePath ep = new EnsurePath(path);
-//        CuratorZookeeperClient zkClient = client.getZookeeperClient();
-//        try {
-//            RetryLoop retryLoop = zkClient.newRetryLoop();
-//            while (retryLoop.shouldContinue()) {
-//                try {
-//                    ep.ensure(zkClient);
-//                    retryLoop.markComplete();
-//                } catch (Exception e) {
-//                    retryLoop.takeException(e);
-//                }
-//            }
-//        } catch (Exception e) {
-//            LOG.error("Failed to ensure path {} on {}", MAPPING_PATH, hostPort);
-//        }
     }
 }

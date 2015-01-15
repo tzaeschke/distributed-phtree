@@ -75,11 +75,12 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
             }
         }
         updateBalancingVersion(request);
-        indexContext.getClusterService().setSize(indexContext.getHostId(), indexContext.getTree().size());
+        String currentHostId = indexContext.getHostId();
+        indexContext.getClusterService().setSize(currentHostId, tree.size());
         if (!indexContext.endBalancing()) {
             throw new RuntimeException("Another execution thread is performing balancing in parallel!");
         }
-        LOG.info("Commit finished.");
+        LOG.info("{} Received commit request.", currentHostId);
         return ackResponse(request);
     }
 
