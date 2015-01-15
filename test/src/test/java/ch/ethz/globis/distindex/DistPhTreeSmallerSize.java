@@ -69,7 +69,6 @@ public class DistPhTreeSmallerSize extends BaseParameterizedTest {
                 {Integer.MIN_VALUE, Integer.MIN_VALUE}
         };
         for (long[] key : keys) {
-            System.out.println("Searching for " + Arrays.toString(key));
             phTree.put(key, 0);
             assertTrue(phTree.contains(key));
         }

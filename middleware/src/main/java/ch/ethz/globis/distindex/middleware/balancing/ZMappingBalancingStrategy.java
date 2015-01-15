@@ -174,16 +174,18 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     /**
      * Send the entries received as an argument to the host;
      * @param entries
-     * @param receivedHostId
+     * @param receiverHostId
      */
-    private void sendEntries(IndexEntryList<long[], byte[]> entries, String receivedHostId) {
+    private void sendEntries(IndexEntryList<long[], byte[]> entries, String receiverHostId) {
+        String currentHostId = indexContext.getHostId();
         PutBalancingRequest<long[]> request;
         Response response;
         for (IndexEntry<long[], byte[]> entry : entries) {
             request = requests.newPutBalancing(entry.getKey(), entry.getValue());
-            response = requestDispatcher.send(receivedHostId, request, BaseResponse.class);
+            response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
             if (response.getStatus() != OpStatus.SUCCESS) {
-                throw new RuntimeException("Receiving host did not accept entry initialization");
+                String message = String.format("[%s] Receiving host %s did not accept entry during balancing", currentHostId, receiverHostId);
+                throw new RuntimeException(message);
             }
         }
     }
@@ -195,10 +197,11 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private boolean initBalancing(int entriesToSend, String receiverHostId) {
+        String currentHostId = indexContext.getHostId();
         InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
-            LOG.error("Receiving host {} did not accept balancing initialization.", receiverHostId);
+            LOG.error("[{}] Receiving host {} did not accept balancing initialization.", currentHostId, receiverHostId);
             return false;
         }
         return true;
@@ -211,13 +214,14 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private void commitBalancing( String receiverHostId) {
         indexContext.setLastBalancingVersion(newVersion);
-
+        String currentHostId = indexContext.getHostId();
         CommitBalancingRequest request = requests.newCommitBalancing();
         request.addParamater("balancingVersion", newVersion);
 
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
-            throw new RuntimeException("Receiving host did not accept balancing commit");
+            String message = String.format("[%s] Receiving host %s did not accept balancing commit", currentHostId, receiverHostId);
+            throw new RuntimeException(message);
         }
     }
 

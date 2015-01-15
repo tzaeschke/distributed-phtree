@@ -112,13 +112,15 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receivedHostId
      */
     private void sendEntries(IndexEntryList<long[], byte[]> entries, String receivedHostId) {
+        String currentHostId = indexContext.getHostId();
         PutBalancingRequest<long[]> request;
         Response response;
         for (IndexEntry<long[], byte[]> entry : entries) {
             request = requests.newPutBalancing(entry.getKey(), entry.getValue());
             response = requestDispatcher.send(receivedHostId, request, BaseResponse.class);
             if (response.getStatus() != OpStatus.SUCCESS) {
-                throw new RuntimeException("Receiving host did not accept entry initialization");
+                String message = String.format("[%s] Receiving host %s did not accept entry", currentHostId, receivedHostId);
+                throw new RuntimeException(message);
             }
         }
     }
@@ -130,10 +132,12 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void initBalancing(int entriesToSend, String receiverHostId) {
+        String currentHostId = indexContext.getHostId();
         InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
-            throw new RuntimeException("Receiving host did not accept balancing initialization");
+            String message = String.format("[%s] Receiving host %s did not accept balancing initialization", currentHostId, receiverHostId);
+            throw new RuntimeException(message);
         }
     }
 
@@ -143,10 +147,12 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      * @param receiverHostId
      */
     private void commitBalancing( String receiverHostId) {
+        String currentHostId = indexContext.getHostId();
         CommitBalancingRequest request = requests.newCommitBalancing();
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
-            throw new RuntimeException("Receiving host did not accept balancing commit");
+            String message = String.format("[%s] Receiving host %s did not accept balancing commit", currentHostId, receiverHostId);
+            throw new RuntimeException(message);
         }
     }
 
