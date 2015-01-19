@@ -27,7 +27,7 @@ public class TestConcurrent extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{{2}, {3}});
+        return Arrays.asList(new Object[][]{{2}, {3}, {4}});
     }
 
     @Before
