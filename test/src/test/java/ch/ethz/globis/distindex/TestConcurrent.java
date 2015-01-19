@@ -92,6 +92,44 @@ public class TestConcurrent extends BaseParameterizedTest {
         }
     }
 
+    @Test
+    public void testConcurrentInserts_SameHost() {
+        int dim = 3;
+        int depth = 64;
+        phTrees[0].create(dim, depth);
+        phTrees[1].create(dim, depth);
+        ExecutorService pool = Executors.newFixedThreadPool(NR_CLIENTS);
+
+        int entries = 153;
+        long[][] keysFirst = new long[entries][dim], keysSecond = new long[entries][dim];
+        for (int i = 1; i < entries; i++) {
+            for (int j = 0; j < dim; j++) {
+                keysFirst[i][j] = i;
+                keysSecond[i][j] = i + entries;
+            }
+        }
+        ThreadedInserter pos = new ThreadedInserter(keysFirst, phTrees[0]);
+        ThreadedInserter neg = new ThreadedInserter(keysSecond, phTrees[1]);
+
+        pool.execute(pos);
+        pool.execute(neg);
+        pool.shutdown();
+        try {
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (long[] key : keysFirst) {
+            assertTrue(phTrees[0].contains(key));
+            assertTrue(phTrees[1].contains(key));
+        }
+        for (long[] key : keysSecond) {
+            assertTrue(phTrees[0].contains(key));
+            assertTrue(phTrees[1].contains(key));
+        }
+    }
+
     class ThreadedInserter implements Runnable {
 
         long[][] keys;
