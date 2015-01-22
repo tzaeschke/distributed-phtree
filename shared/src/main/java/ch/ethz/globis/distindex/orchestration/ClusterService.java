@@ -52,4 +52,14 @@ public interface ClusterService<K> {
     public void setSize(String hostId, int size);
 
     public int setIntervalEnd(String hostId, long[] key);
+
+    /**
+     * Register the host as a free host. This host will not be part of the cluster until a host
+     * that is full will pick it.
+     *
+     * @param hostId                    The id of the host to be marked as free.
+     */
+    public void registerFreeHost(String hostId);
+
+    public void deregisterFreeHost(String hostId);
 }

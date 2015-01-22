@@ -51,6 +51,9 @@ public class ZKClusterService implements ClusterService<long[]> {
     /** The directory holding the names of the online servers. */
     private static final String SERVERS_PATH = "/servers";
 
+    /** The directory where the free servers are registered */
+    private static final String FREE_PATH = "/free";
+
     /** Contains the sizes of each host. */
     private Map<String, Integer> sizes = new HashMap<>();
 
@@ -195,6 +198,31 @@ public class ZKClusterService implements ClusterService<long[]> {
         return mapping.getVersion();
     }
 
+    @Override
+    public void registerFreeHost(String hostId) {
+        String path = FREE_PATH + "/" + hostId;
+        try {
+            client.setData().forPath(path);
+        } catch (Exception e) {
+            LOG.error("Failed to write host to free list.");
+        }
+    }
+
+    @Override
+    public void deregisterFreeHost(String hostId) {
+        String path = FREE_PATH + "/" + hostId;
+        try {
+            client.delete().forPath(path);
+        } catch (Exception e) {
+            LOG.error("Failed to write host to free list.");
+        }
+    }
+
+    public void popFreeHost(String hostId) {
+
+    }
+
+
     private void readSize(final String hostId) {
         String path = sizePath(hostId);
 
@@ -221,6 +249,7 @@ public class ZKClusterService implements ClusterService<long[]> {
             ensurePathExists(SIZE_PATH);
             ensurePathExists(SERVERS_PATH);
             ensurePathExists(MAPPING_PATH);
+            ensurePathExists(FREE_PATH);
         } catch (Exception e) {
             LOG.error("Error initializing resource.", e);
         }

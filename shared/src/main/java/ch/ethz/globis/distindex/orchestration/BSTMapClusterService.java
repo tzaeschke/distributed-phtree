@@ -200,24 +200,14 @@ public class BSTMapClusterService implements ClusterService<long[]> {
         throw new UnsupportedOperationException();
     }
 
-    public void lockForReading() {
-
+    @Override
+    public void registerFreeHost(String hostId) {
+        throw new UnsupportedOperationException();
     }
 
-    public void releaseAfterReading() {
-
-    }
-
-    public void lockForWriting() {
-
-    }
-
-    public void releaseAfterWriting() {
-
-    }
-
-    public void sync() {
-        readCurrentMapping();
+    @Override
+    public void deregisterFreeHost(String hostId) {
+        throw new UnsupportedOperationException();
     }
 
     private void startZK() {

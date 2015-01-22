@@ -22,6 +22,9 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(IndexMiddleware.class);
 
+    /** Wether the host joins as free or not. */
+    private boolean joinedAsFree = false;
+
     /** The host on which the middleware is running */
     private String host;
 
@@ -62,7 +65,11 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
 
             //register as a viable host to the cluster service
             clusterService.connect();
-            clusterService.registerHost(getHostId());
+            if (joinedAsFree) {
+                clusterService.registerFreeHost(getHostId());
+            } else {
+                clusterService.registerHost(getHostId());
+            }
             isRunning = true;
 
             f.channel().closeFuture().sync();
@@ -126,5 +133,13 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
 
     public int getPort() {
         return port;
+    }
+
+    public boolean isJoinedAsFree() {
+        return joinedAsFree;
+    }
+
+    public void setJoinedAsFree(boolean joinedAsFree) {
+        this.joinedAsFree = joinedAsFree;
     }
 }
