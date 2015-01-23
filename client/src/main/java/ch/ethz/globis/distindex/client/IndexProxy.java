@@ -222,7 +222,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         boolean versionOutdated;
         List<IntegerResponse> responses;
         do {
-            List<String> hostIds = clusterService.getOnlineHosts();
+            List<String> hostIds = clusterService.getMapping().get();
             BaseRequest request = requests.newGetDim();
 
             responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);
@@ -246,7 +246,7 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         boolean versionOutdated;
         List<IntegerResponse> responses;
         do {
-            List<String> hostIds = clusterService.getOnlineHosts();
+            List<String> hostIds = clusterService.getMapping().get();
             BaseRequest request = requests.newGetDepth();
 
             responses = requestDispatcher.send(hostIds, request, IntegerResponse.class);

@@ -51,7 +51,7 @@ public interface ClusterService<K> {
 
     public void setSize(String hostId, int size);
 
-    public int setIntervalEnd(String hostId, long[] key);
+    public int setIntervalEnd(String hostId, long[] key, String freeHostId);
 
     /**
      * Register the host as a free host. This host will not be part of the cluster until a host
@@ -61,5 +61,5 @@ public interface ClusterService<K> {
      */
     public void registerFreeHost(String hostId);
 
-    public void deregisterFreeHost(String hostId);
+    public String getNextFreeHost();
 }

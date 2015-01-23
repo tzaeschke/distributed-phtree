@@ -107,7 +107,7 @@ public class ZMappingTest {
         long[] key = { 50L, 50L};
         assertEquals(currentHostId, mapping.get(key));
 
-        mapping.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth));
+        mapping.changeIntervalEnd(currentHostId, MultidimUtil.previous(key, depth), null);
         mapping.updateTree();
 
         assertEquals(receiverHostId, mapping.get(key));
@@ -133,7 +133,7 @@ public class ZMappingTest {
         long[] key = { -50L, -50L};
         assertEquals(currentHostId, mapping.get(key));
 
-        mapping.changeIntervalEnd(receiverHostId, key);
+        mapping.changeIntervalEnd(receiverHostId, key, null);
         mapping.updateTree();
 
         assertEquals(receiverHostId, mapping.get(key));

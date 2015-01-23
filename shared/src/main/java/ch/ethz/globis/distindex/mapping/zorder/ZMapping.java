@@ -339,8 +339,17 @@ public class ZMapping implements KeyMapping<long[]>{
         this.version = version;
     }
 
-    public void changeIntervalEnd(String host, long[] end) {
+    public void changeIntervalEnd(String host, long[] end, String newHostId) {
+        if (newHostId != null) {
+            this.endKeys.put(newHostId, this.endKeys.get(host));
+            addToHostsRight(host, newHostId);
+        }
         this.endKeys.put(host, end);
+    }
+
+    private void addToHostsRight(String hostId, String newHostId) {
+        int index = Collections.binarySearch(hosts, hostId);
+        this.hosts.add(index + 1, newHostId);
     }
 
     /**

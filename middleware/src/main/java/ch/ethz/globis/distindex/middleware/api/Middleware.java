@@ -14,4 +14,8 @@ public interface Middleware extends Closeable, AutoCloseable {
     public boolean isRunning();
 
     public <K, V> IOHandler<K, V> getHandler();
+
+    public boolean isJoinedAsFree();
+
+    public void setJoinedAsFree(boolean joinedAsFree);
 }

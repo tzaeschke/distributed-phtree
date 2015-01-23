@@ -8,10 +8,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class ZKClusterServiceTest {
 
@@ -47,7 +47,43 @@ public class ZKClusterServiceTest {
     }
 
     @Test
-    public void testHosts() {
+    public void testFreeHosts() {
+        ClusterService<long[]> freeHost1 = null, freeHost2 = null, client = null;
+        final String freeHostId1 = "one";
+        final String freeHostId2 = "two";
+        List<String> hostIds = new ArrayList<String>() {{ add(freeHostId1);add(freeHostId2); }};
+        try (TestingServer zk = newZK(ZK_PORT)) {
+            zk.start();
+            freeHost1 = new ZKClusterService(ZK_HOST, ZK_PORT);
+            freeHost2 = new ZKClusterService(ZK_HOST, ZK_PORT);
+            client = new ZKClusterService(ZK_HOST, ZK_PORT);
+            startClusterServices(freeHost1, freeHost2, client);
+            freeHost1.registerFreeHost(freeHostId1);
+            freeHost2.registerFreeHost(freeHostId2);
+
+            String freeHostId = client.getNextFreeHost();
+            assertNotNull(freeHostId);
+            assertTrue(hostIds.contains(freeHostId));
+            hostIds.remove(freeHostId);
+
+            freeHostId = client.getNextFreeHost();
+            assertNotNull(freeHostId);
+            assertTrue(hostIds.contains(freeHostId));
+            hostIds.remove(freeHostId);
+
+            freeHostId = client.getNextFreeHost();
+            assertNull(freeHostId);
+
+
+        } catch (Exception e) {
+            LOG.error("An exception occurred ", e);
+        } finally {
+            closeClusterServices(freeHost1, freeHost2, client);
+        }
+    }
+
+    @Test
+    public void testRegisterHost() {
         ClusterService<long[]> reader = null, writer = null;
         try (TestingServer zk = newZK(ZK_PORT)) {
             zk.start();
@@ -62,6 +98,16 @@ public class ZKClusterServiceTest {
             List<String> onlineHosts = reader.getOnlineHosts();
             assertNotNull(onlineHosts);
             assertEquals(2, onlineHosts.size());
+
+            writer.deregisterHost("one");
+            onlineHosts = reader.getOnlineHosts();
+            assertNotNull(onlineHosts);
+            assertEquals(1, onlineHosts.size());
+
+            writer.deregisterHost("two");
+            onlineHosts = reader.getOnlineHosts();
+            assertNotNull(onlineHosts);
+            assertEquals(0, onlineHosts.size());
         }  catch (Exception e) {
             LOG.error("An exception occurred ", e);
             if (reader != null) {
@@ -77,4 +123,17 @@ public class ZKClusterServiceTest {
         TestingServer zk = new TestingServer(port);
         return zk;
     }
+
+    private void startClusterServices(ClusterService<long[]>... clusterServices) {
+        for (ClusterService<long[]> clusterService :  clusterServices) {
+            clusterService.connect();
+        }
+    }
+
+    private void closeClusterServices(ClusterService<long[]>... clusterServices) {
+        for (ClusterService<long[]> clusterService :  clusterServices) {
+            clusterService.disconnect();
+        }
+    }
+
 }

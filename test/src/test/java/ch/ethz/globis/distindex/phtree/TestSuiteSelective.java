@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 @Ignore
 @RunWith(org.junit.runners.Suite.class)
-@Suite.SuiteClasses({TestNearestNeighbour.class})
+@Suite.SuiteClasses({TestNearestNeighbour.class, TestIndexQueries.class, TestIndexInsertion.class, TestValues.class, TestValuesD.class})
 public class TestSuiteSelective {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);

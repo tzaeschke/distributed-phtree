@@ -16,11 +16,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class DistPhTreeSmallerSize extends BaseParameterizedTest {
+public class TestSmallerSize extends BaseParameterizedTest {
 
     private PHTreeIndexProxy<Integer> phTree;
 
-    public DistPhTreeSmallerSize(int nrServers) throws IOException {
+    public TestSmallerSize(int nrServers) throws IOException {
         super(nrServers, true);
     }
 

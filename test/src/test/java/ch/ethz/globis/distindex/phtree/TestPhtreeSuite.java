@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+/**
+ * Do not execute the full test-suite because of the HighDimension test.
+ */
 @Ignore
 public class TestPhtreeSuite extends TestSuite {
 

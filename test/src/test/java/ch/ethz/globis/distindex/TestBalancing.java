@@ -16,13 +16,13 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 
-public class DistPHTreeBalancingTest extends BaseParameterizedTest {
+public class TestBalancing extends BaseParameterizedTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DistPHTreeBalancingTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TestBalancing.class);
 
     private PHTreeIndexProxy<String> phTree;
 
-    public DistPHTreeBalancingTest(int nrServers) throws IOException {
+    public TestBalancing(int nrServers) throws IOException {
         super(nrServers, true);
     }
 

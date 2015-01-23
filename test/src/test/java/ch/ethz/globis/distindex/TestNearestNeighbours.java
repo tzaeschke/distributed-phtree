@@ -1,4 +1,4 @@
-package ch.ethz.globis.distindex.phtree;
+package ch.ethz.globis.distindex;
 
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;

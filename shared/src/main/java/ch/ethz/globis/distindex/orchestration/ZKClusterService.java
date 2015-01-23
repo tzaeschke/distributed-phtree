@@ -179,12 +179,16 @@ public class ZKClusterService implements ClusterService<long[]> {
     }
 
     @Override
-    public int setIntervalEnd(String hostId, long[] key) {
+    public int setIntervalEnd(String hostId, long[] key, String freeHostId) {
+        if (freeHostId != null) {
+            addToHostsRight(hostId, freeHostId);
+        }
+        //FIXME maybe there will be some inconsistency if updateTree is not called before writing
         boolean writeFailed = true;
         Stat stat = new Stat();
         while (writeFailed) {
             this.mapping = readCurrentMapping(stat);
-            this.mapping.changeIntervalEnd(hostId, key);
+            this.mapping.changeIntervalEnd(hostId, key, freeHostId);
             this.mapping.setVersion(this.mapping.getVersion() + 1);
             try {
                 int version = stat.getVersion();
@@ -198,30 +202,57 @@ public class ZKClusterService implements ClusterService<long[]> {
         return mapping.getVersion();
     }
 
+    private void addToHostsRight(String hostId, String newHostId) {
+        int index = Collections.binarySearch(hosts, hostId);
+        this.hosts.add(index + 1, newHostId);
+        registerNewHostId(newHostId);
+    }
+
     @Override
     public void registerFreeHost(String hostId) {
         String path = FREE_PATH + "/" + hostId;
         try {
-            client.setData().forPath(path);
+            client.create().forPath(path);
         } catch (Exception e) {
-            LOG.error("Failed to write host to free list.");
+            LOG.error("Failed to write host to free list.", e);
         }
     }
 
     @Override
-    public void deregisterFreeHost(String hostId) {
-        String path = FREE_PATH + "/" + hostId;
+    public String getNextFreeHost() {
+        String freeHostId = null;
+        Stat freePathStat = new Stat();
         try {
-            client.delete().forPath(path);
+            List<String> children = client.getChildren().storingStatIn(freePathStat).forPath(FREE_PATH);
+            if (children.size() > 0) {
+                if (removeChild(FREE_PATH, children.get(0), freePathStat)) {
+                    freeHostId = children.get(0);
+                }
+            }
         } catch (Exception e) {
-            LOG.error("Failed to write host to free list.");
+            LOG.error("Error ocurred when trying to obtain the children of path {}", FREE_PATH);
         }
+
+        return freeHostId;
     }
 
-    public void popFreeHost(String hostId) {
-
+    private boolean removeChild(String parentPath, String childId, Stat parentStat) {
+        int parentVersion = parentStat.getVersion();
+        boolean removed = false;
+        String childPath = parentPath + "/" + childId;
+        try {
+            client.inTransaction()
+                    .check().withVersion(parentVersion).forPath(parentPath)
+                    .and()
+                    .delete().forPath(childPath)
+                    .and()
+                    .commit();
+            removed = true;
+        } catch (Exception e) {
+            LOG.info("Free host with path {} was already removed.", childId);
+        }
+        return removed;
     }
-
 
     private void readSize(final String hostId) {
         String path = sizePath(hostId);
