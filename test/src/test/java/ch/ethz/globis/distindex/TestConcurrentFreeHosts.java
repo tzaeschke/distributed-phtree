@@ -4,8 +4,11 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.test.BaseFreeParameterizedTest;
 import org.junit.*;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +33,14 @@ public class TestConcurrentFreeHosts extends BaseFreeParameterizedTest {
     @AfterClass
     public static void restoredBalancingParameters() {
         PhTreeRequestHandler.THRESHOLD = Integer.MAX_VALUE;
+    }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {1, 2},
+                {2, 2}
+        });
     }
 
     @Before

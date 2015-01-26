@@ -37,7 +37,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { {16} });
+        return Arrays.asList(new Object[][] { {1}, {16} });
     }
 
     public TestNearestNeighbours(int nrServers) throws IOException {
