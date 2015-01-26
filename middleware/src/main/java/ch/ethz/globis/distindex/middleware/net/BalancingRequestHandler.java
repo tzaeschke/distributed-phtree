@@ -5,7 +5,6 @@ import ch.ethz.globis.distindex.operation.response.Response;
 
 public interface BalancingRequestHandler<K> {
 
-
     public Response handleInit(InitBalancingRequest request);
 
     public Response handlePut(PutBalancingRequest<K> request);

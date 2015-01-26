@@ -5,6 +5,9 @@ import ch.ethz.globis.disindex.codec.ByteResponseEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseEncoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
+import ch.ethz.globis.distindex.middleware.balancing.BalancingDaemon;
+import ch.ethz.globis.distindex.middleware.balancing.BalancingStrategy;
+import ch.ethz.globis.distindex.middleware.balancing.ZMappingBalancingStrategy;
 import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
@@ -25,9 +28,12 @@ public class PhTreeIndexMiddlewareFactory {
         BalancingRequestHandler<long[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
         RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
         ResponseEncoder responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
+        BalancingStrategy balancingStrategy = new ZMappingBalancingStrategy(indexContext);
+
+        BalancingDaemon balancingDaemon = new BalancingDaemon(indexContext, balancingStrategy, 10L);
 
         IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, balancingRequestHandler, requestDecoder, responseEncoder);
-        return new IndexMiddleware<>(host, port, clusterService, ioHandler);
+        return new IndexMiddleware<>(host, port, clusterService, ioHandler, balancingDaemon);
     }
 
     public static IndexMiddleware newPhTree(String host, int port, String zkHost, int zkPort) {

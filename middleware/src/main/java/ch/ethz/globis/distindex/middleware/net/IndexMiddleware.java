@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.middleware.IOHandler;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
+import ch.ethz.globis.distindex.middleware.balancing.BalancingDaemon;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -46,18 +47,24 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     /** The cluster service used to notify */
     private ClusterService clusterService;
 
-    public IndexMiddleware(String host, int port, ClusterService clusterService, IOHandler<K, V> handler) {
+    private BalancingDaemon balancingDaemon;
+
+    public IndexMiddleware(String host, int port, ClusterService clusterService, IOHandler<K, V> handler,
+                           BalancingDaemon balancingDaemon) {
         this.clusterService = clusterService;
         this.port = port;
         this.host = host;
         this.handler = handler;
+        this.balancingDaemon = balancingDaemon;
     }
 
     @Override
     public void run() {
+
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
 
+        balancingDaemon.run();
         try {
             //initialize the server channels
             ServerBootstrap b = initServerBootstrap(handler);
@@ -89,6 +96,7 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
         if (bossGroup == null || workerGroup == null) {
             throw new IllegalStateException("The thread pools are not properly initialized");
         }
+        balancingDaemon.close();
         clusterService.disconnect();
         closeEventLoops();
         LOG.info("Shutting down middleware {} {} ", host, port);

@@ -32,15 +32,12 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     private static int opCount = 0;
     /** The index context associated with this handler. */
     private IndexContext indexContext;
-    /** The balancing strategy used */
-    private BalancingStrategy balancingStrategy;
 
     private Map<String, PVIterator<byte[]>> iterators;
     private Map<String, Set<String>> clientIteratorMapping;
 
     public PhTreeRequestHandler(IndexContext indexContext) {
         this.indexContext = indexContext;
-        this.balancingStrategy = new ZMappingBalancingStrategy(indexContext);
         this.iterators = new HashMap<>();
         this.clientIteratorMapping = new HashMap<>();
     }
@@ -194,7 +191,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             results.add(key, previous);
         } else {
             //only need to check balancing if we actually inserted something
-            checkBalancing();
+            checkNeedForSizeUpdate();
         }
         return createResponse(request, results);
     }
@@ -212,7 +209,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             value = phTree.remove(key);
         }
         if (value != null) {
-            checkBalancing();
+            checkNeedForSizeUpdate();
         }
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>(key, value);
         return createResponse(request, results);
@@ -328,16 +325,13 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return response;
     }
 
-    private void checkBalancing() {
+    private void checkNeedForSizeUpdate() {
         opCount += 1;
         if (opCount > (THRESHOLD / 2)) {
             LOG.debug("Updating size for host {}", indexContext.getHostId());
             opCount = 0;
             ClusterService<long[]> cluster = indexContext.getClusterService();
             cluster.setSize(indexContext.getHostId(), tree().size());
-        }
-        if (tree().size() > THRESHOLD) {
-            balancingStrategy.balance();
         }
     }
 
