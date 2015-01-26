@@ -9,11 +9,11 @@ public class BalancingDaemonTest {
 
     @Test
     public void testBalancingCheck() {
-        BalancingDaemon daemon = new BalancingDaemon(null, null, 1000L);
+        BalancingDaemon daemon = new BalancingDaemon(null, null, 10L);
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(daemon);
         try {
-            Thread.sleep(10000);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
