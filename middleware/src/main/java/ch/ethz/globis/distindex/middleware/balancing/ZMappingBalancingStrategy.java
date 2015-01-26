@@ -83,7 +83,6 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         } finally {
             indexContext.endBalancing();
         }
-        //printSizes("Sizes after balancing");
     }
 
     private void doBalancing(String currentHostId, String receiverHostId) {
@@ -95,7 +94,6 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
             commitBalancing(receiverHostId);
             removeEntries(entries);
-
         }
     }
 

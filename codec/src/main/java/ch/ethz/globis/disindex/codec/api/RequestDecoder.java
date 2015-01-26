@@ -39,4 +39,6 @@ public interface RequestDecoder<K, V> {
     public PutBalancingRequest<K> decodePutBalancing(ByteBuffer buffer);
 
     public CommitBalancingRequest decodeCommitBalancing(ByteBuffer buffer);
+
+    public RollbackBalancingRequest decodeRollbackBalancing(ByteBuffer buffer);
 }

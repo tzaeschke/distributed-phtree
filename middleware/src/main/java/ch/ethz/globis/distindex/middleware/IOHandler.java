@@ -19,12 +19,12 @@ public class IOHandler<K, V> {
     private static final Logger LOG = LoggerFactory.getLogger(IOHandler.class);
 
     private RequestHandler<K, V> requestHandler;
-    private BalancingRequestHandler<K, V> balancingRequestHandler;
+    private BalancingRequestHandler<K> balancingRequestHandler;
     private RequestDecoder<K, V> decoder;
     private ResponseEncoder encoder;
 
     public IOHandler(RequestHandler<K, V> requestHandler,
-                     BalancingRequestHandler<K, V> balancingRequestHandler,
+                     BalancingRequestHandler<K> balancingRequestHandler,
                      RequestDecoder<K, V> decoder,
                      ResponseEncoder encoder) {
         this.requestHandler = requestHandler;
@@ -88,6 +88,9 @@ public class IOHandler<K, V> {
                 case OpCode.BALANCE_COMMIT:
                     response = handleBalanceCommit(buffer);
                     break;
+                case OpCode.BALANCE_ROLLBACK:
+                    response = handleBalanceRollback(buffer);
+                    break;
                 case OpCode.STATS:
                     response = handleStatsRequest(buffer);
                     break;
@@ -146,6 +149,12 @@ public class IOHandler<K, V> {
     private ByteBuffer handleBalanceCommit(ByteBuffer buffer) {
         CommitBalancingRequest request = decoder.decodeCommitBalancing(buffer);
         Response response = balancingRequestHandler.handleCommit(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleBalanceRollback(ByteBuffer buffer) {
+        RollbackBalancingRequest request = decoder.decodeRollbackBalancing(buffer);
+        Response response = balancingRequestHandler.handleRollback(request);
         return encodeResponse(response);
     }
 

@@ -22,7 +22,7 @@ public class PhTreeIndexMiddlewareFactory {
         indexContext.setClusterService(clusterService);
 
         RequestHandler<long[], byte[]> requestHandler = new PhTreeRequestHandler(indexContext);
-        BalancingRequestHandler<long[], byte[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
+        BalancingRequestHandler<long[]> balancingRequestHandler = new PhTreeBalancingRequestHandler(indexContext);
         RequestDecoder<long[], byte[]> requestDecoder = new ByteRequestDecoder<>(new MultiLongEncoderDecoder());
         ResponseEncoder responseEncoder = new ByteResponseEncoder<>(new MultiLongEncoderDecoder());
 

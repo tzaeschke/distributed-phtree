@@ -3,7 +3,6 @@ package ch.ethz.globis.distindex.middleware;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
-import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
@@ -12,7 +11,7 @@ import ch.ethz.globis.pht.PhTreeV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<long[], byte[]> {
+public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<long[]> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PhTreeBalancingRequestHandler.class);
 
@@ -24,31 +23,13 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
     }
 
     @Override
-    public Response handle(BalancingRequest request) {
-        byte opCode = request.getOpCode();
-        Response response;
-        switch (opCode) {
-            case OpCode.BALANCE_INIT:
-                response = handleInit((InitBalancingRequest) request);
-                break;
-            case OpCode.BALANCE_PUT:
-                response = handlePut((PutBalancingRequest<long[]>) request);
-                break;
-            case OpCode.BALANCE_COMMIT:
-                response = handleCommit((CommitBalancingRequest) request);
-                break;
-            case OpCode.BALANCE_ROLLBACK:
-                response = handleRollback((RollbackBalancingRequest) request);
-                break;
-            default:
-                response = null;
-                break;
+    public Response handleRollback(RollbackBalancingRequest request) {
+        PhTreeV<byte[]> tree = indexContext.getTree();
+        synchronized (tree) {
+            for (IndexEntry<long[], byte[]> entry : buffer) {
+                tree.remove(entry.getKey());
+            }
         }
-        return response;
-    }
-
-    private Response handleRollback(RollbackBalancingRequest request) {
-        buffer.clear();
         indexContext.endBalancing();
         return ackResponse(request);
     }
@@ -69,20 +50,19 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
     public Response handlePut(PutBalancingRequest<long[]> request) {
         long[] key = request.getKey();
         byte[] value = request.getValue();
-        buffer.add(key, value);
 
+        buffer.add(key, value);
+        PhTreeV<byte[]> tree = indexContext.getTree();
+        synchronized (tree) {
+            indexContext.getTree().put(key, value);
+        }
         return ackResponse(request);
     }
 
     @Override
     public Response handleCommit(CommitBalancingRequest request) {
         PhTreeV<byte[]> tree = indexContext.getTree();
-        synchronized (tree) {
-
-            for (IndexEntry<long[], byte[]> entry : buffer) {
-                tree.put(entry.getKey(), entry.getValue());
-            }
-        }
+        buffer.clear();
         updateBalancingVersion(request);
         String currentHostId = indexContext.getHostId();
         indexContext.getClusterService().setSize(currentHostId, tree.size());
