@@ -81,6 +81,11 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
         removeEntries(entries);
     }
 
+    @Override
+    public void balanceAndRemove() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Updates the key mapping after the currentHost zone was split in two and half of it
      * was moved to the receiver host.

@@ -1,7 +1,5 @@
 package ch.ethz.globis.distindex.middleware.api;
 
-import ch.ethz.globis.distindex.middleware.IOHandler;
-
 import java.io.Closeable;
 
 /**
@@ -13,9 +11,7 @@ public interface Middleware extends Closeable, AutoCloseable {
 
     public boolean isRunning();
 
-    public <K, V> IOHandler<K, V> getHandler();
-
-    public boolean isJoinedAsFree();
-
     public void setJoinedAsFree(boolean joinedAsFree);
+
+    public void remove();
 }

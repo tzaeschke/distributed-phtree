@@ -42,6 +42,11 @@ public class BalancingDaemon implements Runnable {
         this.service.shutdown();
     }
 
+    public void balanceAndRemove() {
+        close();
+        balancingStrategy.balanceAndRemove();
+    }
+
     class BalancingCheckerTask implements Runnable {
 
         BalancingDaemon parent;

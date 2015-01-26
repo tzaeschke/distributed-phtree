@@ -108,8 +108,9 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     }
 
     @Override
-    public <K, V> IOHandler<K, V> getHandler() {
-        return (IOHandler<K, V>) handler;
+    public void remove() {
+        balancingDaemon.balanceAndRemove();
+        close();
     }
 
     private <K, V> ServerBootstrap initServerBootstrap(final IOHandler<K, V> handler) {
@@ -150,4 +151,5 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     public void setJoinedAsFree(boolean joinedAsFree) {
         this.joinedAsFree = joinedAsFree;
     }
+
 }
