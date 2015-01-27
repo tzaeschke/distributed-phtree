@@ -50,8 +50,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         int dim  = Integer.parseInt(request.getParameter("dim"));
         int depth = Integer.parseInt(request.getParameter("depth"));
-        PhTreeV<byte[]> tree = new PhTree3<>(dim, depth);
-        indexContext.setTree(tree);
+        indexContext.initTree(dim, depth);
         opCount = 0;
         return createResponse(request);
     }

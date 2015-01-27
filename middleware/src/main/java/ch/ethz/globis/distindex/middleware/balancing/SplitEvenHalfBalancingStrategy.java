@@ -138,7 +138,7 @@ public class SplitEvenHalfBalancingStrategy implements BalancingStrategy {
      */
     private void initBalancing(int entriesToSend, String receiverHostId) {
         String currentHostId = indexContext.getHostId();
-        InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
+        InitBalancingRequest request = requests.newInitBalancing(entriesToSend, indexContext.getTree().getDIM(), indexContext.getTree().getDEPTH());
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             String message = String.format("[%s] Receiving host %s did not accept balancing initialization", currentHostId, receiverHostId);

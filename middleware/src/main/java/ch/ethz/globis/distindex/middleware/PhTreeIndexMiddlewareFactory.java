@@ -36,7 +36,7 @@ public class PhTreeIndexMiddlewareFactory {
         return new IndexMiddleware<>(host, port, clusterService, ioHandler, balancingDaemon);
     }
 
-    public static IndexMiddleware newPhTree(String host, int port, String zkHost, int zkPort) {
+    public static IndexMiddleware<long[], byte[]> newPhTree(String host, int port, String zkHost, int zkPort) {
         ClusterService<long[]> clusterService = new ZKClusterService(zkHost, zkPort);
         return newPhTree(host, port, clusterService);
     }

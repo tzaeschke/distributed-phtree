@@ -43,8 +43,8 @@ public class BalancingDaemon implements Runnable {
     }
 
     public void balanceAndRemove() {
-        close();
         balancingStrategy.balanceAndRemove();
+        close();
     }
 
     class BalancingCheckerTask implements Runnable {

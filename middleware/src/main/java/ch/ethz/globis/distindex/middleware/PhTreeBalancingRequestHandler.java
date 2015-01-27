@@ -40,6 +40,11 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
             int size = request.getSize();
             buffer = new IndexEntryList<>(size);
 
+            int dim = request.getDim();
+            int depth = request.getDepth();
+            if (indexContext.getTree() == null) {
+                indexContext.initTree(dim, depth);
+            }
             return ackResponse(request);
         } else {
             return errorResponse(request);

@@ -116,6 +116,7 @@ public class ZMapping implements KeyMapping<long[]>{
             }
             prevHostId = hostId;
         }
+        this.consistent = true;
     }
 
     private void addRectangleForRegion(String hostId, HBox region, int dim) {
@@ -196,6 +197,7 @@ public class ZMapping implements KeyMapping<long[]>{
     public void remove(String hostId) {
         this.consistent = false;
         this.hosts.remove(hostId);
+        this.endKeys.remove(hostId);
     }
 
     /**
@@ -348,7 +350,16 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     private void addToHostsRight(String hostId, String newHostId) {
-        int index = Collections.binarySearch(hosts, hostId);
+        int index = -1;
+        for (int i = 0; i < hosts.size(); i++) {
+            if (hosts.get(i).equals(hostId)) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            throw new IllegalArgumentException("Host " + hostId + " not in the host list." + toString());
+        }
         this.hosts.add(index + 1, newHostId);
     }
 

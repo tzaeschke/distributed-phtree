@@ -2,18 +2,13 @@ package ch.ethz.globis.distindex.orchestration;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
-import org.apache.curator.CuratorConnectionLossException;
-import org.apache.curator.CuratorZookeeperClient;
-import org.apache.curator.RetryLoop;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
-import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.CloseableUtils;
-import org.apache.curator.utils.EnsurePath;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.data.Stat;
@@ -124,7 +119,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     @Override
     public void deregisterHost(String hostId) {
         mapping.remove(hostId);
-
+        this.hosts.remove(hostId);
         LOG.info("Writing mapping with version {} on de-registration ", mapping.getVersion());
         writeCurrentMapping();
     }
@@ -181,7 +176,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     @Override
     public int setIntervalEnd(String hostId, long[] key, String freeHostId) {
         if (freeHostId != null) {
-            addToHostsRight(hostId, freeHostId);
+            addToHosts(freeHostId);
         }
         //FIXME maybe there will be some inconsistency if updateTree is not called before writing
         boolean writeFailed = true;
@@ -202,9 +197,8 @@ public class ZKClusterService implements ClusterService<long[]> {
         return mapping.getVersion();
     }
 
-    private void addToHostsRight(String hostId, String newHostId) {
-        int index = Collections.binarySearch(hosts, hostId);
-        this.hosts.add(index + 1, newHostId);
+    private void addToHosts(String newHostId) {
+        this.hosts.add(newHostId);
         registerNewHostId(newHostId);
     }
 
@@ -249,7 +243,7 @@ public class ZKClusterService implements ClusterService<long[]> {
                     .commit();
             removed = true;
         } catch (Exception e) {
-            LOG.info("Free host with path {} was already removed.", childId);
+            LOG.info("Free host with path" + childId + " was already removed.", e);
         }
         return removed;
     }
@@ -297,6 +291,10 @@ public class ZKClusterService implements ClusterService<long[]> {
     private ZMapping readCurrentMapping(Stat stat) {
         ZMapping zMap = null;
         try {
+            if (client.getState().equals(CuratorFrameworkState.STOPPED)) {
+                LOG.warn("Attempting to read state on stopped client.");
+                return null;
+            }
             byte[] data = client.getData().storingStatIn(stat).usingWatcher(new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent watchedEvent) throws Exception {

@@ -110,11 +110,15 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
 
     public byte[] encodeInitBalancingRequest(InitBalancingRequest request) {
         int size = request.getSize();
+        int dim = request.getDim();
+        int depth = request.getDepth();
         int outputSize = request.metadataSize()
-                + 4;
+                + 12;
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
         buffer.putInt(size);
+        buffer.putInt(dim);
+        buffer.putInt(depth);
         return buffer.array();
     }
 

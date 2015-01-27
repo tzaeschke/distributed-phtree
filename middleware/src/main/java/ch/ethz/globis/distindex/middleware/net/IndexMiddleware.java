@@ -96,8 +96,8 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
         if (bossGroup == null || workerGroup == null) {
             throw new IllegalStateException("The thread pools are not properly initialized");
         }
-        balancingDaemon.close();
         clusterService.disconnect();
+        balancingDaemon.close();
         closeEventLoops();
         LOG.info("Shutting down middleware {} {} ", host, port);
     }

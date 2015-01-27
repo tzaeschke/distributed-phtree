@@ -14,7 +14,6 @@ import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
-import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
@@ -42,11 +41,6 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
 
     private Requests<long[], byte[]> requests;
 
-    private boolean movedToRight = false;
-    private String freeTargetHost = null;
-
-    private int newVersion = 0;
-
     public ZMappingBalancingStrategy(IndexContext indexContext) {
         this.indexContext = indexContext;
         RequestEncoder requestEncoder = new ByteRequestEncoder<>(new MultiLongEncoderDecoder(), new SerializingEncoderDecoder<>());
@@ -61,18 +55,16 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             return;
         }
         String receiverHostId = null;
-        freeTargetHost = null;
         try {
             ClusterService<long[]> cluster = indexContext.getClusterService();
             KeyMapping<long[]> mapping = cluster.getMapping();
 
             String currentHostId = indexContext.getHostId();
-            receiverHostId = getHostForSplitting(currentHostId, cluster, mapping);
+            BalancingInfo info = getHostForSplitting(currentHostId, cluster, mapping);
 
+            receiverHostId = info.getReceiverHostId();
             if (receiverHostId != null) {
-                LOG.info("Host {} attempts balancing to host {} with mapping version " + mapping.getVersion(),
-                        indexContext.getHostId(), receiverHostId);
-                doBalancing(currentHostId, receiverHostId, movedToRight);
+                doBalancing(info);
             } else {
                 LOG.warn("Failed to find a proper host for balancing.");
             }
@@ -94,7 +86,6 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         if (tryBalanceToFreeHost()) {
             return;
         }
-
         ClusterService<long[]> cluster = indexContext.getClusterService();
         KeyMapping<long[]> mapping = cluster.getMapping();
         String currentHostId = indexContext.getHostId();
@@ -113,8 +104,14 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         ClusterService<long[]> cluster = indexContext.getClusterService();
         String currentHostId = indexContext.getHostId();
         String receiverHostId = cluster.getNextFreeHost();
+
         if (receiverHostId != null) {
-            doBalancing(currentHostId, receiverHostId);
+            BalancingInfo info = new BalancingInfo();
+            info.setInitiatorHostId(currentHostId);
+            info.setReceiverHostId(receiverHostId);
+            info.setRemoveHost(true);
+            info.setReceiverFreeHost(true);
+            doBalancingAll(info);
             return true;
         } else {
             return false;
@@ -129,33 +126,52 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param leftHostId                    The hostId of the left neighbour.
      */
     private void balanceToNeighbours(String currentHostId, String rightHostId, String leftHostId) {
+        BalancingInfo info = new BalancingInfo();
+        info.setInitiatorHostId(currentHostId);
+        info.setReceiverFreeHost(false);
+
         if (leftHostId == null) {
-            doBalancing(currentHostId, rightHostId, true);
+            info.setMoveToRight(true);
+            info.setReceiverHostId(rightHostId);
+            info.setRemoveHost(true);
+            doBalancingAll(info);
             return;
         }
         if (rightHostId == null) {
-            doBalancing(currentHostId, leftHostId);
+            info.setMoveToRight(false);
+            info.setReceiverHostId(leftHostId);
+            info.setRemoveHost(true);
+            doBalancingAll(info);
             return;
         }
-        doBalancing(currentHostId, rightHostId, true);
-        doBalancing(currentHostId, leftHostId);
+        info.setMoveToRight(true);
+        info.setReceiverHostId(rightHostId);
+        info.setRemoveHost(false);
+
+        doBalancing(info);
+        info.setMoveToRight(false);
+        info.setReceiverHostId(leftHostId);
+        info.setRemoveHost(true);
+
+        doBalancingAll(info);
     }
 
     /**
      * Perform the balancing with currentHostId as the id of the initiator host and
      * receiverHostId as the id of the receiver host.
      *
-     * @param currentHostId
-     * @param receiverHostId
      */
-    private void doBalancing(String currentHostId, String receiverHostId, boolean movedToRight) {
-        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(movedToRight);
-        moveEntries(entries, currentHostId, receiverHostId);
+    private void doBalancing(BalancingInfo info) {
+        LOG.info("Host {} attempts balancing to host {} with mapping version " +
+                        indexContext.getClusterService().getMapping().getVersion(),
+                        indexContext.getHostId(), info.getReceiverHostId());
+        IndexEntryList<long[], byte[]> entries = getEntriesForSplitting(info.isMoveToRight());
+        moveEntries(entries, info);
     }
 
-    private void doBalancing(String currentHostId, String receiverHostId) {
+    private void doBalancingAll(BalancingInfo info) {
         IndexEntryList<long[], byte[]> entries = getAllEntries();
-        moveEntries(entries, currentHostId, receiverHostId);
+        moveEntries(entries, info);
     }
 
     /**
@@ -163,46 +179,60 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * stored in the variable receiverHostId.
      *
      * @param entries
-     * @param currentHostId
-     * @param receiverHostId
+     * @param info                              The balancing information linked to this host.
      */
-    private void moveEntries(IndexEntryList<long[], byte[]> entries, String currentHostId, String receiverHostId) {
+    private void moveEntries(IndexEntryList<long[], byte[]> entries, BalancingInfo info) {
+        String receiverHostId = info.getReceiverHostId();
+
         boolean canBalance = initBalancing(entries.size(), receiverHostId);
         if (canBalance) {
             sendEntries(entries, receiverHostId);
-            updateMapping(currentHostId, receiverHostId, entries);
+            updateMapping(info, entries);
 
-            commitBalancing(receiverHostId);
+            commitBalancing(info);
             removeEntries(entries);
         }
     }
 
-    private String getHostForSplitting(String currentHostId, ClusterService<long[]> cluster, KeyMapping<long[]> mapping) {
+    private BalancingInfo getHostForSplitting(String currentHostId, ClusterService<long[]> cluster, KeyMapping<long[]> mapping) {
+        BalancingInfo info = new BalancingInfo();
+
+        info.setInitiatorHostId(currentHostId);
         String resultId = cluster.getNextFreeHost();
         if (resultId != null) {
-            movedToRight = true;
-            freeTargetHost = resultId;
-            return resultId;
+            info.setMoveToRight(true);
+            info.setReceiverFreeHost(true);
+            info.setReceiverHostId(resultId);
+            return info;
         }
+
         if (mapping == null) {
             LOG.warn("Mapping is currently not initialized for {}, cannot proceed with balancing.", currentHostId);
             return null;
         }
         String prevId = mapping.getPrevious(currentHostId);
         String nextId = mapping.getNext(currentHostId);
+
         if (prevId == null) {
-            movedToRight = true;
-            return nextId;
+            info.setReceiverHostId(nextId);
+            info.setReceiverFreeHost(false);
+            info.setMoveToRight(true);
+            return info;
         }
         if (nextId == null) {
-            movedToRight = false;
-            return prevId;
+            info.setReceiverHostId(prevId);
+            info.setReceiverFreeHost(false);
+            info.setMoveToRight(false);
+            return info;
         }
+
         int sizePrev = cluster.getSize(prevId);
         int sizeNext = cluster.getSize(nextId);
         resultId = (sizePrev < sizeNext) ? prevId : nextId;
-        movedToRight = resultId.equals(nextId);
-        return resultId;
+        info.setReceiverFreeHost(false);
+        info.setMoveToRight(resultId.equals(nextId));
+        info.setReceiverHostId(resultId);
+        return info;
     }
 
     private void printSizes(String message) {
@@ -218,10 +248,15 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * Updates the key mapping after the currentHost zone was split in two and half of it
      * was moved to the receiver host.
      *
-     * @param currentHostId                     The hostId of the splitting host.
      */
-    private void updateMapping(String currentHostId, String receiverHostId, IndexEntryList<long[], byte[]> entries) {
+    private void updateMapping(BalancingInfo info, IndexEntryList<long[], byte[]> entries) {
         int entriesMoved = entries.size();
+        String currentHostId = info.getInitiatorHostId();
+        String receiverHostId = info.getReceiverHostId();
+        String freeTargetHost = info.isReceiverFreeHost() ? receiverHostId : null;
+
+        int newVersion;
+        boolean movedToRight = info.isMoveToRight();
         ClusterService<long[]> cluster = indexContext.getClusterService();
         KeyMapping<long[]> mapping = getMapping();
 
@@ -232,6 +267,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         long[] key;
         String host;
         if (entriesMoved != 0) {
+            //ToDo need to perform the changes to the mapping atomically, i.e replacing a host, etc need to make transactions for that
             if (movedToRight) {
                 LOG.info("{} is balancing {} entries to the right interval.", currentHostId, entriesMoved);
                 key = MultidimUtil.previous(entries.get(0).getKey(), depth);
@@ -243,8 +279,12 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
             }
             newVersion = cluster.setIntervalEnd(host, key, freeTargetHost);
             LOG.info("{} is writing mapping with version {} on balancing commit.", currentHostId, newVersion);
+            if (info.isRemoveHost()) {
+                cluster.deregisterHost(info.getInitiatorHostId());
+            }
             zmap.updateTree();
             zmap.setVersion(newVersion);
+            info.setNewVersion(newVersion);
         }
     }
 
@@ -290,7 +330,8 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private boolean initBalancing(int entriesToSend, String receiverHostId) {
         String currentHostId = indexContext.getHostId();
-        InitBalancingRequest request = requests.newInitBalancing(entriesToSend);
+        PhTreeV<byte[]> tree = indexContext.getTree();
+        InitBalancingRequest request = requests.newInitBalancing(entriesToSend, tree.getDIM(), tree.getDEPTH());
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             LOG.error("[{}] Receiving host {} did not accept balancing initialization.", currentHostId, receiverHostId);
@@ -302,9 +343,10 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     /**
      * Send a commit balancing request to the hose whose hostId was received as an argument.
      *
-     * @param receiverHostId
      */
-    private void commitBalancing(String receiverHostId) {
+    private void commitBalancing(BalancingInfo info) {
+        String receiverHostId = info.getReceiverHostId();
+        int newVersion = info.getNewVersion();
         indexContext.setLastBalancingVersion(newVersion);
         String currentHostId = indexContext.getHostId();
         CommitBalancingRequest request = requests.newCommitBalancing();
@@ -382,5 +424,67 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private KeyMapping<long[]> getMapping() {
         return indexContext.getClusterService().getMapping();
+    }
+
+    /**
+     * Contains the information necessary to a good split.
+     */
+    class BalancingInfo {
+
+        private String receiverHostId;
+        private String initiatorHostId;
+        private boolean receiverFreeHost = false;
+        private boolean moveToRight = false;
+        private boolean removeHost = false;
+
+        private int newVersion = 0;
+
+        public String getReceiverHostId() {
+            return receiverHostId;
+        }
+
+        public void setReceiverHostId(String receiverHostId) {
+            this.receiverHostId = receiverHostId;
+        }
+
+        public String getInitiatorHostId() {
+            return initiatorHostId;
+        }
+
+        public void setInitiatorHostId(String initiatorHostId) {
+            this.initiatorHostId = initiatorHostId;
+        }
+
+        public boolean isMoveToRight() {
+            return moveToRight;
+        }
+
+        public void setMoveToRight(boolean moveToRight) {
+            this.moveToRight = moveToRight;
+        }
+
+        public int getNewVersion() {
+            return newVersion;
+        }
+
+        public void setNewVersion(int newVersion) {
+            this.newVersion = newVersion;
+        }
+
+        public boolean isReceiverFreeHost() {
+            return receiverFreeHost;
+        }
+
+        public void setReceiverFreeHost(boolean receiverFreeHost) {
+            this.receiverFreeHost = receiverFreeHost;
+        }
+
+        public void setRemoveHost(boolean removeHost) {
+            this.removeHost = removeHost;
+        }
+
+        public boolean isRemoveHost() {
+            return removeHost;
+        }
     }
 }

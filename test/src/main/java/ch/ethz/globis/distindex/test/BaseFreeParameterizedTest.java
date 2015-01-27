@@ -82,8 +82,8 @@ public class BaseFreeParameterizedTest {
 
             for (int i = nrServers; i < nrServers + nrFreeServers; i++) {
                 Middleware current = createMiddleware(HOST, S_BASE_PORT + i * 2, HOST, ZK_PORT);
-                MiddlewareUtil.startMiddleware(threadPool, current);
                 current.setJoinedAsFree(true);
+                MiddlewareUtil.startMiddleware(threadPool, current);
                 middlewares.add(current);
             }
         }

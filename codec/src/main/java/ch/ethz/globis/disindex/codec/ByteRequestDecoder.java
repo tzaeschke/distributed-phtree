@@ -192,7 +192,9 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         String indexName = new String(readValue(buffer));
         int mappingVersion = buffer.getInt();
         int size = buffer.getInt();
-        return new InitBalancingRequest(requestId, opCode, indexName, mappingVersion, size);
+        int dim = buffer.getInt();
+        int depth = buffer.getInt();
+        return new InitBalancingRequest(requestId, opCode, indexName, mappingVersion, size, dim, depth);
     }
 
     @Override

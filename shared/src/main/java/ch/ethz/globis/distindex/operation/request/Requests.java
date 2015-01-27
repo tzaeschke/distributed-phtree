@@ -75,8 +75,8 @@ public class Requests<K, V> {
         return new BaseRequest(nextId(), OpCode.GET_DEPTH, PLACEHOLDER, mappingVersion());
     }
 
-    public InitBalancingRequest newInitBalancing(int size) {
-        return new InitBalancingRequest(nextId(), OpCode.BALANCE_INIT, PLACEHOLDER, mappingVersion(), size);
+    public InitBalancingRequest newInitBalancing(int size, int dim, int depth) {
+        return new InitBalancingRequest(nextId(), OpCode.BALANCE_INIT, PLACEHOLDER, mappingVersion(), size, dim, depth);
     }
 
     public PutBalancingRequest<K> newPutBalancing(K key, byte[] value) {

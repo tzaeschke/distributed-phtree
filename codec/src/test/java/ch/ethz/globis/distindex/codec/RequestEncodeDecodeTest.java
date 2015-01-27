@@ -139,7 +139,7 @@ public class RequestEncodeDecodeTest {
     @Test
     public void encodeDecodeInitBalancingRequest() {
         int size = new Random().nextInt();
-        InitBalancingRequest request = new InitBalancingRequest(1, OpCode.BALANCE_INIT, "", 1, size);
+        InitBalancingRequest request = new InitBalancingRequest(1, OpCode.BALANCE_INIT, "", 1, size, 2, 64);
         byte[] encodedRequest = requestEncoder.encode(request);
         InitBalancingRequest decoded = requestDecoder.decodeInitBalancing(ByteBuffer.wrap(encodedRequest));
         assertEquals(request, decoded);

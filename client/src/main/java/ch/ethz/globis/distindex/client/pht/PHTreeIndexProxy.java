@@ -312,7 +312,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return requestDispatcher;
     }
 
-    ClusterService<long[]> getClusterService() {
+    public ClusterService<long[]> getClusterService() {
         return clusterService;
     }
 
