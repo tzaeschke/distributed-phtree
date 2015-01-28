@@ -34,9 +34,9 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {1},
-                {7},
                 {4},
                 {5},
+                {7},
                 {13}
         });
     }

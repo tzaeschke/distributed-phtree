@@ -18,19 +18,6 @@ public interface ClusterService<K> {
     public void disconnect();
 
     /**
-     * Handle the creation of a new index.
-     *
-     * @param options
-     */
-    public void createIndex(Map<String, String> options);
-
-    /**
-     * Reads the current key-to-machine mapping from the distributed cluster configuration.
-     * @return                              The current cluster configuration.
-     */
-    public KeyMapping<K> getMapping();
-
-    /**
      * Register the host with the hostId as an index peer.
      * @param hostId
      */
@@ -43,9 +30,37 @@ public interface ClusterService<K> {
     public void deregisterHost(String hostId);
 
     /**
+     * Register the host as a free host. This host will not be part of the cluster until a host
+     * that is full will pick it.
+     *
+     * @param hostId                    The id of the host to be marked as free.
+     */
+    public void registerFreeHost(String hostId);
+
+    /**
+     * Remove a free host from the list of free hosts and return it to the list of free hosts.
+     *
+     * @return                          The id of the removed host.
+     */
+    public String getNextFreeHost();
+
+    /**
      * @return                              The online hosts registered in the cluster.
      */
     public List<String> getOnlineHosts();
+
+    /**
+     * Handle the creation of a new index.
+     *
+     * @param options
+     */
+    public void createIndex(Map<String, String> options);
+
+    /**
+     * Reads the current key-to-machine mapping from the distributed cluster configuration.
+     * @return                              The current cluster configuration.
+     */
+    public KeyMapping<K> getMapping();
 
     /**
      * Returns an approximation of the number of entries stored by a host. This is the latest value that
@@ -79,18 +94,4 @@ public interface ClusterService<K> {
      */
     public int setIntervalEnd(String hostId, long[] key, String freeHostId);
 
-    /**
-     * Register the host as a free host. This host will not be part of the cluster until a host
-     * that is full will pick it.
-     *
-     * @param hostId                    The id of the host to be marked as free.
-     */
-    public void registerFreeHost(String hostId);
-
-    /**
-     * Remove a free host from the list of free hosts and return it to the list of free hosts.
-     *
-     * @return                          The id of the removed host.
-     */
-    public String getNextFreeHost();
 }
