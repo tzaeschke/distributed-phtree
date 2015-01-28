@@ -12,7 +12,6 @@ import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.IndexMiddleware;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 
 /**
@@ -33,7 +32,7 @@ public class PhTreeIndexMiddlewareFactory {
         BalancingDaemon balancingDaemon = new BalancingDaemon(indexContext, balancingStrategy, 10L);
 
         IOHandler<long[], byte[]> ioHandler = new IOHandler<>(requestHandler, balancingRequestHandler, requestDecoder, responseEncoder);
-        return new IndexMiddleware<>(host, port, clusterService, ioHandler, balancingDaemon);
+        return new IndexMiddleware<>(indexContext, clusterService, ioHandler, balancingDaemon);
     }
 
     public static IndexMiddleware<long[], byte[]> newPhTree(String host, int port, String zkHost, int zkPort) {

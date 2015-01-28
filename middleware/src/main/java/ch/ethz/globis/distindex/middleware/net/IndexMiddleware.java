@@ -1,6 +1,7 @@
 package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.middleware.IOHandler;
+import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.balancing.BalancingDaemon;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
@@ -47,13 +48,16 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     /** The cluster service used to notify */
     private ClusterService clusterService;
 
+    private IndexContext indexContext;
+
     private BalancingDaemon balancingDaemon;
 
-    public IndexMiddleware(String host, int port, ClusterService clusterService, IOHandler<K, V> handler,
+    public IndexMiddleware(IndexContext indexContext, ClusterService clusterService, IOHandler<K, V> handler,
                            BalancingDaemon balancingDaemon) {
         this.clusterService = clusterService;
-        this.port = port;
-        this.host = host;
+        this.indexContext = indexContext;
+        this.port = indexContext.getPort();
+        this.host = indexContext.getHost();
         this.handler = handler;
         this.balancingDaemon = balancingDaemon;
     }
@@ -93,6 +97,13 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
 
     @Override
     public void close() {
+        while (indexContext.isBalancing()) {
+            try {
+                Thread.sleep(1L);
+            } catch (InterruptedException e) {
+                LOG.error("Error ");
+            }
+        }
         if (bossGroup == null || workerGroup == null) {
             throw new IllegalStateException("The thread pools are not properly initialized");
         }
