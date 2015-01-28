@@ -152,12 +152,19 @@ This algorithms works under that assumption that all hosts hold at least k point
 \section{Implementation}
 Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.
 
+\subsection{Cluster information}
+The configuration server is implemented using an Apache Zookeeper server. 
+
+The operations that update the mapping have to be executed atomically on Zookeeper. Zookeeper provides the guarantee that all write operations performed on a single \textit{znode} are executed atomically. However, all update update of the mapping modify at least two znodes: the mapping znode and the version  
+
+\subsection{Technologies and Libraries}
 Currently used frameworks:
 \begin{description}
     \item[ZooKeeper] ZooKeeper is used for stored cluster metadata and membership. Currently, the only alternative would have been to implement such a distributed storage manager manually. Using ZooKeeper saved a lot of development time. 
     \item[Netty] Netty is a Java IO library and it is used to implement the server request handling component. Alternatives would have been Java NIO library.
     \item[Kryo] Kryo is very fast serialization library for Java and it is used to serialize the values that have to be stored on the server. These objects need to be transformed into a represention that can be sent over the network. Kryo is faster than the Java serialization, does not require the implementation of the Serializable interface and transforms the objects into byte arrays. This should make the representation smaller than simply transforming the object to a string.
 \end{description}
+
 \chapter{Performance Analysis}
 \section{Benchmark}
 
