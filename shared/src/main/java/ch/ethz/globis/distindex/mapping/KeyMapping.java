@@ -18,21 +18,6 @@ public interface KeyMapping<K> {
      */
     public void remove(String host);
 
-//    /**
-//     * Set the number of keys associated with a host.
-//     *
-//     * @param host
-//     * @param size
-//     */
-//    public void setSize(String host, int size);
-//
-//    /**
-//     * Return the number of keys associated with a host.
-//     * @param host
-//     * @return
-//     */
-//    public int getSize(String host);
-
     /**
      * Obtain the hostId of the machine that stores the key received as an argument.
      *
@@ -88,15 +73,14 @@ public interface KeyMapping<K> {
      */
     public void clear();
 
+    /**
+     * @return                          The version of the mapping.
+     */
     public int getVersion();
 
+    /**
+     * Update the current mapping version.
+     * @param version                   The new version of the mapping.
+     */
     public void setVersion(int version);
-//    /**
-//     * Return the id of the node that will receive the entries after the splitting of node with the
-//     * host id received as an argument.
-//     *
-//     * @param currentHostId                             The id of the node to be split.
-//     * @return
-//     */
-//    public String getHostForSplitting(String currentHostId);
 }
