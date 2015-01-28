@@ -349,6 +349,10 @@ public class ZMapping implements KeyMapping<long[]>{
         this.endKeys.put(host, end);
     }
 
+    public void changeIntervalEnd(String sourceHostId, String destHostId) {
+        this.endKeys.put(destHostId, this.endKeys.get(sourceHostId));
+    }
+
     private void addToHostsRight(String hostId, String newHostId) {
         int index = -1;
         for (int i = 0; i < hosts.size(); i++) {
@@ -445,5 +449,9 @@ public class ZMapping implements KeyMapping<long[]>{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addToRightOf(String freeHostId, String currentHostId) {
+        addToHostsRight(currentHostId, freeHostId);
     }
 }

@@ -77,21 +77,4 @@ public interface ClusterService<K> {
      * @param size
      */
     public void setSize(String hostId, int size);
-
-    /**
-     * Change the end key associated with a host and increment the version. This method always reads the
-     * current value of the mapping, increases the version and attempts to perform the update.
-     *
-     * Prolonged starvation is possible, but unlikely since balancing operations should not be that often.
-     * Moreover, if the write failed due to another write between reading the mapping and writing it, it means
-     * that another host balanced successfully and will probably not perform any more balancing operations for some
-     * time.
-     *
-     * @param hostId
-     * @param key
-     * @param freeHostId
-     * @return
-     */
-    public int setIntervalEnd(String hostId, long[] key, String freeHostId);
-
 }

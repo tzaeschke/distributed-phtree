@@ -196,11 +196,6 @@ public class BSTMapClusterService implements ClusterService<long[]> {
     }
 
     @Override
-    public int setIntervalEnd(String hostId, long[] key, String freeHostId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void registerFreeHost(String hostId) {
         throw new UnsupportedOperationException();
     }

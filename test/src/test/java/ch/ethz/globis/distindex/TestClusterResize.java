@@ -29,9 +29,9 @@ public class TestClusterResize {
     private static final ExecutorService service = Executors.newFixedThreadPool(8);
 
     @Test
-    public void testRemoveRightEnd() {
+    public void testRemoveLeftEnd() {
         IndexMiddleware<long[], byte[]>[] middlewares = new IndexMiddleware[] {
-            createMiddleware(false), createMiddleware(false)
+                createMiddleware(false), createMiddleware(false), createMiddleware(false)
         };
         int dim = 2;
         int depth = 64;
@@ -43,6 +43,8 @@ public class TestClusterResize {
             tree.create(dim, depth);
             IndexEntryList<long[], Object> entries = createEntries(dim, size);
             insert(tree, entries);
+
+            System.out.println("Mapping: " + tree.getMapping());
             assertTrue(contains(tree, entries));
 
             middlewares[1].remove();
@@ -50,8 +52,132 @@ public class TestClusterResize {
         } catch (Exception e) {
             LOG.error("Exception running the test!", e);
             fail();
+        } finally {
+            closeMiddlewares(middlewares);
         }
     }
+
+    @Test
+    public void testRemoveRightEnd() {
+        IndexMiddleware<long[], byte[]>[] middlewares = new IndexMiddleware[] {
+                createMiddleware(false), createMiddleware(false), createMiddleware(false)
+        };
+        int dim = 2;
+        int depth = 64;
+        int size = 50;
+        try (TestingServer server = new TestingServer(ZK_PORT);
+             PHTreeIndexProxy<Object> tree = new PHTreeIndexProxy<>(ZK_HOST, ZK_PORT)) {
+            server.start();
+            startMiddlewares(middlewares);
+            tree.create(dim, depth);
+            IndexEntryList<long[], Object> entries = createEntries(dim, size);
+            insert(tree, entries);
+
+            System.out.println("Mapping: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+
+            middlewares[2].remove();
+            assertTrue(contains(tree, entries));
+        } catch (Exception e) {
+            LOG.error("Exception running the test!", e);
+            fail();
+        } finally {
+            closeMiddlewares(middlewares);
+        }
+    }
+
+    @Test
+    public void testRemoveMiddle() {
+        IndexMiddleware<long[], byte[]>[] middlewares = new IndexMiddleware[] {
+                createMiddleware(false), createMiddleware(false), createMiddleware(false)
+        };
+        int dim = 2;
+        int depth = 64;
+        int size = 50;
+        try (TestingServer server = new TestingServer(ZK_PORT);
+             PHTreeIndexProxy<Object> tree = new PHTreeIndexProxy<>(ZK_HOST, ZK_PORT)) {
+            server.start();
+            startMiddlewares(middlewares);
+            tree.create(dim, depth);
+            IndexEntryList<long[], Object> entries = createEntries(dim, size);
+            insert(tree, entries);
+
+            System.out.println("Mapping: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+
+            middlewares[0].remove();
+            assertTrue(contains(tree, entries));
+        } catch (Exception e) {
+            LOG.error("Exception running the test!", e);
+            fail();
+        } finally {
+            closeMiddlewares(middlewares);
+        }
+    }
+
+    @Test
+    public void testRemoveToFree() {
+        IndexMiddleware<long[], byte[]>[] middlewares = new IndexMiddleware[] {
+                createMiddleware(false), createMiddleware(false), createMiddleware(false), createMiddleware(true)
+        };
+        int dim = 2;
+        int depth = 64;
+        int size = 50;
+        try (TestingServer server = new TestingServer(ZK_PORT);
+             PHTreeIndexProxy<Object> tree = new PHTreeIndexProxy<>(ZK_HOST, ZK_PORT)) {
+            server.start();
+            startMiddlewares(middlewares);
+            tree.create(dim, depth);
+            IndexEntryList<long[], Object> entries = createEntries(dim, size);
+            insert(tree, entries);
+
+            System.out.println("Mapping before: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+
+            middlewares[0].remove();
+
+            System.out.println("Mapping after: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+        } catch (Exception e) {
+            LOG.error("Exception running the test!", e);
+            fail();
+        } finally {
+            closeMiddlewares(middlewares);
+        }
+    }
+
+    @Test
+    public void testRemoveAllToFree() {
+        IndexMiddleware<long[], byte[]>[] middlewares = new IndexMiddleware[] {
+                createMiddleware(false), createMiddleware(false), createMiddleware(false), createMiddleware(true)
+        };
+        int dim = 2;
+        int depth = 64;
+        int size = 50;
+        try (TestingServer server = new TestingServer(ZK_PORT);
+             PHTreeIndexProxy<Object> tree = new PHTreeIndexProxy<>(ZK_HOST, ZK_PORT)) {
+            server.start();
+            startMiddlewares(middlewares);
+            tree.create(dim, depth);
+            IndexEntryList<long[], Object> entries = createEntries(dim, size);
+            insert(tree, entries);
+
+            System.out.println("Mapping before: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+
+            middlewares[0].remove();
+            middlewares[1].remove();
+            middlewares[2].remove();
+            System.out.println("Mapping after: " + tree.getMapping());
+            assertTrue(contains(tree, entries));
+        } catch (Exception e) {
+            LOG.error("Exception running the test!", e);
+            fail();
+        } finally {
+            closeMiddlewares(middlewares);
+        }
+    }
+
 
     private IndexEntryList<long[], Object> createEntriesRandomly(int dim, int size) {
         Random random = new Random();
@@ -108,7 +234,9 @@ public class TestClusterResize {
 
     private void closeMiddlewares(IndexMiddleware[] middlewares) {
         for (IndexMiddleware middleware : middlewares) {
-            middleware.close();
+            if (middleware.isRunning()) {
+                middleware.close();
+            }
         }
     }
 

@@ -201,8 +201,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         }
     }
 
-    @Override
-    public int setIntervalEnd(String hostId, long[] key, String freeHostId) {
+    public synchronized int setIntervalEnd(String hostId, long[] key, String freeHostId) {
         if (freeHostId != null) {
             registerNewHostId(freeHostId);
         }
@@ -213,6 +212,30 @@ public class ZKClusterService implements ClusterService<long[]> {
             stat = new Stat();
             this.mapping = readCurrentMapping(stat);
             this.mapping.changeIntervalEnd(hostId, key, freeHostId);
+            this.mapping.setVersion(this.mapping.getVersion() + 1);
+            try {
+                int version = stat.getVersion();
+                stat = client.setData().withVersion(version).forPath(MAPPING_PATH, mapping.serialize());
+                if (stat != null) {
+                    writeFailed = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to get stat for path {}", MAPPING_PATH);
+            }
+        }
+        this.mapping.updateTree();
+        return mapping.getVersion();
+    }
+
+    public synchronized int setIntervalEndAndDelete(String leftHostId, long[] newKeyForLeft, String currentHostId) {
+        //FIXME maybe there will be some inconsistency if updateTree is not called before writing
+        boolean writeFailed = true;
+        Stat stat;
+        while (writeFailed) {
+            stat = new Stat();
+            this.mapping = readCurrentMapping(stat);
+            this.mapping.changeIntervalEnd(leftHostId, newKeyForLeft, null);
+            this.mapping.remove(currentHostId);
             this.mapping.setVersion(this.mapping.getVersion() + 1);
             try {
                 int version = stat.getVersion();
@@ -267,7 +290,7 @@ public class ZKClusterService implements ClusterService<long[]> {
         return readCurrentMapping(new Stat());
     }
 
-    private ZMapping readCurrentMapping(Stat stat) {
+    private synchronized ZMapping readCurrentMapping(Stat stat) {
         ZMapping zMap = null;
         try {
             if (client.getState().equals(CuratorFrameworkState.STOPPED)) {
@@ -315,5 +338,75 @@ public class ZKClusterService implements ClusterService<long[]> {
         } catch (Exception e) {
             LOG.error("Problem ensuring that the path exists", e);
         }
+    }
+
+    public int mergeWithRight(String currentHostId) {
+        //only need to remove the current end key
+        boolean writeFailed = true;
+        Stat stat;
+        while (writeFailed) {
+            stat = new Stat();
+            this.mapping = readCurrentMapping(stat);
+            this.mapping.remove(currentHostId);
+            this.mapping.setVersion(this.mapping.getVersion() + 1);
+            try {
+                int version = stat.getVersion();
+                stat = client.setData().withVersion(version).forPath(MAPPING_PATH, mapping.serialize());
+                if (stat != null) {
+                    writeFailed = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to get stat for path {}", MAPPING_PATH, e);
+            }
+        }
+        this.mapping.updateTree();
+        return mapping.getVersion();
+    }
+
+    public void mergeWithLeft(String currentHostId, String leftHostId) {
+        //need to remove current and to set left's end to to current's
+        boolean writeFailed = true;
+        Stat stat;
+        while (writeFailed) {
+            stat = new Stat();
+            this.mapping = readCurrentMapping(stat);
+            this.mapping.changeIntervalEnd(currentHostId, leftHostId);
+            this.mapping.remove(currentHostId);
+            this.mapping.setVersion(this.mapping.getVersion() + 1);
+            try {
+                int version = stat.getVersion();
+                stat = client.setData().withVersion(version).forPath(MAPPING_PATH, mapping.serialize());
+                if (stat != null) {
+                    writeFailed = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to get stat for path {}", MAPPING_PATH, e);
+            }
+        }
+        this.mapping.updateTree();
+    }
+
+    public void mergeWithRightFree(String currentHostId, String freeHostId) {
+        //need to remove current and to set left's end to to current's
+        boolean writeFailed = true;
+        Stat stat;
+        while (writeFailed) {
+            stat = new Stat();
+            this.mapping = readCurrentMapping(stat);
+            this.mapping.addToRightOf(freeHostId, currentHostId);
+            this.mapping.changeIntervalEnd(currentHostId, freeHostId);
+            this.mapping.remove(currentHostId);
+            this.mapping.setVersion(this.mapping.getVersion() + 1);
+            try {
+                int version = stat.getVersion();
+                stat = client.setData().withVersion(version).forPath(MAPPING_PATH, mapping.serialize());
+                if (stat != null) {
+                    writeFailed = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to get stat for path {}", MAPPING_PATH, e);
+            }
+        }
+        this.mapping.updateTree();
     }
 }
