@@ -1,10 +1,14 @@
 package ch.ethz.globis.distindex.mapping;
 
 import ch.ethz.globis.distindex.util.SerializerUtil;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhMapperKey;
 import ch.ethz.globis.pht.PhPredicate;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,23 +18,33 @@ public class SerializerUtilTest {
 
     @Test
     public void testSerializeDeserializePhPredicate() throws IOException, ClassNotFoundException {
-        SerializerUtil serializer = SerializerUtil.getInstance();
         PhPredicate pred = getTestPredicate();
         Map<long[], Boolean> argumentResultMap = getTestPredicateResultMap();
         checkResults(argumentResultMap, pred);
 
-        byte[] data = serializer.serializePhPredicate(pred);
-        PhPredicate deserializedPredicate = serializer.deserializePhPredicate(data);
-
+        PhPredicate deserializedPredicate = serializeDeserialize(pred);
         checkResults(argumentResultMap, deserializedPredicate);
     }
 
     @Test
     public void testSerializeNull() throws IOException, ClassNotFoundException {
         SerializerUtil serializer = SerializerUtil.getInstance();
-        byte[] data = serializer.serializePhPredicate(null);
-        PhPredicate deserializedPredicate = serializer.deserializePhPredicate(data);
+        byte[] data = serializer.serializeDefault(null);
+        PhPredicate deserializedPredicate = serializer.deserializeDefault(data);
         assertEquals(null, deserializedPredicate);
+    }
+
+    @Test
+    public void testSerializeDeserializePhMapper() throws IOException, ClassNotFoundException {
+        PVEntry<Object> e = new PVEntry<>(new long[] {1, 2, 3}, "Hello, world");
+        assertEquals(e, serializeDeserialize(PhMapper.PVENTRY()).map(e));
+        assertEquals(e.getKey(), serializeDeserialize(PhMapper.LONG_ARRAY()).map(e));
+    }
+
+    @Test
+    public void testSerializeDeserializePhMapperKey() throws IOException, ClassNotFoundException {
+        long[] key = {1, 2, 3};
+        assertEquals(key, serializeDeserialize(PhMapperKey.LONG_ARRAY()).map(key));
     }
 
     private void checkResults(Map<long[], Boolean> argumentResultMap, PhPredicate predicate) {
@@ -45,6 +59,12 @@ public class SerializerUtilTest {
 
     private PhPredicate getTestPredicate() {
         return p -> p.length < 2;
+    }
+
+    private <T extends Serializable> T serializeDeserialize(T object) throws IOException, ClassNotFoundException {
+        SerializerUtil serializer = SerializerUtil.getInstance();
+        byte[] data = serializer.serializeDefault(object);
+        return serializer.deserializeDefault(data);
     }
 
     private Map<long[], Boolean> getTestPredicateResultMap() {
