@@ -350,4 +350,12 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             it.close();
         }
     }
+
+    public V update(long[] oldKey, long[] newKey) {
+        throw new UnsupportedOperationException();
+    }
+
+    public <R> List<R> queryAll(long[] min, long[] max) {
+        throw new UnsupportedOperationException();
+    }
 }

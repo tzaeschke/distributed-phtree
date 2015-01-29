@@ -68,16 +68,12 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public String toStringPlain() {
-        //ToDo implement toStringPlain()
-        //return proxy.toStringPlain();
-        return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
+        return proxy.toStringPlain();
     }
 
     @Override
     public String toStringTree() {
-        //ToDo implement toStringTree()
-        //return proxy.toStringTree();
-        return "This PhTree instance is distributed. This method is not currently implemented for a distributed PhTree.";
+        return proxy.toStringTree();
     }
 
     @Override
@@ -86,15 +82,13 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public PVIterator<V> query(long[] longs, long[] longs2) {
-        return new DistributedPhTreeIterator<>(proxy.query(longs, longs2));
+    public PVIterator<V> query(long[] min, long[] max) {
+        return new DistributedPhTreeIterator<V>(proxy.query(min, max));
     }
 
     @Override
-    public boolean isRangeEmpty(long[] longs, long[] longs2) {
-        //ToDo implement this by doing a server call
-        PVIterator<V> it  = query(longs, longs2);
-        return !it.hasNext();
+    public boolean isRangeEmpty(long[] min, long[] max) {
+        return proxy.isRangeEmpty(min, max);
     }
 
     @Override
@@ -114,8 +108,22 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
 
     @Override
     public List<long[]> nearestNeighbour(int i, PhDistance phDistance, PhDimFilter phDimFilter, long... keys) {
-        //ToDo this is currently not supported by the PH Tree, but it will change in the future
-        throw new UnsupportedOperationException();
+        return proxy.getNearestNeighbuor(i, phDistance, phDimFilter, keys);
+    }
+
+    @Override
+    public Object update(long[] oldKey, long[] newKey) {
+        return proxy.update(oldKey, newKey);
+    }
+
+    @Override
+    public <R> List<R> queryAll(long[] min, long[] max) {
+        return proxy.queryAll(min, max);
+    }
+
+    @Override
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+        return proxy.queryAll(min, max, maxResults, filter, mapper);
     }
 
     public PHTreeIndexProxy<V> getProxy() {

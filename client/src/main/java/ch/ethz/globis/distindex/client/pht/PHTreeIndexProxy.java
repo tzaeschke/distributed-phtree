@@ -2,18 +2,18 @@ package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.disindex.codec.ByteRequestEncoder;
 import ch.ethz.globis.disindex.codec.ByteResponseDecoder;
+import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
-import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.api.PointIndex;
-import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
 import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
 import ch.ethz.globis.disindex.codec.io.TCPClient;
-import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.io.Transport;
+import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.api.PointIndex;
+import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.request.BaseRequest;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
@@ -24,8 +24,7 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeQStats;
+import ch.ethz.globis.pht.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -292,8 +291,12 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return global;
     }
 
+    public boolean isRangeEmpty(long[] min, long[] max) {
+        throw new UnsupportedOperationException();
+    }
+
     public String toStringTree() {
-        return toStringTree();
+        return toStringPlain();
     }
 
     private ClusterService<long[]> setupClusterService(String host, int port) {
@@ -324,5 +327,15 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         for (String hostId : hostIds) {
             logKNNRequest(hostId, key, k);
         }
+    }
+
+    public List<long[]> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
+        //ToDo this is currently not supported by the PH Tree, but it will change in the future
+        throw new UnsupportedOperationException();
+    }
+
+
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+        throw new UnsupportedOperationException();
     }
 }

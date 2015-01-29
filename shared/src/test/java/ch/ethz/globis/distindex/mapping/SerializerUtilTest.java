@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.mapping;
 
 import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhPredicate;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class SerializerUtillTest {
+public class SerializerUtilTest {
 
     @Test
     public void testSerializeDeserializePhPredicate() throws IOException, ClassNotFoundException {
