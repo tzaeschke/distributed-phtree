@@ -13,8 +13,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SerializerUtilTest {
+
+    @Test
+    public void testSerializeNull() {
+        SerializerUtil serializer = SerializerUtil.getInstance();
+        Object obj = null;
+        byte[] data = serializer.serialize(obj);
+        assertNull(serializer.deserialize(data));
+    }
+
+    @Test
+    public void testSerializeDefaultNull() throws IOException, ClassNotFoundException {
+        SerializerUtil serializer = SerializerUtil.getInstance();
+        byte[] data = serializer.serializeDefault(null);
+        PhPredicate deserializedPredicate = serializer.deserializeDefault(data);
+        assertEquals(null, deserializedPredicate);
+    }
 
     @Test
     public void testSerializeDeserializePhPredicate() throws IOException, ClassNotFoundException {
@@ -24,14 +41,6 @@ public class SerializerUtilTest {
 
         PhPredicate deserializedPredicate = serializeDeserialize(pred);
         checkResults(argumentResultMap, deserializedPredicate);
-    }
-
-    @Test
-    public void testSerializeNull() throws IOException, ClassNotFoundException {
-        SerializerUtil serializer = SerializerUtil.getInstance();
-        byte[] data = serializer.serializeDefault(null);
-        PhPredicate deserializedPredicate = serializer.deserializeDefault(data);
-        assertEquals(null, deserializedPredicate);
     }
 
     @Test
