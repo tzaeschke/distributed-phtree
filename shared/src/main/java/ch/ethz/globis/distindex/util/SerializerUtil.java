@@ -1,11 +1,13 @@
 package ch.ethz.globis.distindex.util;
 
+import ch.ethz.globis.pht.PhPredicate;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import org.jboss.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 
 public class SerializerUtil {
 
@@ -42,5 +44,24 @@ public class SerializerUtil {
         T obj = (T) kryo.readClassAndObject(input);
         input.close();
         return obj;
+    }
+
+    public byte[] serializePhPredicate(PhPredicate predicate) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data;
+        try (ObjectOutput oo = new ObjectOutputStream(buffer)) {
+            oo.writeObject(predicate);
+            oo.flush();
+            data = buffer.toByteArray();
+        }
+        return data;
+    }
+
+    public PhPredicate deserializePhPredicate(byte[] data) throws IOException, ClassNotFoundException {
+        PhPredicate result;
+        try (ObjectInput oi = new ObjectInputStream(new ByteArrayInputStream(data))) {
+            result = (PhPredicate) oi.readObject();
+        }
+        return result;
     }
 }
