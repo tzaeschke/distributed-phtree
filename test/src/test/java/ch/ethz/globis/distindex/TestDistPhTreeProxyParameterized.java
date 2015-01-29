@@ -8,9 +8,7 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeQStats;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +19,8 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
 
@@ -35,7 +35,6 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         return Arrays.asList(new Object[][]{
                 {1},
                 {4},
-                {5},
                 {7},
                 {13}
         });
@@ -136,32 +135,12 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
     public void testGetRange() throws Exception {
         phTree.create(2, 64);
 
-        phTree.put(new long[] {10, 10}, "foo");
-        phTree.put(new long[] {11, 10}, "foo");
-        phTree.put(new long[]{9, 10}, "foo");
-        phTree.put(new long[]{10, 9}, "foo");
-        phTree.put(new long[]{10, 11}, "foo");
-        phTree.put(new long[]{10, 12}, "foo");
-        phTree.put(new long[]{9, 7}, "foo");
-        phTree.put(new long[]{10, 9}, "foo");
-        phTree.put(new long[]{100000000, -1}, "foo");
-        phTree.put(new long[]{-1, 100000000}, "foo");
+        IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
+        IndexEntryList<long[], String> actual = phTree.getRange(new long[]{9, 9}, new long[]{11, 11});
 
-        IndexEntryList<long[], String> result = phTree.getRange(new long[]{9, 9}, new long[]{11, 11});
-        IndexEntryList<long[], String> expected = new IndexEntryList<>();
-        expected.add(new IndexEntry<>(new long[] { 9L, 10L}, "foo"));
-        expected.add(new IndexEntry<>(new long[] { 10L, 9L}, "foo"));
-        expected.add(new IndexEntry<>(new long[] { 10L, 10L}, "foo"));
-        expected.add(new IndexEntry<>(new long[] { 10L, 11L}, "foo"));
-        expected.add(new IndexEntry<>(new long[] { 11L, 10L}, "foo"));
-
-        assertEquals(expected.size(), result.size());
         expected = MultidimUtil.sort(expected);
-        result = MultidimUtil.sort(result);
-        for (int i = 0; i < result.size(); i++) {
-            assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
-            assertEquals(expected.get(i).getValue(), result.get(i).getValue());
-        }
+        actual = MultidimUtil.sort(actual);
+        assertEqualsEntryLists(expected, actual);
     }
 
     @Test
@@ -176,7 +155,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         phTree.put(new long[]{-2, 3}, "foo");
         phTree.put(new long[]{-2, 2}, "foo");
 
-        IndexEntryList<long[], String> result = phTree.getRange(new long[]{-2, -2}, new long[]{2, 2});
+        IndexEntryList<long[], String> actual = phTree.getRange(new long[]{-2, -2}, new long[]{2, 2});
         IndexEntryList<long[], String> expected = new IndexEntryList<>();
         expected.add(new IndexEntry<>(new long[] { 0L, 0L}, "foo"));
         expected.add(new IndexEntry<>(new long[] { 1L, 0L}, "foo"));
@@ -185,13 +164,9 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         expected.add(new IndexEntry<>(new long[] { -1L, 0L}, "foo"));
         expected.add(new IndexEntry<>(new long[] { -2L, 2L}, "foo"));
 
-        assertEquals(expected.size(), result.size());
         expected = MultidimUtil.sort(expected);
-        result = MultidimUtil.sort(result);
-        for (int i = 0; i < result.size(); i++) {
-            assertArrayEquals(expected.get(i).getKey(), result.get(i).getKey());
-            assertEquals(expected.get(i).getValue(), result.get(i).getValue());
-        }
+        actual = MultidimUtil.sort(actual);
+        assertEqualsEntryLists(expected, actual);
     }
 
     @Test
@@ -213,7 +188,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
             add(new long[] { 1, 2});
             add(new long[] { -1, -1});
         }};
-        List<long[]> inserted = new ArrayList<>();
+        List<long[]> inserted = new ArrayList<long[]>();
         inserted.addAll(expected);
         inserted.add(new long[] { -1000, 1000});
         inserted.add(new long[] { -1000, -1000});
@@ -414,6 +389,85 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         assertEquals(0, phTree.size());
         assertEquals(2, phTree.getDim());
         assertEquals(64, phTree.getDepth());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testKNNWithFilter() {
+        phTree.create(2, 64);
+        phTree.getNearestNeighbuor(1, null, null, null);
+    }
+
+    @Test
+    public void testRangeList() {
+        phTree.create(2, 64);
+        IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
+
+        List<PVEntry<String>> pvEntries = phTree.queryAll(new long[]{9, 9}, new long[]{11, 11});
+        final IndexEntryList<long[], String> results = new IndexEntryList<>();
+        pvEntries.stream().forEach(e -> results.add(e.getKey(), e.getValue()));
+
+        expected = MultidimUtil.sort(expected);
+        IndexEntryList<long[], String> actual = MultidimUtil.sort(results);
+        assertEqualsEntryLists(expected, actual);
+    }
+
+    @Test
+    public void testRangeListFilterMapper() {
+        phTree.create(2, 64);
+        IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
+        long[] min = {9, 9};
+        long[] max = {11, 11};
+        List<PVEntry<String>> pvEntries = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapper.PVENTRY());
+        final IndexEntryList<long[], String> results = new IndexEntryList<>();
+        pvEntries.stream().forEach(e -> results.add(e.getKey(), e.getValue()));
+
+        expected = MultidimUtil.sort(expected);
+        IndexEntryList<long[], String> actual = MultidimUtil.sort(results);
+        assertEqualsEntryLists(expected, actual);
+    }
+
+    @Test
+    public void testUpdateKey() {
+        phTree.create(2, 64);
+        long[] key = {1, 2};
+        long[] key2 = {-1, -2};
+        String value = "Hello, world";
+        phTree.put(key, value);
+        assertEquals(value, phTree.get(key));
+        assertNull(phTree.get(key2));
+        phTree.update(key, key2);
+
+        assertEquals(value, phTree.get(key2));
+        assertNull(phTree.get(key));
+    }
+
+    private IndexEntryList<long[], String> setupTestTreeForRangeQueriesAndReturnExpectedResult() {
+        phTree.put(new long[] {10, 10}, "foo");
+        phTree.put(new long[] {11, 10}, "foo");
+        phTree.put(new long[]{9, 10}, "foo");
+        phTree.put(new long[]{10, 9}, "foo");
+        phTree.put(new long[]{10, 11}, "foo");
+        phTree.put(new long[]{10, 12}, "foo");
+        phTree.put(new long[]{9, 7}, "foo");
+        phTree.put(new long[]{10, 9}, "foo");
+        phTree.put(new long[]{100000000, -1}, "foo");
+        phTree.put(new long[]{-1, 100000000}, "foo");
+
+        IndexEntryList<long[], String> expected = new IndexEntryList<>();
+        expected.add(new IndexEntry<>(new long[] { 9L, 10L}, "foo"));
+        expected.add(new IndexEntry<>(new long[] { 10L, 9L}, "foo"));
+        expected.add(new IndexEntry<>(new long[] { 10L, 10L}, "foo"));
+        expected.add(new IndexEntry<>(new long[] { 10L, 11L}, "foo"));
+        expected.add(new IndexEntry<>(new long[] { 11L, 10L}, "foo"));
+        return expected;
+    }
+
+    private <V> void assertEqualsEntryLists(IndexEntryList<long[], V> expected, IndexEntryList<long[], V> actual) {
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertArrayEquals(expected.get(i).getKey(), actual.get(i).getKey());
+            assertEquals(expected.get(i).getValue(), actual.get(i).getValue());
+        }
     }
 
     private static long[] k(long... keys) {
