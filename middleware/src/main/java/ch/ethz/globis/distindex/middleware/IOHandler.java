@@ -6,7 +6,6 @@ import ch.ethz.globis.distindex.middleware.net.BalancingRequestHandler;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import org.slf4j.Logger;
@@ -52,11 +51,17 @@ public class IOHandler<K, V> {
                 case OpCode.GET_RANGE:
                     response = handleGetRangeRequest(buffer);
                     break;
+                case OpCode.GET_RANGE_FILTER:
+                    response = handleGetRangeFilter(buffer);
+                    break;
                 case OpCode.GET_BATCH:
                     response = handleGetBatchRequest(clientHost, buffer);
                     break;
                 case OpCode.PUT:
                     response = handlePutRequest(buffer);
+                    break;
+                case OpCode.UPDATE_KEY:
+                    response = handleUpdateKeyRequest(buffer);
                     break;
                 case OpCode.CREATE_INDEX:
                     response = handleCreateRequest(buffer);
@@ -114,6 +119,18 @@ public class IOHandler<K, V> {
             response = handleErroneousRequest(buffer);
         }
         return response;
+    }
+
+    private ByteBuffer handleUpdateKeyRequest(ByteBuffer buffer) {
+        UpdateKeyRequest<K> request = decoder.decodeUpdateKeyRequest(buffer);
+        Response response = requestHandler.handleUpdateKey(request);
+        return encodeResponse(response);
+    }
+
+    private ByteBuffer handleGetRangeFilter(ByteBuffer buffer) {
+        GetRangeFilterMapperRequest<K> request = decoder.decodeGetRangeFilterMapper(buffer);
+        Response response = requestHandler.handleGetRangeFilter(request);
+        return encodeResponse(response);
     }
 
     private ByteBuffer handleNodeCountRequest(ByteBuffer buffer) {

@@ -267,6 +267,46 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
+    public Response handleUpdateKey(UpdateKeyRequest<long[]> request) {
+
+        if (isVersionOutDate(request) || currentlyBalancing()) {
+            return createOutdateVersionResponse(request);
+        }
+        long[] oldKey = request.getOldKey();
+        long[] newKey = request.getNewKey();
+        PhTreeV<byte[]> tree = tree();
+        byte[] value;
+        synchronized (tree) {
+            value = (byte[]) tree.update(oldKey, newKey);
+        }
+        IndexEntryList<long[], byte[]> singleResult = new IndexEntryList<>(newKey, value);
+        return createResponse(request, singleResult);
+    }
+
+    @Override
+    public Response handleGetRangeFilter(GetRangeFilterMapperRequest<long[]> request) {
+        if (isVersionOutDate(request) || currentlyBalancing()) {
+            return createOutdateVersionResponse(request);
+        }
+
+        PhMapper mapper = request.getMapper();
+        PhPredicate predicate = request.getFilter();
+        long[] start = request.getStart();
+        long[] end = request.getEnd();
+        PhTreeV<byte[]> tree = tree();
+        int maxResults = request.getMaxResults();
+        List<PVEntry<byte[]>> results;
+        synchronized (tree) {
+            if (mapper == null && predicate == null) {
+                results = tree.queryAll(start, end);
+            } else {
+                results = tree.queryAll(start, end, maxResults, predicate, PhMapper.<byte[]>PVENTRY());
+            }
+        }
+        return createResponse(request, createList(results));
+    }
+
+    @Override
     public Response handleNodeCount(BaseRequest request) {
         if (isVersionOutDate(request)) {
             return createOutdateVersionResponse(request);

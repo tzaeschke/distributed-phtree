@@ -105,6 +105,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         return new GetRangeRequest<>(requestId, opCode, indexName, mappingVersion, start, end, distance);
     }
 
+    @Override
     public GetRangeFilterMapperRequest<K> decodeGetRangeFilterMapper(ByteBuffer buffer) {
                 try {
             byte opCode = buffer.get();
@@ -115,6 +116,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
             K start = decodeKey(buffer);
             K end = decodeKey(buffer);
 
+            int maxResults = buffer.getInt();
             int mapperLength = buffer.getInt();
             byte[] mapperBytes = new byte[mapperLength];
             buffer.get(mapperBytes);
@@ -125,7 +127,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
             byte[] filterBytes = new byte[filterLength];
             buffer.get(filterBytes);
             PhPredicate filter = SerializerUtil.getInstance().deserializeDefault(filterBytes);
-            return new GetRangeFilterMapperRequest<>(requestId, opCode, indexName, mappingVersion, start, end, filter, mapper);
+            return new GetRangeFilterMapperRequest<>(requestId, opCode, indexName, mappingVersion, start, end, maxResults, filter, mapper);
         } catch (IOException | ClassNotFoundException e) {
             throw new UnsupportedOperationException("Failed to perform decoding.", e);
         }

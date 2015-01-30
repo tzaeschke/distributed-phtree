@@ -45,4 +45,8 @@ public interface RequestHandler<K, V> {
     public Response handleStats(BaseRequest request);
 
     public void cleanup(String clientHost);
+
+    public Response handleUpdateKey(UpdateKeyRequest<K> request);
+
+    public Response handleGetRangeFilter(GetRangeFilterMapperRequest<K> request);
 }

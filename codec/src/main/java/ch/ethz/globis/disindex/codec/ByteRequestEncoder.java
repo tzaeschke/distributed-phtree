@@ -209,6 +209,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             int outputSize = startKeyBytes.length + 4   // start key bytes + number of start key bytes
                     + endKeyBytes.length + 4    // end key bytes + number of end key bytes
                     + 8                         // sizes of encoded mapper and filter
+                    + 4                         // max entries
                     + encodedMapper.length
                     + encodedFilter.length
                     + request.metadataSize();   // metadata size
@@ -217,6 +218,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             writeMeta(buffer, request);
             writeByteArray(buffer, startKeyBytes);
             writeByteArray(buffer, endKeyBytes);
+            buffer.putInt(request.getMaxResults());
             writeByteArray(buffer, encodedMapper);
             writeByteArray(buffer, encodedFilter);
             return buffer.array();

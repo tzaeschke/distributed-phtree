@@ -3,6 +3,8 @@ package ch.ethz.globis.distindex.operation.request;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhPredicate;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -122,5 +124,13 @@ public class Requests<K, V> {
     private int mappingVersion() {
         KeyMapping<K> mapping = clusterService.getMapping();
         return (mapping == null) ? 0 : mapping.getVersion();
+    }
+
+    public UpdateKeyRequest<K> newUpdateKeyRequest(K oldKey, K newKey) {
+        return new UpdateKeyRequest<>(nextId(), OpCode.UPDATE_KEY, PLACEHOLDER, mappingVersion(), oldKey, newKey);
+    }
+
+    public <R> GetRangeFilterMapperRequest<K> newGetRangeFilterMaper(K min, K max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+        return new GetRangeFilterMapperRequest<>(nextId(), OpCode.GET_RANGE_FILTER, PLACEHOLDER, mappingVersion(), min, max, maxResults, filter, mapper);
     }
 }

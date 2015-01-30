@@ -11,15 +11,14 @@ import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
 import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
 import ch.ethz.globis.disindex.codec.io.TCPClient;
 import ch.ethz.globis.disindex.codec.io.Transport;
+import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.PointIndex;
 import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.operation.request.BaseRequest;
-import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
-import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
-import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
@@ -291,8 +290,32 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return global;
     }
 
-    public boolean isRangeEmpty(long[] min, long[] max) {
+    public List<long[]> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
+        //ToDo this is currently not supported by the PH Tree, but it will change in the future
         throw new UnsupportedOperationException();
+    }
+
+    public List<PVEntry<V>> queryAll(long[] min, long[] max) {
+        return queryAll(min, max, Integer.MAX_VALUE, PhPredicate.ACCEPT_ALL, PhMapper.<V>PVENTRY());
+    }
+
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+        boolean versionOutdated;
+        List<ResultResponse> responses;
+        do {
+            GetRangeFilterMapperRequest<long[]> request =
+                    requests.newGetRangeFilterMaper(min, max, maxResults, filter, mapper);
+            KeyMapping<long[]> mapping = clusterService.getMapping();
+            List<String> hostIds = mapping.get(min, max);
+            responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
+            versionOutdated = check(request, responses);
+        } while (versionOutdated);
+
+        return combine(responses, mapper);
+    }
+
+    public boolean isRangeEmpty(long[] min, long[] max) {
+        return getRange(min, max).size() == 0;
     }
 
     public String toStringTree() {
@@ -329,13 +352,13 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         }
     }
 
-    public List<long[]> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
-        //ToDo this is currently not supported by the PH Tree, but it will change in the future
-        throw new UnsupportedOperationException();
-    }
-
-
-    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
-        throw new UnsupportedOperationException();
+    protected <R> List<R> combine(List<ResultResponse> responses, PhMapper<V, R> mapper) {
+        List<R> results = new ArrayList<>();
+        for (ResultResponse<long[],V> response : responses) {
+            for (IndexEntry<long[], V> e : response.getEntries()) {
+                results.add(mapper.map(new PVEntry<>(e.getKey(), e.getValue())));
+            }
+        }
+        return results;
     }
 }

@@ -15,9 +15,12 @@ import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.pht.PVEntry;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -81,6 +84,38 @@ public class ResponseEncodeDecodeTest {
         MapResponse decodedResponse = decoder.decodeMap(data);
         assertEquals(response, decodedResponse);
     }
+
+    @Test
+    public void encodeDecodeMapResponsePhEntries() {
+        Random random = new Random();
+        byte opCode = getRandom(opCodes, random);
+        byte opStatus = getRandom(opStatuses, random);
+        int requestId = random.nextInt();
+
+        MapResponse response = new MapResponse(opCode, requestId, opStatus);
+        List<PVEntry<String>> pvEntries = new ArrayList<>();
+        pvEntries.add(new PVEntry<>(new long[] { 1, 2}, "Hello, "));
+        pvEntries.add(new PVEntry<>(new long[] { 2, 2}, "world"));
+
+        response.addParameter("pvEntries", pvEntries);
+
+        List<long[]> longs = new ArrayList<>();
+        longs.add(new long[] {1, 2, 3});
+        longs.add(new long[] {-1, -2, -3});
+        response.addParameter("longs", longs);
+
+        List<double[]> doubles = new ArrayList<>();
+        doubles.add(new double[] {1, 2, 3});
+        doubles.add(new double[] {-1, -2, -3});
+
+        response.addParameter("doubles", doubles);
+
+        byte[] data = encoder.encode(response);
+        MapResponse decodedResponse = decoder.decodeMap(data);
+
+        System.out.print(decodedResponse.getParameter("pvEntries"));
+    }
+
 
     private void assertEqualsMeta(ResultResponse<long[], byte[]> original, ResultResponse<long[], String> decoded) {
         assertEquals("Request id's do not match.", original.getRequestId(), decoded.getRequestId());

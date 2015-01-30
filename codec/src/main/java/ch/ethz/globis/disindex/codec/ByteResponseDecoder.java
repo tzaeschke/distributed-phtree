@@ -48,7 +48,6 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
             case ResponseCode.RESULT:
                 response = (R) decodeResult(payload);
                 break;
-
         }
         return response;
     }
@@ -81,6 +80,11 @@ public class ByteResponseDecoder<K, V> implements ResponseDecoder<K, V> {
     @Override
     public ResultResponse<K, V> decodeResult(byte[] payload) {
         return decodeResult(ByteBuffer.wrap(payload));
+    }
+
+    @Override
+    public V decodeValue(byte[] payload) {
+        return valueDecoder.decode(payload);
     }
 
     public ResultResponse<K, V> decodeResult(ByteBuffer buffer) {

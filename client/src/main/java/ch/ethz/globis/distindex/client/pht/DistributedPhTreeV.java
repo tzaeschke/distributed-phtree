@@ -117,7 +117,7 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public <R> List<R> queryAll(long[] min, long[] max) {
+    public List<PVEntry<V>> queryAll(long[] min, long[] max) {
         return proxy.queryAll(min, max);
     }
 

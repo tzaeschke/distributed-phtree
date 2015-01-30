@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.middleware;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.pht.PhTreeV;
 import ch.ethz.globis.pht.v3.PhTree3;
+import ch.ethz.globis.pht.v5.PhTree5;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,7 +39,7 @@ public class IndexContext {
     }
 
     public void initTree(int dim, int depth) {
-        this.tree = new PhTree3<>(dim, depth);
+        this.tree = new PhTree5<>(dim, depth);
     }
 
 

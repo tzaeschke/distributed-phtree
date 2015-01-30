@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class MapResponse extends BaseResponse {
 
-    public Map<String, Object> map = new HashMap<>();
+    private Map<String, Object> map = new HashMap<>();
 
     public MapResponse() {
         super();

@@ -24,4 +24,6 @@ public interface ResponseDecoder<K, V> {
     public IntegerResponse decodeInteger(byte[] payload);
 
     public MapResponse decodeMap(byte[] payload);
+
+    public V decodeValue(byte[] payload);
 }

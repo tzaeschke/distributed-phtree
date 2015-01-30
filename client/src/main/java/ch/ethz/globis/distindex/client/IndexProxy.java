@@ -11,11 +11,10 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
-import ch.ethz.globis.distindex.operation.response.Response;
-import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.distindex.operation.response.SimpleResponse;
+import ch.ethz.globis.distindex.operation.response.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PhMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +131,31 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
             versionOutdated = check(request, response);
         } while (versionOutdated);
         return getSingleEntryValue(response);
+    }
+
+    public V update(K oldKey, K newKey) {
+        boolean versionOutdated;
+        ResultResponse<K, V> response;
+        V value;
+        do {
+            KeyMapping<K> keyMapping = clusterService.getMapping();
+            String hostIdOld = keyMapping.get(oldKey);
+            String hostIdNew = keyMapping.get(newKey);
+            if (hostIdNew == null || hostIdOld == null) {
+                throw new IllegalArgumentException();
+            }
+            if (hostIdNew.equals(hostIdOld)) {
+                UpdateKeyRequest<K> request = requests.newUpdateKeyRequest(oldKey, newKey);
+                response = requestDispatcher.send(hostIdNew, request, ResultResponse.class);
+                versionOutdated = check(request, response);
+                value = getSingleEntryValue(response);
+            } else {
+                value = remove(oldKey);
+                put(newKey, value);
+                versionOutdated = false;
+            }
+        } while (versionOutdated);
+        return value;
     }
 
     @Override
@@ -349,13 +373,5 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         for (IndexIterator<K, V> it : openIterators) {
             it.close();
         }
-    }
-
-    public V update(long[] oldKey, long[] newKey) {
-        throw new UnsupportedOperationException();
-    }
-
-    public <R> List<R> queryAll(long[] min, long[] max) {
-        throw new UnsupportedOperationException();
     }
 }
