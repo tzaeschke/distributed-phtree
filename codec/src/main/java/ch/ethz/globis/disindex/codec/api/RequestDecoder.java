@@ -22,6 +22,8 @@ public interface RequestDecoder<K, V> {
 
     public GetRangeRequest<K> decodeGetRange(ByteBuffer buffer);
 
+    UpdateKeyRequest<K> decodeUpdateKeyRequest(ByteBuffer buffer);
+
     public GetKNNRequest<K> decodeGetKNN(ByteBuffer buffer);
 
     public GetIteratorBatchRequest<K> decodeGetBatch(ByteBuffer buffer);

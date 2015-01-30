@@ -8,6 +8,9 @@ import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhPredicate;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -16,6 +19,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RequestEncodeDecodeTest {
 
@@ -190,6 +194,34 @@ public class RequestEncodeDecodeTest {
     public void encodeDecodeGetDepth() {
         BaseRequest request = new BaseRequest(1, OpCode.GET_DEPTH, "", 1);
         encodeDecodeBasicRequest(request);
+    }
+
+    @Test
+    public void encodeDecodeUpdateKey() {
+        long[] oldKey = {1, 2, 3};
+        long[] newKey = {2, 3, 4};
+        UpdateKeyRequest<long[]> request = new UpdateKeyRequest<>(1, OpCode.UPDATE_KEY, "", 1, oldKey, newKey);
+        byte[] encodedRequest = requestEncoder.encodeUpdateKey(request);
+        UpdateKeyRequest<long[]> decoded = requestDecoder.decodeUpdateKeyRequest(ByteBuffer.wrap(encodedRequest));
+        assertRequestMetaEqual(request, decoded);
+        assertArrayEquals(request.getOldKey(), decoded.getOldKey());
+        assertArrayEquals(request.getNewKey(), decoded.getNewKey());
+    }
+
+    @Test
+    public void encodeDecodeGetRangeWithFilter() {
+        long[] min = {1, 1, 1};
+        long[] max = {100, 100, 100};
+        GetRangeFilterMapperRequest<long[]> request =
+                new GetRangeFilterMapperRequest<>(1, OpCode.GET_RANGE_FILTER, "", 1,
+                        min, max, PhPredicate.ACCEPT_ALL, PhMapper.<long[]>LONG_ARRAY());
+
+        byte[] encodedRequest = requestEncoder.encodeGetRangeFilterMapper(request);
+        GetRangeFilterMapperRequest<long[]> decoded = requestDecoder.decodeGetRangeFilterMapper(ByteBuffer.wrap(encodedRequest));
+        assertRequestMetaEqual(request, decoded);
+        assertTrue(decoded.getFilter().test(new long[] { 1, 2}));
+        PhMapper<long[], long[]> mapper = decoded.getMapper();
+        assertArrayEquals(new long[] {1, 2} , mapper.map(new PVEntry<>(new long[] {1, 2}, new long[] {2, 3})));
     }
 
     private void encodeDecodeBasicRequest(BaseRequest request) {

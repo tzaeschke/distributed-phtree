@@ -5,8 +5,11 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.util.SerializerUtil;
+import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhPredicate;
 import com.google.common.base.Joiner;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -85,6 +88,14 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             case OpCode.CONTAINS:
                 ContainsRequest<K> contr = (ContainsRequest<K>) request;
                 encodedRequest = encodeContains(contr);
+                break;
+            case OpCode.UPDATE_KEY:
+                UpdateKeyRequest<K> updateKeyRequest = (UpdateKeyRequest<K>) request;
+                encodedRequest = encodeUpdateKey(updateKeyRequest);
+                break;
+            case OpCode.GET_RANGE_FILTER:
+                GetRangeFilterMapperRequest<K> getRangeFilterRequest = (GetRangeFilterMapperRequest<K>) request;
+                encodedRequest = encodeGetRangeFilterMapper(getRangeFilterRequest);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command type");
@@ -185,6 +196,35 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         return buffer.array();
     }
 
+    public byte[] encodeGetRangeFilterMapper(GetRangeFilterMapperRequest<K> request) {
+        try {
+            byte[] encodedMapper = SerializerUtil.getInstance().serializeDefault(request.getMapper());
+            byte[] encodedFilter = SerializerUtil.getInstance().serializeDefault(request.getFilter());
+
+            K start = request.getStart();
+            K end = request.getEnd();
+
+            byte[] startKeyBytes = keyEncoder.encode(start);
+            byte[] endKeyBytes = keyEncoder.encode(end);
+            int outputSize = startKeyBytes.length + 4   // start key bytes + number of start key bytes
+                    + endKeyBytes.length + 4    // end key bytes + number of end key bytes
+                    + 8                         // sizes of encoded mapper and filter
+                    + encodedMapper.length
+                    + encodedFilter.length
+                    + request.metadataSize();   // metadata size
+
+            ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+            writeMeta(buffer, request);
+            writeByteArray(buffer, startKeyBytes);
+            writeByteArray(buffer, endKeyBytes);
+            writeByteArray(buffer, encodedMapper);
+            writeByteArray(buffer, encodedFilter);
+            return buffer.array();
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurred during the serialization process.");
+        }
+    }
+
     public byte[] encodeGetKNN(GetKNNRequest<K> request) {
         K key = request.getKey();
         int k = request.getK();
@@ -261,6 +301,24 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
         ByteBuffer buffer = ByteBuffer.allocate(outputSize);
         writeMeta(buffer, request);
         writeString(buffer, mapString);
+        return buffer.array();
+    }
+
+    public byte[] encodeUpdateKey(UpdateKeyRequest<K> request) {
+        K start = request.getOldKey();
+        K end = request.getNewKey();
+
+        byte[] oldKeyBytes = keyEncoder.encode(start);
+        byte[] newKeyBytes = keyEncoder.encode(end);
+
+        int outputSize = oldKeyBytes.length + 4   // start key bytes + number of start key bytes
+                + newKeyBytes.length + 4    // end key bytes + number of end key bytes
+                + request.metadataSize();   // metadata size
+
+        ByteBuffer buffer = ByteBuffer.allocate(outputSize);
+        writeMeta(buffer, request);
+        writeByteArray(buffer, oldKeyBytes);
+        writeByteArray(buffer, newKeyBytes);
         return buffer.array();
     }
 

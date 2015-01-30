@@ -3,9 +3,13 @@ package ch.ethz.globis.disindex.codec;
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.util.SerializerUtil;
+import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhPredicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -101,6 +105,44 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         return new GetRangeRequest<>(requestId, opCode, indexName, mappingVersion, start, end, distance);
     }
 
+    public GetRangeFilterMapperRequest<K> decodeGetRangeFilterMapper(ByteBuffer buffer) {
+                try {
+            byte opCode = buffer.get();
+            int requestId = buffer.getInt();
+            String indexName = new String(readValue(buffer));
+            int mappingVersion = buffer.getInt();
+
+            K start = decodeKey(buffer);
+            K end = decodeKey(buffer);
+
+            int mapperLength = buffer.getInt();
+            byte[] mapperBytes = new byte[mapperLength];
+            buffer.get(mapperBytes);
+            PhMapper mapper;
+            mapper = SerializerUtil.getInstance().deserializeDefault(mapperBytes);
+
+            int filterLength = buffer.getInt();
+            byte[] filterBytes = new byte[filterLength];
+            buffer.get(filterBytes);
+            PhPredicate filter = SerializerUtil.getInstance().deserializeDefault(filterBytes);
+            return new GetRangeFilterMapperRequest<>(requestId, opCode, indexName, mappingVersion, start, end, filter, mapper);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new UnsupportedOperationException("Failed to perform decoding.", e);
+        }
+    }
+
+    @Override
+    public UpdateKeyRequest<K> decodeUpdateKeyRequest(ByteBuffer buffer) {
+        byte opCode = buffer.get();
+        int requestId = buffer.getInt();
+        String indexName = new String(readValue(buffer));
+        int mappingVersion = buffer.getInt();
+
+        K start = decodeKey(buffer);
+        K end = decodeKey(buffer);
+        return new UpdateKeyRequest<K>(requestId, opCode, indexName, mappingVersion, start, end);
+    }
+
     /**
      * Decode a k nearest neighbor request from the client.
      * @param buffer                    The ByteBuffer containing bytes sent by the client.
@@ -137,6 +179,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
         }
         return new GetIteratorBatchRequest<>(requestId, opCode, indexName, mappingVersion, iteratorId, size);
     }
+
 
     @Override
     public CreateRequest decodeCreate(ByteBuffer buffer) {

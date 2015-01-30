@@ -25,4 +25,7 @@ public class OpCode {
     public static final byte STATS_NO_NODE = 43;
     public static final byte QUALITY = 44;
     public static final byte NODE_COUNT = 45;
+
+    public static final byte UPDATE_KEY = 46;
+    public static final byte GET_RANGE_FILTER = 47;
 }
