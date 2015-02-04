@@ -303,7 +303,10 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
                 results = tree.queryAll(start, end, maxResults, predicate, PhMapper.<byte[]>PVENTRY());
             }
         }
-        return createResponse(request, createList(results));
+        boolean includeKeys = !(mapper instanceof PhMapperV);
+        boolean includeValues = !(mapper instanceof PhMapperK);
+
+        return createResponse(request, createList(results, includeKeys, includeValues));
     }
 
     @Override
@@ -434,6 +437,17 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         for (PVEntry<byte[]> entry : input) {
             results.add(entry.getKey(), entry.getValue());
+        }
+        return results;
+    }
+
+    private IndexEntryList<long[], byte[]> createList(List<PVEntry<byte[]>> input,
+                                                      boolean includeKeys,
+                                                      boolean includeValues) {
+        IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
+        for (PVEntry<byte[]> entry : input) {
+            results.add(includeKeys ? entry.getKey() : null,
+                        includeValues ? entry.getValue() : null);
         }
         return results;
     }

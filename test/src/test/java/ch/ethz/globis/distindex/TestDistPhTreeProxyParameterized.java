@@ -427,6 +427,42 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
     }
 
     @Test
+    public void testRangeListFilterMapper_LongArray() {
+        phTree.create(2, 64);
+
+        IndexEntryList<long[], String> entries = setupTestTreeForRangeQueriesAndReturnExpectedResult();
+        long[] min = {9, 9};
+        long[] max = {11, 11};
+        List<long[]> results = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapperK.LONG_ARRAY());
+
+        entries = MultidimUtil.sort(entries);
+        List<long[]> expected = new ArrayList<>();
+        entries.stream().forEach( e -> expected.add(e.getKey()));
+
+        results = MultidimUtil.sort(results);
+        assertEquals(expected.size(), results.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertArrayEquals(expected.get(i), results.get(i));
+        }
+    }
+
+    @Test
+    public void testRangeListFilterMapper_Value() {
+        phTree.create(2, 64);
+
+        IndexEntryList<long[], String> entries = setupTestTreeForRangeQueriesAndReturnExpectedResult();
+        long[] min = {9, 9};
+        long[] max = {11, 11};
+        List<String> results = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapperV.VALUE());
+
+        final HashSet<String> expected = new HashSet<>();
+        entries.forEach(e -> expected.add(e.getValue()));
+        final HashSet<String> resultSet = new HashSet<>(results);
+        assertEquals(expected, resultSet);
+    }
+
+
+    @Test
     public void testUpdateKey() {
         phTree.create(2, 64);
         long[] key = {1, 2};

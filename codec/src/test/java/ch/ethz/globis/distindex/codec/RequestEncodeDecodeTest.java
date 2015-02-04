@@ -10,6 +10,7 @@ import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhMapperK;
 import ch.ethz.globis.pht.PhPredicate;
 import org.junit.Test;
 
@@ -214,7 +215,7 @@ public class RequestEncodeDecodeTest {
         long[] max = {100, 100, 100};
         GetRangeFilterMapperRequest<long[]> request =
                 new GetRangeFilterMapperRequest<>(1, OpCode.GET_RANGE_FILTER, "", 1,
-                        min, max, 5, PhPredicate.ACCEPT_ALL, PhMapper.<long[]>LONG_ARRAY());
+                        min, max, 5, PhPredicate.ACCEPT_ALL, PhMapperK.<long[]>LONG_ARRAY());
 
         byte[] encodedRequest = requestEncoder.encodeGetRangeFilterMapper(request);
         GetRangeFilterMapperRequest<long[]> decoded = requestDecoder.decodeGetRangeFilterMapper(ByteBuffer.wrap(encodedRequest));

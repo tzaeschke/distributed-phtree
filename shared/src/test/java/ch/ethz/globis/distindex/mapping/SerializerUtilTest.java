@@ -1,10 +1,7 @@
 package ch.ethz.globis.distindex.mapping;
 
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PhMapper;
-import ch.ethz.globis.pht.PhMapperKey;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,7 +44,7 @@ public class SerializerUtilTest {
     public void testSerializeDeserializePhMapper() throws IOException, ClassNotFoundException {
         PVEntry<Object> e = new PVEntry<>(new long[] {1, 2, 3}, "Hello, world");
         assertEquals(e, serializeDeserialize(PhMapper.PVENTRY()).map(e));
-        assertEquals(e.getKey(), serializeDeserialize(PhMapper.LONG_ARRAY()).map(e));
+        assertEquals(e.getKey(), serializeDeserialize(PhMapperK.LONG_ARRAY()).map(e));
     }
 
     @Test

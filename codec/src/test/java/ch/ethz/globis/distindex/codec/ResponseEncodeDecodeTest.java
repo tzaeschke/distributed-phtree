@@ -55,6 +55,64 @@ public class ResponseEncodeDecodeTest {
     }
 
     @Test
+    public void encodeDecodeResultResponse_NullKey() {
+        Random random = new Random();
+        byte opCode = getRandom(opCodes, random);
+        byte opStatus = getRandom(opStatuses, random);
+        int requestId = random.nextInt();
+        IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
+        entries.add(null, generateValue());
+        entries.add(null, generateValue());
+        entries.add(null, generateValue());
+        ResultResponse<long[], byte[]> response = new ResultResponse<>(opCode, requestId, opStatus, entries);
+
+        byte[] encodedResponse = encoder.encode(response);
+
+        ResultResponse<long[], String> decodedResponse = decoder.decodeResult(encodedResponse);
+        assertEqualsMeta(response, decodedResponse);
+        IndexEntryList<long[], byte[]> original = response.getEntries();
+        IndexEntryList<long[], String> decoded = decodedResponse.getEntries();
+
+        assertEquals(original.size(), decoded.size());
+        for (int i = 0; i < original.size(); i++) {
+            IndexEntry<long[], byte[]> originalEntry = original.get(i);
+            IndexEntry<long[], String> decodedEntry = decoded.get(i);
+
+            assertArrayEquals(originalEntry.getValue(), valueCodec.encode(decodedEntry.getValue()));
+            assertEquals(valueCodec.decode(originalEntry.getValue()), decodedEntry.getValue());
+        }
+    }
+
+    @Test
+    public void encodeDecodeResultResponse_NullValue() {
+        Random random = new Random();
+        byte opCode = getRandom(opCodes, random);
+        byte opStatus = getRandom(opStatuses, random);
+        int requestId = random.nextInt();
+        IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
+        entries.add(generateKey(), null);
+        entries.add(generateKey(), null);
+        entries.add(generateKey(), null);
+
+        ResultResponse<long[], byte[]> response = new ResultResponse<>(opCode, requestId, opStatus, entries);
+
+        byte[] encodedResponse = encoder.encode(response);
+
+        ResultResponse<long[], String> decodedResponse = decoder.decodeResult(encodedResponse);
+        assertEqualsMeta(response, decodedResponse);
+
+        IndexEntryList<long[], byte[]> original = response.getEntries();
+        IndexEntryList<long[], String> decoded = decodedResponse.getEntries();
+
+        assertEquals(original.size(), decoded.size());
+        for (int i = 0; i < original.size(); i++) {
+            IndexEntry<long[], byte[]> originalEntry = original.get(i);
+            IndexEntry<long[], String> decodedEntry = decoded.get(i);
+            assertArrayEquals(originalEntry.getKey(), decodedEntry.getKey());
+        }
+    }
+
+    @Test
     public void encodeDecodeBaseResponse() {
         Random random = new Random();
         byte opCode = getRandom(opCodes, random);
@@ -148,6 +206,23 @@ public class ResponseEncodeDecodeTest {
         int valueLength = random.nextInt(100);
         String value = new BigInteger(valueLength, random).toString();
         return new IndexEntry<>(key, valueCodec.encode(value));
+    }
+
+    private byte[] generateValue() {
+        Random random = new Random();
+        int valueLength = random.nextInt(100);
+        String value = new BigInteger(valueLength, random).toString();
+        return valueCodec.encode(value);
+    }
+
+    private long[] generateKey() {
+        Random random = new Random();
+        int keyLength = random.nextInt(100);
+        long[] key = new long[keyLength];
+        for (int i = 0; i < keyLength; i++) {
+            key[i] = random.nextInt();
+        }
+        return key;
     }
 
     private IndexEntryList<long[], byte[]> generateEntries(int size) {
