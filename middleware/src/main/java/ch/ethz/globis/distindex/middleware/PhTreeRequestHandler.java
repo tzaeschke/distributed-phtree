@@ -181,9 +181,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         PhTreeV<byte[]> phTree = tree();
         byte[] previous;
-        synchronized (phTree) {
-            previous = phTree.put(key, value);
-        }
+
+        previous = phTree.put(key, value);
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
 
         if (previous != null) {
@@ -204,9 +203,8 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         PhTreeV<byte[]> phTree = tree();
         long[] key = request.getKey();
         byte[] value;
-        synchronized (phTree) {
-            value = phTree.remove(key);
-        }
+        value = phTree.remove(key);
+
         if (value != null) {
             checkNeedForSizeUpdate();
         }
@@ -276,9 +274,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] newKey = request.getNewKey();
         PhTreeV<byte[]> tree = tree();
         byte[] value;
-        synchronized (tree) {
-            value = (byte[]) tree.update(oldKey, newKey);
-        }
+
+        value = (byte[]) tree.update(oldKey, newKey);
+
         IndexEntryList<long[], byte[]> singleResult = new IndexEntryList<>(newKey, value);
         return createResponse(request, singleResult);
     }
@@ -296,13 +294,13 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         PhTreeV<byte[]> tree = tree();
         int maxResults = request.getMaxResults();
         List<PVEntry<byte[]>> results;
-        synchronized (tree) {
-            if (mapper == null && predicate == null) {
-                results = tree.queryAll(start, end);
-            } else {
-                results = tree.queryAll(start, end, maxResults, predicate, PhMapper.<byte[]>PVENTRY());
-            }
+
+        if (mapper == null && predicate == null) {
+            results = tree.queryAll(start, end);
+        } else {
+            results = tree.queryAll(start, end, maxResults, predicate, PhMapper.<byte[]>PVENTRY());
         }
+
         boolean includeKeys = !(mapper instanceof PhMapperV);
         boolean includeValues = !(mapper instanceof PhMapperK);
 

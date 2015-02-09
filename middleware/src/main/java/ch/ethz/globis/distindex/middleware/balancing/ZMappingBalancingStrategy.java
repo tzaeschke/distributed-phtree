@@ -347,10 +347,9 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private void removeEntries(IndexEntryList<long[], byte[]> entries) {
         PhTreeV<byte[]> tree = indexContext.getTree();
-        synchronized (tree) {
-            for (IndexEntry<long[], byte[]> entry : entries) {
-                tree.remove(entry.getKey());
-            }
+
+        for (IndexEntry<long[], byte[]> entry : entries) {
+            tree.remove(entry.getKey());
         }
     }
 
@@ -439,28 +438,28 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         int entriesToMove = treeSize / 2;
 
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
-        synchronized (phTree) {
-            PVIterator<byte[]> it = phTree.queryExtent();
-            if (!movedToRight) {
-                for (int i = 0; i < entriesToMove; i++) {
-                    PVEntry<byte[]> e = it.nextEntry();
-                    entries.add(e.getKey(), e.getValue());
-                }
-                while (it.hasNext()) {
+
+        PVIterator<byte[]> it = phTree.queryExtent();
+        if (!movedToRight) {
+            for (int i = 0; i < entriesToMove; i++) {
+                PVEntry<byte[]> e = it.nextEntry();
+                entries.add(e.getKey(), e.getValue());
+            }
+            while (it.hasNext()) {
+                it.next();
+            }
+        } else {
+            for (int i = 0; i < treeSize - entriesToMove; i++) {
+                if (it.hasNext()) {
                     it.next();
                 }
-            } else {
-                for (int i = 0; i < treeSize - entriesToMove; i++) {
-                    if (it.hasNext()) {
-                        it.next();
-                    }
-                }
-                while (it.hasNext()) {
-                    PVEntry<byte[]> e = it.nextEntry();
-                    entries.add(e.getKey(), e.getValue());
-                }
+            }
+            while (it.hasNext()) {
+                PVEntry<byte[]> e = it.nextEntry();
+                entries.add(e.getKey(), e.getValue());
             }
         }
+
         return entries;
     }
 
@@ -468,13 +467,13 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         PhTreeV<byte[]> phTree = indexContext.getTree();
 
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
-        synchronized (phTree) {
-            PVIterator<byte[]> it = phTree.queryExtent();
-            while (it.hasNext()) {
-                PVEntry<byte[]> e = it.nextEntry();
-                entries.add(e.getKey(), e.getValue());
-            }
+
+        PVIterator<byte[]> it = phTree.queryExtent();
+        while (it.hasNext()) {
+            PVEntry<byte[]> e = it.nextEntry();
+            entries.add(e.getKey(), e.getValue());
         }
+
         return entries;
     }
 

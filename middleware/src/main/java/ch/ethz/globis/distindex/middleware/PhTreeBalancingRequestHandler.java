@@ -25,10 +25,8 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
     @Override
     public Response handleRollback(RollbackBalancingRequest request) {
         PhTreeV<byte[]> tree = indexContext.getTree();
-        synchronized (tree) {
-            for (IndexEntry<long[], byte[]> entry : buffer) {
-                tree.remove(entry.getKey());
-            }
+        for (IndexEntry<long[], byte[]> entry : buffer) {
+            tree.remove(entry.getKey());
         }
         indexContext.endBalancing();
         return ackResponse(request);
@@ -58,9 +56,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
 
         buffer.add(key, value);
         PhTreeV<byte[]> tree = indexContext.getTree();
-        synchronized (tree) {
-            indexContext.getTree().put(key, value);
-        }
+        tree.put(key, value);
         return ackResponse(request);
     }
 
