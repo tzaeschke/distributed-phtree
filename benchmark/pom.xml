@@ -40,6 +40,11 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
         </dependency>
+        <dependency>
+            <groupId>uk.com.robust-it</groupId>
+            <artifactId>cloning</artifactId>
+            <version>1.9.1</version>
+        </dependency>
         <!--JMH benchmarks-->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
