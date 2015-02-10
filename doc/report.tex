@@ -29,15 +29,15 @@
 \fancyhf{}
 \fancyhead[LE,RO]{\sffamily\bfseries\small\thepage}
 \fancyhead[LO]{\sffamily\bfseries\small\leftmark}
-\fancyhead[RE]{\sffamily\bfseries\small\rightmark}
+    \fancyhead[RE]{\sffamily\bfseries\small\rightmark}
 \renewcommand{\headrulewidth}{0.1pt}
 \renewcommand{\footrulewidth}{0pt}
 
 \fancypagestyle{plain}{
-   \fancyhf{}
-   \fancyfoot[C]{\sffamily\bfseries\small\thepage}
-   \renewcommand{\headrulewidth}{0pt}
-   \renewcommand{\footrulewidth}{0pt}
+    \fancyhf{}
+    \fancyfoot[C]{\sffamily\bfseries\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
 }
 
 % Please adapt the following fields if necessary!
@@ -45,7 +45,7 @@
     pdftitle = Distributed Ph Tree, 
     pdfauthor = Bogdan Vancea,
     pdfsubject = Master Thesis,
-		hidelinks,
+    hidelinks,
     plainpages = false,
     bookmarksnumbered = true
 } 
@@ -54,7 +54,7 @@
 
 % Please adapt the following fields if necessary!
 \title{Cluster-Computing and Parallelisation for the
-Multi-Dimensional PH-Index}
+    Multi-Dimensional PH-Index}
 \category{Master Thesis} 
 \author{Bogdan Aurel Vancea}
 \email{$<$bvancea@student.ethz.ch$>$}
@@ -148,6 +148,50 @@ The K nearest neighbours should be found in the following manner:
 \end{enumerate}
 
 This algorithms works under that assumption that all hosts hold at least k points. If that is not the case, and fewer candidates are returned from the first query, one would need to increase the query space and check all of the neighboring areas of the zone holding the query key. To achieve correctness even if all the cluster holds fewer than k keys, one could iteratively query more neighbours in each steps (i.e. first query the 1 - hop neighbourhood, then the 2 - hop neighbourhood) and stop after all of the hosts have been querried.
+
+\subsection{PhTree Concurrency}
+The PhTree does not currently support concurrent write operations. There are several strategies that could be employed to add concurrent writes.
+
+\begin{description}
+    \item[Copy-On-Write] COW would make the PhTree immutable. Therefore, every
+        write operation (insert, remove, update) will create a new version of
+        the containing the changes to be applied. The advantages of this
+        strategy is that it allows one writer and an arbitrarily large number
+        of readers to access the tree concurrently. The second advtange is
+        that this method provides very high consistency guarantees, allowing
+        range and knn queries to run for large periods of time on an older
+        version of the tree. The disadvantages of this method is that it is
+        designed to only allow a single writer thread access the tree in the
+        same time and that it has a higher memory consumption as some of the
+        nodes need to be copied on each access.
+    \item[Pesimmistic Locking] Hand over hand locking strategies could be used
+        to allow multiple writers to acces the tree. Due to the fact that
+        iterators maintain a stack of nodes, it might be needed that some of
+        the nodes need to be copied after modification. 
+        Advantages of this approach: Integrates multiple writers. The main
+        disadvantages are that it have lower consistency guarantees.
+    \item[Optimistic Locking] Optimistic locking could be used instead of hand
+        over hand locking. This strategy would go down the tree without taking
+        any locks to find the node to be modified. When the node is found, the
+        parent and the node are locked and a validation check is performed to
+        make sure the node / parent were not changed and that they are still
+        reachable. This approach takes fewer locks when the write contention
+        is not very high. However, it causes starvation when the lock
+        contention is high.
+\end{description}
+
+The PhTree contains the following write operations:
+\begin{enumerate}
+    \item Adding new key-value pair to the tree.
+    \item Removing a key-value pair from the tree.
+    \item Updating the key for a given key-value pair.
+\end{enumerate}
+
+The following node modification operations are performed on the tree:
+\begin{enumerate}
+    \item New nodes are added as leaves during the insert operation.
+    \item Some leaf nodes could be removed during the delete operation.
+\end{enumerate}
 
 \section{Implementation}
 Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.
