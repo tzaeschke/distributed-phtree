@@ -26,14 +26,20 @@ public class SerializerUtil {
     }
 
     public <T> byte[] serialize(T object) {
-        Kryo kryo = kryos.get();
         ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
         Output output = new Output(outputBuffer);
-        kryo.writeClassAndObject(output, object);
-        output.flush();
+
+        serialize(object, output);
+
         byte[] data =  outputBuffer.toByteArray();
         output.close();
         return data;
+    }
+
+    public <T> void serialize(T object, Output output) {
+        Kryo kryo = kryos.get();
+        kryo.writeClassAndObject(output, object);
+        output.flush();
     }
 
     public <T> T deserialize(byte[] data) {
