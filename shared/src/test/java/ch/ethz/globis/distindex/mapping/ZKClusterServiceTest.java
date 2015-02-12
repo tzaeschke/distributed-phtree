@@ -30,7 +30,7 @@ public class ZKClusterServiceTest {
             clusterService.registerHost("2");
             clusterService.disconnect();
 
-            clusterService = new BSTMapClusterService(ZK_HOST, ZK_PORT);
+            clusterService = new ZKClusterService(ZK_HOST, ZK_PORT);
             clusterService.connect();
             KeyMapping<long[]> mapping2 = clusterService.getMapping();
             clusterService.deregisterHost("1");

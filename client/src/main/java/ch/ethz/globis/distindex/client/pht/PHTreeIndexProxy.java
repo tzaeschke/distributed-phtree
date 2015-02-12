@@ -326,8 +326,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return new ZKClusterService(host, port);
     }
 
-    public void setKnnRadiusStrategy(KNNRadiusStrategy knnRadiusStrategy) {
-        this.knnRadiusStrategy = knnRadiusStrategy;
+    public void setKnnRadiusStrategy(KNNRadiusStrategy radiusStrategy) {
+        this.knnStrategy.setRadiusStrategy(radiusStrategy);
     }
 
     public KeyMapping<long[]> getMapping() {

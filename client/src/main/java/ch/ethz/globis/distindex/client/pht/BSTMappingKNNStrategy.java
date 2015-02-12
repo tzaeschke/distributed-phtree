@@ -32,6 +32,11 @@ public class BSTMappingKNNStrategy<V> implements KNNStrategy<V> {
         return neighbours;
     }
 
+    @Override
+    public void setRadiusStrategy(KNNRadiusStrategy radiusStrategy) {
+        this.radiusStrategy = radiusStrategy;
+    }
+
     /**
      * Perform an iterative expansion search for the nearest neighbour. This should be called if
      * the host containing the query point does not contain K nearest neighbours.

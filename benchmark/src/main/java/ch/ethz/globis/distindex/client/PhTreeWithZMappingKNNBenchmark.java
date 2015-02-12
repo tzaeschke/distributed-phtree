@@ -5,6 +5,9 @@ import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
+import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
+import ch.ethz.globis.distindex.orchestration.ClusterService;
+import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import org.apache.curator.test.TestingServer;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -27,22 +30,15 @@ import java.util.concurrent.TimeUnit;
  * Benchmark suite for the k nearest neighbour operation
  */
 @BenchmarkMode({Mode.Throughput})
-@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-@Measurement(iterations = 20, time = 100, timeUnit = TimeUnit.NANOSECONDS)
-public class PhTreeKNNBenchmark {
+@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 15, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+public class PhTreeWithZMappingKNNBenchmark {
 
-    private static Logger LOG = LoggerFactory.getLogger(PhTreeKNNBenchmark.class);
+    private static Logger LOG = LoggerFactory.getLogger(PhTreeWithZMappingKNNBenchmark.class);
 
-    private static KNNRadiusStrategy basic = new BasicKNNRadiusStrategy();
     private static KNNRadiusStrategy range = new RangeKNNRadiusStrategy();
     private static KNNRadiusStrategy rangeKNN = new RangeHostsKNNRadiusStrategy();
     private static KNNRadiusStrategy rangeFilter = new RangeFilteredKNNRadiusStrategy();
-
-    @Benchmark
-    public Object basicSearchAllNeighbours(BenchmarkState state) {
-        state.indexProxy.setKnnRadiusStrategy(basic);
-        return state.indexProxy.getNearestNeighbors(randomKey(), 10);
-    }
 
     @Benchmark
     public Object rectangleRangeSearch(BenchmarkState state) {
@@ -93,8 +89,9 @@ public class PhTreeKNNBenchmark {
         }
 
         private static PHTreeIndexProxy<Object> setupIndex() {
-            PHFactory factory = new ZKPHFactory(ZK_HOST, ZK_PORT);
-            PHTreeIndexProxy<Object> proxy = factory.createProxy(2, 64);
+            ClusterService<long[]> clusterService = new ZKClusterService(ZK_HOST, ZK_PORT);
+            PHTreeIndexProxy<Object> proxy = new PHTreeIndexProxy<Object>(clusterService);
+            proxy.create(2, 64);
             return proxy;
         }
 
@@ -132,7 +129,7 @@ public class PhTreeKNNBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(".*" + PhTreeKNNBenchmark.class.getSimpleName() + ".*")
+                .include(".*" + PhTreeWithZMappingKNNBenchmark.class.getSimpleName() + ".*")
                 .forks(1)
                 .build();
         new Runner(opt).run();

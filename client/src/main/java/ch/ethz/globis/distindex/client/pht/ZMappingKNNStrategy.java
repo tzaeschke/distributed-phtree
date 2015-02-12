@@ -14,6 +14,7 @@ import java.util.List;
 public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ZMappingKNNStrategy.class);
+
     private KNNRadiusStrategy radiusStrategy = new RangeFilteredKNNRadiusStrategy();
 
     @Override
@@ -30,6 +31,11 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
         }
         LOG.debug("KNN request ended for key={} and k={}", Arrays.toString(key), k);
         return neighbours;
+    }
+
+    @Override
+    public void setRadiusStrategy(KNNRadiusStrategy radiusStrategy) {
+        this.radiusStrategy = radiusStrategy;
     }
 
     private List<long[]> getNearestNeighbors(String hostId, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
