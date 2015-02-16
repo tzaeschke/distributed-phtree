@@ -1,8 +1,8 @@
 package ch.ethz.globis.distindex.serializer;
 
+import ch.ethz.globis.pht.PVEntry;
 import ch.ethz.globis.pht.PVIterator;
 import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.v5.PhTree5;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -10,7 +10,9 @@ import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import java.io.*;
 
-public class IterativeSerializer implements PhTreeSerializer {
+public class IterativeSerializer<T> implements PhTreeSerializer {
+
+    private PhTreeV<T> tree;
 
     private ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
         protected Kryo initialValue() {
@@ -38,10 +40,23 @@ public class IterativeSerializer implements PhTreeSerializer {
     }
 
     @Override
-    public <T> PhTreeV<T> load(String filename) throws FileNotFoundException {
+    public PhTreeV<T> load(String filename) throws FileNotFoundException {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();
-            return (PhTreeV<T>) kryo.readClassAndObject(input);
+            PVEntry<T> e;
+            while (input.eof()) {
+                e = (PVEntry<T>) kryo.readClassAndObject(input);
+                tree.put(e.getKey(), e.getValue());
+            }
+            return tree;
         }
+    }
+
+    public void setTree(PhTreeV<T> tree) {
+        this.tree = tree;
+    }
+
+    public PhTreeV<T> getTree() {
+        return tree;
     }
 }
