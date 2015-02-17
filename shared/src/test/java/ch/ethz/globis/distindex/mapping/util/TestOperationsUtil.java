@@ -1,7 +1,11 @@
 package ch.ethz.globis.distindex.mapping.util;
 
+import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.v5.PhTree5;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,5 +36,26 @@ public class TestOperationsUtil {
             result[i - start] = String.valueOf(i);
         }
         return result;
+    }
+
+    public static PhTreeV<String> createRandomPhTree(int entries, int dim) {
+
+        PhTreeV<String> tree = new PhTree5<>(dim, 64);
+
+        long[] key;
+        for (int i = 0; i < entries; i++) {
+            key = createRandomKey(dim);
+            tree.put(key, Arrays.toString(key));
+        }
+        return tree;
+    }
+
+    public static long[] createRandomKey(int dim) {
+        Random random = new Random();
+        long[] key = new long[dim];
+        for (int i = 0; i < dim; i++) {
+            key[i] = random.nextInt();
+        }
+        return key;
     }
 }

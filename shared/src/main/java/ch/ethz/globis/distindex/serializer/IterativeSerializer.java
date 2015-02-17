@@ -44,7 +44,7 @@ public class IterativeSerializer<T> implements PhTreeSerializer {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();
             PVEntry<T> e;
-            while (input.eof()) {
+            while (!input.eof()) {
                 e = (PVEntry<T>) kryo.readClassAndObject(input);
                 tree.put(e.getKey(), e.getValue());
             }
