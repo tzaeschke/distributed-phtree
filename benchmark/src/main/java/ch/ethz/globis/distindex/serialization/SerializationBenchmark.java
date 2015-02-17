@@ -65,7 +65,7 @@ public class SerializationBenchmark {
         public void init() throws FileNotFoundException {
 
             //create a tree containing random entries
-            int nrEntries = 100000;
+            int nrEntries = 10000;
             tree = new PhTree5<String>(dim, depth);
 
             long[] key = new long[dim];
