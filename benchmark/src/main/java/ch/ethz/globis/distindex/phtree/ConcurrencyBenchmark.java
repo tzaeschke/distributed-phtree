@@ -1,14 +1,14 @@
 package ch.ethz.globis.distindex.phtree;
 
 
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeHelper;
+import ch.ethz.globis.pht.v5.*;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,25 +16,40 @@ import java.util.concurrent.locks.ReentrantLock;
 @BenchmarkMode({Mode.Throughput})
 @Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 15, time = 10, timeUnit = TimeUnit.MILLISECONDS)
+@Threads(2)
 public class ConcurrencyBenchmark {
 
     @Benchmark
     public Object deleteRandom_noConcurrent(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
+        state.setNoConcurrency();
 
         return delete(state);
     }
 
     @Benchmark
     public Object deleteRandom_COW(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = true;
+        state.setCopyOnWrite();
+
+        return delete(state);
+    }
+
+    @Benchmark
+    public Object deleteRandom_HandOverHand(BenchmarkState state) {
+        state.setHandOverHandLocking();
+
+        return delete(state);
+    }
+
+    @Benchmark
+    public Object deleteRandom_OL(BenchmarkState state) {
+        state.setOptimisticLocking();
 
         return delete(state);
     }
 
     @Benchmark
     public Object deleteRandom_BigLock(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
+        state.setNoConcurrency();
         try {
             state.l.lock();
             return delete(state);
@@ -43,37 +58,48 @@ public class ConcurrencyBenchmark {
         }
     }
 
-    private boolean delete(BenchmarkState state) {
-        PhTree tree = state.getTree();
+    private String delete(BenchmarkState state) {
+        PhTree5<String> tree = state.getTree();
 
         int dim = tree.getDIM();
 
         long[] key = createRandomKey(dim);
-        return state.tree.delete(key);
+        return state.tree.remove(key);
     }
 
     @Benchmark
     public Object containsRandom_noConcurrent(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
+        state.setNoConcurrency();
 
         return contains(state);
     }
 
     @Benchmark
     public Object containsRandom_COW(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = true;
+        state.setCopyOnWrite();
+
+        return contains(state);
+    }
+
+    @Benchmark
+    public Object containsRandom_HandOverHand(BenchmarkState state) {
+        state.setHandOverHandLocking();
+
+        return contains(state);
+    }
+
+    @Benchmark
+    public Object containsRandom_OL(BenchmarkState state) {
+        state.setOptimisticLocking();
 
         return contains(state);
     }
 
     @Benchmark
     public Object containsRandom_BigLock(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
-        try {
-            state.l.lock();
+        state.setNoConcurrency();
+        synchronized (state.lock) {
             return contains(state);
-        } finally {
-            state.l.unlock();
         }
     }
 
@@ -86,21 +112,36 @@ public class ConcurrencyBenchmark {
 
     @Benchmark
     public Object putRandom_NoConcurrent(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
+        state.setNoConcurrency();
 
         return put(state);
     }
 
     @Benchmark
     public Object putRandom_COW(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = true;
+        state.setCopyOnWrite();
+
+        return put(state);
+    }
+
+    @Benchmark
+    public Object putRandom_HandOverHand(BenchmarkState state) {
+        state.setHandOverHandLocking();
+
+        return put(state);
+    }
+
+    @Benchmark
+    public Object putRandom_OL(BenchmarkState state) {
+        state.setOptimisticLocking();
 
         return put(state);
     }
 
     @Benchmark
     public Object putRandom_BigLock(BenchmarkState state) {
-        PhTreeHelper.CONCURRENT = false;
+        state.setNoConcurrency();
+
         try {
             state.l.lock();
             return put(state);
@@ -113,7 +154,7 @@ public class ConcurrencyBenchmark {
         int dim = state.getTree().getDIM();
 
         long[] key = createRandomKey(dim);
-        return state.getTree().insert(key);
+        return state.getTree().put(key, Arrays.toString(key));
     }
 
     private long[] createRandomKey(int dim) {
@@ -128,16 +169,42 @@ public class ConcurrencyBenchmark {
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-        PhTree tree;
-        ReentrantLock l = new ReentrantLock(true);
+        PhTree5<String> tree;
+        final Object lock = new Object();
+        final ReentrantLock l = new ReentrantLock();
+
+        private PhOperations phOperationsOL;
+        private PhOperations phOperationsHoH;
+        private PhOperations phOperationsCOW;
+        private PhOperations phOperationsSimple;
 
         @Setup
         public void initTree() {
-            tree = PhTree.create(2, 64);
+            tree = new PhTree5<String>(2, 64);
+            phOperationsOL = new PhOperationsOL(tree);
+            phOperationsCOW = new PhOperationsCOW(tree);
+            phOperationsHoH = new PhOperationsHandOverHand(tree);
+            phOperationsSimple = new PhOperationsSimple(tree);
         }
 
-        public PhTree getTree() {
+        public PhTree5<String> getTree() {
             return tree;
+        }
+
+        public void setOptimisticLocking() {
+            tree.setOperations(phOperationsOL);
+        }
+
+        public void setHandOverHandLocking() {
+            tree.setOperations(phOperationsHoH);
+        }
+
+        public void setCopyOnWrite() {
+            tree.setOperations(phOperationsCOW);
+        }
+
+        public void setNoConcurrency() {
+            tree.setOperations(phOperationsSimple);
         }
     }
 
