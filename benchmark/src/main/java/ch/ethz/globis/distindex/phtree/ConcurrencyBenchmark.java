@@ -14,49 +14,49 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 @BenchmarkMode({Mode.Throughput})
-@Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 15, time = 10, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
 @Threads(2)
 public class ConcurrencyBenchmark {
 
-    @Benchmark
-    public Object deleteRandom_noConcurrent(BenchmarkState state) {
-        state.setNoConcurrency();
-
-        return delete(state);
-    }
-
-    @Benchmark
-    public Object deleteRandom_COW(BenchmarkState state) {
-        state.setCopyOnWrite();
-
-        return delete(state);
-    }
-
-    @Benchmark
-    public Object deleteRandom_HandOverHand(BenchmarkState state) {
-        state.setHandOverHandLocking();
-
-        return delete(state);
-    }
-
-    @Benchmark
-    public Object deleteRandom_OL(BenchmarkState state) {
-        state.setOptimisticLocking();
-
-        return delete(state);
-    }
-
-    @Benchmark
-    public Object deleteRandom_BigLock(BenchmarkState state) {
-        state.setNoConcurrency();
-        try {
-            state.l.lock();
-            return delete(state);
-        } finally {
-            state.l.unlock();
-        }
-    }
+//    @Benchmark
+//    public Object deleteRandom_noConcurrent(BenchmarkState state) {
+//        state.setNoConcurrency();
+//
+//        return delete(state);
+//    }
+//
+//    @Benchmark
+//    public Object deleteRandom_COW(BenchmarkState state) {
+//        state.setCopyOnWrite();
+//
+//        return delete(state);
+//    }
+//
+//    @Benchmark
+//    public Object deleteRandom_HandOverHand(BenchmarkState state) {
+//        state.setHandOverHandLocking();
+//
+//        return delete(state);
+//    }
+//
+//    @Benchmark
+//    public Object deleteRandom_OL(BenchmarkState state) {
+//        state.setOptimisticLocking();
+//
+//        return delete(state);
+//    }
+//
+//    @Benchmark
+//    public Object deleteRandom_BigLock(BenchmarkState state) {
+//        state.setNoConcurrency();
+//        try {
+//            state.l.lock();
+//            return delete(state);
+//        } finally {
+//            state.l.unlock();
+//        }
+//    }
 
     private String delete(BenchmarkState state) {
         PhTree5<String> tree = state.getTree();
@@ -67,41 +67,41 @@ public class ConcurrencyBenchmark {
         return state.tree.remove(key);
     }
 
-    @Benchmark
-    public Object containsRandom_noConcurrent(BenchmarkState state) {
-        state.setNoConcurrency();
-
-        return contains(state);
-    }
-
-    @Benchmark
-    public Object containsRandom_COW(BenchmarkState state) {
-        state.setCopyOnWrite();
-
-        return contains(state);
-    }
-
-    @Benchmark
-    public Object containsRandom_HandOverHand(BenchmarkState state) {
-        state.setHandOverHandLocking();
-
-        return contains(state);
-    }
-
-    @Benchmark
-    public Object containsRandom_OL(BenchmarkState state) {
-        state.setOptimisticLocking();
-
-        return contains(state);
-    }
-
-    @Benchmark
-    public Object containsRandom_BigLock(BenchmarkState state) {
-        state.setNoConcurrency();
-        synchronized (state.lock) {
-            return contains(state);
-        }
-    }
+//    @Benchmark
+//    public Object containsRandom_noConcurrent(BenchmarkState state) {
+//        state.setNoConcurrency();
+//
+//        return contains(state);
+//    }
+//
+//    @Benchmark
+//    public Object containsRandom_COW(BenchmarkState state) {
+//        state.setCopyOnWrite();
+//
+//        return contains(state);
+//    }
+//
+//    @Benchmark
+//    public Object containsRandom_HandOverHand(BenchmarkState state) {
+//        state.setHandOverHandLocking();
+//
+//        return contains(state);
+//    }
+//
+//    @Benchmark
+//    public Object containsRandom_OL(BenchmarkState state) {
+//        state.setOptimisticLocking();
+//
+//        return contains(state);
+//    }
+//
+//    @Benchmark
+//    public Object containsRandom_BigLock(BenchmarkState state) {
+//        state.setNoConcurrency();
+//        synchronized (state.lock) {
+//            return contains(state);
+//        }
+//    }
 
     private boolean contains(BenchmarkState state) {
         int dim = state.getTree().getDIM();
@@ -181,9 +181,9 @@ public class ConcurrencyBenchmark {
         @Setup
         public void initTree() {
             tree = new PhTree5<String>(2, 64);
-            phOperationsOL = new PhOperationsOL(tree);
+            phOperationsOL = new PhOperationsOL_COW(tree);
             phOperationsCOW = new PhOperationsCOW(tree);
-            phOperationsHoH = new PhOperationsHandOverHand(tree);
+            phOperationsHoH = new PhOperationsHandOverHand_COW(tree);
             phOperationsSimple = new PhOperationsSimple(tree);
         }
 
