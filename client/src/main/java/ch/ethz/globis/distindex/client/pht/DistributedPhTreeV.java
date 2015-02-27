@@ -112,7 +112,7 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public Object update(long[] oldKey, long[] newKey) {
+    public V update(long[] oldKey, long[] newKey) {
         return proxy.update(oldKey, newKey);
     }
 
