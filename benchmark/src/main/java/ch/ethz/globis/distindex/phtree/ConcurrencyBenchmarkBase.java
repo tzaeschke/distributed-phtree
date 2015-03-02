@@ -1,16 +1,14 @@
 package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.pht.v5.*;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-@BenchmarkMode({Mode.Throughput})
-@Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
 public class ConcurrencyBenchmarkBase {
 
     @State(Scope.Benchmark)
