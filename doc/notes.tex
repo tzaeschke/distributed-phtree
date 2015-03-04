@@ -1,0 +1,230 @@
+\documentclass[11pt,a4paper]{globis-book}
+
+\usepackage{graphicx}
+\usepackage[helvetica]{quotchap}
+\usepackage{times}
+\usepackage{ethfont}
+\usepackage[british]{babel}
+\usepackage{longtable}
+\usepackage{fancyhdr}
+\usepackage{shadethm}
+\usepackage{makeidx}
+\usepackage[a4paper,portrait,twoside,inner=3.25cm,outer=3.5cm,top=3.5cm,bottom=4.0cm]{geometry}
+\usepackage{hyperref}
+\usepackage{globis}
+
+\renewcommand{\sectfont}{\sffamily\bfseries\Huge}
+
+\setlength{\shadedtextwidth}{\textwidth}
+\setlength{\shadeleftshift}{3mm}
+\setlength{\shaderightshift}{3mm}
+\addtolength{\shadedtextwidth}{-\shadeleftshift}
+\addtolength{\shadedtextwidth}{-\shaderightshift}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\sloppy
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\sffamily\bfseries\small\thepage}
+\fancyhead[LO]{\sffamily\bfseries\small\leftmark}
+    \fancyhead[RE]{\sffamily\bfseries\small\rightmark}
+\renewcommand{\headrulewidth}{0.1pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\sffamily\bfseries\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+% Please adapt the following fields if necessary!
+\hypersetup{
+    pdftitle = Distributed Ph Tree, 
+    pdfauthor = Bogdan Vancea,
+    pdfsubject = Master Thesis,
+    hidelinks,
+    plainpages = false,
+    bookmarksnumbered = true
+} 
+
+\raggedbottom
+
+% Please adapt the following fields if necessary!
+\title{Cluster-Computing and Parallelisation for the
+    Multi-Dimensional PH-Index}
+\category{Master Thesis} 
+\author{Bogdan Aurel Vancea}
+\email{$<$bvancea@student.ethz.ch$>$}
+\professor{Prof. Dr. Moira C. Norrie}
+\assistant{Tilmann Zaeschke \\Christoph Zimmerli}
+\group{Global Information Systems Group}
+\institute{Institute of Information Systems}
+\department{Department of Computer Science}
+\school{ETH Zurich}
+\version{}
+\date{\today}
+\copyrightyear{2014}
+
+\makeindex
+
+\begin{document}
+
+\frontmatter
+\maketitlepage
+\cleardoublepage
+\pdfbookmark{Contents}{toc}
+
+\chapter*{Abstract}
+
+Here comes the abstract.
+
+\tableofcontents
+
+\mainmatter
+
+% Here comes the content
+
+\chapter{Introduction}
+\section{Multi-dimensional Indexes}
+\label{sec:title}
+
+\subsection{Background information}
+Need to add an introduction here.
+
+This is an example of how to cite a scientific publication~\cite{murolo2013} from your bibliography (BibTeX\footnote{\url{http://en.wikipedia.org/wiki/BibTeX}} file). And this example shows how you create links within your documents, e.g. link to section~\ref{sec:title}.
+
+\chapter{Design and Implementation}
+\section{Algorithms}
+\subsection{Requirements}
+The distributed index has the following requirements:
+\begin{enumerate}
+    \item Eventual consistency. The index is eventual consistent, meaning that the following assumptions are true:
+        \begin{enumerate}
+            \item Any entries that are inserted at some point t in time will eventually be returned in results at a following point in time t + $\epsilon$ .
+            \item In the case that a client starts an insert operation at time t and another client, in a separate thread or a separate, issues a query at time t + $\epsilon$, the response of the query of the second client is not guaranteed to contain the point inserted by the first client.
+        \end{enumerate} 
+    \item Re-balancing transparency. The balancing process should be transparent with respect to the client. This means that the client API should not know that there might be multiple versions of the key mapping available due to any on-going balances. 
+\end{enumerate} 
+
+\subsection{Data partitioning}
+
+Describe here how the key-value pairs are partitioned across the hosts.
+
+\subsection{Data balancing}
+
+Describe how the key-value pairs are balanced across the index nodes.
+The cluster should be able to properly balance the amount of keys that are stored in each server.
+
+Ideas that might not work:
+\begin{itemize}
+    \item Storing information like the number of keys held by each node in Zookeeper. This would mean that the ZooKeeper would need to be notified on each insert, which would cause severe scalability and availability issues. 
+\end{itemize}
+
+The size information linked to each host is very important for properly spreading the entries across all of the hosts. To prevent the ZooKeeper server from becoming a bottleneck while updating the sizes, the update of the size information should be sent periodically, but not after each insert / deletion operation. A possible solution is for each host to update it's size after a fixed number of insert/delete operation. Another possible solution is to have each host update the size after a fixed period of time, like 1s, 10s, etc. 
+\subsection{Basic Index operation}
+
+Describe the point operations here. These are operations that affect a single key-value pair, like get, put, delete, contains, etc.
+
+\subsection{Iterators}
+Describe how iterators are handle when dealing with a cluster of index servers. Describe the current algorithm used and the alternatives.
+
+\subsection{Range search}
+Describe how the range search is performed. Describe how the number of hows that need to be querried is reduced and what the alternatives are.
+
+\subsection{K Nearest neighbours}
+The K nearest neighbours should be found in the following manner:
+\begin{enumerate}
+    \item First, a request for the k nearest neighbours is sent to the host that holds the query key. This query will return a number of candidate points.
+    \item After finding the furthest neighbour fn from the set of candidates obtained at the previous step on could do the following:
+        \begin{itemize}
+            \item look into all neighbouring ares and check for neighbours that are closer to q than fn.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a knn query into those areas. Then apply an additional knn to combine candidates.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a range query in those areas. Then apply an additional knn to combine candidates.
+            \item find all zones intersecting the square (q - dist(q, fn), q + dist(q, fn)) and perform a range query followed by a filtering based on dist(q, fn) in those areas. Then apply an additional knn to combine candidates.
+        \end{itemize}
+\end{enumerate}
+
+This algorithms works under that assumption that all hosts hold at least k points. If that is not the case, and fewer candidates are returned from the first query, one would need to increase the query space and check all of the neighboring areas of the zone holding the query key. To achieve correctness even if all the cluster holds fewer than k keys, one could iteratively query more neighbours in each steps (i.e. first query the 1 - hop neighbourhood, then the 2 - hop neighbourhood) and stop after all of the hosts have been querried.
+
+\subsection{PhTree Concurrency}
+The PhTree does not currently support concurrent write operations. There are several strategies that could be employed to add concurrent writes.
+
+\begin{description}
+    \item[Copy-On-Write] COW would make the PhTree immutable. Therefore, every
+        write operation (insert, remove, update) will create a new version of
+        the containing the changes to be applied. The advantages of this
+        strategy is that it allows one writer and an arbitrarily large number
+        of readers to access the tree concurrently. The second advtange is
+        that this method provides very high consistency guarantees, allowing
+        range and knn queries to run for large periods of time on an older
+        version of the tree. The disadvantages of this method is that it is
+        designed to only allow a single writer thread access the tree in the
+        same time and that it has a higher memory consumption as some of the
+        nodes need to be copied on each access.
+    \item[Pesimmistic Locking] Hand over hand locking strategies could be used
+        to allow multiple writers to acces the tree. Due to the fact that
+        iterators maintain a stack of nodes, it might be needed that some of
+        the nodes need to be copied after modification. 
+        Advantages of this approach: Integrates multiple writers. The main
+        disadvantages are that it have lower consistency guarantees.
+    \item[Optimistic Locking] Optimistic locking could be used instead of hand
+        over hand locking. This strategy would go down the tree without taking
+        any locks to find the node to be modified. When the node is found, the
+        parent and the node are locked and a validation check is performed to
+        make sure the node / parent were not changed and that they are still
+        reachable. This approach takes fewer locks when the write contention
+        is not very high. However, it causes starvation when the lock
+        contention is high.
+\end{description}
+
+The PhTree contains the following write operations:
+\begin{enumerate}
+    \item Adding new key-value pair to the tree.
+    \item Removing a key-value pair from the tree.
+    \item Updating the key for a given key-value pair.
+\end{enumerate}
+
+The following node modification operations are performed on the tree:
+\begin{enumerate}
+    \item New nodes are added as leaves during the insert operation.
+    \item Some leaf nodes could be removed during the delete operation.
+\end{enumerate}
+
+\section{Implementation}
+Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.
+
+\subsection{Cluster information}
+The configuration server is implemented using an Apache Zookeeper server. 
+
+The operations that update the mapping have to be executed atomically on Zookeeper. Zookeeper provides the guarantee that all write operations performed on a single \textit{znode} are executed atomically. However, all update update of the mapping modify at least two znodes: the mapping znode and the version  
+
+\subsection{Technologies and Libraries}
+Currently used frameworks:
+\begin{description}
+    \item[ZooKeeper] ZooKeeper is used for stored cluster metadata and membership. Currently, the only alternative would have been to implement such a distributed storage manager manually. Using ZooKeeper saved a lot of development time. 
+    \item[Netty] Netty is a Java IO library and it is used to implement the server request handling component. Alternatives would have been Java NIO library.
+    \item[Kryo] Kryo is very fast serialization library for Java and it is used to serialize the values that have to be stored on the server. These objects need to be transformed into a represention that can be sent over the network. Kryo is faster than the Java serialization, does not require the implementation of the Serializable interface and transforms the objects into byte arrays. This should make the representation smaller than simply transforming the object to a string.
+\end{description}
+
+\chapter{Performance Analysis}
+\section{Benchmark}
+
+\chapter{Conclussions}
+
+\appendix
+
+\listoffigures
+\listoftables
+
+\chapter*{Acknowledgements}
+
+\newpage
+\thispagestyle{empty}
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document} 
