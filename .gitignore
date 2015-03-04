@@ -34,3 +34,9 @@ log/
 *.lot
 *.out
 *.toc
+
+#Test generated stuff- these files should be removed
+full_tree.txt
+iterative_tree.txt
+shared/tree.txt
+tree.txt
