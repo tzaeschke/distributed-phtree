@@ -1,3 +1,21 @@
-\begin{thebibliography}{}
+\begin{thebibliography}{1}
+
+\bibitem{Bentley1975}
+Jon~Louis Bentley.
+\newblock Multidimensional binary search trees used for associative searching.
+\newblock {\em Commun. ACM}, 18(9):509--517, September 1975.
+
+\bibitem{FinkelB74}
+Raphael~A. Finkel and Jon~Louis Bentley.
+\newblock Quad trees: A data structure for retrieval on composite keys.
+\newblock {\em Acta Inf.}, 4:1--9, 1974.
+
+\bibitem{Zaschke2014}
+Tilmann Z\"{a}schke, Christoph Zimmerli, and Moira~C. Norrie.
+\newblock The ph-tree: A space-efficient storage structure and
+  multi-dimensional index.
+\newblock In {\em Proceedings of the 2014 ACM SIGMOD International Conference
+  on Management of Data}, SIGMOD '14, pages 397--408, New York, NY, USA, 2014.
+  ACM.
 
 \end{thebibliography}
