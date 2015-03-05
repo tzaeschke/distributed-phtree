@@ -88,9 +88,11 @@ Here comes the abstract.
 % Here comes the content
 
 \chapter{Introduction}
-This chapter briefly describes the context and the motivation of the thesis and presents the objectives that are to be achieved. Finally, section \ref{sec:introduction-outline} provides an overview of this thesis.
+\label{ch:intro}
+This chapter briefly describes the context and the motivation of the thesis and presents the objectives that are to be achieved. Finally, section \ref{sec:intro-outline} provides an overview of this thesis.
 
 \section{Motivation}
+\label{sec:intro-motivation}
 Multi-dimensional data is widely used today, especially in domains like database management systems, geographic information systems, computer vision and computational geometry. When all of the dimensions of the data hold numerical values, this data can be viewed as a collection of points in higher dimensional spaces. Due to this nature, multi-dimensional numerical data provides the possibly of posing more complex queries based on the distance between these points in space. For example, in the context of a geo-information system, one could query for all of the points that fall inside a specific hyper-rectangle or attempt to find the nearest neighbours of an arbitrary query point.
 
 Several point-based multi-dimensional indexing solution have been developed in the latest years, the most prominent being kD-trees and quadtrees. This type of data structures store the multi-dimensional data such that more complex operations, like range and nearest neighbour queries are executed efficiently. The PhTree is a new multi-dimensional data structure based on the quadtree. In addition to providing support for complex queries, the PhTree is also space-efficient, as its space requirements are sometimes even lower than those of multi-dimensional arrays. 
@@ -102,92 +104,147 @@ Additionally, in the last few years the processor speed has reached the power wa
 This thesis attempts to provide a solution to these two issues by extending the PhTree multi-dimensional index to run on distributed cluster of machines. Furthermore, the PhTree is also updated to support concurrent access.
 
 \section{Objectives}
+\label{sec:intro-objectives}
+The previous section has highlighted two challenges currently faced by indexing systems: \textit{high storage requirements} and \textit{support for concurrent access.}. This work proposes the distributed PhTree, a version of the PhTree that can be run on a cluster of machines, making it able to handle data sets that cannot fit in the main memory of a single machine. Moreover, the distributed PhTree should be able to handle concurrent requests. This applies both to requests sent to different machines that are part of the cluster and concurrent requests sent by different clients to the same machine. 
 
-\textit{Meta - will be removed after editing.}
-\textit{Describe the objectives of this thesis: the distribution of the index and the addition of the concurrency support}
+Specifically, the distributed PhTree has to fulfill the following requirements:
+\begin{description}
+    \item[Cluster capability] The system should run across a network of machines, making use of the memory and processing resources on each machine. Furthermore, the system should attempt to balance the number of multi-dimensional entries that each machine is responsible of.
+    \item[Cluster concurrency] The system should be able to support concurrent requests to different nodes of the cluster. Each node should be able to process queries related to the entries that it stores locally.
+    \item[Node concurrency] Each node should support multi-threaded read and write access to the entries that it stores.
+\end{description} 
+
+As the thesis touches on two main subjects, distribution and concurrency, the main challenges encountered are twofold. From the distribution perspective, the challenges are the identification of suitable entry distribution and balancing strategies, devising efficient algorithms for executing queries across multiple cluster nodes, and the efficient management of a very large number of cluster nodes. For the concurrency perspective, the challenges are the identification of a suitable concurrent access strategy that can maximize the number of concurrent write operations.
+
 \section{Thesis outline}
-\label{sec:introduction-outline}
-\textit{Meta - will be removed after editing.}
-\textit{Give an overview of what each chapter will contain}
-\label{sec:title}
+\label{sec:intro-outline}
+
+This chapter gave an overview of the challenges currently faced by multi-dimensional indexing structures and briefly explained how this work seeks to address them. Additionally, this chapter also presented the main objectives of this thesis. The rest of the thesis is structured as follows:
+
+\textbf{Chapter \ref{ch:background}} provides additional information about the PhTree, its characteristics and supported operations. The second part of this chapter describes relevant previous work done in the areas of distributed multi-dimensional indexes and concurrent data structures.
+
+The design of the distributed PhTree from the point of view of a distributed system is presented in \textbf{Chapter \ref{ch:distindex}}. This chapter presents the chosen data distribution strategy, and also touches on the possible alternatives and the consequences of this choice. Additionally, this chapter provides an overview of how the queries spanning multiple nodes are executed by the system.
+
+The addition of the multi-threaded read and write support for the PhTree is discussed in \textbf{Chapter \ref{ch:concurrency}}. Several concurrent access strategies are discussed, together with their advantages, disadvantages and consistency guarantees.
+
+\textbf{Chapter \ref{ch:implementation}} describes the implementation-specific decisions that were taken during the development process. This chapter also presents the technologies that were used and justifies the technological choices.
+
+The distributed PhTree is evaluated in \textbf{Chapter \ref{ch:evaluation}}. The performance characteristics of the implemented distributed systems as well as those of the implemented concurrency strategy are discussed.
+
+\textbf{Chapter \ref{ch:conclusions}} concludes the thesis by presenting the contribution of this work in the context of distributed multi-dimensional indexing systems. This second part of this chapter discusses possible future contributions.
 
 \chapter{Background}
-\textit{Meta - will be removed after editing.}
-\textit{This section should provide an overview of the PhTree. It should also present important previous work concerning distributed indexes and parallel data structures.}
+\label{ch:background}
+The first part of this chapter analyses the single-threaded PhTree, a multi-dimensional data structure and the starting point of this work. It provides an overview of its specific characteristics and describes the supported operations.
 
-This is an example of how to cite a scientific publication~\cite{murolo2013} from your bibliography (BibTeX\footnote{\url{http://en.wikipedia.org/wiki/BibTeX}} file). And this example shows how you create links within your documents, e.g. link to section~\ref{sec:title}. 
+The second part of this chapter presents the relevant related work in the area of distributed multi-dimensional index and concurrent data structures. 
 
 \section{The PhTree}
+\label{sec:background-phtree}
+
 \textit{Meta - will be removed after editing.}
 \textit{Provide on overview of the PhTree. Should not go into too many details here, refer to PhTree paper.}
 
 \section{Related work}
+\label{sec:background-rw}
 
 \textit{Meta - will be removed after editing.}
 \textit{Present the relevant related work.}
+
 \subsection{Distributed Indexes}
+
 \subsection{Concurrent data structures}
 
 \chapter{Index distribution}
+\label{ch:distindex}
 
 \textit{Meta - will be removed after editing.}
 \textit{This chapter should focus on how the distributed index was implemented: how the data was split across the cluster nodes, the manner in which the queries are executed and how the entry load balancing is performed.} 
+
 \section{Challenges}
+\label{sec:distindex-challenges}
 
 \textit{Meta - will be removed after editing.}
 \textit{Present the callenges of implementing a distributed system : scalability, load balancing, etc. Should not focus on issues like security, availability as those are not relevant to this report.}
-\section{Distibution strategies}
+
+\section{Distribution strategies}
+\label{sec:distindex-strategies}
 
 \textit{Meta - will be removed after editing.}
 \textit{Present the possible ways in which the entries can be distributed across the cluster nodes. Talk about the advantages and disaadvantages of each approach. Say which approach was chosen and why.}
+
 \subsection{Hashing}
+
 \subsection{Spatial splitting}
+
 \subsection{Z-Order curve splitting}
 
 \section{Algorithms}
+\label{sec:distindex-algorithms}
 
 \textit{Meta - will be removed after editing.}
 \textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
+
 \subsection{Point queries}
+
 \subsection{Range queries}
+
 \subsection{Nearest neighbour queries}
+
 \subsection{Entry load balancing}
 
 \section{Architecture}
+\label{sec:distindex-architectures}
 
 \textit{Meta - will be removed after editing.}
 \textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
 
 \chapter{Concurrency}
+\label{ch:concurrency}
 
 \textit{Meta - will be removed after editing.}
 \textit{Present the concurrency strategies that could be added to the PhTree and explain the consistency model associated with each strategy.}
 
 The PhTree does not currently support concurrent write operations. There are several strategies that could be employed to add concurrent writes.
+
 \section{Challenges}
+
 \section{Concurrency strategies}
+
 \subsection{Copy-on-Write}
+
 \subsection{Locking}
 
 \chapter{Implementation}
+\label{ch:implementation}
+
 \textit{Meta - will be removed after editing.}
 \textit{Present the implementation architecture and the techologies used.}
+
 \section{System description}
 \textit{Meta - will be removed after editing.}
 \textit{Describe the system, include class/deployment diagrams.}
+
 \section{Technologies}
 \textit{Meta - will be removed after editing.}
 \textit{Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.}
 
 \chapter{Evaluation}
+\label{ch:evaluation}
+
 \textit{Meta - will be removed after editing.}
 \textit{Explain how the system should be evaluated, present and explain the benchmarks}
-\chapter{Conclussions}
 
+\chapter{Conclusions}
+\label{ch:conclusions}
+
+\section{Contributions}
+\label{sec:conclusions-contribution}
 \textit{Meta - will be removed after editing.}
 \textit{Conclude the report. This should reiterate the main points of the report and try to mirror the introduction}
-\chapter{Future work}
 
+\section{Future work}
+\label{sec:conclusions-future-work}
 \textit{Meta - will be removed after editing.}
 \textit{Present the points that were not tackled by the thesis and talk about possible future work.}
 
