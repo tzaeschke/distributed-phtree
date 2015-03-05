@@ -88,16 +88,25 @@ Here comes the abstract.
 % Here comes the content
 
 \chapter{Introduction}
+This chapter briefly describes the context and the motivation of the thesis and presents the objectives that are to be achieved. Finally, section \ref{sec:introduction-outline} provides an overview of this thesis.
+
 \section{Motivation}
-\textit{Meta - will be removed after editing.}
-\textit{This subsection will describe the context in which this work is placed and why this work is needed.}
+Multi-dimensional data is widely used today, especially in domains like database management systems, geographic information systems, computer vision and computational geometry. When all of the dimensions of the data hold numerical values, this data can be viewed as a collection of points in higher dimensional spaces. Due to this nature, multi-dimensional numerical data provides the possibly of posing more complex queries based on the distance between these points in space. For example, in the context of a geo-information system, one could query for all of the points that fall inside a specific hyper-rectangle or attempt to find the nearest neighbours of an arbitrary query point.
+
+Several point-based multi-dimensional indexing solution have been developed in the latest years, the most prominent being kD-trees and quadtrees. This type of data structures store the multi-dimensional data such that more complex operations, like range and nearest neighbour queries are executed efficiently. The PhTree is a new multi-dimensional data structure based on the quadtree. In addition to providing support for complex queries, the PhTree is also space-efficient, as its space requirements are sometimes even lower than those of multi-dimensional arrays. 
+
+As technology advances and the world becomes more connected, multi-dimensional data becomes easier to acquire and store. Because of this, it is necessary that multi-dimensional data structure need to store and manage more data than would fit a single machine. However, traditional multi-dimensional indexes like the kD-tree and quad-tree do not cover this use case as they are designed to run on a single machine.
+
+Additionally, in the last few years the processor speed has reached the power wall and processor designers cannot increase the CPU frequency by increasing the number of transistors. Recent advances in processor design have been made by adding more cores on CPU's rather than increasing the processing frequency. Therefore, it is important that contemporary data structures be adapted to multi-core architectures by allowing them to support concurrent accesses. As with the case of the increase storage requirements, traditional multi-dimensional data structures do not support concurrent write operations.
+
+This thesis attempts to provide a solution to these two issues by extending the PhTree multi-dimensional index to run on distributed cluster of machines. Furthermore, the PhTree is also updated to support concurrent access.
 
 \section{Objectives}
 
 \textit{Meta - will be removed after editing.}
 \textit{Describe the objectives of this thesis: the distribution of the index and the addition of the concurrency support}
 \section{Thesis outline}
-
+\label{sec:introduction-outline}
 \textit{Meta - will be removed after editing.}
 \textit{Give an overview of what each chapter will contain}
 \label{sec:title}
@@ -106,7 +115,7 @@ Here comes the abstract.
 \textit{Meta - will be removed after editing.}
 \textit{This section should provide an overview of the PhTree. It should also present important previous work concerning distributed indexes and parallel data structures.}
 
-This is an example of how to cite a scientific publication~\cite{murolo2013} from your bibliography (BibTeX\footnote{\url{http://en.wikipedia.org/wiki/BibTeX}} file). And this example shows how you create links within your documents, e.g. link to section~\ref{sec:title}.
+This is an example of how to cite a scientific publication~\cite{murolo2013} from your bibliography (BibTeX\footnote{\url{http://en.wikipedia.org/wiki/BibTeX}} file). And this example shows how you create links within your documents, e.g. link to section~\ref{sec:title}. 
 
 \section{The PhTree}
 \textit{Meta - will be removed after editing.}
