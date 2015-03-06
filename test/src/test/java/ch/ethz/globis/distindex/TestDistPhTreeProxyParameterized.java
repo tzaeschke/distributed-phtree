@@ -3,9 +3,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.distindex.client.pht.DistributedPhTreeIterator;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
@@ -19,8 +17,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
 

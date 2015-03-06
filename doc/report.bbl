@@ -10,6 +10,27 @@ Raphael~A. Finkel and Jon~Louis Bentley.
 \newblock Quad trees: A data structure for retrieval on composite keys.
 \newblock {\em Acta Inf.}, 4:1--9, 1974.
 
+\bibitem{Liao2010HadoopIndex}
+Haojun Liao, Jizhong Han, and Jinyun Fang.
+\newblock Multi-dimensional index on hadoop distributed file system.
+\newblock In {\em Networking, Architecture and Storage (NAS), 2010 IEEE Fifth
+  International Conference on}, pages 240--249, July 2010.
+
+\bibitem{Ramabhadran04prefixhash}
+Sriram Ramabhadran, Sylvia Ratnasamy, Joseph~M. Hellerstein, and Scott Shenker.
+\newblock Prefix hash tree: An indexing data structure over distributed hash
+  tables.
+\newblock Technical report, 2004.
+
+\bibitem{Stoica2001chord}
+Ion Stoica, Robert Morris, David Karger, M.~Frans Kaashoek, and Hari
+  Balakrishnan.
+\newblock Chord: A scalable peer-to-peer lookup service for internet
+  applications.
+\newblock In {\em Proceedings of the 2001 Conference on Applications,
+  Technologies, Architectures, and Protocols for Computer Communications},
+  SIGCOMM '01, pages 149--160, New York, NY, USA, 2001. ACM.
+
 \bibitem{Zaschke2014}
 Tilmann Z\"{a}schke, Christoph Zimmerli, and Moira~C. Norrie.
 \newblock The ph-tree: A space-efficient storage structure and
@@ -17,5 +38,11 @@ Tilmann Z\"{a}schke, Christoph Zimmerli, and Moira~C. Norrie.
 \newblock In {\em Proceedings of the 2014 ACM SIGMOD International Conference
   on Management of Data}, SIGMOD '14, pages 397--408, New York, NY, USA, 2014.
   ACM.
+
+\bibitem{Zhang04skipindex}
+Chi Zhang and Arvind Krishnamurthy.
+\newblock Skipindex: Towards a scalable peer-to-peer index service for high
+  dimensional data.
+\newblock Technical report, Princeton Univ, 2004.
 
 \end{thebibliography}

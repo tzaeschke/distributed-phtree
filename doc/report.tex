@@ -144,11 +144,27 @@ The second part of this chapter presents the relevant related work in the area o
 
 The PhTree~\cite{Zaschke2014} is a novel multi-dimensional indexing structure that focuses on fast retrieval and highly efficient storage. It combines concepts from PATRICIA-tries, quadtrees and hypercubes to encode the multi-dimensional data using bit prefix sharing. Because of this, the storage requirements can sometimes be lower than those of the storage requirements of an array of objects.
 
+An example PhTree storing 2-dimensional 4 bit points is shown in \ref{fig:PhTree-example}. The tree illustrated in this figure stores the points: (0, 4), (3, 4) and (3, 6). However, each point is stored as the \textit{bit interleaving} of its values in all dimensions. Therefore, the bit interleaving of point (3, 6), represented in binary as (0011, 1010) is 01001110. By storing the points under the \textit{bit interleaving} form, the PhTree maps the multi-dimensional points into a 1-dimensional space. The 1-dimensional values will be referred to as \textit{Z-values} as they form the \textit{Z-order space filling curve}. 
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics{images/PhTree-example}
+    \caption{2 dimensional 4bit PhTree containing the points: (0000, 1000), (0011, 1000), (0011, 1010).}
+    \label{fig:PhTree-example}
+\end{figure}
+
 The PhTree has the following important properties:
 \begin{itemize}
     \item \textbf{Z-Ordering}. The multi-dimensional entries are order according to the Z-order space filling curve. As a consequence, points which are close in the original multi-dimensional space will also be relatively close in the Z-Ordering.
     \item \textbf{Constant height}. The height of the PH-tree is equal the number of bits needed to store each value of the multi-dimensional space. Therefore, when the values in each dimension are represented in 64 bits, as long or doubles, the maximum height of the PhTree is 64. This property is important as \textit{the maximum height of the PhTree is independent of the number of points it stores}.
-    \item \textbf{Balancing is not needed}. The PhTree does not perform balancing operation after write operation have occured. While this fact could lead to un-balanced trees, it is usually not a problem in practice, as the height of tree is limited by a constant factor.
+    \item \textbf{Balancing is not needed}. The PhTree does not perform balancing operation after write operation have occurred. While this fact could lead to un-balanced trees, it is usually not a problem in practice, as the height of tree is limited by a constant factor.
+\end{itemize}
+
+The PhTree is similar to a HashMap, as it stores entries consisting of key-value pairs. In this case however, the key is a multi-dimensional data point, while the value can be an arbitrary object. The following operations are supported:
+\begin{itemize}
+    \item \textbf{Point queries} operate on single multi-dimensional points. The possible queries are \textit{get()}, \textit{put()}, \textit{delete()} and \textit{updateKey()}. The \textit{get()} query retrieves the value associated with a multi-dimensional key, and the \textit{delete()} operation removes the value associated with a multi-dimensional key. The \textit{put()} operation adds new key-value to the index. Finally, the \textit{updateKey()} operations updates the key associated with an existing key-value entry.
+    \item \textbf{Range queries} select all of the data points that fall inside a multi-dimensional hyper-rectangle. This rectangle is defined by a \textit{lower left} and a \textit{upper right} point. 
+    \item \textbf{Nearest neighbour queries} select the closest k points in the index to an arbitrary query point. 
 \end{itemize}
 
 \section{Related work}
@@ -159,8 +175,16 @@ The PhTree has the following important properties:
 
 \subsection{Distributed Indexes}
 
-The distributed hash table (DHT)
+Distributed Hash Tables (DHT's) are a class of decentralized distributed systems which expose an API similar to that of a hash-table. These P2P systems use a structured overlay network to assign a given key to a node in the system. Requests for a certain key can be sent to any node of the system and will be forwarded to the node responsible for it. DHT's have been designed to work on internet-scale, connecting large numbers of machines across large distances. The main concerns are scalability and availability, while the \textit{get()} and \textit{put()} operations have "best effort" semantics. Chord~\cite{Stoica2001chord}, one of the most popular and most efficient DHT system, manages to guarantee that any request for a certain key will arrive the responsible node in at most \textit{O(logn)} hops, in the context in which each nod contains only \textit{O(logn)} links to other nodes. 
+
+One important issues of distributed hash tables is that they only support "exact match" queries. The Prefix Hash Tree~\cite{Ramabhadran04prefixhash} adds support for range queries to a DHT by using a secondary data structure, to maintain a mapping between nodes and keys. This mapping is a trie containing the prefixes of the bit-strings of the keys, and thus, logically, leaf nodes of this trie correspond to interval regions of keys. All leaf-nods are linked using a linked-list, allowing range queries to traverse the query range starting for the first leaf that matches the range. 
+
+A similar approach is taken by the SkipIndex~\cite{Zhang04skipindex}, a multi-dimensional indexing system that uses a SkipGraph to map geometrical regions to machine nodes. Each system node maintains only a partial view of the region tree and thus range and nearest neighbour queries are performed using selective multicasting.
+
+A different approach for creating a scalable multi-dimensional index is to use a big-data platform. \cite{Liao2010HadoopIndex} propose storing a block-based multi-dimensional index structure like the R-tree directly in HDFS and use query models like MapReduce as building blocks for the implementation of range and nearest neighbour queries.
+
 \subsection{Concurrent data structures}
+
 
 \chapter{Index distribution}
 \label{ch:distindex}
