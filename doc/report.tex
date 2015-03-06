@@ -142,8 +142,14 @@ The second part of this chapter presents the relevant related work in the area o
 \section{The PhTree}
 \label{sec:background-phtree}
 
-\textit{Meta - will be removed after editing.}
-\textit{Provide on overview of the PhTree. Should not go into too many details here, refer to PhTree paper.}
+The PhTree~\cite{Zaschke2014} is a novel multi-dimensional indexing structure that focuses on fast retrieval and highly efficient storage. It combines concepts from PATRICIA-tries, quadtrees and hypercubes to encode the multi-dimensional data using bit prefix sharing. Because of this, the storage requirements can sometimes be lower than those of the storage requirements of an array of objects.
+
+The PhTree has the following important properties:
+\begin{itemize}
+    \item \textbf{Z-Ordering}. The multi-dimensional entries are order according to the Z-order space filling curve. As a consequence, points which are close in the original multi-dimensional space will also be relatively close in the Z-Ordering.
+    \item \textbf{Constant height}. The height of the PH-tree is equal the number of bits needed to store each value of the multi-dimensional space. Therefore, when the values in each dimension are represented in 64 bits, as long or doubles, the maximum height of the PhTree is 64. This property is important as \textit{the maximum height of the PhTree is independent of the number of points it stores}.
+    \item \textbf{Balancing is not needed}. The PhTree does not perform balancing operation after write operation have occured. While this fact could lead to un-balanced trees, it is usually not a problem in practice, as the height of tree is limited by a constant factor.
+\end{itemize}
 
 \section{Related work}
 \label{sec:background-rw}
@@ -153,6 +159,7 @@ The second part of this chapter presents the relevant related work in the area o
 
 \subsection{Distributed Indexes}
 
+The distributed hash table (DHT)
 \subsection{Concurrent data structures}
 
 \chapter{Index distribution}
