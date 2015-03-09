@@ -199,11 +199,29 @@ However, an issue with all concurrent search trees where modifications are done 
 \textit{Meta - will be removed after editing.}
 \textit{This chapter should focus on how the distributed index was implemented: how the data was split across the cluster nodes, the manner in which the queries are executed and how the entry load balancing is performed.} 
 
+This chapter describes the design of the distributed PhTree from the distributed point of view. It presents the challenges and the possible design choices for extending the PhTree to run in a distributed setting, discusses the system architecture and describes the algorithms used for the distributed querries. Concurrency related issues are not tackled in this chapter as they are addressed in Chapter \ref{ch:concurrency}.
+
 \section{Challenges}
 \label{sec:distindex-challenges}
 
-\textit{Meta - will be removed after editing.}
-\textit{Present the callenges of implementing a distributed system : scalability, load balancing, etc. Should not focus on issues like security, availability as those are not relevant to this report.}
+While extending the PhTree to be a distributed index increase its storage capacity, there are a number of challenges to overcome in order to reach a good implementation. These challenges are:
+\begin{itemize}
+    \item \textbf{Balancing the storage load}. In a cluster of n indentical nodes, nodes which have the same hardware resources available, all nodes should store and equal amount of data. Assuming that the values associated with each key are relatively equal in size, all nodes should store a relatively equal number of key-value entries.
+    \item \textbf{Maintaining data locality}. The PhTree needs to provide support to range and nearest neighbour queries, types of queries which generally analyze contiguous portions of the space and return sets of points which are generally close together. If the indexed points manifest locality, points close in space reside on the same node, range and nearest neighbour queries could be sent to only a part of the nodes in the cluster. In the best case, range and nearest neighbour queries could be sent to only a single node. It is therefore preferable that queries are sent to as few nodes as possible, minimizing both the response time and the request load to the nodes in the cluster.
+    \item \textbf{Ensuring cluster scalability}. To support very large storage requirements, the system should support a large number of online-indexing nodes. Furthermore, to support scalability, adding and removing nodes to and from the system should be easy and should not require the cluster to be shut down and then re-started. Such atomic cluster re-configuration is challenges because of the data migrations that it entails to achieve a balanced storage load. New nodes added to the system start off as being empty and should received some entries from the currently running active nodes. Moreover, the data received should preserve locality. Nodes that are being removed from the system need to first make that the entries currently stored and moved to different nodes in the system in a manner that preserves locality. 
+    \item \textbf{Minimizing node information}. As the PhTree is held in-memory, it is important for the indexing nodes to be efficient in managing their memory, to maximize the entries stored by the tree. Maintaining a connection to node over a network generally requires an open socket on both participating nodes. However, active sockets take up system memory and CPU cycles, making it important to reduce the number of open connections that a node has to other nodes in the system. Therefore, it is important to devise a communication model in which each node has to be aware and communicate with a small number of other nodes in the system, to reduce the resource compution related to cluster membership.
+\end{itemize}
+
+Other challenges posed by distributed indexes and distributed systems in general are availabilty and security, however these issues are not tackled by this work.
+
+By taking into account the discussed challenges, an idea architecture of the system has the following requirements:
+\begin{enumerate}
+    \item Points are assigned to nodes in the cluster in a way that preserves locality.
+    \item New nodes can be added and removed without shutting down or stopping the cluster.
+    \item Each node maintains open connections to a small number of other nodes in the system.
+\end{enumerate}
+
+The following sections of this chapter describe the distribution strategy chosen to properly address the challenges presented in this section, the final architecture of the system and the algorithms for the query execution.
 
 \section{Distribution strategies}
 \label{sec:distindex-strategies}
