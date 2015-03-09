@@ -1,14 +1,31 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{Bentley1975}
 Jon~Louis Bentley.
 \newblock Multidimensional binary search trees used for associative searching.
 \newblock {\em Commun. ACM}, 18(9):509--517, September 1975.
 
+\bibitem{Bronson2010concurrent}
+Nathan~G. Bronson, Jared Casper, Hassan Chafi, and Kunle Olukotun.
+\newblock A practical concurrent binary search tree.
+\newblock {\em SIGPLAN Not.}, 45(5):257--268, January 2010.
+
+\bibitem{Brown2014concurrent}
+Trevor Brown, Faith Ellen, and Eric Ruppert.
+\newblock A general technique for non-blocking trees.
+\newblock In {\em Proceedings of the 19th ACM SIGPLAN Symposium on Principles
+  and Practice of Parallel Programming}, PPoPP '14, pages 329--342, New York,
+  NY, USA, 2014. ACM.
+
 \bibitem{FinkelB74}
 Raphael~A. Finkel and Jon~Louis Bentley.
 \newblock Quad trees: A data structure for retrieval on composite keys.
 \newblock {\em Acta Inf.}, 4:1--9, 1974.
+
+\bibitem{Fraser2007concurrent}
+Keir Fraser and Tim Harris.
+\newblock Concurrent programming without locks.
+\newblock {\em ACM Trans. Comput. Syst.}, 25(2), May 2007.
 
 \bibitem{Liao2010HadoopIndex}
 Haojun Liao, Jizhong Han, and Jinyun Fang.
