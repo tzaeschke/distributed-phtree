@@ -226,6 +226,11 @@ The following sections of this chapter describe the distribution strategy chosen
 \section{Distribution strategies}
 \label{sec:distindex-strategies}
 
+There are two main solutions to the problem of distributing a tree data structure over a cluster of computing nodes: 
+\begin{itemize}
+    \item \textbf{Assigning tree nodes to machines}. In this approach, there will be only a single PhTree containing all of the entries stored by the cluster, each node of the PhTree being stored on an individual machine. This means that following a pointer from a parent tree node to a child tree node could require the forwarding of the request to a different machine, the one containing the child tree node. As the PhTree depth is limited by a bit width of the data being stored, from the theoretical point of view, the number of such "forwards" is limited by a constant number.
+    \item \textbf{Assigning data points to machines}. In this approach, each machine in the system will maintain a in-memory PhTree and data points are assigned to machines according to some mapping. This mapping will be referred to as the \textit{key-mapping}, as it mantains a mapping between the keys of the entries stored and the machines that store them. Queries for arbitrary points will always be dispatched to the machines that hold the poins, according the \textit{key-mapping}.
+\end{itemize}
 \textit{Meta - will be removed after editing.}
 \textit{Present the possible ways in which the entries can be distributed across the cluster nodes. Talk about the advantages and disaadvantages of each approach. Say which approach was chosen and why.}
 
