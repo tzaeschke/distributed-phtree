@@ -324,14 +324,18 @@ Due to the presented advtanges, the z-order curve interval splitting is the meth
 \section{Architecture}
 \label{sec:distindex-architectures}
 
+The network architecture of the distributed PhTree is presented in Figure \ref{fig:architecture}. The points are distributed to the hosts in the cluster using the z-order curve interval splitting method. The \textit{key-mapping} is stored on the configuration server and is known to all of the nodes and the clients of the system. The configuration server uses a notification-based model and is responsbile for notifying the indexing hosts and clients whenever any changes occur. This model reduces the amount of network traffic within the cluster, as nodes and clients only need to read the \textit{key-mapping} on start-up and do not need to poll the configuration server for changes. 
+
+Clients of the index first connect to the configuration server, retrieve the \textit{key-mapping} and register to receiver notifications if the mapping changes. After receiving the mapping, clients can begin to send queries to the indexing nodes within the cluster. Clients decide which hosts need to the contacted for a query based on the type of the query and the \textit{key-mapping}. This model is efficient as it allows the clients to decide the hosts to be queried based on local data. Futhermore, queries concerning more indexing nodes can be executed by sending network requests in parallel to all of the involved nodes. A potential drawback of this model is that the configuration server could become the bottleneck in a system with many indexing hosts or many connected clients. This issue can be addressed by using replicating the configuration data to a cluster of configuration servers. An alternative solution would be to store only a partial representation of the mapping in each indexing node and allow queries to be "hop" from one node to the other until they reach the destination machines, as in the case of the prevously discussed distributed hash tables. However, the extra latency introduced by repeated "hops" with the cluster makes this approach ill-suited for latency-sensitive applications like a distributed-index.  
+
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=0.7]{images/architecture}
     \caption{The architecture of the distributed PhTree}
     \label{fig:architecture}
 \end{figure}
-\textit{Meta - will be removed after editing.}
-\textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
+
+As the data is split according to z-order curver intervals, each indexing hosts only needs to maintain two connections to other hosts in the cluster (or 1 for the hosts holding the edge intervals). This means that the amount of memory used by the hosts to store cluster membership information remains relatively constant, even if the number of the nodes in the cluster increases. 
 
 \section{Algorithms}
 \label{sec:distindex-algorithms}
