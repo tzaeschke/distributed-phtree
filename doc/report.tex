@@ -230,19 +230,30 @@ There are two main solutions to the problem of distributing a tree data structur
     \item \textbf{Assigning data points to machines}. In this approach, each machine in the system will maintain a in-memory PhTree and data points are assigned to machines according to some mapping. This mapping will be referred to as the \textit{key-mapping}, as it mantains a mapping between the keys of the entries stored and the machines that store them. Queries for arbitrary points will always be dispatched to the machines that hold the poins, according the \textit{key-mapping}. Therefore, if the \textit{key-mapping} is known by the clients of the index, point queries can be resolved by a single "network" request. However, in such an architecture, the manner in which the points are distributed according to the \textit{key-mapping} influences the manner in which the range and nearest neighbour queries are executed. 
 \end{itemize}
 
-While both of these alternatives satisfy some of the requirements of an ideal architecture, the drawbacks of the first approach, the assignment of tree nodes to machines, outweight the advantages it provides. The number of network requests needed by this approach when storing 32 or 64 bit data, typical for most applications, make the use of this approach prohibitive in a setting where queries must have a low-latency.
+While both of these alternatives satisfy some of the requirements of an ideal architecture, the drawbacks of the first approach, the assignment of tree nodes to machines, outweigh the advantages it provides. The number of network requests needed by this approach when storing 32 or 64 bit data, typical for most applications, make the use of this approach prohibitive in a setting where queries must have a low-latency.
 
 Therefore, this work will focus on the second distribution approach. The following sections will present possible strategies for distributing the points to PhTree's store on different machines in the cluster.  
 
 \subsection{Hashing}
 
+The first approach considered is using a \textit{hashing} function to assign the multi-dimensional points to machines in the clusters. This process is illustrated in figure \ref{fig:hashing}. The hashing function takes the multi-dimensional point and generates a host id h based on the point values in each dimension. This approach is similar to the approach used to implement in-memory hash tables, where keys are mapped to buckets in the hash table.
+
+The main advantage of this approach is that if the hash function is known to all of the machines in the cluster and to all of the clients, point queries can be executed in O(1) network requests. Moreover, if the hash function is uniform, the multi-dimensional points are spread uniformly across the cluster, leading to a balanced storage load on all of the machines.
+
+However, the use of a hash function for the point distribution presents some drawbacks. First of all, a hash function works well for a fixed number of hosts n. A different cluster configuration, with a different number of machines, requires the use of a different hash function. Moreover, changing the hash function requires a re-hashing of all of the points already stored in the cluster, potentially leading to a situation where all of the stored points need to be moved to a different machine. This situation would case a lot of traffic within the cluster, making it hard for the system to answer queries until the migration process is finished.
+
 \begin{figure}[h]
     \centering 
-    \includegraphics{images/hashing}
+    \includegraphics[scale=0.9]{images/hashing}
     \caption{Distributing the points based on a hash function}
     \label{fig:hashing}
 \end{figure}
+
+A second issue with use of hash functions is the observation that hash functions which are perceived to be good in this situation spread the multi-dimensional points uniformly across the machines in the cluster. In such a situation, is is quite likely that the hash function does not preserve point locality, and such, complex queries like range queries and nearest neighbour queries will need to be dispatched to all of the computing nodes in the cluster. 
+
 \subsection{Spatial splitting}
+
+Another approach that can be used for the point distribution problem is to split the partition the original space into a set of contiguous regions and assign each region to a hosts in the system. The most intuitive way to perform this split is to split the multi-dimensional space equally to obtain one region per index host. Figure \ref{fig:geometric-2hosts} shows a potential splitting of a 2D space for 2 hosts, while Figure \ref{fig:geometric-4hosts} presents a possible split of the same 2D space for 4 hosts. 
 
 \begin{figure}
 \centering
@@ -258,10 +269,43 @@ Therefore, this work will focus on the second distribution approach. The followi
 \end{minipage}
 \end{figure}
 
-\subsection{Z-Order curve splitting}
+The spatial splitting approach is not only intuitive, but it also preserve locality, as generally, points which are close together are part of the same regions and are therefore stored on the same machine. Additionally, range queries can be resolved by dispatching the range query to all of the hosts whose assigned regions intersect with the range received as input. In the best cases, range queries can be dispatched to a single host. It is generally preferable to split the space into hyper-rectangles, as these regions can be stored using only two data points, the top left and bottom right corners, independently of the number of dimensions of the original space. 
+
+While the spatial splitting works well in some situations, sometimes it is unclear how to properly split the space between the machines. For example, the 2D space is easy to split into 2 or 4 equal regions, but it is more difficult to split for 3 or 5 hosts. It is always possible to split the space into n equal sized "strips", however this approach diminishes the locality of the data for large values of n. Representing regions as arbitrary polygons instead of hyper-rectangles addresses the problem to a degree, but storing these polygons and computing intersection between them is more difficult than performing the same task using hyper-rectangles. 
+
+Difficulties in splitting the space can also arise even when using hyper-rectangle regions of different size. One instance is the case skewed point distributions, presented in figures \ref{fig:geometric-bad-split} and \ref{fig:geometric-bad-split-2}. In the case of the point distributions illustrated in these figures, an equal space split would not split the points equally between the hosts. However, there are many possible rectangle-based splittings of the space, and it is unclear which of these it is better. In some case, the best split could be achieved by splittng the space into more regions than machines and assign each region to a machine.
 
 \begin{figure}
 \centering
+\parbox{5cm}{
+    \includegraphics[width=5cm]{images/geometric-bad-split}
+    \caption{}
+    \label{fig:geometric-bad-split}}
+\qquad
+\begin{minipage}{5cm}
+    \includegraphics[width=5cm]{images/geometric-bad-split-2}
+    \caption{Equal geometric space splitting for 4 hosts and 2 dimensions}
+    \label{fig:geometric-bad-split-2}
+\end{minipage}
+\end{figure}
+
+Additionally, in the case of skewed input distributions, the optimal split of the space into regions will change over time, as some regions will end up containing more and more points. In this case, the cluster needs to go through a \textit{re-balancing} phase, when the regions are modified and some points are moved from highly populated regions to less populated neighbouring regions. An important observation is that the number of neighbouring regions for an arbitrary regions is a function of the number of dimensions of the original space. This leads to a large number of regions participating, or at least being considered, in the re-balancing of the points from a single dense region to its neighbours. 
+
+\subsection{Z-Order curve splitting}
+
+As previously mentioned, the in-memory PhTree stores the multi-dimensional points according to the Z-ordering, by mapping the initial space to the 1-dimensional Z-order curve. This curve fills in the initial space in a contiguous and complete manner. Figure \ref{fig:zordering-clear}\footnote{Image adapted from \url{http://www.scholarpedia.org/article/B-tree_and_UB-tree}} shows the Z-order space filling curve filling the 2D space where the values in each dimension are limited by 3 bits.  
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.8]{images/zordering-clear}
+    \caption{Z-order space filling curve filling the 2 dimensional space.}
+    \label{fig:zordering-clear}
+\end{figure}
+
+Therefore, instead of splitting the original space into regions, one could attempt to parition the z-order curve into contigous intervals. Figure \ref{fig:zorder-line} shows the 1 dimensional z-order curve corresponding same 3 bit 2-dimensional space, split into 4 intervals of different colours: $[{0, 12}]$ with blue, $[13, 35]$ with yellow, $[36, 47]$ with violet and $[48, 63]$ with green. Figure \ref{fig:zorder-square} shows how the interval splitting is reflected in the original space. Each interval on the z-order curve corresponds to either a hyper-rectangle or a set of hyper-rectangles. Each interval in the z-order curve is reprsented by at most $O(d*w)$ hyper-rectangles, where d is the number of dimensions and k is the number of bits needed to represented the values in each dimension. ~\cite{skopal2006-ubtree} provides an algorithm for generating the hyper-rectangles associated with a z-order curve range.
+
+\begin{figure}
+    \centering
 \parbox{5cm}{
     \includegraphics[width=5cm]{images/zorder-line}
     \caption{Example intervals on the 3bit z-order curve}
@@ -274,8 +318,9 @@ Therefore, this work will focus on the second distribution approach. The followi
 \end{minipage}
 \end{figure}
 
-\subsection{Z-Order curve splitting}
+An advantage of this splitting method is the regions corresponding to the z-order intervals manifest locality, making it well suited for a point distribution method. Moreover, even if in the original space each region has O(d) neighbours, each interval on the z-order curve has a small, constant number of neighbouring intervals (2 for the interior intervals, 1 for the two edge intervals). This makes it easier to handle the cases in which a region is densely populated and should re-balance its points to neighbouring regions. 
 
+Due to the presented advtanges, the z-order curve interval splitting is the method that was chosen as a point distibution strategy for the distributed PhTree. 
 \section{Architecture}
 \label{sec:distindex-architectures}
 
