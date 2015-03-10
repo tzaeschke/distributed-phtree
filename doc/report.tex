@@ -196,9 +196,6 @@ However, an issue with all concurrent search trees where modifications are done 
 \chapter{Index distribution}
 \label{ch:distindex}
 
-\textit{Meta - will be removed after editing.}
-\textit{This chapter should focus on how the distributed index was implemented: how the data was split across the cluster nodes, the manner in which the queries are executed and how the entry load balancing is performed.} 
-
 This chapter describes the design of the distributed PhTree from the distributed point of view. It presents the challenges and the possible design choices for extending the PhTree to run in a distributed setting, discusses the system architecture and describes the algorithms used for the distributed querries. Concurrency related issues are not tackled in this chapter as they are addressed in Chapter \ref{ch:concurrency}.
 
 \section{Challenges}
@@ -214,8 +211,9 @@ While extending the PhTree to be a distributed index increase its storage capaci
 
 Other challenges posed by distributed indexes and distributed systems in general are availabilty and security, however these issues are not tackled by this work.
 
-By taking into account the discussed challenges, an idea architecture of the system has the following requirements:
+By taking into account the discussed challenges, an ideal architecture of the system has the following requirements:
 \begin{enumerate}
+    \item Ensure low response time by minimizing the number of network requests that have to be made.        
     \item Points are assigned to nodes in the cluster in a way that preserves locality.
     \item New nodes can be added and removed without shutting down or stopping the cluster.
     \item Each node maintains open connections to a small number of other nodes in the system.
@@ -228,17 +226,67 @@ The following sections of this chapter describe the distribution strategy chosen
 
 There are two main solutions to the problem of distributing a tree data structure over a cluster of computing nodes: 
 \begin{itemize}
-    \item \textbf{Assigning tree nodes to machines}. In this approach, there will be only a single PhTree containing all of the entries stored by the cluster, each node of the PhTree being stored on an individual machine. This means that following a pointer from a parent tree node to a child tree node could require the forwarding of the request to a different machine, the one containing the child tree node. As the PhTree depth is limited by a bit width of the data being stored, from the theoretical point of view, the number of such "forwards" is limited by a constant number.
-    \item \textbf{Assigning data points to machines}. In this approach, each machine in the system will maintain a in-memory PhTree and data points are assigned to machines according to some mapping. This mapping will be referred to as the \textit{key-mapping}, as it mantains a mapping between the keys of the entries stored and the machines that store them. Queries for arbitrary points will always be dispatched to the machines that hold the poins, according the \textit{key-mapping}.
+    \item \textbf{Assigning tree nodes to machines}. In this approach, there will be only a single PhTree containing all of the entries stored by the cluster, each node of the PhTree being stored on an individual machine. This means that following a pointer from a parent tree node to a child tree node could require the forwarding of the request to a different machine, the one containing the child tree node. As the PhTree depth is limited by a bit width of the data being stored, from the theoretical point of view, the number of such "forwards" is limited by a constant number. Additionally, spreading the tree nodes uniformly across the machines will lead to a balanced storage load. The drawback of this approach is that even though the number of "forwards" during a tree travels is limited by a constant number, the impact on the response time of the system is very high as each "forward" constitutes of a network request. For example, for indexes storing 64 bit multi-dimensional points, a point query would take 64 forwards between the machines in the cluster in the worst case.  
+    \item \textbf{Assigning data points to machines}. In this approach, each machine in the system will maintain a in-memory PhTree and data points are assigned to machines according to some mapping. This mapping will be referred to as the \textit{key-mapping}, as it mantains a mapping between the keys of the entries stored and the machines that store them. Queries for arbitrary points will always be dispatched to the machines that hold the poins, according the \textit{key-mapping}. Therefore, if the \textit{key-mapping} is known by the clients of the index, point queries can be resolved by a single "network" request. However, in such an architecture, the manner in which the points are distributed according to the \textit{key-mapping} influences the manner in which the range and nearest neighbour queries are executed. 
 \end{itemize}
-\textit{Meta - will be removed after editing.}
-\textit{Present the possible ways in which the entries can be distributed across the cluster nodes. Talk about the advantages and disaadvantages of each approach. Say which approach was chosen and why.}
+
+While both of these alternatives satisfy some of the requirements of an ideal architecture, the drawbacks of the first approach, the assignment of tree nodes to machines, outweight the advantages it provides. The number of network requests needed by this approach when storing 32 or 64 bit data, typical for most applications, make the use of this approach prohibitive in a setting where queries must have a low-latency.
+
+Therefore, this work will focus on the second distribution approach. The following sections will present possible strategies for distributing the points to PhTree's store on different machines in the cluster.  
 
 \subsection{Hashing}
 
+\begin{figure}[h]
+    \centering 
+    \includegraphics{images/hashing}
+    \caption{Distributing the points based on a hash function}
+    \label{fig:hashing}
+\end{figure}
 \subsection{Spatial splitting}
 
+\begin{figure}
+\centering
+\parbox{5cm}{
+    \includegraphics[width=5cm]{images/geometric-2hosts}
+    \caption{Equal geometric space splitting for 2 hosts and 2 dimensions}
+    \label{fig:geometric-2hosts}}
+\qquad
+\begin{minipage}{5cm}
+    \includegraphics[width=5cm]{images/geometric-4hosts}
+    \caption{Equal geometric space splitting for 4 hosts and 2 dimensions}
+    \label{fig:geometric-4hosts}
+\end{minipage}
+\end{figure}
+
 \subsection{Z-Order curve splitting}
+
+\begin{figure}
+\centering
+\parbox{5cm}{
+    \includegraphics[width=5cm]{images/zorder-line}
+    \caption{Example intervals on the 3bit z-order curve}
+    \label{fig:zorder-line}}
+\qquad
+\begin{minipage}{5cm}
+    \includegraphics[width=5cm]{images/zorder-square}
+    \caption{Example intervals on the 3bit z-order curve filling the 2D space}
+    \label{fig:zorder-square}
+\end{minipage}
+\end{figure}
+
+\subsection{Z-Order curve splitting}
+
+\section{Architecture}
+\label{sec:distindex-architectures}
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=0.7]{images/architecture}
+    \caption{The architecture of the distributed PhTree}
+    \label{fig:architecture}
+\end{figure}
+\textit{Meta - will be removed after editing.}
+\textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
 
 \section{Algorithms}
 \label{sec:distindex-algorithms}
@@ -253,12 +301,6 @@ There are two main solutions to the problem of distributing a tree data structur
 \subsection{Nearest neighbour queries}
 
 \subsection{Entry load balancing}
-
-\section{Architecture}
-\label{sec:distindex-architectures}
-
-\textit{Meta - will be removed after editing.}
-\textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
 
 \chapter{Concurrency}
 \label{ch:concurrency}
@@ -286,6 +328,12 @@ The PhTree does not currently support concurrent write operations. There are sev
 \textit{Meta - will be removed after editing.}
 \textit{Describe the system, include class/deployment diagrams.}
 
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=0.4]{images/implementation-architecture}
+    \caption{The implementation architecture of the distributed PhTree}
+    \label{fig:implementation-architecture}
+\end{figure}
 \section{Technologies}
 \textit{Meta - will be removed after editing.}
 \textit{Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.}
