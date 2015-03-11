@@ -14,7 +14,6 @@
 \usepackage{globis}
 
 \renewcommand{\sectfont}{\sffamily\bfseries\Huge}
-
 \setlength{\shadedtextwidth}{\textwidth}
 \setlength{\shadeleftshift}{3mm}
 \setlength{\shaderightshift}{3mm}
@@ -288,7 +287,7 @@ Difficulties in splitting the space can also arise even when using hyper-rectang
     \label{fig:geometric-bad-split-2}
 \end{minipage}
 \end{figure}
-
+        
 Additionally, in the case of skewed input distributions, the optimal split of the space into regions will change over time, as some regions will end up containing more and more points. In this case, the cluster needs to go through a \textit{re-balancing} phase, when the regions are modified and some points are moved from highly populated regions to less populated neighbouring regions. An important observation is that the number of neighbouring regions for an arbitrary regions is a function of the number of dimensions of the original space. This leads to a large number of regions participating, or at least being considered, in the re-balancing of the points from a single dense region to its neighbours. 
 
 \subsection{Z-Order curve splitting}
@@ -340,16 +339,26 @@ As the data is split according to z-order curver intervals, each indexing hosts 
 \section{Algorithms}
 \label{sec:distindex-algorithms}
 
-\textit{Meta - will be removed after editing.}
-\textit{This section should explain how the queries should be executed on the distributed system. Present the load balancing algorithm}.
+This section will discuss how the \textit{key-mapping} is created from the Z-order curve intervals and how the queries are executed based on the key-mapping. 
+\subsection{Key-mapping design}
+
+The \textit{key-mapping} used by the distributed PhTree assigns the points based on the Z-order curve intervals. To determine the host responsible for a certain multi-dimensional point, one would have to map that point to the Z-order curve and determine the interval that contains it. There are two alternative for designing the \textit{key-mapping} based on the Z-order curve intervals:
+\begin{enumerate}
+    \item Store the Z-intervals directly as pairs of Z-values and perform 1-dimensional interval matchings to determine the hosts that have to be contact for certain queries. The operation is linear in the number of hosts, for both point and range queries, as the Z-values of the query points need to be compared with the Z-values of the intervals. The correctness of this approach stems from the fact that the region represented by a d-dimensional hyper-rectangle [X, Y] \footnote{Where X is the top-left corner of the hyper-rectangle and Y is the bottom-left corner of the hyper rectangle} is included in the set of d-dimensional regions corresponding to Z-interval $[Z_X,Z_Y]$.
+    \item Store the hyper-rectangles from the original space that correspond to each Z-order interval and perform intersections between the query points/rectangles from the original space and the hyper-rectangle of the interval regions. This operation takes $O(n * w * d)$, as each region contains at most $O(w * d)$ hyper-rectangles. 
+\end{enumerate}
+
+Even if the first solution is asymptotically faster than the second one for finding the hosts to query, the first approach attempts to query a much larger area in the original space than the second one. Therefore, the first method can potentially generate many more network requests than the first one, especially in a system with a large number of online indexing hosts. Moreover, the intersection operation itself is performed on the client, in-memory, and does not generate a network request. Because of these reasons, the second approach is preferable to the first approach in a system looking to minimize the number of network requests associated to each query, like the distributed PhTree. 
 
 \subsection{Point queries}
+Point queries involve operations on a single query point, the insertion or removal of a key-value pair, obtaining the value associated with a key value pair or changing the key associated with a key-value pair. For the point queries, the client only needs to determine which host to send the request to. This is done by determining the intersections between the query point and the hyper-rectangles corresponding to the Z-order intervals. In the case of the \textit{get()}, \textit{put()} and \textit{delete()} operations, the client sends the request to the hosts responsible for the query point and returns the result of the operation. In the case of the \textit{updateKey()} operations, it is possible that a different host is currently responsible for the new key of the value associated with the query point. In that case, the \textit{updateKey()} operation is performed in two steps: first the client removes the old key from the host responsible for it, and the inserts the new key to the proper host.
 
 \subsection{Range queries}
 
 \subsection{Nearest neighbour queries}
 
 \subsection{Entry load balancing}
+
 
 \chapter{Concurrency}
 \label{ch:concurrency}
