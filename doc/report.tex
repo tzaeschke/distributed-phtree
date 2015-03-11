@@ -1,6 +1,7 @@
 \documentclass[11pt,a4paper]{globis-book}
 
 \usepackage{graphicx}
+\usepackage{subfig}
 \usepackage[helvetica]{quotchap}
 \usepackage{times}
 \usepackage{ethfont}
@@ -374,8 +375,20 @@ The PhTree does not currently support concurrent write operations. There are sev
 
 \subsection{Copy-on-Write}
 
-\subsection{Locking}
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=0.6]{images/Tree-COW}
+    \caption{Illustration of Copy-on-Write on a binary tree}
+    \label{fig:tree-cow}
+\end{figure}
 
+\subsection{Locking}
+\begin{figure}
+    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-a}}
+    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-b}}
+    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-c}}
+\caption{}
+\end{figure}
 \chapter{Implementation}
 \label{ch:implementation}
 
