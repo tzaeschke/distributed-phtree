@@ -356,7 +356,27 @@ Point queries involve operations on a single query point, the insertion or remov
 
 \subsection{Range queries}
 
+\begin{figure}
+    \centering
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-range}}
+    \qquad
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-range-intervals}}
+    \caption{Illustration of a knn-query execution execution}
+\end{figure}
 \subsection{Nearest neighbour queries}
+
+\begin{figure}
+    \centering
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-knn-a}}
+    \qquad
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-knn-b}}
+    \hspace{8pt}
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-knn-c}}
+    \qquad
+    \subfloat[caption][]{\includegraphics[width = 2.5in]{images/zordering-knn-d}}
+    \caption{Illustration of a knn-query execution execution}
+\end{figure}
+
 
 \subsection{Entry load balancing}
 
@@ -384,10 +404,20 @@ The PhTree does not currently support concurrent write operations. There are sev
 
 \subsection{Locking}
 \begin{figure}
-    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-a}}
-    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-b}}
-    \subfloat[caption]{\includegraphics[width = 2in]{images/Tree-HoH-c}}
-\caption{}
+    \centering
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-a}}
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-b}}
+    \hspace{8pt}
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-c}}
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-d}}
+    \caption{Illustration of hand-over-hand locking execution}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-c}}
+    \subfloat[caption][]{\includegraphics[width = 3in]{images/Tree-HoH-d}}
+    \caption{Illustration of optimistic locking execution}
 \end{figure}
 \chapter{Implementation}
 \label{ch:implementation}
