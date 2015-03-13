@@ -453,58 +453,83 @@ Furthermore, clients currently balancing do not accept write requests. This is d
 \chapter{Concurrency}
 \label{ch:concurrency}
 
-\textit{Meta - will be removed after editing.}
-\textit{Present the concurrency strategies that could be added to the PhTree and explain the consistency model associated with each strategy.}
-
-The PhTree does not currently support concurrent write operations. There are several strategies that could be employed to add concurrent writes.
-
 \section{Challenges}
+The first version of the PH-tree does not support concurrent access, and remains consistent only if accessed by a single thread at a time. With the current popularity of multi-core CPU's, concurrent access has the potential of providing a significant improvement in the throughput of the PH-tree. The addition of concurrent access presents the following challenges:
+\begin{itemize}
+    \item Concurrent access strategies must guarantee that deadlock will not occur when the data structure is accessed by multiple threads.
+    \item The chosen strategy should optimize the execution time for the most common operation, by minimizing for example, the amount of locks that have to be taken during for those operations. In case of an indexing data structure, read operations are more common than write operations.
+    \item Different concurrent access strategies come with different consistency guarantees. For example, consider the situation in which two processes A and B work concurrently on a shared data structure. Process A starts a read operation at time $t$ and process B a write operation at time $t + \epsilon$. The consistency model determines if process A might see the changes made by process B, if process B finishes the operation before A.
+\end{itemize}
 
+The following section presents the concurrent access strategies added to the PH-tree and discusses their consistency guarantees.
 \section{Concurrency strategies}
 
 \subsection{Copy-on-Write}
 
+COW would make the PH-Tree immutable. Therefore, every write operation ( \textit{insert()}, \textit{remove()} and \textit{update}) will create a new version of the tree containing the changes to be applied. The advantages of this strategy is that it allows one writer and an arbitrarily large number of readers to access the tree concurrently. The second advantage is that this method provides very high consistency guarantees, allowing range and knn queries to run for large periods of time on an older version of the tree. The disadvantages of this method is that it is designed to only allow a single writer thread access the tree in the same time and that it has a higher memory consumption as some of the nodes need to be copied on each access.
+
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=0.6]{images/Tree-COW}
-    \caption{Illustration of Copy-on-Write on a binary tree}
+    \caption{Illustration of Copy-on-Write on a binary tree where the node G has to be written}
     \label{fig:tree-cow}
 \end{figure}
 
+There are several possibilities to handle multiple writer threads using the Copy-on-Write strategy. One approach would be allow multiple threads to access the tree in the same time. This can be done by implementing the atomic root swap using a Test-And-Set atomic operation, essentially turning each write operation into a transaction. In case the root was changed since the thread has started the operation, the atomic Test-And-Set fails and the thread will need to restart the operation. The main drawback of this approach is that the commit fails even if the changes to the tree are made to different parts of the tree.
+
 \subsection{Locking}
-\begin{figure}
+
+A very simple way to handle concurrent writer threads is to use global lock that each thread must take before the execution of an operation. If the lock is a mutex, the tree can only be accessed by a single thread, and if the thread is a read-write lock, the tree can be accessed by either a single writer or several reader threads. This coarse-grained locking strategy is not very efficient and therefore only useful as a baseline implementation during the performance evaluation.
+
+\textit{Fine grained} locking strategies perform locking at the level of tree nodes and can allow multiple writer threads to modify the tree in the same time. Two popular strategies are described in the following sections. It is important to note that the locking strategies provide a more relaxed consistency model. Therefore, an iterator which starts to traverse the tree at time $t$ and finishes at time $t + d$ will potentially see all of the changes made by different threads in the time intervals $t + d$. 
+
+\subsubsection{Hand-over-Hand locking}
+
+Hand-over-hand locking, also called \textit{lock-coupling}, is a fine-grained locking strategy according to which a lock for a node can only be acquired if the parent lock is also held. When traversing the tree according to this strategy, at most two lock will be held by a thread at a time. An additional lock needs to be acquired before acquiring the lock of the root of the tree, to prevent conflicts on the creation of the first node of the tree. 
+
+Figure \ref{fig:locking-hoh} shows the sequence of events happening when a thread needs to update a node. The node to be updated in this figure is node G. The thread first acquires the root, descends to node C and acquires that lock as well. The root can be unlocked before descending to node G and acquiring that lock. After the changes are done, the lock of node G is unlocked.
+
+This strategy allows multiple threads to modify the different subtrees of the tree. The main drawback of this approach is that if the non-leaf nodes are modified, subtrees of those nodes cannot be modified of a different thread until the current thread finishes the update operation. Secondly, there will be a high contention for the locks on the higher levels of the tree, which could negatively affect performance for write-heavy workloads. 
+
+\begin{figure}[t]
     \centering
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-a}
-        \caption{Something}
+        \caption{The root is locked}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-b}
-        \caption{Something}
+        \caption{The next node is locked}
     \end{subfigure}
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-c}
-        \caption{Something}
+        \caption{The root can now be unlocked}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-d}
-        \caption{Something}
+        \caption{The final node is locked}
     \end{subfigure}
-    \caption{Illustration of hand-over-hand locking execution}
+    \caption{Illustration of hand-over-hand locking descent to node G}
+    \label{fig:locking-hoh}
 \end{figure}
+
+\subsubsection{Optimistic locking}
 
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-c}
-        \caption{Something}
-    \end{subfigure}
+        \caption{The parent of the target node is locked}
+    \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
         \includegraphics[width = 3in]{images/Tree-HoH-d}
-        \caption{Something}
+        \caption{The target node is locked}
     \end{subfigure}
-    \caption{Illustration of optimistic locking execution}
+    \caption{Illustration of optimistic locking descent to node G}
 \end{figure}
+
+The PH-tree supports both a full COW concurrency strategy and the fine grained locking strategies. The optimistic locking strategy is generally faster than the hand-over-hand locking strategy, but can lead to starvation when many threads need to update the same node or nodes which are close together. The choice between the COW strategy and the fine grained strategies comes down to the choice between the consistency guarantees provided by them. For example, snapshots of the tree can only be obtained if the tree is using the COW strategy. 
+
 \chapter{Implementation}
 \label{ch:implementation}
 
@@ -549,7 +574,7 @@ One aspect of the distributed PH-tree that could be improved is the execution of
 
 From the point of view of the balancing algorithm, hosts participating in re-balancing operation do not accept write requests, to simplify the management of the mapping between the points and the hosts. The balancing algorithm could be modified to allow the hosts to accept write requests to a separate buffer and integrate the buffer to the stored PH-tree after the balancing operation has finished.
 
-
+The concurrency strategies presented by this work rely on locking and copy-on-write to allow concurrent access. Further work could focus on investigating potential concurrent access strategies using on atomic operations.
 \appendix
 
 \listoffigures
