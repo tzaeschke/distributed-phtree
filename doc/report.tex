@@ -402,23 +402,25 @@ It is sometime possible that the initial query sent to the host responsible for 
 
 \begin{figure}
     \centering
-    \begin{subfigure}[b]{0.5\linewidth}
+    \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = 2.5in]{images/zordering-knn-a}
-        \caption{Something}
+        \caption{The 2 dimensional space.}
     \end{subfigure}%
-    \begin{subfigure}[b]{0.5\linewidth}
+    \qquad
+    \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = 2.5in]{images/zordering-knn-b}
-        \caption{Something}
+        \caption{Distance to further neighbour.}
     \end{subfigure}
-    \begin{subfigure}[b]{0.5\linewidth}
+    \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = 2.5in]{images/zordering-knn-c}
-        \caption{Something}
+        \caption{The additional rectangle range query.}
     \end{subfigure}%
-    \begin{subfigure}[b]{0.5\linewidth}
+    \qquad
+    \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = 2.5in]{images/zordering-knn-d}
-        \caption{Something}
+        \caption{The optimal circle range query.}
     \end{subfigure}
-    \caption{Illustration of a knn-query execution execution}
+    \caption{Illustration of a 3 nearest neighbour query execution in a 2 dimensional space. }
     \label{fig:knn}
 \end{figure}
 
@@ -445,6 +447,8 @@ The re-balancing algorithm proceeds as follows:
 \end{enumerate}
 
 This algorithm allows a host $h$ to be part of only a single re-balancing operation at a moment in time. As soon as a host successfully initiates a re-balancing operation, both the \textit{initiator} and the \textit{receiver} mark themselves as busy and will refuse further re-balancing initiation operations until the current operation is finished. This allows up to $n/2$ balancing operations to run in parallel across the cluster, as each operation involves two neighbouring hosts.
+
+Furthermore, clients currently balancing do not accept write requests. This is done to prevent the \textit{initiator} host to accept updates to the section of z-order curve that is currently re-balanced to the \textit{receiver} host.
 
 \chapter{Concurrency}
 \label{ch:concurrency}
@@ -532,13 +536,19 @@ The PhTree does not currently support concurrent write operations. There are sev
 
 \section{Contributions}
 \label{sec:conclusions-contribution}
-\textit{Meta - will be removed after editing.}
-\textit{Conclude the report. This should reiterate the main points of the report and try to mirror the introduction}
 
+This work presents a complete solution from implementing a distributed and parallel multi-dimensional index, by presenting both a distribution architecture and operation parallelization solutions for individual machines. The main contributions are the following:
+
+The distribution architecture partitions the multi-dimensional space in a manner that allows fast point operation and efficient range and nearest neighbour queries. The proposed balancing algorithm ensures that all hosts will eventually hold a comparable number of entries, even in the case of very skewed input distributions. The presented distribution solution can be easily adapted for other types of index keys, as long as the key domain can be mapped to 1 dimensional line, allowing the constructing of efficient and scalable range-queryable, distributed key-values stores.
+
+The in-memory PH-tree was updated to support concurrent access according to two consistency paradigms. The Copy-On-Write approach offers full consistency guarantees, providing snapshot semantics to queries and isolating readers from any further modifications to the tree. For situations where full consistency is not needed, the optimistic locking approach offers relaxed consistency semantics and provides improved write throughput by allowing concurrent write operations. Furthermore, none of presented approaches require the readers to acquire any locks and thus add no overhead to the execution of the read operations. 
 \section{Future work}
 \label{sec:conclusions-future-work}
-\textit{Meta - will be removed after editing.}
-\textit{Present the points that were not tackled by the thesis and talk about possible future work.}
+
+One aspect of the distributed PH-tree that could be improved is the execution of the distributed nearest neighbour queries. As previously mentioned in section \ref{sec:distindex-algorithms}, the nearest neighbour algorithm first obtains the k nearest neighbours from the host responsible for the query point and then procees to run a range query on the cluster to check for any closer points on different hosts. The additional check is done by checking a hyper-cubic section of the initial space. A more efficient approach would be to check a hyper-spheric region centered in the query point. This improvement could reduce the number of hosts queried on the second step of the nearest neighbour queries and could potentially improve the execution time of such queries. 
+
+From the point of view of the balancing algorithm, hosts participating in re-balancing operation do not accept write requests, to simplify the management of the mapping between the points and the hosts. The balancing algorithm could be modified to allow the hosts to accept write requests to a separate buffer and integrate the buffer to the stored PH-tree after the balancing operation has finished.
+
 
 \appendix
 
