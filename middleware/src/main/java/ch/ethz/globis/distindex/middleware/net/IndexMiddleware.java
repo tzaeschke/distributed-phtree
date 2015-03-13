@@ -2,6 +2,7 @@ package ch.ethz.globis.distindex.middleware.net;
 
 import ch.ethz.globis.distindex.middleware.IOHandler;
 import ch.ethz.globis.distindex.middleware.IndexContext;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.balancing.BalancingDaemon;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
@@ -122,6 +123,28 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     public void remove() {
         balancingDaemon.balanceAndRemove();
         close();
+    }
+
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Wrong number of parameters.");
+        }
+
+        try {
+            String portString = args[0];
+            String hostPortString = args[1];
+            int port = Integer.parseInt(portString);
+            String[] strings = hostPortString.split(":");
+
+            String zkHost = strings[0];
+            int zkPort = Integer.valueOf(strings[1]);
+
+            IndexMiddleware<long[], byte[]> middleware = PhTreeIndexMiddlewareFactory.newPhTree("localhost", port, zkHost, zkPort);
+
+            middleware.run();
+        } catch (Exception ex) {
+            System.out.println("Parameters should be: <port>, <zkHostPort>)");
+        }
     }
 
     private <K, V> ServerBootstrap initServerBootstrap(final IOHandler<K, V> handler) {
