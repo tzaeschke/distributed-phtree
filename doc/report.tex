@@ -466,7 +466,11 @@ The following section presents the concurrent access strategies added to the PH-
 
 \subsection{Copy-on-Write}
 
-COW would make the PH-Tree immutable. Therefore, every write operation ( \textit{insert()}, \textit{remove()} and \textit{update}) will create a new version of the tree containing the changes to be applied. The advantages of this strategy is that it allows one writer and an arbitrarily large number of readers to access the tree concurrently. The second advantage is that this method provides very high consistency guarantees, allowing range and knn queries to run for large periods of time on an older version of the tree. The disadvantages of this method is that it is designed to only allow a single writer thread access the tree in the same time and that it has a higher memory consumption as some of the nodes need to be copied on each access.
+Copy-on-Write is an concurrent access strategy that allows multiple threads to access the same shared data structure. When one of these threads needs to modify the shared data structure, it first makes a copy of it, performs the modifications and then updates it with its modified copy. Each write operation creates a new version of the shared data structure, making it immutable. This strategy allows one writer thread and an arbitrary number of reader threads to work on the same data in the same time. If multiple writer threads were to access the data structure, each would end up with its updated copy and the last to replace the shared data structure with the copy would overwrite the changes of the other writer. 
+
+In case of the trees, writer threads do not have to copy the full tree before applying their modifications. It is sufficient to create a copy of the node that is update and to all of its parents nodes, up to and including the root of the tree. The number of nodes copied for each update is equal to the maximum height of the tree. In case of the PH-tree, this number is equal to the number of bits needed to represent the values on each dimensions, independent of the number of nodes or entries currently stored in the tree. 
+
+Figure \ref{fig:tree-cow} illustrates the execution of write operation. For simplicity, a general binary tree is pictured here, as the operation is executed in a similar manner on a PH-tree. In this example, node G needs to be updated. To achieve this, all of the ancestors of G are copied and the copy of G, $G'$ is updated. Finally, the root pointer of the tree is changed from A to $A'$ atomically. It is important that the root swap is performed in an atomic manner, such that any readers concurrently accessing the tree will either access the old or the new version of the tree.
 
 \begin{figure}[h]
     \centering 
@@ -484,12 +488,6 @@ A very simple way to handle concurrent writer threads is to use global lock that
 \textit{Fine grained} locking strategies perform locking at the level of tree nodes and can allow multiple writer threads to modify the tree in the same time. Two popular strategies are described in the following sections. It is important to note that the locking strategies provide a more relaxed consistency model. Therefore, an iterator which starts to traverse the tree at time $t$ and finishes at time $t + d$ will potentially see all of the changes made by different threads in the time intervals $t + d$. 
 
 \subsubsection{Hand-over-Hand locking}
-
-Hand-over-hand locking, also called \textit{lock-coupling}, is a fine-grained locking strategy according to which a lock for a node can only be acquired if the parent lock is also held. When traversing the tree according to this strategy, at most two lock will be held by a thread at a time. An additional lock needs to be acquired before acquiring the lock of the root of the tree, to prevent conflicts on the creation of the first node of the tree. 
-
-Figure \ref{fig:locking-hoh} shows the sequence of events happening when a thread needs to update a node. The node to be updated in this figure is node G. The thread first acquires the root, descends to node C and acquires that lock as well. The root can be unlocked before descending to node G and acquiring that lock. After the changes are done, the lock of node G is unlocked.
-
-This strategy allows multiple threads to modify the different subtrees of the tree. The main drawback of this approach is that if the non-leaf nodes are modified, subtrees of those nodes cannot be modified of a different thread until the current thread finishes the update operation. Secondly, there will be a high contention for the locks on the higher levels of the tree, which could negatively affect performance for write-heavy workloads. 
 
 \begin{figure}[t]
     \centering
@@ -513,6 +511,12 @@ This strategy allows multiple threads to modify the different subtrees of the tr
     \label{fig:locking-hoh}
 \end{figure}
 
+Hand-over-hand locking, also called \textit{lock-coupling}, is a fine-grained locking strategy according to which a lock for a node can only be acquired if the parent lock is also held. When traversing the tree according to this strategy, at most two lock will be held by a thread at a time. An additional lock needs to be acquired before acquiring the lock of the root of the tree, to prevent conflicts on the creation of the first node of the tree. 
+
+Figure \ref{fig:locking-hoh} shows the sequence of events happening when a thread needs to update a node. The node to be updated in this figure is node G. The thread first acquires the root, descends to node C and acquires that lock as well. The root can be unlocked before descending to node G and acquiring that lock. After the changes are done, the lock of node G is unlocked.
+
+This strategy allows multiple threads to modify the different subtrees of the tree. The main drawback of this approach is that if the non-leaf nodes are modified, subtrees of those nodes cannot be modified of a different thread until the current thread finishes the update operation. Secondly, there will be a high contention for the locks on the higher levels of the tree, which could negatively affect performance for write-heavy workloads. 
+
 \subsubsection{Optimistic locking}
 
 \begin{figure}
@@ -527,6 +531,14 @@ This strategy allows multiple threads to modify the different subtrees of the tr
     \end{subfigure}
     \caption{Illustration of optimistic locking descent to node G}
 \end{figure}
+
+Optimistic locking is an alternative fine grained locking strategy which seeks to minimize the number of locks which are take during a write operation. The basic idea is to traverse the tree without acquiring any locks until the node to be updated is reached. Once at the target node, the writer thread acquires the lock of the parent and the lock of the current node. After this happens, the write operation can continue only if both of these two nodes have not yet been removed from the tree and the current node is still a child node of the parent node. If any of these checks fail, the write operation fails and the current thread begins another attempt by starting a new traversal of the tree.
+
+To ease the implementation, each node has an additional removed flag, which indicates if certain node has been removed from the tree. When a thread removes a node, it sets this flag to true before releasing the lock of the node. 
+
+One advantage of this method is that in a large tree, re-tries are generally rare as threads do not generally attempt to update the same node. Moreover, a thread holding the lock of a certain node does not block other threads from performing update operations on the node's subtrees, unlike the \textit{hand-over-hand} strategy.
+
+It is important to mention the fact the in the case of the PH-tree, all update operation to a single node are not executed in an atomic fashion, which can cause reader threads to perform reads from nodes which are in an inconsistent state. This can be avoided by protecting the nodes with a read-write lock and requiring the read operations to acquire the read lock of a node before performing a read. However, the latency of the read operation is increased if readers need to acquire locks. Another solution is to add some copy-on-write logic to the write operations. Specifically, before performing a write operation on certain node, the writer thread first creates of copy of the node, performs the update on the copy and then atomically replaces the parent node's reference to the node with the copy. As the writer thread holds the lock on the parent node, it is guaranteed that no other writer threads will overwrite this change. Furthermore, reader threads will either access the old version of the node or the updated copy.
 
 The PH-tree supports both a full COW concurrency strategy and the fine grained locking strategies. The optimistic locking strategy is generally faster than the hand-over-hand locking strategy, but can lead to starvation when many threads need to update the same node or nodes which are close together. The choice between the COW strategy and the fine grained strategies comes down to the choice between the consistency guarantees provided by them. For example, snapshots of the tree can only be obtained if the tree is using the COW strategy. 
 
