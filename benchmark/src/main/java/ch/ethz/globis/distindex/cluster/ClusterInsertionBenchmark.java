@@ -24,14 +24,14 @@ public class ClusterInsertionBenchmark {
         PHFactory factory = new ZKPHFactory(ZK_HOST, ZK_PORT);
         int dim = 2;
         int depth = 64;
-        int nrEntries = 10000;
+        int nrEntries = 50000;
 
         insertWithClients(factory, nrEntries);
     }
 
     private static void insertWithClients(PHFactory factory, int nrEntries) {
         int nrClients = 4;
-        ExecutorService pool = Executors.newFixedThreadPool(4);
+        ExecutorService pool = Executors.newFixedThreadPool(nrClients);
 
         List<Runnable> tasks = new ArrayList<Runnable>();
         try {
@@ -60,9 +60,8 @@ public class ClusterInsertionBenchmark {
     }
 
     private static void doInsert(PhTree tree, List<long[]> points) {
-        System.out.println("Inserting " + points.size() + " points.");
-
         long startTime = System.currentTimeMillis();
+        System.out.println("Inserting " + points.size() + " points. " + startTime);
 
         for (long[] point : points) {
             tree.insert(point);
@@ -71,7 +70,7 @@ public class ClusterInsertionBenchmark {
 
         double duration = (endTime - startTime) / 1000.0;
         double throughput = points.size() / duration;
-        System.out.println("Tree size: " + tree.size());
+        System.out.println("Tree size: " + tree.size() + " " + endTime);
         System.out.println("Throughput is : " + throughput);
     }
 
