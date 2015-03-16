@@ -131,15 +131,18 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
         }
 
         try {
-            String portString = args[0];
-            String hostPortString = args[1];
-            int port = Integer.parseInt(portString);
+            String hostPortString = args[0];
+            String zkHostPortString = args[1];
             String[] strings = hostPortString.split(":");
+            int port = Integer.parseInt(strings[1]);
+            String host = strings[0];
+
+            strings = zkHostPortString.split(":");
 
             String zkHost = strings[0];
             int zkPort = Integer.valueOf(strings[1]);
 
-            IndexMiddleware<long[], byte[]> middleware = PhTreeIndexMiddlewareFactory.newPhTree("localhost", port, zkHost, zkPort);
+            IndexMiddleware<long[], byte[]> middleware = PhTreeIndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
 
             middleware.run();
         } catch (Exception ex) {

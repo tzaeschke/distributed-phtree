@@ -23,7 +23,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
     private FieldEncoder<K> keyEncoder;
     private FieldEncoder<V> valueEncoder;
 
-    private static final Joiner.MapJoiner joiner = Joiner.on(",").withKeyValueSeparator("=>");
+    private final Joiner.MapJoiner joiner = Joiner.on(",").withKeyValueSeparator("=>");
 
     public ByteRequestEncoder(FieldEncoder<K> keyEncoder, FieldEncoder<V> valueEncoder) {
         this.keyEncoder = keyEncoder;
