@@ -33,11 +33,23 @@ Haojun Liao, Jizhong Han, and Jinyun Fang.
 \newblock In {\em Networking, Architecture and Storage (NAS), 2010 IEEE Fifth
   International Conference on}, pages 240--249, July 2010.
 
+\bibitem{shanir04}
+M.~Moir and N.~Shavit.
+\newblock Concurrent data structures.
+\newblock In {\em Handbook of Data Structures and Applications, D. Metha and S.
+  Sahni Editors}, pages 47--14 -- 47--30, 2007.
+\newblock Chapman and Hall/CRC Press.
+
 \bibitem{Ramabhadran04prefixhash}
 Sriram Ramabhadran, Sylvia Ratnasamy, Joseph~M. Hellerstein, and Scott Shenker.
 \newblock Prefix hash tree: An indexing data structure over distributed hash
   tables.
 \newblock Technical report, 2004.
+
+\bibitem{skopal2006-ubtree}
+Tomás Skopal, Michal Krátký, Jaroslav Pokorný, and Václav Snásel.
+\newblock {A new range query algorithm for Universal B-trees}.
+\newblock {\em Information Systems}, 31:489--511, 2006.
 
 \bibitem{Stoica2001chord}
 Ion Stoica, Robert Morris, David Karger, M.~Frans Kaashoek, and Hari
