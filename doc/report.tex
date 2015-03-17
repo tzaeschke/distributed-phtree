@@ -577,12 +577,9 @@ The PH-tree supports both a full COW concurrency strategy and the fine grained l
 \chapter{Implementation}
 \label{ch:implementation}
 
-\textit{Meta - will be removed after editing.}
-\textit{Present the implementation architecture and the techologies used.}
+\section{System architecture}
 
-\section{System description}
-\textit{Meta - will be removed after editing.}
-\textit{Describe the system, include class/deployment diagrams.}
+The architecture of the distributed PH-tree is shown in Figure \ref{fig:implementation-architecture} . The implementation consists of two artifacts: the \textit{client library} and the \textit{middleware library}. Both of these libraries have been implemented in the Java programming language and are the main artifacts of this work.
 
 \begin{figure}[h]
     \centering 
@@ -590,9 +587,23 @@ The PH-tree supports both a full COW concurrency strategy and the fine grained l
     \caption{The implementation architecture of the distributed PH-tree}
     \label{fig:implementation-architecture}
 \end{figure}
-\section{Technologies}
+
+The \textit{client library} is deployed on the clients and contains the code necessary to connect to the configuration server, retrieve the cluster information and perform operations on the cluster. The \textit{client library} also contains a dependency to the \textit{Kryo} library, a Java serialization library that used to encode the values stored on the PH-tree before performing to the insertion operation and decode the values retrieved from the server.
+
+The \textit{server library} contains the index middleware logic and needs to be deployed on the indexing hosts. The \textit{server library} implements a multi-threaded middleware Java application running on the indexing hosts. The \textit{Netty IO}\footnote{http://netty.io/} library is used to handle incoming client requests using a thread pool.
+
+The \textit{configuration server} was implemented using \textit{ZooKeeper}\footnote{http://zookeeper.apache.org/}, an open source server whose goal is to provide reliable distributed coordination. Zookeeper provides a centralized service for maintaining configuration information and performing distributed synchronization. The \textit{cluster configuration} is stored is a ZooKeeper specific format by the indexing hosts. ZooKeeper also allows the possibility of replicating the stored configuration by running a \textit{qourum}\footnote{The name used by ZooKeeper for a replicated cluster of ZooKeeper server.} of machines to improve availability. 
+
+A minimal configuration of the distributed PH-tree requires a ZooKeeper server, an indexing host running the \textit{server library} and client machines performing operation using the \textit{cluster library}.
+
+\section{Client module}
 \textit{Meta - will be removed after editing.}
 \textit{Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.}
+
+\section{Middleware module}
+
+\section{Configuration server}
+
 
 \chapter{Evaluation}
 \label{ch:evaluation}
