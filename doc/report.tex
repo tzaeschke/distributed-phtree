@@ -596,14 +596,56 @@ The \textit{configuration server} was implemented using \textit{ZooKeeper}\footn
 
 A minimal configuration of the distributed PH-tree requires a ZooKeeper server, an indexing host running the \textit{server library} and client machines performing operation using the \textit{cluster library}.
 
-\section{Client module}
-\textit{Meta - will be removed after editing.}
-\textit{Describe the technologies used, the reasons for which these technologies were chosen and any alternatives.}
+\section{PH-tree Java API}
+\textit{Describe the Java API for the PH-tree and show how the new implementation fits in the API.}
 
-\section{Middleware module}
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/PH-Tree-API}
+    \caption{The Java API of the PH-tree. The classes coloured with blue represent the existing code, the additions in green represent the distributed implementation.}
+    \label{fig:PH-tree-Java-API}
+\end{figure}
 
-\section{Configuration server}
+\section{Distribution}
 
+\subsection{Client design}
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/Client}
+    \caption{The class diagram of the client library}
+    \label{fig:Client-library}
+\end{figure}
+\subsection{Server design}
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/Server}
+    \caption{The class diagram of the server library}
+    \label{fig:Server-library}
+\end{figure}
+
+\subsection{Configuration server and Key-Mapping implementation}
+
+\subsection{Balancing considerations}
+
+\subsection{Communication protocol}
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=0.7]{images/Encoding}
+    \caption{A diagram of the communication protocol between the client and the server}
+    \label{fig:Server-library}
+\end{figure}
+
+\section{Concurrency}
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/PH-tree-concurrency}
+    \caption{The Java API of the concurrency classes}
+    \label{fig:Concurrency-classes}
+\end{figure}
 
 \chapter{Evaluation}
 \label{ch:evaluation}
