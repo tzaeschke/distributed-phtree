@@ -588,16 +588,17 @@ The architecture of the distributed PH-tree is shown in Figure \ref{fig:implemen
     \label{fig:implementation-architecture}
 \end{figure}
 
-The \textit{client library} is deployed on the clients and contains the code necessary to connect to the configuration server, retrieve the cluster information and perform operations on the cluster. The \textit{client library} also contains a dependency to the \textit{Kryo} library, a Java serialization library that used to encode the values stored on the PH-tree before performing to the insertion operation and decode the values retrieved from the server.
+The \textit{client library} is deployed on the clients and contains the code necessary to connect to the configuration server, retrieve the cluster information and perform operations on the cluster. The \textit{client library} also contains a dependency to the \textit{Kryo} library, a Java serialization library that used to encode the values stored on the PH-tree before performing to the insertion operation and decode the values retrieved from the server. Clients cannot modify the cluster information and can only subscribe to be notified by the configuration server when indexing hosts join or leave the cluster and when the Z-order curve intervals changes as a result of a rebalancing operation.
 
-The \textit{server library} contains the index middleware logic and needs to be deployed on the indexing hosts. The \textit{server library} implements a multi-threaded middleware Java application running on the indexing hosts. The \textit{Netty IO}\footnote{http://netty.io/} library is used to handle incoming client requests using a thread pool.
+The \textit{server library} contains the index middleware logic and needs to be deployed on the indexing hosts. The \textit{server library} implements a multi-threaded middleware Java application running on the indexing hosts. The \textit{Netty IO}\footnote{http://netty.io/} library is used to handle incoming client requests using a thread pool. When a server is started, it first connects to configuration server to retrieve the cluster information and then is assigned an interval of the Z-ordr curve for which it is responsible. If the cluster alredy contains some data the new node can join mark itself as a free node and will be contacted by the next node in the cluster that will begin a balancing operaton. Indexing hosts update the intervals in the cluster configuraton after a balacin operation and periodically update the number of entries stored. 
 
 The \textit{configuration server} was implemented using \textit{ZooKeeper}\footnote{http://zookeeper.apache.org/}, an open source server whose goal is to provide reliable distributed coordination. Zookeeper provides a centralized service for maintaining configuration information and performing distributed synchronization. The \textit{cluster configuration} is stored is a ZooKeeper specific format by the indexing hosts. ZooKeeper also allows the possibility of replicating the stored configuration by running a \textit{qourum}\footnote{The name used by ZooKeeper for a replicated cluster of ZooKeeper server.} of machines to improve availability. 
 
 A minimal configuration of the distributed PH-tree requires a ZooKeeper server, an indexing host running the \textit{server library} and client machines performing operation using the \textit{cluster library}.
 
 \section{PH-tree Java API}
-\textit{Describe the Java API for the PH-tree and show how the new implementation fits in the API.}
+
+The Java API of the PH-tree is presented in Figure \ref{fig:PH-tree-Java-API}. The interface \textit{PhTreeV} is the main interface and corresponds to a PH-tree that stores entries with keys of type \textit{long[]} and arbitrary objects as values. A set API is provided through the classes \textit{PhTree} and \textit{PhTreeD}. \textit{PhTree} uses a \textit{PhTreeV} instance with empty values to implement a set for multi-dimensional points with values of type \textit{long}. \textit{PhTreeVD} is targeted towards application which require floating point precision for the values of each dimension. This type of tree is backed by the \textit{PhTreeV} instance and performs pre and post processing of the multiple-dimensional points to map them from \textit{double[]} to \textit{long[]}.
 
 \begin{figure}[h]
     \centering 
@@ -606,10 +607,18 @@ A minimal configuration of the distributed PH-tree requires a ZooKeeper server, 
     \label{fig:PH-tree-Java-API}
 \end{figure}
 
+The initial PH-tree implementation also provides support for range tree, which can store \textit{hyper-rectangles} defined by two multi-dimensional points: the bottom-left and top-right corners of the hyper-rectangle. These types of trees are implemented using special types of pre and post processors and are internally backed by point PH-trees. \textit{PhTreeRangeV} stores hyper-rectangles defined by multi-dimensional points represented as \textit{long[]} and allows arbitrary values. \textit{PhTreeRangeVD} is similar but allows points to be represented as \textit{double[]}. Both of these two implementations use an instance of \textit{PhTreeV} to store the processed hyper-rectangles, as shown in Figure \ref{fig:PH-tree-Java-API}. Finally, \textit{PhTreeRangeD} provides support for hype-rectangle set index is backed by a \textit{PhTree} object. 
+
+As presented in Figure \ref{fig:PH-tree-Java-API}, all of the types of trees discussed depende on the interface PhTreeV. The distributed PH-tree provides another implementation for this interface. Method calls to any of the trees in the presented hierarchy are transformed into commands send by the \textit{DistrbutedPhTreeV} class to the indexing hosts over the network. After the requests are services, \textit{DistributedPhTreeV} combines the responses and provides the appropriate returning value. 
+
+One big advantage of this approach is that client is not aware if it is using a in-memory tree or a distributed one, except at the creation time. Therefore, appliation previously using the in-memory version of the PH-tree can easily switch to the distributed implementation, with minimal code changes. 
+
+The choice of providing a separate implementation only of the \textit{PhTreeV} class has another important consequence: the indexing hosts only need to maintain an in-memory instance of a \textit{PhTreeV} implementation, independent of the type of tree used by the client. This simplifies the implementation and also has the advantage of off-loading the pre and post processing operation from the servers to the clients, allowing faster request processing and better throughput on the servers. 
 \section{Distribution}
 
 \subsection{Client design}
 
+A high level diagram of the client library is presented in Figure \ref{fig:Client-library}. 
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=1]{images/Client}
@@ -618,6 +627,7 @@ A minimal configuration of the distributed PH-tree requires a ZooKeeper server, 
 \end{figure}
 \subsection{Server design}
 
+The high level diagram of the server library is presented in Figure \ref{fig:Server-library}
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=1]{images/Server}
@@ -631,14 +641,27 @@ A minimal configuration of the distributed PH-tree requires a ZooKeeper server, 
 
 \subsection{Communication protocol}
 
+The distributed PH-tree uses a custom binary protocol for both the communication between a client and an indexing host and between two indexing neighbouring indexing hosts. The main communication flow is described in Figure \ref{fig:Encoding}. The \textit{RequestDispatcher} on the client creates a \textit{Request} object for each method call to the PH-tree API. This request object contains the request type and the arguments received by the method and it is converted into an array of bytes by the \textit{RequestEncoder} class, according to the communication protocol. The array of bytes is sent through the network to all of the servers that participate in the operation. On the server, the request is assigned to one of request processing threads which converts the array of bytes back to a \textit{Request} object using a \textit{RequestDecoder}. The request is then serviced by a \textit{RequestHandler} object, which returns a \textit{Response} object containing the result of the request. The \textit{Response} object is converted into an array of bytes using a \textit{ResponseEncoder} and sent back to the client over the wire. Back on the client, the response is decoded from a byte array. In case multiple servers were contacted, all of their responses are decoded and then combined to produce the return value of the method call.
+
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=0.7]{images/Encoding}
     \caption{A diagram of the communication protocol between the client and the server}
-    \label{fig:Server-library}
+    \label{fig:Encoding}
 \end{figure}
 
+The main reasons for using a binary protocol, as opposed to a more high level protocol based on JSON\footnote{http://json.org/} or XML\footnote{http://en.wikipedia.org/wiki/XML} are the following:
+\begin{itemize}
+    \item A binary protocol produces a much smaller output than a text based protocol. In the case of the custom binary protocol, all parameters are converted into arrays of bytes of the smallest possible size and combined into a large byte array. JSON and XML formats require additional metadata to store the name of the fields and to make the representation human readable. 
+    \item JSON or XML protocols follow a two-step process: first the request is converted into a JSON or XML document, then the document is converted into an array of bytes to be sent over the network. The binary protocol skips the middle step and transforms requests directly into arrays of bytes. This makes the binary encoding faster than the text-based alternatives.
+    \item The messages exchanged for this communication protocols are generally quite simple and thus the implementation effort for efficient custom serialization is not very high. 
+\end{itemize}
+
 \section{Concurrency}
+
+The addition of concurrent support to the PH-tree involves the modification of the write operations to handle accesses from multiple threads. The operations which perform queries, create or execute iterators across the PH-tree were not modified, to preserve the response time of the read operations. Therefore, only the \textit{put()}, \textit{delete()} and \textit{updateKey()} methods for implementations of the \textit{PhTreeV} interface require modifications to support concurrency. 
+
+The implementation was performed by isolating the write methods into a separate interface called \textit{PhOperations}. Thus, the PH-tree implementation delegates the execution of the write methods to an internal \textit{PhOperations} object. This pattern allows us to easily provide multiple implementation for concurrent write access strategies by placing each strategy into a separate implementation class. 
 
 \begin{figure}[h]
     \centering 
@@ -646,6 +669,10 @@ A minimal configuration of the distributed PH-tree requires a ZooKeeper server, 
     \caption{The Java API of the concurrency classes}
     \label{fig:Concurrency-classes}
 \end{figure}
+
+Figure \ref{fig:Concurrency-classes} shows the \textit{PhOperations} interface and its implementations. First of all, \textit{PhOperationsSimple} provides an no-concurrency implementation of the write operations, allowing operation that do not require concurrent access to by-pass the response time performance penalty added by the synchronized implementations. \textit{PhOperationsCOW} provides a full Copy-on-Write implementation, which essentially creates a "new" version\footnote{Only a single path from the root to the update node is changed at each write operations, the rest of the tree is shared with the previous version.} of the tree at each write operation and supports iteration on snapshots of the tree. This implementation supports a single writing accessing the three concurrently with an arbitrarily large number of readers. \textit{PhOperationHoH} and \textit{PhOperationsOL} are fine grained lock-based concurrency strategies, providing support for multiple reader and writer threads at the cost of strict consistency. In both of these implementations, the nodes modified are first copied and the modified copies are atomically replaced in the parent nodes. This removes the need for taking locks in the read methods. \textit{PhOperationsHoH} implements the tree descent using hand-over-hand locking, while \textit{PhOperationsOL} performs optimistic locking for this purpose. As previously discussed in Chapter \ref{ch:concurrency}, \textit{PhOperationsOL} may need multiple descents on the tree until the locking attempt was successful and should generally perform better than \textit{PhOperaionsHoH} for workloads in which the writers are not accessing the same area of the tree at the same time.
+
+Another big advantage is that the \textit{PhOperations} reference can be swapped at runtime, which changes the concurrency strategy used by the PH-tree. This allows a tree to use optimistic locking while it is "loaded" with entries from multiple threads, and then switch to copy-on-write to allow iterators or range queries to execute on snapshots of the tree. 
 
 \chapter{Evaluation}
 \label{ch:evaluation}
