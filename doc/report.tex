@@ -618,13 +618,17 @@ The choice of providing a separate implementation only of the \textit{PhTreeV} c
 
 \subsection{Client design}
 
-A high level diagram of the client library is presented in Figure \ref{fig:Client-library}. 
+A high level diagram of the client library is presented in Figure \ref{fig:Client-library}. The \textit{DistributedPhTreeV} class implements the \textit{PhTreeV} interface and provides access the distributed PH-tree. Each method call on the \textit{PhTreeV} interface is delegated to a \textit{PhTreeIndexProxy} object. This object converts each method call into a \textit{Request} object, similar to the \textit{Command design pattern}\footnote{http://en.wikipedia.org/wiki/Command\_pattern}. The proxy class also decides which hosts need to be contacted to resolve the operation, based on a locally cached \textit{Key-Mapping} object. This object contains the most recent cluster configuration available to the host. The \textit{Request} object is then passed on to a \textit{RequestDispatcher}, where it is encoded to an array of bytes and sent to the corresponding hosts via TCP sockets. The \textit{Transport} class keeps the most recently used connections alive, to avoid having to perform the TCP handshake for each operation when repeatedly interacting with the same host. 
+
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=1]{images/Client}
     \caption{The class diagram of the client library}
     \label{fig:Client-library}
 \end{figure}
+
+
+The calls to the \textit{DistributedPhTreeV} methods are blocking, as the \textit{Transport} object blocks the execution until it has received a response from the remote indexing host. The response is received as an array of bytes and is decoded into a \textit{Response} object and returned to the \textit{RequestDispatcher} object. If more hosts participated in the query, their corresponding \textit{Response} objects are combined and the result of the operation is returned to the caller of the \textit{DistributedPhTreeV} method.
 \subsection{Server design}
 
 The high level diagram of the server library is presented in Figure \ref{fig:Server-library}
@@ -634,6 +638,7 @@ The high level diagram of the server library is presented in Figure \ref{fig:Ser
     \caption{The class diagram of the server library}
     \label{fig:Server-library}
 \end{figure}
+
 
 \subsection{Configuration server and Key-Mapping implementation}
 
