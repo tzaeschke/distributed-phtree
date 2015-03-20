@@ -627,11 +627,14 @@ A high level diagram of the client library is presented in Figure \ref{fig:Clien
     \label{fig:Client-library}
 \end{figure}
 
+The calls to the \textit{DistributedPhTreeV} methods are blocking, as the \textit{Transport} object blocks the execution until it has received a response from the remote indexing host. The response is received as an array of bytes and is decoded into a \textit{Response} object and returned to the \textit{RequestDispatcher} object. If more hosts participated in the query, their corresponding \textit{Response} objects are combined and the result of the operation is returned to the caller of the \textit{DistributedPhTreeV} method. 
 
-The calls to the \textit{DistributedPhTreeV} methods are blocking, as the \textit{Transport} object blocks the execution until it has received a response from the remote indexing host. The response is received as an array of bytes and is decoded into a \textit{Response} object and returned to the \textit{RequestDispatcher} object. If more hosts participated in the query, their corresponding \textit{Response} objects are combined and the result of the operation is returned to the caller of the \textit{DistributedPhTreeV} method.
 \subsection{Server design}
 
-The high level diagram of the server library is presented in Figure \ref{fig:Server-library}
+The \textit{server library} is implemented as a multi-threaded, asynchronous, event-driven server, according to the \textit{reactor pattern}\footnote{http://en.wikipedia.org/wiki/Reactor\_pattern}. This model uses two types of threads: \textit{Dispatcher} threads and \textit{Handler} threads. A \textit{Dispatcher} thread accepts incoming connections, allocates the necessary resources to the connections and then passes the connection resources to a \textit{Handler} thread. The \textit{Handler} thread accepts requests from the client using the connection resource provided by the \textit{Dispatcher} thread. For the TCP protocol, this resource is generally and reference to a \textit{Socket} object. The \textit{Handler} thread manages requests from more than one client by leveraging the event-based IO support provided by the operating systm. The \textit{Netty IO} Java library was used for the implementation, as it provides an easy manner to set up the a pool of \textit{Handler} threads. The chosen server architecture generally performs better than architecturs which create a new thread for every request, as the \textit{Handler} threads are pooled and are initialized before any client requests are serviced. 
+
+The high level diagram of the server library is presented in Figure \ref{fig:Server-library}. The main class of the \textit{server library} is the \textit{IndexMiddleware} class, which sets up the pool of handler threads and starts the dispatcher thread. The \textit{MiddlewareChannelHandler} class is the first handler that is executed by one of the \textit{Handler} threads upon receiving a request on a client connection. This class performs reads all of the bytes corresponding to a single request from a client and places them into a byte array object. This object is then passed to an instance of the \textit{IOHandler} class, which coverts the byte array into a \textit{Request} object. The \textit{IOHandler} then passed the \textit{Request} object to another handle, based on the type of the request. Client requests are passed along to a \textit{RequestHandler} object, while balancing requests, coming from othr servers are passed to the \textit{BalancingRequestHandler} object. 
+
 \begin{figure}[h]
     \centering 
     \includegraphics[scale=1]{images/Server}
@@ -639,12 +642,20 @@ The high level diagram of the server library is presented in Figure \ref{fig:Ser
     \label{fig:Server-library}
 \end{figure}
 
+Information that is commonly accessed by all of the \textit{Handler} threads is stored in the \textit{IndexContext} object. This object contains a reference to the \textit{ClusterService}, used to read and writer cluster configuration data, and to the in-memory PH-tree instance on that server, which is used in processing the client requests. 
 
 \subsection{Configuration server and Key-Mapping implementation}
 
 The \textit{Key-Mapping} was implemented using the ZooKeeper, an open-source coordination service. ZooKeeper provides access to a shared hierarchical namespace similar to a file system. This namespace is comprised of data registers, called \textit{znodes}, which are identified by a path and store data in the form of a byte array. The data stored within a \textit{znode} is guaranteed to always be read and written atomically. Additionally, each \textit{znode} can have any number of children \textit{znodes}. ZooKeeper provides primitives to create and delete \textit{znodes}, check if a node exists, get and set the data stored by a node and also retrieves the list of children of a node. It is also possible to set \textit{watches} on certain znodes, and receive notifications from ZooKeeper when the data of the node was changed. 
 
 Both the client and the servers access the configuration data using the \textit{ClusterService} object, which maintains a cached version of the configuration on a \textit{KeyMapping} object. Handlers in the \textit{server library} module can also update the configuration through the \textit{ClusterService} API. The \textit{ClusterService} receives notifications from the ZooKeeper server when any data was changed updates the \textit{Key-Mapping} object with these updates. The implementation of the \textit{ClusterService} uses the \textit{Curator}\footnote{http://curator.apache.org/} framework, a set of libraries that provide a simpler and more reliable API for accessing ZooKeeper. 
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/KeyMapping}
+    \caption{A diagram of the Key-Mapping stored in ZooKeeper}
+    \label{fig:KeyMapping}
+\end{figure}
 
 The ZooKeeper configuration for the distributed PH-tree was implemented using three main znodes:
 \begin{itemize}
