@@ -2,9 +2,7 @@ package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.pht.PhTree;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,17 +24,17 @@ public class ClusterInsertionBenchmark {
         int depth = 64;
         int nrEntries = 50000;
 
-        insertWithClients(factory, nrEntries);
+        insertWithClients(factory, nrEntries, dim, depth);
     }
 
-    private static void insertWithClients(PHFactory factory, int nrEntries) {
+    private static void insertWithClients(PHFactory factory, int nrEntries, int dim, int depth) {
         int nrClients = 4;
         ExecutorService pool = Executors.newFixedThreadPool(nrClients);
 
         List<Runnable> tasks = new ArrayList<Runnable>();
         try {
             for (int i = 0; i < nrClients; i++) {
-                tasks.add(new InsertionTask(factory, nrEntries));
+                tasks.add(new InsertionTask(factory, nrEntries, dim, depth));
             }
             for (Runnable task : tasks) {
                 pool.execute(task);
@@ -53,10 +51,17 @@ public class ClusterInsertionBenchmark {
         List<long[]> entries = new ArrayList<long[]>();
         Random random = new Random();
         for (int i = 0; i < nrEntries; i++) {
-            entries.add(new long[] { random.nextLong(), random.nextLong() });
+            entries.add(new long[]{
+                gaussianRandomValue(random), gaussianRandomValue(random)
+            });
         }
 
         doInsert(tree, entries);
+    }
+
+    private static long gaussianRandomValue(Random random) {
+        double r = random.nextGaussian();
+        return (long) ((Long.MAX_VALUE - 1) * r);
     }
 
     private static void doInsert(PhTree tree, List<long[]> points) {
@@ -64,6 +69,7 @@ public class ClusterInsertionBenchmark {
         System.out.println("Inserting " + points.size() + " points. " + startTime);
 
         for (long[] point : points) {
+
             tree.insert(point);
         }
         long endTime = System.currentTimeMillis();
@@ -88,8 +94,8 @@ public class ClusterInsertionBenchmark {
         private PhTree tree;
         private int nrEntries;
 
-        public InsertionTask(PHFactory factory, int nrEntries) {
-            this.tree = factory.createPHTreeSet(2, 64);
+        public InsertionTask(PHFactory factory, int nrEntries, int dim, int depth) {
+            this.tree = factory.createPHTreeSet(dim, depth);
             this.nrEntries = nrEntries;
         }
 
