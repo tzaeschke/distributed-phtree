@@ -715,9 +715,136 @@ Another big advantage is that the \textit{PhOperations} reference can be swapped
 \chapter{Evaluation}
 \label{ch:evaluation}
 
-\textit{Meta - will be removed after editing.}
-\textit{Explain how the system should be evaluated, present and explain the benchmarks}
+This chapter contains the performance evaluation of the distributed PH-tree. Section \ref{sec:evalution-distribution} presents the performance of the PH-tree from the distributed point of view, for indexing clusters of different sizes. The concurrent access strategies presented in Chapter \ref{ch:concurrency} are evaluated in Section \ref{sec:evaluation-concurrency}.
 
+\section{Distribution}
+\label{sec:evalution-distribution}
+
+\subsection{Experimental Setup}
+The experiments were executed to measure the insertion response time and throughput for distributed clusters containing different numbers of server hosts. The machines used were provided by the Google Computer Engine\footnote{https://cloud.google.com/compute/} cloud platform. Each server process was ran on a virtual instance containing 2 virtual CPU's and 7.5 GB of RAM memory. The client requests were generated several other virtual instances with the same hardware resources as the server machines.
+
+Both the throughput and the response time were measured on the client machines. In the measurements, we consider that an operation performed on the distributed index starts in the moment when the method corresponding to this operation is called in the client code and ends when the same methods returns. Therefore, the duration of an operation includes the request encoding on the client side, the time needed by the request to travel over the network to the server machine, the processing time on the server machine, the time needed by the server response to travel over the network back to the client and the response decoding. 
+
+The experiments are run in the following manner. First, a client program is started on each client machine through a bash script and each client logs the duration of each request together with the time stamp at which the request was completed. After all clients have finished executing, the log files are gathered from the client machines and merged into a master log. Because not all the clients start executing at precisely the same time, each experiment will be formed of three phases: \textit{the build-up} phase, when some clients perform request and others have not started yet, the \textit{stable request load} phase, when all clients are performing requests and the \textit{cool down} phase, when some clients still perform request and others have finished. These phases are identified by looking at trace of the throughput of the system. The time intervals corresponding to the \textit{build up} and \textit{cool down} phases are removed from the master log and the stats presented are computed only on the data from the \textit{stable request load} phase. 
+
+\subsection{Experimental Results}
+
+The evolution of the throughput and response time of the distributed PH-tree when increasing the number of indexing servers is presented in Figure \ref{fig:exp-distributed}. For this experiment, requests were generated from a number of 6 client virtual machines. On each client machine, a number of 8 threads insert a number of 50000 3-dimensional points. The values for each dimension were sampled from the Gaussian distribution. At the end of each run of this experiment, the PH-tree contains 2.4 million entries. Because the number of entries inserted is the same across all runs, it is expected that setups with more servers will have a higher throughput and a lower response time.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/distributed-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/distributed-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of the throughput and response time of the distributed PH-tree for different sizes of clusters}
+    \label{fig:exp-distributed}
+\end{figure}
+
+Figure \ref{fig:exp-distributed} shows that the throughput of the system increases together with the number of indexing servers. In the case of a single indexing host, the distributed index processes approximately 14500 operations per second. The addition of a second server increase the throughput to approximately 28000 operations per second. Adding the third and the fourth host increases the throughput even further, up to a 37000 operations per second for 4 servers. 
+
+The second thread which can be noticed in Figure \ref{fig:exp-distributed} is that the response time for the insert operation decreases with the addition of extra indexing servers. In the case of a single server, the response time is around 3.4ms for each insert operation. As more server machines are added, the response time decrease to 2.1ms for the two server cluster, 1.5ms for the three server cluster and 1.39ms for the four server cluster.
+
+\section{Concurrency}
+\label{sec:evaluation-concurrency}
+
+\subsection{Experimental setup}
+The aim of the concurrency tests is the evaluate the throughput and response time of each implemented concurrency strategy. Furthermore, it is important to view how each concurrency strategy scales with respect to the number of concurrent threads accessing the PH-tree. Additionally, we identify the impact the concurrency strategies have when the PH-tree is only accessed by a single thread in the same time.
+
+All tests were run on the following hardware: an Intel i5 processor with 4 CPU cores and 16 GB of RAM memory. Because the tree is kept completely in-memory, each individual operation is very fast and attempting to log the duration of each request to either an in-memory structure or a disk file would decrease the throughput of the PH-tree and skew the results. The measurements were performed using a background thread that is woken up at a fixed time interval, for example 1 second and count the number of operations performed since the last measurement.
+
+\subsection{Experimental results}
+
+The first type of tests evaluate the throughput and response time of the concurrency strategies for an increasing number of threads. In each run, an array of 5 million multi-dimensional elements is inserted into an empty PH-tree. The values are sampled from the Gaussian distribution. The array is split equally into non-overlapping intervals between the inserting threads and each thread will insert a certain section of it. As the number of inserted entries is equal across the runs, it is expected that more inserting threads will lead to a higher throughput and a lower response time.
+
+The experiments were performed for multi-dimensional entries with an increasing number of dimensions. Figure \ref{fig:concurrent-1d} shows the response time and throuput for 1 dimensional entries, \ref{fig:concurrent-2d} for 2 dimensional entries, \ref{fig:concurrent-3d} for 3 dimensional entries, \ref{fig:concurrent-6d} for 6 dimensional entries and \ref{fig:concurrent-10d} for 10 dimensional entries. 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-1d-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-1d-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of write throughput and response time for 1 dimensional PH-trees}
+    \label{fig:concurrent-1d}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-2d-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-2d-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of write throughput and response time for 2 dimensional PH-trees}
+    \label{fig:concurrent-2d}
+\end{figure}
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-3d-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-3d-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of write throughput and response time for 3 dimensional PH-trees}
+    \label{fig:concurrent-3d}
+\end{figure}
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-6d-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-6d-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of write throughput and response time for 6 dimensional PH-trees}
+    \label{fig:concurrent-6d}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-10d-tp}
+        \caption{Write throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/concurrent-10d-rt}
+        \caption{Write response time}
+    \end{subfigure}
+    \caption{Evolution of write throughput and response time for 10 dimensional PH-trees}
+    \label{fig:concurrent-10d}
+\end{figure}
+
+For all of the tests, the Copy-On-Write strategy maintains a relatively steady throughput, caused by the fact that this strategy only allows a single writer thread and multiple readers at a time. The contention on the writer lock also causes the response time to increase as the number of writer threads increases.
+
+For up to 6 dimensions, both the Hand-over-Hand and Optimistic locking strategies generally perform better than the Copy-on-Writer strategy, having a higher throughput and a lower response time. For both of these strategies, increasing the number of threads leads to an increase in throughput, up to a point where the lock contention becomes so high that it causes the throughput to drop. Optimistic locking generally outperforms Hand-over-Hand locking, having a better through put and a lower response time in most cases. Additionally, Optimistic locking generates less lock contention and manages to maintain the increase in throughput for a higher number of threads than Hand-over-Hand locking. 
+
+The second type of tests measures the penalty induced by the concurrency strategies when the tree is accessed by a single writer thread. For these experiments, 1 million 3-dimensional entries were inserted into an empty PH-tree by a single thread. The values for each entry were generated uniformly at random. Figure \ref{fig:concurrent-comp} illustrates the time needed for the insertion workload for each concurrency strategy and the no-concurrency version of the tree. For the no-concurrency version, the insertion finished in 1.1 seconds. The version will be used as a baseline for the other measurements. 
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics[scale=1]{images/plots/concurrent-comp}
+    \caption{Time needed by 1 thread to insert 1e6 entries into the PH-tree}
+    \label{fig:concurrent-comp}
+\end{figure}
+
+In the case of the Copy-on-Write version, the process finished in 3.2 second, taking almost three times longer than the baseline. This is due to the fact that each insert copies a full-path from the root of the tree to the modified node. The Hand-over-Hand locking finished took 1.49 seconds, and was approximately 30\% slower than the baseline version. In the case of Hand-over-Hand locking, all nodes in the path from the root to the modified node are locked and copies are created only for the nodes which are updated. This makes the Hand-over-Hand strategy faster than the full Copy-on-Write strategy, but slower than the single-threaded implementation, which does not take any locks or perform any node copies. Finally, the Optimistic locking strategy performs the best from the implemented concurrency strategies, finishing the insertion in 1.3 second. This strategy is faster than the Hand-over-Hand strategy, as only two nodes are locked, as opposed to a full path, but is still slower than the single-threaded implementation.
 \chapter{Conclusions}
 \label{ch:conclusions}
 
