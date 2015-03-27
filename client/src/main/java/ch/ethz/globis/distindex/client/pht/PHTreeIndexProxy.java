@@ -42,8 +42,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     private int depth = -1;
     private int dim = -1;
 
-    private KNNRadiusStrategy knnRadiusStrategy = new RangeKNNRadiusStrategy();
-
     private KNNStrategy<V> knnStrategy = new ZMappingKNNStrategy<>();
 
     public PHTreeIndexProxy(ClusterService<long[]> clusterService) {
@@ -312,10 +310,6 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         } while (versionOutdated);
 
         return combine(responses, mapper);
-    }
-
-    public boolean isRangeEmpty(long[] min, long[] max) {
-        return getRange(min, max).size() == 0;
     }
 
     public String toStringTree() {

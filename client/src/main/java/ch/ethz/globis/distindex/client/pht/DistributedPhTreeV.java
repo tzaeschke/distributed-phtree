@@ -87,11 +87,6 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public boolean isRangeEmpty(long[] min, long[] max) {
-        return proxy.isRangeEmpty(min, max);
-    }
-
-    @Override
     public int getDIM() {
         return proxy.getDim();
     }
