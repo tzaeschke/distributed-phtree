@@ -7,10 +7,7 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
-import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
-import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
-import ch.ethz.globis.disindex.codec.io.TCPClient;
-import ch.ethz.globis.disindex.codec.io.Transport;
+import ch.ethz.globis.disindex.codec.io.*;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.PointIndex;
@@ -63,7 +60,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         FieldEncoderDecoder<V> valueEncoder = new SerializingEncoderDecoder<>();
         RequestEncoder encoder = new ByteRequestEncoder<>(keyEncoder, valueEncoder);
         ResponseDecoder<long[], V> decoder = new ByteResponseDecoder<>(keyEncoder, valueEncoder);
-        Transport transport = new TCPClient();
+        Transport transport = new AsyncTCPClient();
 
         return new ClientRequestDispatcher<>(transport, encoder, decoder);
     }

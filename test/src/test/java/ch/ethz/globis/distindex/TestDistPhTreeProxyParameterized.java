@@ -274,6 +274,34 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
     }
 
     @Test
+    public void testGetRangeMulti() throws Exception {
+        phTree.create(2, 64);
+
+        int nrEntries = 200;
+        Random random = new Random();
+
+        long[] key;
+        String value;
+        IndexEntryList<long[], String> entries = new IndexEntryList<>();
+
+        for (int i = 0; i < nrEntries; i++) {
+            key = new long[]{random.nextLong(), random.nextLong()};
+            value = new BigInteger(50, random).toString();
+            phTree.put(key, value);
+            entries.add(key, value);
+        }
+
+        long[] start = { Long.MIN_VALUE, Long.MIN_VALUE};
+        long[] end = {Long.MAX_VALUE, Long.MAX_VALUE};
+
+        IndexEntryList<long[], String> results;
+        for (int i = 0; i < 10000; i++) {
+            results = phTree.getRange(start, end);
+            assertEquals(nrEntries, results.size());
+        }
+    }
+
+    @Test
     public void testRandomKNNBug() {
         phTree.create(2, 64);
 
