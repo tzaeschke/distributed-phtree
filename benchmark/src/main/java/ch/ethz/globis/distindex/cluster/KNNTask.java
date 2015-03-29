@@ -10,12 +10,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class InsertReadTask implements Runnable {
-
+public class KNNTask implements Runnable {
     private PhTree tree;
     private int nrEntries;
 
-    public InsertReadTask(PHFactory factory, int nrEntries, int dim, int depth) {
+    public KNNTask(PHFactory factory, int nrEntries, int dim, int depth) {
         this.tree = factory.createPHTreeSet(dim, depth);
         this.nrEntries = nrEntries;
     }
@@ -42,20 +41,19 @@ public class InsertReadTask implements Runnable {
         return (long) ((Long.MAX_VALUE - 1) * r);
     }
 
-    private boolean doWork(PhTree tree, List<long[]> points) {
+    private void doWork(PhTree tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
-        boolean res = true;
+        int k = 100;
+        List<long[]> neighbours;
+        for (long[] point : points) {
+            tree.insert(point);
+        }
         for (long[] point : points) {
             start = System.currentTimeMillis();
-            tree.insert(point);
+            neighbours = tree.nearestNeighbour(k, point);
             end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,insert,"+ (end - start));
-            start = System.currentTimeMillis();
-            res &= tree.contains(point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,get,"+ (end - start));
+            System.out.println(date.format(new Date()) + ",end,knn,"+ (end - start) + "," + neighbours.size());
         }
-        return res;
     }
 }

@@ -63,7 +63,7 @@ public class RangeTask implements Runnable{
             start = System.currentTimeMillis();
             List<Object> objects = tree.queryAll(keyStart, keyEnd);
             end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,range,"+ (end - start) + objects.size());
+            System.out.println(date.format(new Date()) + ",end,range,"+ (end - start) + "," + objects.size());
         }
     }
 }
