@@ -2,18 +2,14 @@ package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
-import ch.ethz.globis.pht.PhTree;
-import org.lwjgl.Sys;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class ClusterInsertionBenchmark {
+public class ClusterRangeBenchmark {
 
     private static String ZK_HOST = "localhost";
     private static int ZK_PORT = 2181;
@@ -28,17 +24,17 @@ public class ClusterInsertionBenchmark {
         int depth = 64;
         int nrEntries = NR_ENTRIES;
 
-        insertWithClients(factory, nrEntries, dim, depth);
+        workloadWithClients(factory, nrEntries, dim, depth);
     }
 
-    private static void insertWithClients(PHFactory factory, int nrEntries, int dim, int depth) {
+    private static void workloadWithClients(PHFactory factory, int nrEntries, int dim, int depth) {
         int nrClients = NR_THREADS;
         ExecutorService pool = Executors.newFixedThreadPool(nrClients);
 
         List<Runnable> tasks = new ArrayList<Runnable>();
         try {
             for (int i = 0; i < nrClients; i++) {
-                tasks.add(new InsertionTask(factory, nrEntries, dim, depth));
+                tasks.add(new RangeTask(factory, nrEntries, dim, depth));
             }
             for (Runnable task : tasks) {
                 pool.execute(task);
