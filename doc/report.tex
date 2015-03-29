@@ -845,6 +845,12 @@ The second type of tests measures the penalty induced by the concurrency strateg
 \end{figure}
 
 In the case of the Copy-on-Write version, the process finished in 3.2 second, taking almost three times longer than the baseline. This is due to the fact that each insert copies a full-path from the root of the tree to the modified node. The Hand-over-Hand locking finished took 1.49 seconds, and was approximately 30\% slower than the baseline version. In the case of Hand-over-Hand locking, all nodes in the path from the root to the modified node are locked and copies are created only for the nodes which are updated. This makes the Hand-over-Hand strategy faster than the full Copy-on-Write strategy, but slower than the single-threaded implementation, which does not take any locks or perform any node copies. Finally, the Optimistic locking strategy performs the best from the implemented concurrency strategies, finishing the insertion in 1.3 second. This strategy is faster than the Hand-over-Hand strategy, as only two nodes are locked, as opposed to a full path, but is still slower than the single-threaded implementation.
+
+\section{Result}
+\label{sec:evaluation-results}
+
+The distributed experiments showed that the distributed PH-tree scales with an increasing number of server machines. In all experiments of this type, the addition of server machines to the cluster increased the overall throughput of the system and decreased the response time for each individual request. For a fixed size workload, the throughput increase and response time decrease is slightly smaller with each additional server. This effect is due to the fact that test environment contains a limited number of clients, which wait for a response from the server before creating the next request. 
+
 \chapter{Conclusions}
 \label{ch:conclusions}
 
@@ -853,7 +859,7 @@ In the case of the Copy-on-Write version, the process finished in 3.2 second, ta
 
 This work presents a complete solution from implementing a distributed and parallel multi-dimensional index, by presenting both a distribution architecture and operation parallelization solutions for individual machines. The main contributions are the following:
 
-The distribution architecture partitions the multi-dimensional space in a manner that allows fast point operation and efficient range and nearest neighbour queries. The proposed balancing algorithm ensures that all hosts will eventually hold a comparable number of entries, even in the case of very skewed input distributions. The presented distribution solution can be easily adapted for other types of index keys, as long as the key domain can be mapped to 1 dimensional line, allowing the constructing of efficient and scalable range-queryable, distributed key-values stores.
+The distribution architecture partitions the multi-dim"Cele mai importante două zile din viața ta sunt ziua în care te-ai născut și cea în care afli de ce."ensional space in a manner that allows fast point operation and efficient range and nearest neighbour queries. The proposed balancing algorithm ensures that all hosts will eventually hold a comparable number of entries, even in the case of very skewed input distributions. The presented distribution solution can be easily adapted for other types of index keys, as long as the key domain can be mapped to 1 dimensional line, allowing the constructing of efficient and scalable range-queryable, distributed key-values stores.
 
 The in-memory PH-tree was updated to support concurrent access according to two consistency paradigms. The Copy-On-Write approach offers full consistency guarantees, providing snapshot semantics to queries and isolating readers from any further modifications to the tree. For situations where full consistency is not needed, the optimistic locking approach offers relaxed consistency semantics and provides improved write throughput by allowing concurrent write operations. Furthermore, none of presented approaches require the readers to acquire any locks and thus add no overhead to the execution of the read operations. 
 \section{Future work}

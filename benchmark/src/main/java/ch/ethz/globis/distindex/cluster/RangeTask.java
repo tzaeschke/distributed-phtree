@@ -40,7 +40,7 @@ public class RangeTask implements Runnable{
 
     private long gaussianRandomValue(Random random) {
         double r = random.nextGaussian();
-        return (long) ((Long.MAX_VALUE - 1) * r);
+        return (long) ((Short.MAX_VALUE * 128) * r);
     }
 
     private void doInsert(PhTree tree, List<long[]> points) {
@@ -55,9 +55,9 @@ public class RangeTask implements Runnable{
         long[] keyEnd;
         Random r = new Random();
 
-        for (int i = 0; i < nrEntries; i++) {
-            offsetA = r.nextInt(Integer.MAX_VALUE - 100);
-            offsetB = r.nextInt(Integer.MAX_VALUE - 100);
+        for (int i = 0; i < nrEntries / 5; i++) {
+            offsetA = r.nextInt(Short.MAX_VALUE * 3);
+            offsetB = r.nextInt(Short.MAX_VALUE * 3);
             keyStart = new long[] {-offsetA, -offsetA};
             keyEnd = new long[] {offsetB, offsetB};
             start = System.nanoTime();

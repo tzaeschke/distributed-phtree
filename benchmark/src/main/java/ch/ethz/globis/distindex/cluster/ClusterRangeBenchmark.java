@@ -14,7 +14,7 @@ public class ClusterRangeBenchmark {
     private static String ZK_HOST = "localhost";
     private static int ZK_PORT = 2181;
     private static int NR_ENTRIES = 50000;
-    private static int NR_THREADS = 4;
+    private static int NR_THREADS = 8;
 
     public static void main(String[] args) {
         extractArguments(args);

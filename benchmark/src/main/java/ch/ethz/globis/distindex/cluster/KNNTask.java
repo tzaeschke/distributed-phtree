@@ -38,18 +38,20 @@ public class KNNTask implements Runnable {
 
     private long gaussianRandomValue(Random random) {
         double r = random.nextGaussian();
-        return (long) ((Long.MAX_VALUE - 1) * r);
+        return (long) ((Short.MAX_VALUE - 1) * r);
     }
 
     private void doWork(PhTree tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
-        int k = 100;
+        int k = 50;
         List<long[]> neighbours;
         for (long[] point : points) {
             tree.insert(point);
         }
-        for (long[] point : points) {
+        long[] point;
+        for (int i = 0; i < nrEntries / 10; i++) {
+            point = points.get(i);
             start = System.nanoTime();
             neighbours = tree.nearestNeighbour(k, point);
             end = System.nanoTime();

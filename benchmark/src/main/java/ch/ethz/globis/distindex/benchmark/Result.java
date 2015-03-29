@@ -31,6 +31,11 @@ public class Result {
         return avgResponseTime;
     }
 
+    public double getThroughput() {
+        double duration = (end - start) / 1000.0;
+        return nrOperations / duration;
+    }
+
     @Override
     public String toString() {
         double duration = (end - start) / 1000.0;

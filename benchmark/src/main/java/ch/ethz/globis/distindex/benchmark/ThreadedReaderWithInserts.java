@@ -40,9 +40,9 @@ public class ThreadedReaderWithInserts implements Callable<Result> {
             magic += (o == null) ? magic + 1: magic;
         }
 
-        averageResponseTime /= (endIndex - startIndex);
         long end = System.nanoTime();
         int nrEntries = endIndex - startIndex;
+        averageResponseTime /= nrEntries;
         start /= 1000000.0;
         end /= 1000000.0;
         return new Result(start, end, nrEntries, averageResponseTime);

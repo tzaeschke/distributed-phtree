@@ -38,9 +38,9 @@ public class ThreadedReader implements Callable<Result> {
             magic += (o == null) ? 0 : 1;
         }
 
-        averageResponseTime /= (endIndex - startIndex);
         long end = System.nanoTime();
         int nrEntries = endIndex - startIndex;
+        averageResponseTime /= nrEntries;
         start /= 1000000.0;
         end /= 1000000.0;
         return new Result(start, end, nrEntries, averageResponseTime);

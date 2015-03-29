@@ -4,6 +4,7 @@ import ch.ethz.globis.pht.v5.PhOperationsCOW;
 import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
 import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
 import ch.ethz.globis.pht.v5.PhTree5;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,18 +172,51 @@ public class InsertionBenchmark {
 
             String pattern = "%s\t%30s\t%30s\t%30s";
             System.out.println(String.format(pattern, "Threads", "Copy-on-Write", "Hand-over-Hand", "Optimistic locking"));
-            for (int rep = 0; rep < reps; rep++) {
-                for (int i = 1; i <= maxThreads; i++) {
+            Result result;
+            String dataCow, dataHoH, dataOL;
+            double tp = 0;
+            double avgResponseTime = 0;
+            String dataPattern = "%10.5f\t%10.5f";
+            for (int i = 1; i <= maxThreads; i++) {
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkCOWMulti(i, testEntries, dim, depth);
+
+                    result = benchmarkCOWMulti(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataCow = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkHoHMulti(i, testEntries, dim, depth);
+
+                    result = benchmarkHoHMulti(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataHoH = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkOLMulti(i, testEntries, dim, depth);
 
-                    line = String.format(pattern, i, benchmarkCOWMulti(i, entries, dim, depth),
-                            benchmarkHoHMulti(i, entries, dim, depth),
-                            benchmarkOLMulti(i, entries, dim, depth));
-
-                    System.out.println(line);
+                    result = benchmarkOLMulti(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
                 }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataOL = String.format(dataPattern, tp, avgResponseTime);
+                line = String.format(pattern, i, dataCow, dataHoH, dataOL);
+                System.out.println(line);
             }
         }
 
@@ -196,18 +230,51 @@ public class InsertionBenchmark {
 
             String pattern = "%s\t%30s\t%30s\t%30s";
             System.out.println(String.format(pattern, "Threads", "Copy-on-Write", "Hand-over-Hand", "Optimistic locking"));
-            for (int rep = 0; rep < reps; rep++) {
-                for (int i = 1; i <= maxThreads; i++) {
+            Result result;
+            String dataCow, dataHoH, dataOL;
+            double tp = 0;
+            double avgResponseTime = 0;
+            String dataPattern = "%10.5f\t%10.5f";
+            for (int i = 1; i <= maxThreads; i++) {
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkCOWMultiRead(i, testEntries, dim, depth);
+
+                    result = benchmarkCOWMultiRead(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataCow = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkHoHMultiRead(i, testEntries, dim, depth);
+
+                    result = benchmarkHoHMultiRead(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataHoH = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkOLMultiRead(i, testEntries, dim, depth);
 
-                    line = String.format(pattern, i, benchmarkCOWMultiRead(i, entries, dim, depth),
-                            benchmarkHoHMultiRead(i, entries, dim, depth),
-                            benchmarkOLMultiRead(i, entries, dim, depth));
-
-                    System.out.println(line);
+                    result = benchmarkOLMultiRead(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
                 }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataOL = String.format(dataPattern, tp, avgResponseTime);
+                line = String.format(pattern, i, dataCow, dataHoH, dataOL);
+                System.out.println(line);
             }
         }
 
@@ -221,18 +288,51 @@ public class InsertionBenchmark {
 
             String pattern = "%s\t%30s\t%30s\t%30s";
             System.out.println(String.format(pattern, "Threads", "Copy-on-Write", "Hand-over-Hand", "Optimistic locking"));
-            for (int rep = 0; rep < reps; rep++) {
-                for (int i = 1; i <= maxThreads; i++) {
+            Result result;
+            String dataCow, dataHoH, dataOL;
+            double tp = 0;
+            double avgResponseTime = 0;
+            String dataPattern = "%10.5f\t%10.5f";
+            for (int i = 1; i <= maxThreads; i++) {
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkCOWMultiReadWrite(i, testEntries, dim, depth);
+
+                    result = benchmarkCOWMultiReadWrite(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataCow = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkHoHMultiReadWrite(i, testEntries, dim, depth);
+
+                    result = benchmarkHoHMultiReadWrite(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
+                }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataHoH = String.format(dataPattern, tp, avgResponseTime);
+
+                tp = 0;
+                avgResponseTime = 0;
+                for (int rep = 0; rep < reps; rep++) {
                     benchmarkOLMultiReadWrite(i, testEntries, dim, depth);
 
-                    line = String.format(pattern, i, benchmarkCOWMultiReadWrite(i, entries, dim, depth),
-                            benchmarkHoHMultiReadWrite(i, entries, dim, depth),
-                            benchmarkOLMultiReadWrite(i, entries, dim, depth));
-
-                    System.out.println(line);
+                    result = benchmarkOLMultiReadWrite(i, entries, dim, depth);
+                    tp += result.getThroughput();
+                    avgResponseTime += result.getAvgResponseTime();
                 }
+                avgResponseTime /= reps;
+                tp /= reps;
+                dataOL = String.format(dataPattern, tp, avgResponseTime);
+                line = String.format(pattern, i, dataCow, dataHoH, dataOL);
+                System.out.println(line);
             }
         }
     }
