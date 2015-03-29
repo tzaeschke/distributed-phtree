@@ -2,10 +2,16 @@ package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.pht.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ZKPHFactory implements PHFactory {
 
     private String zkHost;
     private int zkPort;
+
+    private List<PHTreeIndexProxy> proxies = new ArrayList<>();
 
     public ZKPHFactory(String zkHost, int zkPort) {
         this.zkHost = zkHost;
@@ -15,6 +21,7 @@ public class ZKPHFactory implements PHFactory {
     @Override
     public <V> PHTreeIndexProxy<V> createProxy(int dim, int depth) {
         PHTreeIndexProxy<V> tree =  new PHTreeIndexProxy<>(zkHost, zkPort);
+        proxies.add(tree);
         tree.create(dim, depth);
         return tree;
     }
@@ -22,6 +29,7 @@ public class ZKPHFactory implements PHFactory {
     @Override
     public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
         PHTreeIndexProxy<V> proxy = new PHTreeIndexProxy<>(zkHost, zkPort);
+        proxies.add(proxy);
         proxy.create(dim, depth);
         return new DistributedPhTreeV<>(proxy);
     }
@@ -45,5 +53,16 @@ public class ZKPHFactory implements PHFactory {
         PhTree backingTree = createPHTreeSet(2 * dim, depth);
 
         return new PhTreeRangeD(backingTree);
+    }
+
+    @Override
+    public void close() {
+        for (PHTreeIndexProxy proxy : proxies) {
+            try {
+                proxy.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

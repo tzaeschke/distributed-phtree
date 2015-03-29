@@ -164,13 +164,7 @@ public class AsyncTCPClient implements Transport{
 
     @Override
     public void close() throws IOException {
-        pool.shutdown();
-        try {
-            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            LOG.error("Failed to shutdown AsyncTCPClient internal thread pool", pool);
-        }
-
+        pool.shutdownNow();
         for (Socket socket : connections.values()) {
             socket.close();
         }

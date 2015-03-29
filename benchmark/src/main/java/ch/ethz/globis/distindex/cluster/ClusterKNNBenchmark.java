@@ -25,6 +25,7 @@ public class ClusterKNNBenchmark {
         int nrEntries = NR_ENTRIES;
 
         insertWithClients(factory, nrEntries, dim, depth);
+        factory.close();
     }
 
     private static void insertWithClients(PHFactory factory, int nrEntries, int dim, int depth) {

@@ -47,14 +47,14 @@ public class InsertReadTask implements Runnable {
         long start, end;
         boolean res = true;
         for (long[] point : points) {
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             tree.insert(point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,insert,"+ (end - start));
-            start = System.currentTimeMillis();
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,insert,"+ ((end - start) / 1000000.0));
+            start = System.nanoTime();
             res &= tree.contains(point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,get,"+ (end - start));
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,get,"+ ((end - start) / 1000000.0));
         }
         return res;
     }

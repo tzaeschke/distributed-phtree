@@ -22,18 +22,20 @@ public class ThreadedInserter implements Callable<Result> {
     @Override
     public Result call() throws Exception {
         double averageResponseTime = 0;
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         long s, e;
         for (int i = startIndex; i < endIndex; i++) {
-            s = System.currentTimeMillis();
+            s = System.nanoTime();
             tree.put(entries.get(i), null);
-            e = System.currentTimeMillis();
-            averageResponseTime += e - s;
+            e = System.nanoTime();
+            averageResponseTime += (e - s) / 1000000.0;
         }
-        averageResponseTime /= endIndex - startIndex;
-        long end = System.currentTimeMillis();
+        averageResponseTime /= (endIndex - startIndex);
+        long end = System.nanoTime();
         int nrEntries = endIndex - startIndex;
+        start /= 1000000.0;
+        end /= 1000000.0;
         return new Result(start, end, nrEntries, averageResponseTime);
     }
 }

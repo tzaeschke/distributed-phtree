@@ -24,23 +24,25 @@ public class ThreadedReader implements Callable<Result> {
     @Override
     public Result call() throws Exception {
         double averageResponseTime = 0;
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
 
         long s, e;
 
         for (int i = startIndex; i < endIndex; i++) {
-            s = System.currentTimeMillis();
+            s = System.nanoTime();
             Object o = tree.get(entries.get(i));
-            e = System.currentTimeMillis();
-            averageResponseTime += e - s;
+            e = System.nanoTime();
+            averageResponseTime += (e - s) / 1000000.0;
 
             //attempt to prevent compiler from optimizing this
             magic += (o == null) ? 0 : 1;
         }
 
-        averageResponseTime /= endIndex - startIndex;
-        long end = System.currentTimeMillis();
+        averageResponseTime /= (endIndex - startIndex);
+        long end = System.nanoTime();
         int nrEntries = endIndex - startIndex;
+        start /= 1000000.0;
+        end /= 1000000.0;
         return new Result(start, end, nrEntries, averageResponseTime);
     }
 }

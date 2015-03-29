@@ -50,10 +50,10 @@ public class KNNTask implements Runnable {
             tree.insert(point);
         }
         for (long[] point : points) {
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             neighbours = tree.nearestNeighbour(k, point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,knn,"+ (end - start) + "," + neighbours.size());
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,knn,"+ ((end - start) / 1000000.0) + "," + neighbours.size());
         }
     }
 }

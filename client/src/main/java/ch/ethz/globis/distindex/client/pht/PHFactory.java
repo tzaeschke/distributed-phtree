@@ -16,4 +16,6 @@ public interface PHFactory {
     PhTree createPHTreeSet(int dim, int depth);
 
     PhTreeRangeD createPHTreeRangeSet(int dim, int depth);
+
+    public void close();
 }

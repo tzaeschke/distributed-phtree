@@ -25,6 +25,7 @@ public class ClusterRangeBenchmark {
         int nrEntries = NR_ENTRIES;
 
         workloadWithClients(factory, nrEntries, dim, depth);
+        factory.close();
     }
 
     private static void workloadWithClients(PHFactory factory, int nrEntries, int dim, int depth) {

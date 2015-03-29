@@ -60,10 +60,10 @@ public class RangeTask implements Runnable{
             offsetB = r.nextInt(Integer.MAX_VALUE - 100);
             keyStart = new long[] {-offsetA, -offsetA};
             keyEnd = new long[] {offsetB, offsetB};
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             List<Object> objects = tree.queryAll(keyStart, keyEnd);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,range,"+ (end - start) + "," + objects.size());
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,range,"+ ((end - start) / 1000000.0) + "," + objects.size());
         }
     }
 }

@@ -17,7 +17,7 @@ public class ClusterInsertionBenchmark {
 
     private static String ZK_HOST = "localhost";
     private static int ZK_PORT = 2181;
-    private static int NR_ENTRIES = 50000;
+    private static int NR_ENTRIES = 500;
     private static int NR_THREADS = 4;
 
     public static void main(String[] args) {
@@ -29,6 +29,7 @@ public class ClusterInsertionBenchmark {
         int nrEntries = NR_ENTRIES;
 
         insertWithClients(factory, nrEntries, dim, depth);
+        factory.close();
     }
 
     private static void insertWithClients(PHFactory factory, int nrEntries, int dim, int depth) {

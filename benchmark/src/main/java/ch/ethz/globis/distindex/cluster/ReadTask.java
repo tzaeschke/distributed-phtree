@@ -49,10 +49,10 @@ public class ReadTask implements Runnable {
         boolean res = true;
         for (long[] point : points) {
             tree.insert(point);
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             res &= tree.contains(point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,get,"+ (end - start));
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,get,"+ ((end - start) / 1000000.0));
         }
     }
 }

@@ -47,10 +47,10 @@ public class InsertionTask implements Runnable {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
         for (long[] point : points) {
-            start = System.currentTimeMillis();
+            start = System.nanoTime();
             tree.insert(point);
-            end = System.currentTimeMillis();
-            System.out.println(date.format(new Date()) + ",end,insert,"+ (end - start));
+            end = System.nanoTime();
+            System.out.println(date.format(new Date()) + ",end,insert,"+ ((end - start) / 1000000.0));
         }
     }
 }
