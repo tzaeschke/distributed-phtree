@@ -55,7 +55,7 @@ public class RangeTask implements Runnable{
         long[] keyEnd;
         Random r = new Random();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < nrEntries; i++) {
             offsetA = r.nextInt(Integer.MAX_VALUE - 100);
             offsetB = r.nextInt(Integer.MAX_VALUE - 100);
             keyStart = new long[] {-offsetA, -offsetA};
