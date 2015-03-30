@@ -165,7 +165,6 @@ public class IndexProxy<K, V> implements Index<K, V>, Closeable, AutoCloseable {
         do {
             KeyMapping<K> keyMapping = clusterService.getMapping();
             List<String> hostIds = keyMapping.get(start, end);
-
             GetRangeRequest<K> request = requests.newGetRange(start, end);
             responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
             versionOutdated = check(request, responses);

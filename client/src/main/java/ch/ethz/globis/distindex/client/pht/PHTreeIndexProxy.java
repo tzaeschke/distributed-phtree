@@ -21,6 +21,7 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
+import org.lwjgl.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
             KeyMapping<long[]> keyMapping = clusterService.getMapping();
             List<String> hostIds = keyMapping.get(start, end);
+
+            //System.out.println("KNN hit " + hostIds.size() + " hosts");
             hostIds.remove(initialHost);
 
             if (hostIds.size() == 0) {
@@ -307,6 +310,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
                     requests.newGetRangeFilterMaper(min, max, maxResults, filter, mapper);
             KeyMapping<long[]> mapping = clusterService.getMapping();
             List<String> hostIds = mapping.get(min, max);
+            //System.out.println("Range query hit " + hostIds.size() + " hosts.");
             responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
             versionOutdated = check(request, responses);
         } while (versionOutdated);

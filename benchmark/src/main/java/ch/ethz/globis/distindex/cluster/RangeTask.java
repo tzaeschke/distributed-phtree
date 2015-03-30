@@ -28,7 +28,8 @@ public class RangeTask implements Runnable{
 
     private void insert(PhTree tree, int nrEntries) {
         List<long[]> entries = new ArrayList<long[]>();
-        Random random = new Random();
+
+        Random random = new Random(42);
         for (int i = 0; i < nrEntries; i++) {
             entries.add(new long[]{
                     gaussianRandomValue(random), gaussianRandomValue(random)
@@ -55,11 +56,25 @@ public class RangeTask implements Runnable{
         long[] keyEnd;
         Random r = new Random();
 
-        for (int i = 0; i < nrEntries / 5; i++) {
-            offsetA = r.nextInt(Short.MAX_VALUE * 3);
+        /*
+         *  offsetA = r.nextInt(Short.MAX_VALUE * 3);
             offsetB = r.nextInt(Short.MAX_VALUE * 3);
-            keyStart = new long[] {-offsetA, -offsetA};
-            keyEnd = new long[] {offsetB, offsetB};
+
+            and
+
+            long[] key = {0, 0};
+
+            for each query creates queries that always hit all the hosts
+         */
+        long[] key = {0, 0};
+        for (int i = 0; i < nrEntries / 5; i++) {
+            offsetA = r.nextInt(Short.MAX_VALUE * 32);
+            offsetB = r.nextInt(Short.MAX_VALUE * 32);
+
+            key = points.get(i);
+            keyStart = new long[] {key[0] - offsetA, key[1] - offsetA};
+            keyEnd = new long[] { key[0] + offsetB, key[1] + offsetB};
+
             start = System.nanoTime();
             List<Object> objects = tree.queryAll(keyStart, keyEnd);
             end = System.nanoTime();

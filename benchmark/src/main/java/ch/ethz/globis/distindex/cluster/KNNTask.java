@@ -44,7 +44,7 @@ public class KNNTask implements Runnable {
     private void doWork(PhTree tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
-        int k = 50;
+        int k = 100;
         List<long[]> neighbours;
         for (long[] point : points) {
             tree.insert(point);
