@@ -9,6 +9,7 @@ import ch.ethz.globis.pht.PhTreeRangeV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -71,11 +72,15 @@ public class ZMapping implements KeyMapping<long[]>{
     public void add(List<String> hostIds) {
         checkConsistency();
 
-        String[] hosts = hostIds.toArray(new String[hostIds.size()]);
-        BST bst = BST.fromArray(hosts);
+//        String[] hosts = hostIds.toArray(new String[hostIds.size()]);
+//        BST bst = BST.fromArray(hosts);
+        //Map<String, String> map = bst.asMap();
+        this.hosts.addAll(hostIds);
+        //hostIds.addAll(this.hosts);
 
-        updateRegions(bst.asMap());
-        this.hosts = bst.leaves();
+        Map<String, String> map = constructMappingEqual(hosts);
+        updateRegions(map);
+        //this.hosts = hostIds;
 
         updateTree();
     }
@@ -93,13 +98,14 @@ public class ZMapping implements KeyMapping<long[]>{
         checkConsistency();
 
         //add the nest hostId to the mapping
-        BST bst = constructNewMapping(hostId);
-
-        Map<String, String> mapping = bst.asMap();
-        this.hosts = bst.leaves();
-
+//        BST bst = constructNewMapping(hostId);
+//
+//        Map<String, String> mapping = bst.asMap();
+        //this.hosts = bst.leaves();
+        this.hosts.add(hostId);
+        Map<String, String> map = constructMappingEqual(hosts);
         //reconstruct the set of regions mapped to each host
-        updateRegions(mapping);
+        updateRegions(map);
         updateTree();
     }
 
@@ -435,6 +441,48 @@ public class ZMapping implements KeyMapping<long[]>{
             str += Arrays.toString(endKeys.get(host));
         }
         str += "\n";
+        return str;
+    }
+
+    public Map<String, String> constructMappingEqual(List<String> hosts) {
+        Map<String, String> map = new LinkedHashMap<>();
+        if (hosts == null || hosts.size() == 0) {
+            return map;
+        }
+        String endCode = "";
+
+        int nrBitsZValue = dim * depth;
+        for (int i = 0; i < nrBitsZValue; i++) {
+            endCode += "1";
+        }
+        BigInteger end = new BigInteger(endCode, 2);
+        end = end.add(BigInteger.ONE);
+        int nrHosts = hosts.size();
+        BigInteger displacement = end.divide(new BigInteger(Integer.toString(nrHosts)));
+        BigInteger lastValue = BigInteger.ZERO;
+        for (int i = 0; i < nrHosts; i++) {
+            if (i == 0) {
+                lastValue = displacement.subtract(BigInteger.ONE);
+            } else if (i == nrHosts - 1) {
+                lastValue = end.subtract(BigInteger.ONE);
+            } else {
+                lastValue = lastValue.add(displacement);
+            }
+            String bitString = toBinaryString(lastValue, nrBitsZValue);
+            map.put(bitString, hosts.get(i));
+        }
+        return map;
+    }
+
+    public String toBinaryString(BigInteger val, int bits) {
+        String str = "";
+        for (int bit = bits - 1; bit >= 0; bit--) {
+            if (val.testBit(bit)) {
+                str += "1";
+            } else {
+                str += "0";
+            }
+        }
         return str;
     }
 

@@ -5,10 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -191,5 +188,14 @@ public class ZMappingTest {
         String hostId = mapping.get(key);
         assertNotNull(hostId);
         assertEquals(expectedHostId, hostId);
+    }
+
+    @Test
+    public void testEqualIntervalsCreation() {
+        ZMapping mapping = new ZMapping(2, 3);
+        List<String> hosts = new ArrayList<>();
+        hosts.add("host1");
+        Map<String, String> endKeys = mapping.constructMappingEqual(hosts);
+        System.out.println(endKeys);
     }
 }
