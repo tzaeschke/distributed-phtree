@@ -27,7 +27,7 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
         if (candidates.size() < k) {
             neighbours = iterativeExpansion(keyMapping, key, k, indexProxy);
         } else {
-            neighbours = radiusSearch(key, k, candidates, indexProxy);
+            neighbours = radiusSearch(keyHostId, key, k, candidates, indexProxy);
         }
         LOG.debug("KNN request ended for key={} and k={}", Arrays.toString(key), k);
         return neighbours;
@@ -47,8 +47,8 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
         return indexProxy.extractKeys(response);
     }
 
-    private List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
-        return radiusStrategy.radiusSearch(key, k, candidates, indexProxy);
+    private List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+        return radiusStrategy.radiusSearch(initialHost, key, k, candidates, indexProxy);
     }
 
     private List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {

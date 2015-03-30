@@ -16,13 +16,18 @@ import java.util.List;
 public class RangeFilteredKNNRadiusStrategy implements KNNRadiusStrategy {
 
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    public <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);
         long[] end = MultidimUtil.transpose(key, distance);
         PhDistance measure = new PhDistanceD();
         double dist = measure.dist(key, farthestNeighbor);
-        return MultidimUtil.nearestNeighbours(key, k, indexProxy.combineKeys(indexProxy.getRange(start, end, dist)));
+
+        List<long[]> extendedCandidates = indexProxy.getRange(initialHost, start, end, dist);
+
+        extendedCandidates.addAll(candidates);
+
+        return MultidimUtil.nearestNeighbours(key, k, extendedCandidates);
     }
 }

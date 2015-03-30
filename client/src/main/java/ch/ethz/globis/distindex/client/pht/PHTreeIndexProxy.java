@@ -74,6 +74,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return super.create(options);
     }
 
+
     /**
      * Perform a range query and then filter using a distance.
      *
@@ -82,7 +83,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param distance
      * @return
      */
-    public IndexEntryList<long[], V> getRange(long[] start, long[] end, double distance) {
+    public List<long[]> getRange(String initialHost, long[] start, long[] end, double distance) {
         boolean versionOutdated;
         List<ResultResponse> responses;
         do {
@@ -91,7 +92,11 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
 
             KeyMapping<long[]> keyMapping = clusterService.getMapping();
             List<String> hostIds = keyMapping.get(start, end);
+            hostIds.remove(initialHost);
 
+            if (hostIds.size() == 0) {
+                return new ArrayList<>();
+            }
             GetRangeRequest<long[]> request = requests.newGetRange(start, end, distance);
             responses = requestDispatcher.send(hostIds, request, ResultResponse.class);
             versionOutdated = check(request, responses);
@@ -99,7 +104,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
                     Arrays.toString(start) + "-" + Arrays.toString(end), distance);
         } while (versionOutdated);
 
-        return combine(responses);
+        return combineKeys(responses);
     }
 
     /**

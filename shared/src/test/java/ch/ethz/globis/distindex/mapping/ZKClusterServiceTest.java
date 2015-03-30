@@ -1,6 +1,5 @@
 package ch.ethz.globis.distindex.mapping;
 
-import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import org.apache.curator.test.TestingServer;

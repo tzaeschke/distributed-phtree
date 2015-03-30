@@ -1,11 +1,9 @@
 package ch.ethz.globis.distindex.client;
 
 import ch.ethz.globis.distindex.client.pht.*;
-import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
-
+import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
-import ch.ethz.globis.distindex.orchestration.BSTMapClusterService;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import org.apache.curator.test.TestingServer;

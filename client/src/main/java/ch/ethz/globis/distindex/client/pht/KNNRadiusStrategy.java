@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface KNNRadiusStrategy {
 
-    <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates,
+    <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates,
                                   PHTreeIndexProxy<V> indexProxy);
 }

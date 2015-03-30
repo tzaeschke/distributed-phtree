@@ -24,12 +24,14 @@ public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
      */
 
     @Override
-    public <V> List<long[]> radiusSearch(long[] key, int k, List<long[]> candidates,
+    public <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates,
                                          PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);
         long[] end = MultidimUtil.transpose(key, distance);
+
+
         return MultidimUtil.nearestNeighbours(key, k, indexProxy.combineKeys(indexProxy.getRange(start, end)));
     }
 }
