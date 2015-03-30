@@ -741,6 +741,30 @@ The evolution of the throughput and response time of the distributed PH-tree whe
         \includegraphics[scale=0.5]{images/plots/distributed-rt}
         \caption{Write response time}
     \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read-distributed-tp}
+        \caption{Read throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read-distributed-rt}
+        \caption{Read response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/range-distributed-tp}
+        \caption{Range query throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read-distributed-rt}
+        \caption{Range query response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/knn-distributed-tp}
+        \caption{KNN with k = 50 query throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/knn-distributed-rt}
+        \caption{KNN with k = 50 response time}
+    \end{subfigure}
     \caption{Evolution of the throughput and response time of the distributed PH-tree for different sizes of clusters}
     \label{fig:exp-distributed}
 \end{figure}
@@ -759,82 +783,64 @@ All tests were run on the following hardware: an Intel i5 processor with 4 CPU c
 
 \subsection{Experimental results}
 
+\subsubsection{Write performance}
+
 The first type of tests evaluate the throughput and response time of the concurrency strategies for an increasing number of threads. In each run, an array of 5 million multi-dimensional elements is inserted into an empty PH-tree. The values are sampled from the Gaussian distribution. The array is split equally into non-overlapping intervals between the inserting threads and each thread will insert a certain section of it. As the number of inserted entries is equal across the runs, it is expected that more inserting threads will lead to a higher throughput and a lower response time.
 
-The experiments were performed for multi-dimensional entries with an increasing number of dimensions. Figure \ref{fig:concurrent-1d} shows the response time and throuput for 1 dimensional entries, \ref{fig:concurrent-2d} for 2 dimensional entries, \ref{fig:concurrent-3d} for 3 dimensional entries, \ref{fig:concurrent-6d} for 6 dimensional entries and \ref{fig:concurrent-10d} for 10 dimensional entries. 
+The experiments were performed for multi-dimensional entries with an increasing number of dimensions. Figure \ref{fig:concurrentd} shows the response time and throuput for the inserion operation, with the number of threads varying from 1 to 16. The figure shows the results of the same experiment on PH-tree having dimensions 1, 2, 3, 6 and 10.  
 
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-1d-tp}
-        \caption{Write throughput}
+        \includegraphics[scale=0.5]{images/plots/insert1d-tp}
+        \caption{1D PH-tree throughput}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-1d-rt}
-        \caption{Write response time}
+        \includegraphics[scale=0.5]{images/plots/insert1d-rt}
+        \caption{1D PH-tree response time}
     \end{subfigure}
-    \caption{Evolution of write throughput and response time for 1 dimensional PH-trees}
-    \label{fig:concurrent-1d}
-\end{figure}
-
-\begin{figure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/insert2d-tp}
+        \caption{2D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/insert2d-rt}
+        \caption{2D PH-tree response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/insert3d-tp}
+        \caption{3D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/insert3d-rt}
+        \caption{3D PH-tree response time}
+    \end{subfigure}
     \centering
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-2d-tp}
-        \caption{Write throughput}
+        \includegraphics[scale=0.5]{images/plots/insert6d-tp}
+        \caption{6D PH-tree throughput}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-2d-rt}
-        \caption{Write response time}
+        \includegraphics[scale=0.5]{images/plots/insert6d-rt}
+        \caption{6D PH-tree response time}
     \end{subfigure}
-    \caption{Evolution of write throughput and response time for 2 dimensional PH-trees}
-    \label{fig:concurrent-2d}
-\end{figure}
-\begin{figure}
-    \centering
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-3d-tp}
-        \caption{Write throughput}
+        \includegraphics[scale=0.5]{images/plots/insert10d-tp}
+        \caption{10D PH-tree throughput}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-3d-rt}
-        \caption{Write response time}
+        \includegraphics[scale=0.5]{images/plots/insert10d-rt}
+        \caption{10D PH-tree response time}
     \end{subfigure}
-    \caption{Evolution of write throughput and response time for 3 dimensional PH-trees}
-    \label{fig:concurrent-3d}
-\end{figure}
-\begin{figure}
-    \centering
-    \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-6d-tp}
-        \caption{Write throughput}
-    \end{subfigure}%
-    \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-6d-rt}
-        \caption{Write response time}
-    \end{subfigure}
-    \caption{Evolution of write throughput and response time for 6 dimensional PH-trees}
-    \label{fig:concurrent-6d}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-10d-tp}
-        \caption{Write throughput}
-    \end{subfigure}%
-    \begin{subfigure}[b]{0.5\linewidth}
-        \includegraphics[scale=0.5]{images/plots/concurrent-10d-rt}
-        \caption{Write response time}
-    \end{subfigure}
-    \caption{Evolution of write throughput and response time for 10 dimensional PH-trees}
-    \label{fig:concurrent-10d}
+    \caption{Evolution of write throughput and response time for the PH-tree}
+    \label{fig:concurrentd}
 \end{figure}
 
 For all of the tests, the Copy-On-Write strategy maintains a relatively steady throughput, caused by the fact that this strategy only allows a single writer thread and multiple readers at a time. The contention on the writer lock also causes the response time to increase as the number of writer threads increases.
 
 For up to 6 dimensions, both the Hand-over-Hand and Optimistic locking strategies generally perform better than the Copy-on-Writer strategy, having a higher throughput and a lower response time. For both of these strategies, increasing the number of threads leads to an increase in throughput, up to a point where the lock contention becomes so high that it causes the throughput to drop. Optimistic locking generally outperforms Hand-over-Hand locking, having a better through put and a lower response time in most cases. Additionally, Optimistic locking generates less lock contention and manages to maintain the increase in throughput for a higher number of threads than Hand-over-Hand locking. For both fine grained locking strategies, an increase in the number of threads leads to an increase in the lock contention, which leads to an increase in response time.
 
+\subsubsection{Single thread write performance}
 The second type of tests measures the penalty induced by the concurrency strategies when the tree is accessed by a single writer thread. For these experiments, 1 million 3-dimensional entries were inserted into an empty PH-tree by a single thread. The values for each entry were generated uniformly at random. Figure \ref{fig:concurrent-comp} illustrates the time needed for the insertion workload for each concurrency strategy and the single-threaded version of the tree. For the single-threaded version, the insertion finished in 1.1 seconds. The version will be used as a baseline for the other measurements. 
 
 \begin{figure}[h]
@@ -846,10 +852,66 @@ The second type of tests measures the penalty induced by the concurrency strateg
 
 In the case of the Copy-on-Write version, the process finished in 3.2 second, taking almost three times longer than the baseline. This is due to the fact that each insert copies a full-path from the root of the tree to the modified node. The Hand-over-Hand locking finished took 1.49 seconds, and was approximately 30\% slower than the baseline version. In the case of Hand-over-Hand locking, all nodes in the path from the root to the modified node are locked and copies are created only for the nodes which are updated. This makes the Hand-over-Hand strategy faster than the full Copy-on-Write strategy, but slower than the single-threaded implementation, which does not take any locks or perform any node copies. Finally, the Optimistic locking strategy performs the best from the implemented concurrency strategies, finishing the insertion in 1.3 second. This strategy is faster than the Hand-over-Hand strategy, as only two nodes are locked, as opposed to a full path, but is still slower than the single-threaded implementation.
 
+\subsubsection{Read performance}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read1d-tp}
+        \caption{1D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read1d-rt}
+        \caption{1D PH-tree response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read2d-tp}
+        \caption{2D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read2d-rt}
+        \caption{2D PH-tree response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read3d-tp}
+        \caption{3D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read3d-rt}
+        \caption{3D PH-tree response time}
+    \end{subfigure}
+    \centering
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read6d-tp}
+        \caption{6D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read6d-rt}
+        \caption{6D PH-tree response time}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read10d-tp}
+        \caption{10D PH-tree throughput}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\linewidth}
+        \includegraphics[scale=0.5]{images/plots/read10d-rt}
+        \caption{10D PH-tree response time}
+    \end{subfigure}
+    \caption{Evolution of read throughput and response time for the PH-tree}
+    \label{fig:concurrent-read}
+\end{figure}
+
+Finally, the last type of tests evaluate the scalability of the PH-tree read operations with respect to the number of concurrent reader threads. In this test, the PH-tree is loaded with 5 million entries and then all entries inserted in the tree are retrieved with the \textit{get()} point query. The entries are split into non-overlapping partitions and each partition is assigned to a reader thread. Each thread then retrieves all of the keys in its partition. As previously mentioned, the concurrent access stratgies did not modify the read operatons and all implemented concurrent strategies perform the read operations in the same manner. 
+
+These tests have been run on an 16 CPU machine, with 60GB of RAM memory. The number of reader threads is varied from 1 to 16, to reduce the effects of thread context switching. The test was repeated for PH-trees of dimensions 1, 2, 3, 6 and 10, to observe the effect of the higher dimensional data in the overall performance of the PH-tree. Figure \ref{fig:concurrent-read} presents the evolution of the throughput and response time for the described setups.
+
+The reslts shown that an incresed number of reader threads increases the overall throughput of the PH-tree. The increase in throughput is almost linear for up to 6 reader threads, after which each additional reader thread adds a smaller increase to the throughput. The throughput stabilizes after the number of readers goes over 10.
 \section{Result}
 \label{sec:evaluation-results}
 
 The distributed experiments showed that the distributed PH-tree scales with an increasing number of server machines. In all experiments of this type, the addition of server machines to the cluster increased the overall throughput of the system and decreased the response time for each individual request. For a fixed size workload, the throughput increase and response time decrease is slightly smaller with each additional server. This effect is due to the fact that test environment contains a limited number of clients, which wait for a response from the server before creating the next request. 
+
+The concurreny experiments compared the performance of the three implemented concurrency strategies: \textit{Copy-on-Write}, \textit{Hand-over-Hand locking} and \textit{Optimistic locking}.\textit{Optimistic locking} performed better for the write operations, having a higher throughput and a lower response time than both other strateiges. 
 
 \chapter{Conclusions}
 \label{ch:conclusions}
