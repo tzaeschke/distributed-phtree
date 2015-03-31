@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-THREADS=8
+THREADS=4
 POINTS=50000
 
 ZK_HOST="zk-us-1.us-central1-a.robotic-branch-89320"
