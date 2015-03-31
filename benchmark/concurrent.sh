@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 MACHINE="client-asia-1.asia-east1-c.robotic-branch-89320"
-NR_ENTRIES=100000
+NR_ENTRIES=5000000
 MAX_THREADS=16
 
 DIR="concurrent"
@@ -12,7 +12,7 @@ echo "Starting concurrency tests on $MACHINE"
 echo "Nr entries: $NR_ENTRIES"
 echo "Mx threads: $MAX_THREADS"
 
-ssh $MACHINE "java -XX:+UseConcMarkSweepGC -Xmx16G -cp benchmarks.jar ch.ethz.globis.distindex.benchmark.InsertionBenchmark $NR_ENTRIES $MAX_THREADS > client.log"
+ssh $MACHINE "java -Xmx16G -cp benchmarks.jar ch.ethz.globis.distindex.benchmark.InsertionBenchmark $NR_ENTRIES $MAX_THREADS > client.log"
 
 echo "Waiting for test to finish ..."
 
