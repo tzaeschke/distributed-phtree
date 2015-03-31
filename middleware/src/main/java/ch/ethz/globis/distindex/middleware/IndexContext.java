@@ -42,9 +42,9 @@ public class IndexContext {
     }
 
     public void initTree(int dim, int depth) {
-        if (tree != null) {
-            return;
-        }
+//        if (tree != null) {
+//            return;
+//        }
         PhTree5<byte[]> concurrentTree =  new PhTree5<>(dim, depth);
         concurrentTree.setOperations(new PhOperationsOL_COW<>(concurrentTree));
         this.tree = concurrentTree;
