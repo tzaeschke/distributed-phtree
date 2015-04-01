@@ -14,6 +14,28 @@
 \usepackage[a4paper,portrait,twoside,inner=3.25cm,outer=3.5cm,top=3.5cm,bottom=4.0cm]{geometry}
 \usepackage{hyperref}
 \usepackage{globis}
+\usepackage{listings}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
 
 \renewcommand{\sectfont}{\sffamily\bfseries\Huge}
 \setlength{\shadedtextwidth}{\textwidth}
@@ -80,7 +102,11 @@
 
 \chapter*{Abstract}
 
-Here comes the abstract.
+The storage and management of multi-dimensional data is an important aspect in many of todays applications, like geo-information systems, computer visions and computer geometry. In contemporary times, when computes are able to capture and store increasing amounts of multi-dimensional data, it is important for the applications to efficiently store and query this data. 
+
+This work presents a distributed version of the PH-tree, a highly efficient in-memory multi-dimensional data structure, supporting range and nearest neighbour queries. We present a distribution architecture for the PH-tree, which extends the PH-tree to run on cluster of computers. The distributed version of the PH-tree is able to use the main-memory of all of the machines in the cluster to store the multi-dimensional data for very efficient query operations. Moreover, the distributed settings allows each machine to be queried independently of the other machines. The point distribution algorithm used uses the Z-order space filling curve to assign sections of the space to the computers and in the cluster. Additionally, we present an automatic data re-balancing algorithm, which attempts to maintain an equal storage load across all computers. The performance evaluation shows that the proposed distribution version of the PH-tree is able to scale with respect to the number of computer in the cluster, obtaining an almost linear increase in throughput and a linear reduction in the response for point operations. 
+
+Another contribution of this work is the extension of the PH-tree to support concurrent write access, allowing it to take advantage of multi-core processor architectures. We present several concurrent write access strategies, with different consistency guarantees, discuss the advantages and disadvantages and evaluate the write performance. The presented Copy-on-Write algorithm allows queries to execute on snapshots of the PH-tree, while the actual PH-tree is accessed by one writer and a large number of readers. This work also presents two fine grained locking strategies, which sacrifice consistency to allow multiple reader and writer threads to access the tree in the same time. All presented concurrency perform locking only in the case of the write operations, and allow read queries to execute without taking any locks.   
 
 \tableofcontents
 
@@ -937,8 +963,51 @@ One aspect of the distributed PH-tree that could be improved is the execution of
 From the point of view of the balancing algorithm, hosts participating in re-balancing operation do not accept write requests, to simplify the management of the mapping between the points and the hosts. The balancing algorithm could be modified to allow the hosts to accept write requests to a separate buffer and integrate the buffer to the stored PH-tree after the balancing operation has finished.
 
 The concurrency strategies presented by this work rely on locking and copy-on-write to allow concurrent access. Further work could focus on investigating potential concurrent access strategies using on atomic operations.
-\appendix
 
+\appendix
+\chapter{Installation and usage Instructions}
+
+The distributed PH-tree was implemented in Java, as a Maven\footnote{https://maven.apache.org/} project. Compiling the project requires the Java Development Kit 8 and Maven 3 to be installed on the local computer. Moreover, this source code uses the PH-tree library as a compilation and run-time dependency, and therefore it is required that the PH-tree Maven artifact be installed in the local computer repository prior to compilation. 
+
+\section{Compilation and installation} 
+
+\subsection{Client and server libraries}
+The compilation is performed using Maven. To compile the project, open a console to the directory where the source code is store and type the command: \texttt{maven package} . This will compile both the client and server libraries and execute all the unit tests. It is necessary that the Maven binary be present in the PATH variable of the console terminal. Alternatively, the project can be compile from an IDE, as the majority of the contemporary IDE's provide wizards for importing and managing Maven projects.
+
+\subsection{ZooKeeper}
+The cluster of machines running the distributed PH-tree needs at least one ZooKeeper server to store the cluster configuration. An up-to-date guide for downloading and installing a basic ZooKeeper server is available at the following location: \url{https://zookeeper.apache.org/doc/trunk/zookeeperStarted.html}. 
+A summary of the installation instructions:
+\begin{itemize}
+    \item Download the latest stable ZooKeeper package and copy it to the desired installation location. We will refer to this directory as \texttt{ZOO\_HOME}.
+    \item Go to \texttt{ZOO\_HOME/conf} and rename the \texttt{zoo\_sample.cfg} file to \texttt{zoo.cfg}. 
+    \item Start the ZooKeeper server using the \texttt{zkStart.sh} script in the directory \texttt{ZOO\_HOME}.
+\end{itemize}
+
+\section{Usage}
+To set up the distributed PH-tree, first start the ZooKeeper server on an assigned computer. Indexing servers can be started using the \texttt{middleware-1.0-SNAPSHOT.jar} Java jar.
+The following code snippet starts a server on the machine with ip \texttt{server-ip} on port 5000 that connects to a ZooKeeper server running on \text{zk-ip} : 
+
+\begin{lstlisting}[language=BASH]
+    java -jar middleware-1.0-SNAPSHOT.jar server-ip:5000 zk-ip:2181
+\end{lstlisting}
+
+Additional servers can be added by executing a similar command on a different machine and changing \texttt{server-ip} accordingly. Clients can access the distributed PH-tree using the API provided in the client library module. An example for connecting to a running cluster of machines is listed in Figure \ref{fig:java-code}.
+
+\begin{figure}
+\begin{lstlisting}[language=Java]       
+    // connect to a cluster of machines storing 
+    // its configuration in the ZooKeeper at 
+    // the following address 
+    String zkHost = "localhost";
+    int zkPort = 2181;
+    PHFactory factory = new ZKPhFactory(zkHost, zkPort);
+
+    //create a 2D PH-tree with 64 bit width
+    PhTree tree = factory.createPHTreeSet(2, 64);    
+\end{lstlisting}
+\caption{Example code snippet for connecting to the PH-tree from the Java API}
+\label{fig:java-code}
+\end{figure}
 \listoffigures
 \listoftables
 
