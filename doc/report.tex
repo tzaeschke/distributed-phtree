@@ -77,13 +77,13 @@
 \raggedbottom
 
 % Please adapt the following fields if necessary!
-\title{Cluster-Computing and Parallelisation for the
+\title{Cluster-Computing and Parallelization for the
     Multi-Dimensional PH-Index}
 \category{Master Thesis} 
 \author{Bogdan Aurel Vancea}
 \email{$<$bvancea@student.ethz.ch$>$}
 \professor{Prof. Dr. Moira C. Norrie}
-\assistant{Dr. Tilmann Zaeschke \\Christoph Zimmerli}
+\assistant{Dr. Tilmann Z{\"a}schke \\Christoph Zimmerli}
 \group{Global Information Systems Group}
 \institute{Institute of Information Systems}
 \department{Department of Computer Science}
@@ -103,11 +103,11 @@
 
 \chapter*{Abstract}
 
-The storage and management of multi-dimensional data is an important aspect in many applications, like geo-information systems, computer vision and computer geometry. In contemporary times, when computers are able to capture and store increasing amounts of multi-dimensional data, it is important for the applications to efficiently store and query this data. 
+The storage and management of multi-dimensional data is an important aspect in many applications, like geo-information systems, computer vision and computer geometry. In contemporary times, when computers are able to capture and store increasing amounts of multi-dimensional data, it is important for applications to efficiently store and query this data. 
 
-This work presents a distributed version of the PH-tree, a highly efficient in-memory multi-dimensional data structure, supporting range and nearest neighbour queries. We present a distribution architecture for the PH-tree, which extends the PH-tree to run on cluster of computers. The distributed version of the PH-tree is able to use the main-memory of all of the machines in the cluster to store the multi-dimensional data. Moreover, the distributed setting allows each machine to be queried independently of the other machines. The point distribution algorithm proposed in this work uses the Z-order space filling curve to assign sections of the space to the computers in the cluster. Additionally, we present an automatic data re-balancing algorithm, which attempts to maintain an equal storage load across all computers. The performance evaluation shows that the proposed distribution version of the PH-tree is able to scale with respect to the number of computer in the cluster, obtaining an almost linear increase in throughput and a similar reduction in the response time for point operations. 
+This work presents a distributed version of the PH-tree, a highly efficient in-memory multi-dimensional data structure, supporting range and nearest neighbour queries. We present a distribution architecture for the PH-tree, which extends it to run on a cluster of computers. The distributed version of the PH-tree is able to use the main-memory of all of machines in the cluster to store the multi-dimensional data. Moreover, the distributed setting allows each machine to be queried independently of the other machines. The point distribution algorithm proposed in this work uses the Z-order space filling curve to assign sections of the space to the computers in the cluster. Additionally, we present an automatic data re-balancing algorithm, which attempts to maintain an equal storage load across all computers. The performance evaluation shows that the proposed distribution version of the PH-tree is able to scale with respect to the number of computer in the cluster, obtaining an almost linear increase in throughput and a similar reduction in the response time for point operations. 
 
-Another contribution of this work is the extension of the PH-tree to support concurrent write access, allowing it to take advantage of multi-core processor architectures. We present several concurrent write access strategies, with different consistency guarantees, discuss the advantages and disadvantages and evaluate the write performance. The presented Copy-on-Write strategy allows queries to execute on snapshots of the PH-tree, while the actual PH-tree is accessed by one writer and a large number of readers. This work also presents two fine grained locking strategies, which sacrifice consistency to allow multiple reader and writer threads to access the tree in the same time. All presented concurrency strategies perform locking only in the case of the write operations, and allow read queries to execute without taking any locks, which greatly increases the performance of read operations when using large numbers of reader threads.  
+Another contribution of this work is the extension of the PH-tree to support concurrent write access, allowing it to take advantage of multi-core processor architectures. We present several concurrent write access strategies, with different consistency guarantees, discuss their advantages and disadvantages and evaluate the write performance. The presented copy-on-write strategy allows queries to execute on snapshots of the PH-tree, while the PH-tree itself is accessed by one writer and multiple readers. This work also presents two fine grained locking strategies, which sacrifice consistency to allow multiple reader and writer threads to access the tree in the same time. All presented concurrency strategies perform locking only in the case of the write operations, and allow read queries to execute without taking any locks, which greatly increases the performance of read operations for large numbers of reader threads.  
 
 \tableofcontents
 
@@ -143,7 +143,7 @@ Specifically, the distributed PH-tree has to fulfill the following requirements:
 
 As the thesis touches on two main subjects, distribution and concurrency, the main challenges encountered are twofold. From the distribution perspective, the challenges are the identification of suitable entry distribution and balancing strategies, devising efficient algorithms for executing queries across multiple cluster nodes, and the efficient management of a very large number of cluster nodes. For the concurrency perspective, the challenges are the identification of a suitable concurrent access strategy that can maximize the number of concurrent write operations.
 
-\section{Thesis outline}
+\section{Thesis Outline}
 \label{sec:intro-outline}
 
 This chapter gave an overview of the challenges currently faced by multi-dimensional indexing structures and briefly explained how this work seeks to address them. Additionally, this chapter also presented the main objectives of this thesis. The rest of the thesis is structured as follows:
@@ -191,12 +191,12 @@ The PH-tree is similar to a HashMap, as it stores entries consisting of key-valu
 \begin{itemize}
     \item \textbf{Point operations} operate on single multi-dimensional points. The possible queries are \textit{get()}, \textit{put()}, \textit{delete()} and \textit{updateKey()}. The \textit{get()} query retrieves the value associated with a multi-dimensional key, and the \textit{delete()} operation removes the value associated with a multi-dimensional key. The \textit{put()} operation adds new key-value to the index. Finally, the \textit{updateKey()} operations updates the key associated with an existing key-value entry.
     \item \textbf{Range queries} select all of the data points that fall inside a multi-dimensional hyper-rectangle. This rectangle is defined by a \textit{lower left} and a \textit{upper right} point. 
-    \item \textbf{Nearest neighbour queries} select the closest k points in the index to an arbitrary query point. 
+    \item \textbf{Nearest neighbour queries} select the closest $k$ points in the index to an arbitrary query point. 
 \end{itemize}
 
 Currently, the amount of entries the PH-tree can store limited by the memory available on a single host. A distributed version of the PH-tree would be able to store a much larger amount of entries and would be able to make use of clusters of computing nodes. Specifically, the distributed version would be well suited for running in cloud environments, where users can easily add more computing nodes to their existing systems to handle higher storage requirements and improve performance. The challenges in creating a distributed version of the PH-tree are the implementation of range and nearest neighbour queries, which might need to be dispatched to multiple nodes of the system. The goal is to design a distribution architecture and a set of algorithms that minimize the number of nodes to which a complex query is sent.
 
-\section{Related work}
+\section{Related Work}
 \label{sec:background-rw}
 
 The following sections reviews the existing research concerning distributed indexes and concurrent data structures. The goal of this section is to understand to existing approaches that can be used for the design and implementation of the distributed PhTre and to identify which of these approaches are best suited for the use cases targeted by this work.
@@ -210,7 +210,7 @@ A similar approach is taken by the SkipIndex~\cite{Zhang04skipindex}, a multi-di
 
 A different approach for creating a scalable multi-dimensional index is to use a big-data platform. \cite{Liao2010HadoopIndex} propose storing a block-based multi-dimensional index structure like the R-tree directly in HDFS\footnote{http://hadoop.apache.org/docs/r1.2.1/hdfs\_design.html} and use query models like MapReduce\footnote{http://en.wikipedia.org/wiki/MapReduce} as building blocks for the implementation of range and nearest neighbour queries.
 
-\subsection{Concurrent data structures}
+\subsection{Concurrent Data Structures}
 
 Concurrent data structures are currently a very active area of research. There are two main ways of implementing a concurrent data structures: lock-based solution and lock-free solutions. Lock-based solutions use locks to synchronize the concurrent access to either the data structure itself, called \textit{course-grained locking}, or to parts of the data structure, which is also called \textit{fine grained locking}. Lock-free solutions use either atomic primitives, like \textit{compare-and-swap} or software transactional memory to synchronize modification attempts on the data structure.
 
@@ -220,7 +220,7 @@ A naive concurrent implementation of a search tree can be achieved by protecting
 
 However, an issue with all concurrent search trees where modifications are done to a single node is that the execution of queries which have to run on the tree for longer periods of time, like iterators or range queries, overlaps with the execution of other write-operations. Therefore, longer running queries will view the any updates that are done on the tree. In some cases, it is desirable to run the read queries on a snapshot of the tree that is isolated from other concurrent updates. This can be achieved using a strategy called \textit{Copy-On-Write}, which allows a single writer and an arbitrary number of reads to access the same data structure concurrently. Moreover, each write operations creates a new version of the data structure that is only available to readers which have started after the update which created the new version has finished. 
 
-\chapter{Index distribution}
+\chapter{Index Distribution}
 \label{ch:distindex}
 
 This chapter describes how PH-tree is extended to be deployed and run on a number of machines part of a computer cluster. It presents the challenges and the possible design choices for extending the PH-tree to run in a distributed setting, discusses the system architecture and describes the algorithms used for the distributed queries. Concurrency related issues are addressed separately in Chapter \ref{ch:concurrency}.
@@ -248,7 +248,7 @@ By taking into account the discussed challenges, an ideal architecture of the sy
 
 The following sections of this chapter describe the possible strategies for distributing the point to nodes in the cluster, the strategy chosen to properly address the challenges presented in this section, the final architecture of the system and the algorithms for the query execution.
 
-\section{Distribution strategies}
+\section{Distribution Strategies}
 \label{sec:distindex-strategies}
 
 There are two main solutions to the problem of distributing a tree data structure over a cluster of computing nodes: 
@@ -278,7 +278,7 @@ However, the use of a hash function for the point distribution presents some dra
 
 A second issue with use of hash functions is the observation that hash functions which are perceived to be good in this situation spread the multi-dimensional points uniformly across the machines in the cluster. In such a situation, is is quite likely that the hash function does not preserve point locality, and such, complex queries like range queries and nearest neighbour queries will need to be dispatched to all of the computing nodes in the cluster. 
 
-\subsection{Spatial splitting}
+\subsection{Spatial Splitting}
 
 Another approach that can be used for the point distribution problem is to partition the original space into a set of contiguous regions and assign each region to a host in the system. The most intuitive way to perform this split is to split the multi-dimensional space equally to obtain one region per index host. Figure \ref{fig:geometric-2hosts} shows a potential splitting of a 2D space for 2 hosts, while Figure \ref{fig:geometric-4hosts} presents a possible split of the same 2D space for 4 hosts. 
 
@@ -318,7 +318,7 @@ Difficulties in splitting the space can also arise even when using hyper-rectang
         
 Additionally, in the case of skewed input distributions, the optimal split of the space into regions will change over time, as some regions will end up containing more and more points. In this case, the cluster needs to go through a \textit{re-balancing} phase, when the regions are modified and some points are moved from highly populated regions to less populated neighbouring regions. An important observation is that the number of neighbouring regions for an arbitrary region is a function of the number of dimensions of the original space. This leads to an exponential number of regions participating, or at least being considered, in the re-balancing of the points from a single dense region to its neighbours. 
 
-\subsection{Z-Order curve splitting}
+\subsection{Z-Order Curve Splitting}
 
 As previously mentioned, the in-memory PH-tree stores the multi-dimensional points according to the Z-ordering, by mapping the initial space to the 1-dimensional Z-order curve. This curve fills in the initial space in a contiguous and complete manner. Figure \ref{fig:zordering-clear}\footnote{Image adapted from \url{http://www.scholarpedia.org/article/B-tree_and_UB-tree}} shows the Z-order space filling curve filling the 2D space where the values in each dimension are limited by 3 bits.  
 
@@ -340,7 +340,7 @@ Therefore, instead of splitting the original space into regions, one could attem
 \qquad
 \begin{minipage}{5cm}
     \includegraphics[width=5cm]{images/zorder-square}
-    \caption{Example intervals on the 3bit Z-order curve filling the 2D space}
+    \caption{Example intervals on the 3 bit Z-order curve filling the 2D space}
     \label{fig:zorder-square}
 \end{minipage}
 \end{figure}
@@ -369,12 +369,12 @@ As the data is split according to Z-order curve intervals, each indexing host on
 \label{sec:distindex-algorithms}
 
 This section will discuss how the \textit{key-mapping} is created from the Z-order curve intervals and how the queries are executed based on the key-mapping. 
-\subsection{Key-mapping design}
+\subsection{Key-Mapping Design}
 
 \label{sec:distindex-key-mapping}
 The \textit{key-mapping} used by the distributed PH-tree assigns the points based on the Z-order curve intervals. To determine the host responsible for a certain multi-dimensional point, one has to find the Z-order interval that contains the Z-value of this point. In the case of a range query, one has to find all of the Z-order intervals for which the regions in the original space intersect the hyper-rectangle defined by the top left and bottom right points which define the range query. There are two alternative for designing the \textit{key-mapping} based on the Z-order curve intervals:
 \begin{enumerate}
-    \item Store the Z-intervals as pairs of Z-values and perform 1-dimensional interval matchings to determine the hosts that have to be contacted for certain queries. For point operations, determining which host needs to be contacted can be done by performing a binary search of the Z-value of the query point on the Z-order intervals belonging to each host. In the case of range queries, one needs to determine the hosts storing the top left and bottom right corners using binary seach, and return all of the hosts holding the intervals between the interval of the host storing the top left point and the host storing the top right point. In both cases, the complexity is $O(logn)$, where $n$ is the number of hosts. The correctness of this approach stems from the fact that the region represented by a $d$-dimensional hyper-rectangle [X, Y] \footnote{Where X is the top left corner of the hyper-rectangle and Y is the bottom right corner of the hyper rectangle} is included in the set of d-dimensional regions corresponding to the Z-interval $[Z_X,Z_Y]$. This can be seen in Figure \ref{fig:range-zorder}.
+    \item Store the Z-intervals as pairs of Z-values and perform 1-dimensional interval matchings to determine the hosts that have to be contacted for certain queries. For point operations, determining which host needs to be contacted can be done by performing a binary search of the Z-value of the query point on the Z-order intervals belonging to each host. In the case of range queries, one needs to determine the hosts storing the top left and bottom right corners using binary search, and return all of the hosts holding the intervals between the interval of the host storing the top left point and the host storing the top right point. In both cases, the complexity is $O(logn)$, where $n$ is the number of hosts. The correctness of this approach stems from the fact that the region represented by a $d$-dimensional hyper-rectangle [X, Y] \footnote{Where X is the top left corner of the hyper-rectangle and Y is the bottom right corner of the hyper rectangle} is included in the set of $d$-dimensional regions corresponding to the Z-interval $[Z_X,Z_Y]$. This can be seen in Figure \ref{fig:range-zorder}.
     \item Store the hyper-rectangles from the original space that correspond to each Z-order interval and perform intersections between the query points/rectangles from the original space and the hyper-rectangle of the interval regions. The complexity of this operation is $O(n * w * d)$, for $n$ indexing hosts, as each region contains at most $O(w * d)$ hyper-rectangles. Figure \ref{fig:zorder-rectangles-split} shows how the regions defined by the Z-order intervals can be split into hyper-rectangles.
 \end{enumerate}
 
@@ -386,12 +386,12 @@ The \textit{key-mapping} used by the distributed PH-tree assigns the points base
 \end{figure}
 Even if the first solution is asymptotically faster than the second one for finding the hosts to query, the first approach attempts to query a much larger area in the original space than the second one. Therefore, the first method can potentially generate many more network requests than the first one, especially in a system with a large number of online indexing hosts. Moreover, the intersection operation itself is performed in-memory on the client machine and does not generate a network request. Because of these reasons, the second approach is preferable to the first approach in a system looking to minimize the number of network requests associated to each query, like the distributed PH-tree. 
 
-An algorithm for decomposing Z-order intervals into a set of hyper-rectangles is described in \cite{skopal2006-ubtree}. This algorithm decomposes a Z-order interval into at most $O(w * d)$ hyper-rectangles in $O(w * d)$ time, where $w$ is the bit width of values in each dimension and $d$ is the numbe of dimensions. We propose storing the hyper-rectangles associated with each Z-order interval into a multi-dimensional data structure able to perform intersection between the stored hyper-rectangles and a query point or a query hyper-rectangle.
+An algorithm for decomposing Z-order intervals into a set of hyper-rectangles is described in \cite{skopal2006-ubtree}. This algorithm decomposes a Z-order interval into at most $O(w * d)$ hyper-rectangles in $O(w * d)$ time, where $w$ is the bit width of values in each dimension and $d$ is the number of dimensions. We propose storing the hyper-rectangles associated with each Z-order interval into a multi-dimensional data structure able to perform intersection between the stored hyper-rectangles and a query point or a query hyper-rectangle.
 
-\subsection{Point operations}
+\subsection{Point Operations}
 Point operations involve a single query point, like the insertion or removal of a key-value pair, obtaining the value associated with a key-value pair or changing the key associated with a key-value pair. For the point queries, the client only needs to determine which host to send the request to. This is done by determining the intersections between the query point and the hyper-rectangles corresponding to the Z-order intervals. In the case of the \textit{get()}, \textit{put()} and \textit{delete()} operations, the client sends the request to the host responsible for the query point and returns the result of the operation. In the case of the \textit{updateKey()} operations, it is possible that a different host is responsible for the new key of the value associated with the query point. In that case, the \textit{updateKey()} operation is performed in two steps: first the client removes the old key from the host responsible for it, and then inserts the new key into the proper host.
 
-\subsection{Range queries}
+\subsection{Range Queries}
 
 Range queries have the form \textit{range\_query(top-left, bottom-right)}. Both of the received arguments are multi-dimensional data points and this operation returns all of the points in the index that fall inside the multi-dimensional rectangle defined by these two points. These operations are resolved in the following manner on the client. First, the client performs an intersection between the hyper-rectangle range and the hyper-rectangles associated with the Z-order intervals contained in the \textit{key-mapping}. It then send requests to all of the hosts whose regions were intersected, receives and combines the results. It is important to note that each host returns a list of point that are already ordered via Z-ordering and because the nature of the Z-order interval split, these lists do not need to be merged, but only concatenated.
 
@@ -418,7 +418,7 @@ Figure \ref{fig:range-zorder} illustrates an example range query. It shows the r
 
 As previously mentioned, because the Z-order range associated with the query range corresponds to a larger regions than the query hyper-rectangle, especially in high dimensional spaces, 
 
-\subsection{Nearest neighbour queries}
+\subsection{Nearest Neighbour Queries}
 
 Nearest neighbour queries return the $k$ nearest points, according to the Euclidean distance, to an arbitrary query point, thus having the form \textit{knn\_query(q, k)}. The query point does not need to be stored in the index. The execution of a nearest neighbour query has the following steps:
 \begin{enumerate}
@@ -458,7 +458,7 @@ It is sometime possible that the initial query sent to the host responsible for 
 
 While this approach for finding the $k$ nearest neighbours of a query point is correct, it is not the most efficient one. The main issues is that the additional range query searches for other neighbours in a hyper-cubing range. The optimal strategy would be to search for these neighbours in hyper-sphere of radius $d$ centered at $q$. This hyper-sphere is inscribed in the hyper-cube search by the range query, as illustrated in Figure \ref{fig:knn}d. Therefore, the algorithm presented in this work can sometimes send unnecessary request to hosts responsible for the areas outside of the hyper-sphere and still within the hypercube. This is generally not a problem in lower dimensional spaces, however the different in volume between the hyper-cube and the hyper-sphere increases gradually with dimensionality of the space. 
 
-\subsection{Entry re-balancing}
+\subsection{Entry Rebalancing}
 
 As previously described, data sets which are skewed towards certain areas of the multi-dimensional space will cause some machines to store more points than the others. A load balancing algorithm is needed to balance the amount of entries stored across the cluster, such that each hosts stores roughly the same amount of entries. 
 
@@ -494,7 +494,7 @@ The in-memory version of the PH-tree does not support concurrent access and rema
     \item The PH-tree also supports an iterator over all of the entries or over all of the entries contained within a specified hyper-rectangle. The concurrency strategy should allow iterators to traverse a PH-tree, even if the tree is concurrently modified by other threads. The concurrency strategy used will influence which entries of the tree are seen by the iterator.
 \end{itemize}
 
-\section{PH-tree structure}
+\section{PH-tree Structure}
 
 The PH-tree stores key-value pair entries. The keys are multi-dimensional data points and the values are optional. The entries are stored as bit strings, to exploit any prefix sharing between the bit strings of the keys and reduce the storage requirements. 
 
@@ -503,7 +503,7 @@ Figure \ref{fig:phtree-node-1} illustrates a 2 dimensional PH-tree containing  t
 This structural representation of the PH-tree has the following important consequences:
 \begin{itemize}
     \item All information stored in a node cannot be read or written in an atomic manner, as the prefix, the hypercube and the postfixes need to be read or written in separate instructions. 
-    \item Adding a new subnode to a node, as well as removing or replacing it can be done atomically.      
+    \item Adding a new sub-node to a node, as well as removing or replacing it can be done atomically.      
 \end{itemize} 
 
 \begin{figure}
@@ -523,7 +523,7 @@ This structural representation of the PH-tree has the following important conseq
 \end{figure}
 
 The following section presents the concurrent access strategies available in the concurrent version of the PH-tree and discusses their consistency guarantees.
-\section{Concurrency strategies}
+\section{Concurrency Strategies}
 
 \subsection{Copy-on-Write}
 
@@ -546,11 +546,11 @@ Iterators created on a Copy-on-Write PH-tree essentially traverse a snapshot of 
 
 \subsection{Locking}
 
-A very simple way to handle concurrent writer threads is to use a global lock that each thread must take before the execution of an operation. If the lock is a mutex, the tree can only be accessed by a single thread. If the thread is a read-write lock, the tree can be accessed by either a single writer or several reader threads. However, this \textit{coarse-grained} lockig strategy does not allow one writer thread and one readers to perform the accesses in parallel. Furthermore, if the lock favors readers, writers might the permanently blocked from accessing the tree for workloads with a sustained number of read accesses. A similar situation arises for a read-write lock that favors writers, which might block reader threads indefinitely. Due to these disadvantages, we turned our attention to other locking approaches, namely \textit{fine-grained} locking strategies.  
+A very simple way to handle concurrent writer threads is to use a global lock that each thread must take before the execution of an operation. If the lock is a mutex, the tree can only be accessed by a single thread. If the thread is a read-write lock, the tree can be accessed by either a single writer or several reader threads. However, this \textit{coarse-grained} locking strategy does not allow one writer thread and one readers to perform the accesses in parallel. Furthermore, if the lock favors readers, writers might the permanently blocked from accessing the tree for workloads with a sustained number of read accesses. A similar situation arises for a read-write lock that favors writers, which might block reader threads indefinitely. Due to these disadvantages, we turned our attention to other locking approaches, namely \textit{fine-grained} locking strategies.  
 
 \textit{Fine grained} locking strategies perform locking at the level of tree nodes and can allow multiple writer threads to modify the tree in the same time. Two popular strategies are described in the following sections. For simplicity, in the following sections we first consider how the strategies support concurrent writers and then discuss how to incorporate concurrent read and writer access.  
 
-\subsubsection{Hand-over-Hand locking}
+\subsubsection{Hand-over-Hand Locking}
 
 \begin{figure}[t]
     \centering
@@ -580,7 +580,7 @@ Figure \ref{fig:locking-hoh} shows the sequence of events happening when a threa
 
 This strategy allows multiple threads to modify the different subtrees of the tree. The main drawback of this approach is that if the non-leaf nodes are modified, subtrees of those nodes cannot be modified of a different thread until the current thread finishes the update operation. Secondly, there will be a high contention for the locks on the higher levels of the tree, which could negatively affect performance for write-heavy workloads. 
 
-\subsubsection{Optimistic locking}
+\subsubsection{Optimistic Locking}
 
 \begin{figure}
     \centering
@@ -592,37 +592,37 @@ This strategy allows multiple threads to modify the different subtrees of the tr
         \includegraphics[width = 3in]{images/Tree-HoH-d}
         \caption{The target node is locked}
     \end{subfigure}
-    \caption{Illustration of optimistic locking descent to node G}\
+    \caption{Illustration of optimistic locking descent to node G}
     \label{fig:locking-ol}
 \end{figure}
 
-Optimistic locking is an alternative fine grained locking strategy which seeks to minimize the number of locks which are taken during a write operation. The basic idea is to traverse the tree without acquiring any write locks until the node to be updated is reached. Once at the target node, the writer thread acquires the lock of the parent and the lock of the current node. After this happens, the write operation can continue only if both of these two nodes have not yet been removed from the tree and the current node is still a child node of the parent node. If any of these checks fail, the write operation fails and the current thread begins another attempt by starting a new traversal of the tree. Figure \ref{fig:locking-ol} shows the sequence of events for the update of a node in the tree using optimistic locking. As in the previous section, the node to be modifed is G. 
+Optimistic locking is an alternative fine grained locking strategy which seeks to minimize the number of locks which are taken during a write operation. The basic idea is to traverse the tree without acquiring any write locks until the node to be updated is reached. Once at the target node, the writer thread acquires the lock of the parent and the lock of the current node. After this happens, the write operation can continue only if both of these two nodes have not yet been removed from the tree and the current node is still a child node of the parent node. If any of these checks fail, the write operation fails and the current thread begins another attempt by starting a new traversal of the tree. Figure \ref{fig:locking-ol} shows the sequence of events for the update of a node in the tree using optimistic locking. As in the previous section, the node to be modified is G. 
 
 To speed up checking if a node is still reachable from the root node, each node has an additional removed flag, which indicates if certain node has been removed from the tree. When a thread removes a node, it sets this flag to true before releasing the lock of the node. 
 
-One advantage of this method is that in a large tree, re-tries are generally rare as threads do not generally attempt to update the same node. Moreover, a thread holding the lock of a certain node does not block other threads from performing update operations on the node's subtrees, unlike the \textit{hand-over-hand} strategy.
+One advantage of this method is that in a large tree, re-tries are generally rare as threads do not generally attempt to update the same node. Moreover, a thread holding the lock of a certain node does not block other threads from performing update operations on the node's subtrees, unlike the hand-over-hand strategy.
 
-\subsubsection{Handling reader threads}
+\subsubsection{Handling Reader Threads}
 It is important to mention the fact the in the case of the PH-tree, all update operation to a single node are not executed in an atomic fashion, which can cause reader threads to perform reads from nodes which are in an inconsistent state. This inconsistency can be avoided by protecting the nodes with a read-write lock and requiring the read operations to acquire the lock of a node in reading mode before performing a read. Additionally, writer threads attempt to acquire the lock of a node in write mode during the read operation. The conversion of exclusive locks to read-write locks allows both described fine-grained locking strategies to support both concurrent writers and readers. 
 
 In the case of the fine-grained locking concurrency strategies, iterators running the PH-tree operate according to a relaxed consistency semantics. Therefore, an iterator created at time $t$, which finished traversing the tree at time $e$ will see all of entries that were part of the tree a time $t$ and are still part of the tree at time $e$. Moreover, entries inserted or removed in the time interval $[t, e]$ may also be seen by the iterator. It is however guaranteed that all of the entries seen by the iterator are visited according the Z-ordering. 
 
-\subsection{Hybrid approach}
-As previously mentioned, both hand-over-hand locking and optimistic locking require readers to acquire locks on the nodes they perform the reads on. This increases the latency of the read operation due to the overhead of acquiring locks. Moreover, when the tree is accessed by many reader threads, lock contention can lead to a very fast peformance decrease. 
+\subsection{Hybrid Approach}
+As previously mentioned, both hand-over-hand locking and optimistic locking require readers to acquire locks on the nodes they perform the reads on. This increases the latency of the read operation due to the overhead of acquiring locks. Moreover, when the tree is accessed by many reader threads, lock contention can lead to a very fast performance decrease. 
 
-We propose the modificaton of the fine-grained locking strategies to incorporate copy-on-write logic for the write operations. Specifically, before performing a write operation on certain node, the writer thread first creates of copy of the node, performs the update on the copy and then atomically replaces the parent node's reference to the node with the copy. As the writer thread holds the lock on the parent node, it is guaranteed that no other writer threads will overwrite this change. Furthermore, reader threads do not need acquire locks on the nodes when reading the node information, as the current node they are accessing will not be changed by the writers. 
+We propose the modification of the fine-grained locking strategies to incorporate copy-on-write logic for the write operations. Specifically, before performing a write operation on certain node, the writer thread first creates of copy of the node, performs the update on the copy and then atomically replaces the parent node's reference to the node with the copy. As the writer thread holds the lock on the parent node, it is guaranteed that no other writer threads will overwrite this change. Furthermore, reader threads do not need acquire locks on the nodes when reading the node information, as the current node they are accessing will not be changed by the writers. 
 
 This modifications allows the read operations and iterators on the PH-tree to remain unchanged, while only the write operations need to be updated. Therefore, the response time of the read operations will not suffer from the overhead of lock contention. 
 
-\section{Chosen strategies}
+\section{Chosen Strategies}
 The PH-tree supports both a full COW concurrency strategy and the hybrid versions of the described fine grained locking strategies. The optimistic locking strategy is generally faster than the hand-over-hand locking strategy, the actual results being detailed in Section \ref{sec:evaluation-concurrency} of Chapter \ref{ch:evaluation}. However, optimistic locking can lead to starvation when many threads need to update the same node or nodes which are close together. Therefore, hand-over-hand locking can be chosen over optimistic locking in situations where it is important that writer threads are not starved. The choice between the COW strategy and the fine grained strategies comes down to the choice between the consistency guarantees provided by them. For example, snapshots of the tree can only be obtained if the tree is using the COW strategy. 
 
 \chapter{Implementation}
 \label{ch:implementation}
 
-This chapter describes the implementation of the approaches described in the previous chapter in order to obtain a distributed and concurrent PH-tree. We discuess the technologies used to implement the distribution architecture and explain how the multiple concurrency strategies have been integrated in the code of the PH-tree. 
+This chapter describes the implementation of the approaches described in the previous chapter in order to obtain a distributed and concurrent PH-tree. We discuss the technologies used to implement the distribution architecture and explain how the multiple concurrency strategies have been integrated in the code of the PH-tree. 
 
-\section{System architecture}
+\section{System Architecture}
 
 The architecture of the distributed PH-tree is shown in Figure \ref{fig:implementation-architecture}. The implementation consists of two artifacts: the \textit{client library} and the \textit{server library}.
 
@@ -635,7 +635,7 @@ The architecture of the distributed PH-tree is shown in Figure \ref{fig:implemen
 
 The \textit{client library} is deployed on the clients and contains the code necessary to connect to the configuration server, retrieve the cluster information and perform operations on the cluster. The \textit{client library} also contains a dependency to the \textit{Kryo} library, a Java serialization library that is used to encode the values stored on the PH-tree before the insert operation and decode the values retrieved from the server. Clients cannot modify the cluster information and can only subscribe to be notified by the configuration server when indexing hosts join or leave the cluster and when the Z-order curve intervals changes as the result of a rebalancing operation.
 
-The \textit{server library} contains the index middleware logic and needs to be deployed on the indexing hosts. The \textit{server library} implements a multi-threaded middleware Java application running on the indexing hosts. The \textit{Netty IO}\footnote{http://netty.io/} library is used to handle incoming client requests using a thread pool. When a server is started, it first connects to the configuration server to retrieve the cluster information and then is assigned an interval of the Z-order curve for which it is responsible. If the cluster already contains some data the new node can mark itself as a free node and will be contacted by the next node in the cluster that will begin a balancing operation. Indexing hosts update the intervals in the cluster configuration after a balancing operation and periodically update the number of entries stored. 
+The \textit{server library} contains the index server logic and needs to be deployed on the indexing hosts. The \textit{server library} implements a multi-threaded server Java application running on the indexing hosts. The \textit{Netty IO}\footnote{http://netty.io/} library is used to handle incoming client requests using a thread pool. When a server is started, it first connects to the configuration server to retrieve the cluster information and then is assigned an interval of the Z-order curve for which it is responsible. If the cluster already contains some data the new node can mark itself as a free node and will be contacted by the next node in the cluster that will begin a balancing operation. Indexing hosts update the intervals in the cluster configuration after a balancing operation and periodically update the number of entries stored. 
 
 The \textit{configuration server} was implemented using \textit{ZooKeeper}\footnote{http://zookeeper.apache.org/}, an open source server whose goal is to provide reliable distributed coordination. ZooKeeper provides a centralized service for maintaining configuration information and performing distributed synchronization. The \textit{cluster configuration} is stored in a ZooKeeper specific format. ZooKeeper also allows the possibility of replicating the stored configuration by running a \textit{qourum}\footnote{The name used by ZooKeeper for a replicated cluster of ZooKeeper servers.} of machines to improve availability. 
 
@@ -662,7 +662,7 @@ The choice of providing a separate implementation only of the \texttt{PhTreeV} c
 
 \section{Distribution}
 
-\subsection{Client design}
+\subsection{Client Design}
 
 A high level diagram of the client library is presented in Figure \ref{fig:Client-library}. The \texttt{DistributedPhTreeV} class implements the \texttt{PhTreeV} interface and provides access the distributed PH-tree. Each method call on the \texttt{PhTreeV} interface is delegated to a \texttt{PhTreeIndexProxy} object. This object converts each method call into a \texttt{Request} object, similar to the \textit{Command design pattern}\footnote{http://en.wikipedia.org/wiki/Command\_pattern}. The proxy class also decides which hosts need to be contacted to resolve the operation, based on a locally cached \texttt{Key-Mapping} object. This object contains the most recent cluster configuration available to the host. The \texttt{Request} object is then passed on to a \texttt{RequestDispatcher}, where it is encoded into an array of bytes and sent to the corresponding hosts via the Java TCP Socket API. The \texttt{Transport} class keeps the most recently used connections alive, to avoid having to perform the TCP handshake for each operation when repeatedly interacting with the same host. 
 
@@ -675,7 +675,7 @@ A high level diagram of the client library is presented in Figure \ref{fig:Clien
 
 The calls to the \texttt{DistributedPhTreeV} methods are blocking, as the \texttt{Transport} object blocks the execution until it has received a response from the remote indexing host. The response is received as an array of bytes and is decoded into a \texttt{Response} object and returned to the \texttt{RequestDispatcher} object. If more hosts participated in the query, their corresponding \texttt{Response} objects are combined and the result of the operation is returned to the caller of the \texttt{DistributedPhTreeV} method. 
 
-\subsection{Server design}
+\subsection{Server Design}
 
 The \textit{server library} is implemented as a multi-threaded, asynchronous, event-driven server, according to the \textit{reactor pattern}\footnote{http://en.wikipedia.org/wiki/Reactor\_pattern}. This model uses two types of threads: \textit{Dispatcher} threads and \textit{Handler} threads. A \textit{Dispatcher} thread accepts incoming connections, allocates the necessary resources for the connection and then passes the connection resources to a \textit{Handler} thread. The \textit{Handler} thread accepts requests from the client using the connection resource provided by the \textit{Dispatcher} thread. For the TCP protocol, this resource is generally a reference to a \textit{Socket} object. The \textit{Handler} thread manages requests from more than one client by leveraging the event-based IO support provided by the operating system. The \textit{Netty IO} Java library is used for the implementation, as it provides an easy manner to set up a pool of \textit{Handler} threads. The chosen server architecture generally performs better than architectures which create a new thread for every request, as the \textit{Handler} threads are pooled and are initialized before any client requests are serviced. 
 
@@ -690,7 +690,7 @@ The high level diagram of the server library is presented in Figure \ref{fig:Ser
 
 Information that is commonly accessed by all of the \textit{Handler} threads is stored in the \texttt{IndexContext} object. This object contains a reference to the \texttt{ClusterService}, used to read and writer cluster configuration data, and to the in-memory PH-tree instance on that server, which is used in processing the client requests. 
 
-\subsection{Configuration server and Key-Mapping implementation}
+\subsection{Configuration Server and Key-Mapping Implementation}
 
 The \textit{Key-Mapping} was implemented using the ZooKeeper, an open-source coordination service. ZooKeeper provides access to a shared hierarchical namespace similar to a file system. This namespace is comprised of data registers, called \textit{znodes}, which are identified by a path and store data in the form of a byte array. The data stored within a \textit{znode} is guaranteed to always be read and written atomically. Additionally, each \textit{znode} can have any number of children \textit{znodes}. ZooKeeper provides primitives to create and delete \textit{znodes}, check if a node exists, get and set the data stored by a node and also retrieves the list of children of a node. It is also possible to set \textit{watches} on certain znodes, and receive notifications from ZooKeeper when the data of the node was changed. 
 
@@ -714,7 +714,7 @@ As the clients maintain a cached copy of the latest information in ZooKeeper, it
 
 In a cluster of $n$ hosts, there can be at most $n/2$ balancing operations running in parallel on the cluster, as eac host can be involved in a single balancing operation at a time. Therefore, it is important that a host's updates to the mapping do not overwrite the changes made by other hosts. The mapping update operation is performed in a \textit{compare-and-swap} manner, using the multi-update operation support provided by ZooKeeper. Using this type of operation, it is possible to perform an update to a znode only if its version (or alternatively, another znode's version) has not changed since the previous value was read. Following a re-balancing operation, the initiator hosts attempts to write the new version of the mapping to ZooKeeper. If the mapping was changed by another host, the initiator reads the new mapping, applies its changes on the interval bounds and retries the operation until it is successful. While this approach can lead to starvation if a host is consistently blocked by other hosts to update the mapping, such a large numbe of concurrent re-balancing operatons is not likely to happen. An alternative solution to this problem would have been to implement a distributed lock on the mapping through ZooKeeper. In that situation, the initiators would always need to perform three requests to ZooKeeper: one request to acquire the lock, the second to perform the write and the third to release the lock. Our solution optimizes the duration of the re-balancing operation for the best case, when the write will be successful, as that situation is much more common in practice. 
 
-\subsection{Communication flow}
+\subsection{Communication Flow}
 
 The distributed PH-tree uses a custom binary protocol for both the communication between a client and an indexing host and between two indexing neighbouring indexing hosts. The main communication flow is described in Figure \ref{fig:Encoding}. The \texttt{RequestDispatcher} on the client creates a \texttt{Request} object for each method call to the PH-tree API. This request object contains the request type and the arguments received by the method and it is converted into an array of bytes by the \texttt{RequestEncoder} class, according to the communication protocol. The array of bytes is sent through the network to all of the servers that participate in the operation. On the server, the request is assigned to one of request processing threads which converts the array of bytes back to a \texttt{Request} object using a \texttt{RequestDecoder}. The request is then serviced by a \texttt{RequestHandler} object, which returns a \texttt{Response} object containing the result of the request. The \texttt{Response} object is converted into an array of bytes using a \texttt{ResponseEncoder} and sent back to the client over the wire. Back on the client, the response is decoded from a byte array. In case multiple servers were contacted, all of their responses are decoded and then combined to produce the return value of the method call.
 
@@ -758,6 +758,7 @@ Figure \ref{fig:Concurrency-classes} shows the \texttt{PhOperations} interface a
 Another big advantage is that the \texttt{PhOperations} reference can be swapped at runtime, which changes the concurrency strategy used by the PH-tree. This allows a tree to use optimistic locking while it is "loaded" with entries from multiple threads, and then switch to copy-on-write to allow iterators or range queries to execute on snapshots of the tree. 
 
 The implementation uses the locks provided by the Java API for the write locks. An instance of \texttt{ReentrantLock} is added to each node object, and the locks are taken by the writer threads according to the concurrency strategy used. Furthermore, the \texttt{ReentrantLock} object is used to synchronize the writer threads in the copy-in-write implementation of the tree. An alternative to using lock objects on each node is to perform synchronization using a separate concurrent data structure, in an attempt to reduce the amount of memory associated with each node. For example, to "lock" a node, a writer would insert it the node reference into a concurrent hash table. Similarly, "unlocking" a node is done by removing the node from the set. Therefore, a node is "locked" if it is stored in the set. This approach would reduce the space overhead added by the lock object, however its performance depends greatly on the performance of the concurrent hash set. Furthermore, if a thread wants to acquire a lock that is already taken is has to repeatedly poll the data structure, entering a busy-wait state. This means that the thread will keep using the CPU and generate a lot of traffic on the memory bus until the lock is released. We have finally chosen the solution that assigns a lock object to each node, as it avoid busy-waiting when writer threads have to wait on a lock.  
+
 \chapter{Evaluation}
 \label{ch:evaluation}
 
@@ -767,7 +768,7 @@ This chapter contains the performance evaluation of the distributed PH-tree. Sec
 \label{sec:evalution-distribution}
 
 \subsection{Experimental Setup}
-The experiments were executed in order to measure the insertion response time and throughput for distributed clusters containing different numbers of server hosts. The machines used were provided by the Google Computer Engine\footnote{https://cloud.google.com/compute/} cloud platform. Each server process ran on a virtual instance containing 2 virtual CPU's and 7.5 GB of RAM memory\footnote{The code used by Google Compute engine for this type of virtual machine is \texttt{n1-standard-2 }}. Google Compute Engine does not provide any information regarding the physical hardware used by the virtual machines, however the virtual machine emulated the Intel Core i7-3800 processor family, with each of the 2 CPU cores having a 2.6GHz frequency. The same type of machines have been used to run the ZooKeeper server, run the indexing server processes and generate client requests. 
+The experiments were executed in order to measure the insertion response time and throughput for distributed clusters containing different numbers of server hosts. The machines used were provided by the Google Computer Engine\footnote{https://cloud.google.com/compute/} cloud platform. Each server process ran on a virtual instance containing 2 virtual CPU's and 7.5 GB of RAM memory\footnote{The code used by Google Compute engine for this type of virtual machine is \texttt{n1-standard-2 }}. Google Compute Engine does not provide any information regarding the physical hardware used by the virtual machines, however the virtual machine emulated the Intel Core i7-3800 processor family, with each of the 2 CPU cores having a 2.6GHz frequency. The same type of machines have been used to run the ZooKeeper server, the indexing server processes and generate client requests. 
 
 Both the throughput and the response time were measured on the client machines. In the measurements, we consider that an operation performed on the distributed index starts in the moment when the method corresponding to this operation is called in the client code and ends when the same methods returns. Therefore, the duration of an operation includes the request encoding on the client side, the time needed by the request to travel over the network to the server machine, the processing time on the server machine, the time needed by the server response to travel over the network back to the client and the response decoding. 
 
@@ -838,13 +839,13 @@ The nearest neighbour workload, similar to the range query workload, is executed
 \section{Concurrency}
 \label{sec:evaluation-concurrency}
 
-\subsection{Experimental setup}
+\subsection{Experimental Setup}
 \label{subsec:exp-conc}
 The aim of the concurrency tests is the evaluate the throughput and response time of each implemented concurrency strategy. Furthermore, it is important to view how each concurrency strategy scales with respect to the number of concurrent threads accessing the PH-tree. Additionally, we identify the impact the concurrency strategies have when the PH-tree is only accessed by a single thread in the same time.
 
 The concurrent experiments have been run on a Google Compute Engine VM\footnote{The code of the virtual machine on the Google Compute Engine platform is \texttt{n1-standard-16}.} instance with 16 virtual CPU cores and 60GB of RAM. Similar to the machines used for the distribution computation, information regarding the physical hardware used by the machine is not available. However, the emulated hardware family is Intel Xeon E5-1600, and each virtual CPU has a frequency of 2.5 GHz. All performed experiments were performed with 3 repetitions and the response time and throughput have been averaged across the repetitions. 
 
-\subsection{Experimental results}
+\subsection{Experimental Results}
 \subsubsection{Write performance}
 
 The first type of tests evaluate the throughput and response time of the concurrency strategies for an increasing number of threads. In each run, an array of 5 million multi-dimensional elements is inserted into an empty PH-tree. The values are sampled from the Gaussian distribution. The array is split equally into non-overlapping intervals between the inserting threads and each thread will insert a certain section of it. As the number of inserted entries is equal across the runs, it is expected that more inserting threads will lead to a higher throughput and a lower response time.
@@ -905,7 +906,7 @@ For up to 6 dimensions, both the Hand-over-Hand and Optimistic locking strategie
 
 Another important factor in the multi-threaded performance of the PH-tree is the contention on the memory bus. As the number of dimensions of the PH-tree increases, each threads needs to both read and write and increasing amount of data from and to the main memory. Figure \ref{fig:exp-conc-write-10d-tp} shows that for 10 dimensional trees, the difference in throughput between the concurrency approaches is much smaller than in the 1, 2, 3 or 6 dimensional experiments. 
 
-\subsubsection{Single thread write performance}
+\subsubsection{Single Thread Write Performance}
 
 The second type of tests measures the penalty induced by the concurrency strategies when the tree is accessed by a single writer thread. For these experiments, 1 million 3-dimensional entries were inserted into an empty PH-tree by a single thread. The hardware used for this tests is an Intel i5-760 with 4 CPU cores, each running at a 2.8 GHz frequency. The values for each entry were generated uniformly at random. Figure \ref{fig:concurrent-comp} illustrates the time needed for the insertion workload for each concurrency strategy and the single-threaded version of the tree. For the single-threaded version, the insertion finished in 1.1 seconds. The version will be used as a baseline for the other measurements. The hardware used for this tests is an Intel i5-760 with 4 CPU cores, each running at a 2.8 GHz frequency. 
 
@@ -957,7 +958,7 @@ These tests have been run on the same 16 CPU machine described in \ref{subsec:ex
 
 The results show that an increased number of reader threads increases the overall throughput of the PH-tree. The increase in throughput is almost linear for up to 6 reader threads, after which each additional reader thread adds a smaller increase to the throughput. The throughput stabilizes after the number of readers goes over 10. As in the case of insertion performance, the number of dimensions of the data stored in the PH-tree influences both the throughput and response time. As the number of dimensions increases, the throughput decreases and the response time decreases. This is due to the fact that the PH-tree nodes themselves are bigger and each thread needs to transfer more data over the memory bus.
 
-\section{Result}
+\section{Results}
 \label{sec:evaluation-results}
 
 The distributed experiments showed that the distributed PH-tree scales with an increasing number of server machines. In all experiments of this type, the addition of server machines to the cluster increased the overall throughput of the system and decreased the response time for each individual request. This increase in throughput and decrease in response time will always happen in workloads consisting mostly of point operations. In the case of range and nearest neighbour queries, the performance is dependent on the number of hosts that need to contacted for each individual query, a number that generally increases if the number of hosts is increased. However, we found that if the majority of the range and nearest neighbour queries are resolved on a single host, the system displays similar throughput and response time characteristics as in the case of point operation workloads. 
@@ -985,13 +986,13 @@ From the point of view of the balancing algorithm, hosts participating in re-bal
 The concurrency strategies presented by this work rely on locking and copy-on-write to allow concurrent access. Further work could focus on investigating the performance of concurrent access strategies which use atomic operations instead of locks as a synchronization mechanism. Such a solution would remove the overhead added by the lock contention and potentially provide better performance in some situations.
 
 \appendix
-\chapter{Installation and usage Instructions}
+\chapter{Installation and Usage Instructions}
 
 The distributed PH-tree was implemented in Java and uses Maven\footnote{https://maven.apache.org/} for compilation, packaging and dependency management. Compiling the project requires the Java Development Kit 8 and Maven 3 to be installed on the local computer. Moreover, the source code uses the PH-tree library as a compilation and run-time dependency, and therefore it is required that the PH-tree Maven artifact be installed in the local computer repository prior to compilation. 
 
 \section{Compilation and installation} 
 
-\subsection{Client and server libraries}
+\subsection{Client and Server Libraries}
 As previously mentioned, the compilation is performed using Maven, which can be downloaded from \url{http://maven.apache.org/download.cgi}. To compile the project, open a console to the directory where the source code is stored and type the command: \texttt{maven package} . This command will compile both the client and server libraries and execute all the unit tests. When compiling from the command line, it is necessary that the Maven binary be present in the PATH variable of the command line environment. Alternatively, the project can be compiled from an IDE, as the majority of the contemporary IDE's provide wizards for importing and managing Maven projects.
 
 \subsection{ZooKeeper}
