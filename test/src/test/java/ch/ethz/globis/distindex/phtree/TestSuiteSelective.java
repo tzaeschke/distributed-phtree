@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
+//ignored to make compilation finish faster
 @Ignore
 @RunWith(org.junit.runners.Suite.class)
 @Suite.SuiteClasses({TestNearestNeighbour.class, TestIndexQueries.class, TestIndexInsertion.class, TestValues.class, TestValuesD.class})

@@ -90,7 +90,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         double distance = request.getDistance();
 
         IndexEntryList<long[], byte[]> results;
-        if (distance > 0) {
+        if (tree().size() == 0) {
+            results = new IndexEntryList<>();
+        } if (distance > 0) {
             results = createList(tree().query(start, end), MultidimUtil.transpose(start, distance), distance);
         } else {
             results = createList(tree().query(start, end));
@@ -103,11 +105,15 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         if (isVersionOutDate(request)) {
             return createOutdateVersionResponse(request);
         }
-
         long[] key = request.getKey();
         int k = request.getK();
 
-        IndexEntryList<long[], byte[]> results = createKeyList(tree().nearestNeighbour(k, key));
+        IndexEntryList<long[], byte[]> results;
+        if (tree().size() == 0) {
+            results = new IndexEntryList<>();
+        } else {
+            results = createKeyList(tree().nearestNeighbour(k, key));
+        }
         return createResponse(request, results);
     }
 
@@ -295,7 +301,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         int maxResults = request.getMaxResults();
         List<PVEntry<byte[]>> results;
 
-        if (mapper == null && predicate == null) {
+        if (tree.size() == 0) {
+            results = new ArrayList<>();
+        } else if (mapper == null && predicate == null) {
             results = tree.queryAll(start, end);
         } else {
             results = tree.queryAll(start, end, maxResults, predicate, PhMapper.<byte[]>PVENTRY());

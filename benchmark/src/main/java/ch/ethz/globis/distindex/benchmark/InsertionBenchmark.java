@@ -149,8 +149,8 @@ public class InsertionBenchmark {
     public static void main(String[] args) {
 
         int depth = 64;
-        int nrEntries = 50000;
-        int maxThreads = 4;
+        int nrEntries = 5000;
+        int maxThreads = 2;
 
         if (args.length == 2) {
             nrEntries = Integer.parseInt(args[0]);
@@ -228,10 +228,10 @@ public class InsertionBenchmark {
             List<long[]> entries = generateRandomEntries(nrEntries, dim);
             List<long[]> testEntries = generateConsecutiveEntries(5000, dim);
 
-            String pattern = "%s\t%30s\t%30s\t%30s";
-            System.out.println(String.format(pattern, "Threads", "Copy-on-Write", "Hand-over-Hand", "Optimistic locking"));
+            String pattern = "%s\t%30s";
+            System.out.println(String.format(pattern, "Threads", "PhOperations"));
             Result result;
-            String dataCow, dataHoH, dataOL;
+            String dataCow;
             double tp = 0;
             double avgResponseTime = 0;
             String dataPattern = "%10.5f\t%10.5f";
@@ -246,94 +246,9 @@ public class InsertionBenchmark {
                 avgResponseTime /= reps;
                 tp /= reps;
                 dataCow = String.format(dataPattern, tp, avgResponseTime);
-
-                tp = 0;
-                avgResponseTime = 0;
-
-                for (int rep = 0; rep < reps; rep++) {
-                    benchmarkHoHMultiRead(i, testEntries, dim, depth);
-
-                    result = benchmarkHoHMultiRead(i, entries, dim, depth);
-                    tp += result.getThroughput();
-                    avgResponseTime += result.getAvgResponseTime();
-                }
-                avgResponseTime /= reps;
-                tp /= reps;
-                dataHoH = String.format(dataPattern, tp, avgResponseTime);
-
-                tp = 0;
-                avgResponseTime = 0;
-                for (int rep = 0; rep < reps; rep++) {
-                    benchmarkOLMultiRead(i, testEntries, dim, depth);
-
-                    result = benchmarkOLMultiRead(i, entries, dim, depth);
-                    tp += result.getThroughput();
-                    avgResponseTime += result.getAvgResponseTime();
-                }
-                avgResponseTime /= reps;
-                tp /= reps;
-                dataOL = String.format(dataPattern, tp, avgResponseTime);
-                line = String.format(pattern, i, dataCow, dataHoH, dataOL);
+                line = String.format(pattern, i, dataCow);
                 System.out.println(line);
             }
         }
-
-//        System.out.println("*********************************************");
-//        System.out.println("                Read during inserts");
-//        System.out.println("*********************************************");
-//        for (int dim : dims) {
-//            System.out.println("Dimensions: " + dim);
-//            List<long[]> entries = generateRandomEntries(nrEntries, dim);
-//            List<long[]> testEntries = generateConsecutiveEntries(5000, dim);
-//
-//            String pattern = "%s\t%30s\t%30s\t%30s";
-//            System.out.println(String.format(pattern, "Threads", "Copy-on-Write", "Hand-over-Hand", "Optimistic locking"));
-//            Result result;
-//            String dataCow, dataHoH, dataOL;
-//            double tp = 0;
-//            double avgResponseTime = 0;
-//            String dataPattern = "%10.5f\t%10.5f";
-//            for (int i = 1; i <= maxThreads; i++) {
-//                for (int rep = 0; rep < reps; rep++) {
-//                    benchmarkCOWMultiReadWrite(i, testEntries, dim, depth);
-//
-//                    result = benchmarkCOWMultiReadWrite(i, entries, dim, depth);
-//                    tp += result.getThroughput();
-//                    avgResponseTime += result.getAvgResponseTime();
-//                }
-//                avgResponseTime /= reps;
-//                tp /= reps;
-//                dataCow = String.format(dataPattern, tp, avgResponseTime);
-//
-//                tp = 0;
-//                avgResponseTime = 0;
-//
-//                for (int rep = 0; rep < reps; rep++) {
-//                    benchmarkHoHMultiReadWrite(i, testEntries, dim, depth);
-//
-//                    result = benchmarkHoHMultiReadWrite(i, entries, dim, depth);
-//                    tp += result.getThroughput();
-//                    avgResponseTime += result.getAvgResponseTime();
-//                }
-//                avgResponseTime /= reps;
-//                tp /= reps;
-//                dataHoH = String.format(dataPattern, tp, avgResponseTime);
-//
-//                tp = 0;
-//                avgResponseTime = 0;
-//                for (int rep = 0; rep < reps; rep++) {
-//                    benchmarkOLMultiReadWrite(i, testEntries, dim, depth);
-//
-//                    result = benchmarkOLMultiReadWrite(i, entries, dim, depth);
-//                    tp += result.getThroughput();
-//                    avgResponseTime += result.getAvgResponseTime();
-//                }
-//                avgResponseTime /= reps;
-//                tp /= reps;
-//                dataOL = String.format(dataPattern, tp, avgResponseTime);
-//                line = String.format(pattern, i, dataCow, dataHoH, dataOL);
-//                System.out.println(line);
-//            }
-//        }
     }
 }
