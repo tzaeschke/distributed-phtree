@@ -374,16 +374,22 @@ This section will discuss how the \textit{key-mapping} is created from the Z-ord
 \label{sec:distindex-key-mapping}
 The \textit{key-mapping} used by the distributed PH-tree assigns the points based on the Z-order curve intervals. To determine the host responsible for a certain multi-dimensional point, one has to find the Z-order interval that contains the Z-value of this point. In the case of a range query, one has to find all of the Z-order intervals for which the regions in the original space intersect the hyper-rectangle defined by the top left and bottom right points which define the range query. There are two alternative for designing the \textit{key-mapping} based on the Z-order curve intervals:
 \begin{enumerate}
-    \item Store the Z-intervals as pairs of Z-values and perform 1-dimensional interval matchings to determine the hosts that have to be contact for certain queries. For point operations, the The operation is linear in the number of hosts, for both point and range queries, as the Z-values of the query points need to be compared with the Z-values of the intervals. The correctness of this approach stems from the fact that the region represented by a $d$-dimensional hyper-rectangle [X, Y] \footnote{Where X is the top left corner of the hyper-rectangle and Y is the bottom right corner of the hyper rectangle} is included in the set of d-dimensional regions corresponding to the Z-interval $[Z_X,Z_Y]$. 
-    \item Store the hyper-rectangles from the original space that correspond to each Z-order interval and perform intersections between the query points/rectangles from the original space and the hyper-rectangle of the interval regions. The complexity of this operation is $O(n * w * d)$, for $n$ indexing hosts, as each region contains at most $O(w * d)$ hyper-rectangles. 
+    \item Store the Z-intervals as pairs of Z-values and perform 1-dimensional interval matchings to determine the hosts that have to be contacted for certain queries. For point operations, determining which host needs to be contacted can be done by performing a binary search of the Z-value of the query point on the Z-order intervals belonging to each host. In the case of range queries, one needs to determine the hosts storing the top left and bottom right corners using binary seach, and return all of the hosts holding the intervals between the interval of the host storing the top left point and the host storing the top right point. In both cases, the complexity is $O(logn)$, where $n$ is the number of hosts. The correctness of this approach stems from the fact that the region represented by a $d$-dimensional hyper-rectangle [X, Y] \footnote{Where X is the top left corner of the hyper-rectangle and Y is the bottom right corner of the hyper rectangle} is included in the set of d-dimensional regions corresponding to the Z-interval $[Z_X,Z_Y]$. This can be seen in Figure \ref{fig:range-zorder}.
+    \item Store the hyper-rectangles from the original space that correspond to each Z-order interval and perform intersections between the query points/rectangles from the original space and the hyper-rectangle of the interval regions. The complexity of this operation is $O(n * w * d)$, for $n$ indexing hosts, as each region contains at most $O(w * d)$ hyper-rectangles. Figure \ref{fig:zorder-rectangles-split} shows how the regions defined by the Z-order intervals can be split into hyper-rectangles.
 \end{enumerate}
 
-Even if the first solution is asymptotically faster than the second one for finding the hosts to query, the first approach attempts to query a much larger area in the original space than the second one. Therefore, the first method can potentially generate many more network requests than the first one, especially in a system with a large number of online indexing hosts. Moreover, the intersection operation itself is performed on the client, in-memory, and does not generate a network request. Because of these reasons, the second approach is preferable to the first approach in a system looking to minimize the number of network requests associated to each query, like the distributed PH-tree. 
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{images/zorder-rectangles.pdf}
+    \caption{The intervals described in \ref{fig:zorder-square} split into hyper-rectangles. }
+    \label{fig:zorder-rectangles-split}
+\end{figure}
+Even if the first solution is asymptotically faster than the second one for finding the hosts to query, the first approach attempts to query a much larger area in the original space than the second one. Therefore, the first method can potentially generate many more network requests than the first one, especially in a system with a large number of online indexing hosts. Moreover, the intersection operation itself is performed in-memory on the client machine and does not generate a network request. Because of these reasons, the second approach is preferable to the first approach in a system looking to minimize the number of network requests associated to each query, like the distributed PH-tree. 
 
-\cite{skopal2006-ubtree} presents an algorithm to decompose a Z-order interval into a set of at most $O(w*d)$ rectangles. These rectangles are then stored in a multi-dimensional data structure providing hyper-rectangle intersection operations.\footnote{This implementation actually uses a variant of the in-memory PH-tree for this function.}
+An algorithm for decomposing Z-order intervals into a set of hyper-rectangles is described in \cite{skopal2006-ubtree}. This algorithm decomposes a Z-order interval into at most $O(w * d)$ hyper-rectangles in $O(w * d)$ time, where $w$ is the bit width of values in each dimension and $d$ is the numbe of dimensions. We propose storing the hyper-rectangles associated with each Z-order interval into a multi-dimensional data structure able to perform intersection between the stored hyper-rectangles and a query point or a query hyper-rectangle.
 
 \subsection{Point operations}
-Point operations involve a single query point, like the insertion or removal of a key-value pair, obtaining the value associated with a key value pair or changing the key associated with a key-value pair. For the point queries, the client only needs to determine which host to send the request to. This is done by determining the intersections between the query point and the hyper-rectangles corresponding to the Z-order intervals. In the case of the \textit{get()}, \textit{put()} and \textit{delete()} operations, the client sends the request to the hosts responsible for the query point and returns the result of the operation. In the case of the \textit{updateKey()} operations, it is possible that a different host is currently responsible for the new key of the value associated with the query point. In that case, the \textit{updateKey()} operation is performed in two steps: first the client removes the old key from the host responsible for it, and the inserts the new key to the proper host.
+Point operations involve a single query point, like the insertion or removal of a key-value pair, obtaining the value associated with a key-value pair or changing the key associated with a key-value pair. For the point queries, the client only needs to determine which host to send the request to. This is done by determining the intersections between the query point and the hyper-rectangles corresponding to the Z-order intervals. In the case of the \textit{get()}, \textit{put()} and \textit{delete()} operations, the client sends the request to the host responsible for the query point and returns the result of the operation. In the case of the \textit{updateKey()} operations, it is possible that a different host is responsible for the new key of the value associated with the query point. In that case, the \textit{updateKey()} operation is performed in two steps: first the client removes the old key from the host responsible for it, and then inserts the new key into the proper host.
 
 \subsection{Range queries}
 
@@ -395,13 +401,13 @@ A range query can generate up to $O(n)$ network requests, as in some cases, all 
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = \linewidth]{images/zordering-range}
-        \caption{The 2-dimensional range $[(0, 2), (1, 5)]$ overlaid on the Z-order curve.}
+        \caption{The 2-dimensional range $[(0, 2), (1, 5)]$ overlaid on the Z-order curve. The Z-order curve interval corresponding the this range is represented with grey.}
         \label{fig:range-zorder}
     \end{subfigure}%
     \qquad
     \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = \linewidth]{images/zordering-range-intervals}
-        \caption{The intervals specific in the previous section overlaid over the previous picture.}
+        \caption{The 2-dimensional range $[{0, 2), (1, 5)}]$ ovelaid on the Z-order curve. The intervals mentioned in Figure \ref{fig:zorder-square} are coloured in this image as well.}
         \label{fig:range-zorder-intervals}
     \end{subfigure}
     \caption{Illustration of a range query intersected with the host intervals}
@@ -426,7 +432,7 @@ The additional range query is needed because the Z-order splitting, or any other
 
 It is sometime possible that the initial query sent to the host responsible for $q$ will return fewer than $k$ points. This will generally only happen when the cluster contains very few points. In this case, the queried area should be iteratively increased until at least $k$ points are returned. This can be done by computing the distance $d$ and iterative increasing it until the range query $[q - d, q + d]$ returns at least $k$ points.
 
-\begin{figure}
+\begin{figure}[h]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \includegraphics[width = 2.5in]{images/zordering-knn-a}
@@ -452,7 +458,7 @@ It is sometime possible that the initial query sent to the host responsible for 
 
 While this approach for finding the $k$ nearest neighbours of a query point is correct, it is not the most efficient one. The main issues is that the additional range query searches for other neighbours in a hyper-cubing range. The optimal strategy would be to search for these neighbours in hyper-sphere of radius $d$ centered at $q$. This circle is inscribed in the hyper-cube search by the range query, as illustrated in Figure \ref{fig:knn}d. Therefore, the algorithm presented in this work can sometimes send unnecessary request to hosts responsible for the areas outside of the circle and still within the hypercube. This is generally not a problem in lower dimensional spaces, however the different in volume between the hyper-cube and the hyper-sphere increases gradually with dimensionality of the space. 
 
-\subsection{Entry load balancing}
+\subsection{Entry re-balancing}
 
 As previously described, data sets which are skewed towards certain areas of the multi-dimensional space will cause some machines to store more points than the others. A load balancing algorithm is needed to balance the amount of entries stored across the cluster, such that each hosts stores roughly the same amount of entries. 
 
