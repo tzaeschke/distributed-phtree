@@ -102,11 +102,11 @@
 
 \chapter*{Abstract}
 
-The storage and management of multi-dimensional data is an important aspect in many of todays applications, like geo-information systems, computer visions and computer geometry. In contemporary times, when computes are able to capture and store increasing amounts of multi-dimensional data, it is important for the applications to efficiently store and query this data. 
+The storage and management of multi-dimensional data is an important aspect in many applications, like geo-information systems, computer vision and computer geometry. In contemporary times, when computers are able to capture and store increasing amounts of multi-dimensional data, it is important for the applications to efficiently store and query this data. 
 
-This work presents a distributed version of the PH-tree, a highly efficient in-memory multi-dimensional data structure, supporting range and nearest neighbour queries. We present a distribution architecture for the PH-tree, which extends the PH-tree to run on cluster of computers. The distributed version of the PH-tree is able to use the main-memory of all of the machines in the cluster to store the multi-dimensional data for very efficient query operations. Moreover, the distributed settings allows each machine to be queried independently of the other machines. The point distribution algorithm used uses the Z-order space filling curve to assign sections of the space to the computers and in the cluster. Additionally, we present an automatic data re-balancing algorithm, which attempts to maintain an equal storage load across all computers. The performance evaluation shows that the proposed distribution version of the PH-tree is able to scale with respect to the number of computer in the cluster, obtaining an almost linear increase in throughput and a linear reduction in the response for point operations. 
+This work presents a distributed version of the PH-tree, a highly efficient in-memory multi-dimensional data structure, supporting range and nearest neighbour queries. We present a distribution architecture for the PH-tree, which extends the PH-tree to run on cluster of computers. The distributed version of the PH-tree is able to use the main-memory of all of the machines in the cluster to store the multi-dimensional data. Moreover, the distributed setting allows each machine to be queried independently of the other machines. The point distribution algorithm proposed in this work uses the Z-order space filling curve to assign sections of the space to the computers in the cluster. Additionally, we present an automatic data re-balancing algorithm, which attempts to maintain an equal storage load across all computers. The performance evaluation shows that the proposed distribution version of the PH-tree is able to scale with respect to the number of computer in the cluster, obtaining an almost linear increase in throughput and a similar reduction in the response time for point operations. 
 
-Another contribution of this work is the extension of the PH-tree to support concurrent write access, allowing it to take advantage of multi-core processor architectures. We present several concurrent write access strategies, with different consistency guarantees, discuss the advantages and disadvantages and evaluate the write performance. The presented Copy-on-Write algorithm allows queries to execute on snapshots of the PH-tree, while the actual PH-tree is accessed by one writer and a large number of readers. This work also presents two fine grained locking strategies, which sacrifice consistency to allow multiple reader and writer threads to access the tree in the same time. All presented concurrency perform locking only in the case of the write operations, and allow read queries to execute without taking any locks.   
+Another contribution of this work is the extension of the PH-tree to support concurrent write access, allowing it to take advantage of multi-core processor architectures. We present several concurrent write access strategies, with different consistency guarantees, discuss the advantages and disadvantages and evaluate the write performance. The presented Copy-on-Write strategy allows queries to execute on snapshots of the PH-tree, while the actual PH-tree is accessed by one writer and a large number of readers. This work also presents two fine grained locking strategies, which sacrifice consistency to allow multiple reader and writer threads to access the tree in the same time. All presented concurrency strategies perform locking only in the case of the write operations, and allow read queries to execute without taking any locks, which greatly increases the performance of read operations when using large numbers of reader threads.  
 
 \tableofcontents
 
@@ -950,37 +950,37 @@ The concurrent experiments compared the performance of the three implemented con
 \section{Contributions}
 \label{sec:conclusions-contribution}
 
-This work presents a complete solution from implementing a distributed and parallel multi-dimensional index, by presenting both a distribution architecture and operation parallelization solutions for individual machines. The main contributions are the following:
+This work presents a complete solution from implementing a distributed and parallel multi-dimensional index based on the PH-tree. We propose a distribution architecture for the PH-tree and devise a set of efficient distributed algorithms for the PH-tree operations. Furthermore, the in-memory PH-tree was extended to support concurrent write operations, allowing each machine in the cluster to service more requests in an concurrent manner. The main contributions of this work are the following:
 
-The distribution architecture partitions the multi-dimensional space in a manner that allows fast point operation and efficient range and nearest neighbour queries. The proposed balancing algorithm ensures that all hosts will eventually hold a comparable number of entries, even in the case of very skewed input distributions. The presented distribution solution can be easily adapted for other types of index keys, as long as the key domain can be mapped to 1 dimensional line, allowing the constructing of efficient and scalable range-queryable, distributed key-values stores.
+The distribution architecture partitions the multi-dimensional space in a manner that allows fast point operation and efficient range and nearest neighbour queries. The proposed balancing algorithm ensures that all hosts will eventually hold a comparable number of entries, even in the case of very skewed input distributions. The presented distribution solution can be easily adapted for other types of indexes, as long as the key domain for of this indexes can be mapped to 1 dimensional line, allowing the construction of efficient and scalable range-queryable, distributed key-values stores.
 
-The in-memory PH-tree was updated to support concurrent access according to two consistency paradigms. The Copy-On-Write approach offers full consistency guarantees, providing snapshot semantics to queries and isolating readers from any further modifications to the tree. For situations where full consistency is not needed, the optimistic locking approach offers relaxed consistency semantics and provides improved write throughput by allowing concurrent write operations. Furthermore, none of presented approaches require the readers to acquire any locks and thus add no overhead to the execution of the read operations. 
+The in-memory PH-tree was updated to support concurrent access according to two consistency paradigms. The Copy-On-Write approach offers full consistency guarantees, providing snapshot semantics to queries and isolating readers from any further modifications to the tree. For situations where full consistency is not needed, the Optimistic Locking approach offers relaxed consistency semantics and provides improved write throughput by allowing concurrent write operations. Hand-over-Hand locking provides the same consistency as Optimistic Locking, and also guarantees that starvation will not occur in the case of the writers. Furthermore, none of presented approaches require the readers to acquire any locks and thus add no overhead to the execution of the read operations. 
 \section{Future work}
 \label{sec:conclusions-future-work}
 
-One aspect of the distributed PH-tree that could be improved is the execution of the distributed nearest neighbour queries. As previously mentioned in section \ref{sec:distindex-algorithms}, the nearest neighbour algorithm first obtains the k nearest neighbours from the host responsible for the query point and then proceeds to run a range query on the cluster to check for any closer points on different hosts. The additional check is done by exploring a hyper-cubic section of the initial space. A more efficient approach would be to check a hyper-spheric region centered in the query point. This improvement could reduce the number of hosts queried on the second step of the nearest neighbour queries and could potentially improve the execution time of such queries. 
+One aspect of the distributed PH-tree that could be improved is the execution of the distributed nearest neighbour queries. As previously mentioned in section \ref{sec:distindex-algorithms}, the nearest neighbour algorithm first obtains the $k$ nearest neighbours from the host responsible for the query point and then proceeds to run a range query on the cluster to check for any closer points on different hosts. The additional check is done by exploring a hyper-cubic section of the initial space. A more efficient approach would be to check a hyper-spheric region centered in the query point. This improvement could reduce the number of hosts queried on the second step of the nearest neighbour queries and could potentially improve the execution time of such queries. 
 
-From the point of view of the balancing algorithm, hosts participating in re-balancing operation do not accept write requests, to simplify the management of the mapping between the points and the hosts. The balancing algorithm could be modified to allow the hosts to accept write requests to a separate buffer and integrate the buffer to the stored PH-tree after the balancing operation has finished.
+From the point of view of the balancing algorithm, hosts participating in re-balancing operation do not accept write requests, to simplify the update of the mapping between the points and the hosts. The balancing algorithm could be modified to allow the hosts to accept write requests to a separate buffer and integrate the buffer to the stored PH-tree after the balancing operation has finished.
 
-The concurrency strategies presented by this work rely on locking and copy-on-write to allow concurrent access. Further work could focus on investigating potential concurrent access strategies using on atomic operations.
+The concurrency strategies presented by this work rely on locking and copy-on-write to allow concurrent access. Further work could focus on investigating the performance of concurrent access strategies which use atomic operations instead of locks as a synchronization mechanism. Such a solution would remove the overhead added by the lock contention and potentially provide better performance in some situations.
 
 \appendix
 \chapter{Installation and usage Instructions}
 
-The distributed PH-tree was implemented in Java, as a Maven\footnote{https://maven.apache.org/} project. Compiling the project requires the Java Development Kit 8 and Maven 3 to be installed on the local computer. Moreover, this source code uses the PH-tree library as a compilation and run-time dependency, and therefore it is required that the PH-tree Maven artifact be installed in the local computer repository prior to compilation. 
+The distributed PH-tree was implemented in Java and uses Maven\footnote{https://maven.apache.org/} for compilation, packaging and dependency management. Compiling the project requires the Java Development Kit 8 and Maven 3 to be installed on the local computer. Moreover, the source code uses the PH-tree library as a compilation and run-time dependency, and therefore it is required that the PH-tree Maven artifact be installed in the local computer repository prior to compilation. 
 
 \section{Compilation and installation} 
 
 \subsection{Client and server libraries}
-The compilation is performed using Maven. To compile the project, open a console to the directory where the source code is store and type the command: \texttt{maven package} . This will compile both the client and server libraries and execute all the unit tests. It is necessary that the Maven binary be present in the PATH variable of the console terminal. Alternatively, the project can be compile from an IDE, as the majority of the contemporary IDE's provide wizards for importing and managing Maven projects.
+As previously mentioned, the compilation is performed using Maven, which can be downloaded from \url{http://maven.apache.org/download.cgi}. To compile the project, open a console to the directory where the source code is stored and type the command: \texttt{maven package} . This command will compile both the client and server libraries and execute all the unit tests. When compiling from the command line, it is necessary that the Maven binary be present in the PATH variable of the command line environment. Alternatively, the project can be compiled from an IDE, as the majority of the contemporary IDE's provide wizards for importing and managing Maven projects.
 
 \subsection{ZooKeeper}
-The cluster of machines running the distributed PH-tree needs at least one ZooKeeper server to store the cluster configuration. An up-to-date guide for downloading and installing a basic ZooKeeper server is available at the following location: \url{https://zookeeper.apache.org/doc/trunk/zookeeperStarted.html}. 
-A summary of the installation instructions:
+The cluster of machines running the distributed PH-tree needs at least one ZooKeeper server to store the manager the cluster configuration information. An up-to-date guide for downloading and installing a basic ZooKeeper server is available at the following location: \url{https://zookeeper.apache.org/doc/trunk/zookeeperStarted.html}. 
+A short summary of operations needed to install and start a ZooKeeper server is presented below.
 \begin{itemize}
-    \item Download the latest stable ZooKeeper package and copy it to the desired installation location. We will refer to this directory as \texttt{ZOO\_HOME}.
-    \item Go to \texttt{ZOO\_HOME/conf} and rename the \texttt{zoo\_sample.cfg} file to \texttt{zoo.cfg}. 
-    \item Start the ZooKeeper server using the \texttt{zkStart.sh} script in the directory \texttt{ZOO\_HOME}.
+    \item Download the latest stable ZooKeeper package and copy it to the desired installation directory. This directory will be referred to as \texttt{ZOO\_HOME}.
+    \item In the \texttt{ZOO\_HOME/conf} directory, rename the \texttt{zoo\_sample.cfg} file to \texttt{zoo.cfg}. The initial file contains an sample configuration file for ZooKeeper, and renaming it to \texttt{zoo.cfg} will make ZooKeeper use this configuration when started.
+    \item Start the ZooKeeper server using the \texttt{zkServer.sh} script in the directory \texttt{ZOO\_HOME}.
 \end{itemize}
 
 \section{Usage}
@@ -991,7 +991,9 @@ The following code snippet starts a server on the machine with ip \texttt{server
     java -jar middleware-1.0-SNAPSHOT.jar server-ip:5000 zk-ip:2181
 \end{lstlisting}
 
-Additional servers can be added by executing a similar command on a different machine and changing \texttt{server-ip} accordingly. Clients can access the distributed PH-tree using the API provided in the client library module. An example for connecting to a running cluster of machines is listed in Figure \ref{fig:java-code}.
+Additional servers can be added by executing this command on a different machine and changing \texttt{server-ip} accordingly. 
+
+Clients can access the distributed PH-tree using the API provided in the client library module. An example for connecting to a running cluster of machines is listed in Figure \ref{fig:java-code}. The \texttt{PHFactory} class creates references to PH-tree classes, which can be used to perform operations on the distributed PH-tree.
 
 \begin{figure}
 \begin{lstlisting}[language=Java]       
@@ -1000,7 +1002,7 @@ Additional servers can be added by executing a similar command on a different ma
     // the following address 
     String zkHost = "localhost";
     int zkPort = 2181;
-    PHFactory factory = new ZKPhFactory(zkHost, zkPort);
+    PHFactory factory = new ZKPHFactory(zkHost, zkPort);
 
     //create a 2D PH-tree with 64 bit width
     PhTree tree = factory.createPHTreeSet(2, 64);    
@@ -1009,7 +1011,7 @@ Additional servers can be added by executing a similar command on a different ma
 \label{fig:java-code}
 \end{figure}
 \listoffigures
-\listoftables
+%\listoftables
 
 \chapter*{Acknowledgements}
 
