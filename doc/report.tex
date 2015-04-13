@@ -141,7 +141,7 @@ Specifically, the distributed PH-tree has to fulfill the following requirements:
     \item[Node concurrency] Each machine should support multi-threaded read and write access to the entries that it stores.
 \end{description} 
 
-As the thesis touches on two main subjects, distribution and concurrency, the main challenges encountered are twofold. From the distribution perspective, the challenges are the identification of suitable entry distribution and balancing strategies, devising efficient algorithms for executing queries across multiple cluster nodes, and the efficient management of a very large number of cluster nodes. For the concurrency perspective, the challenges are the identification of a suitable concurrent access strategy that can maximize the number of concurrent write operations.
+As the thesis touches on two main subjects, distribution and concurrency, the main challenges encountered are twofold. From the distribution perspective, the challenges are the identification of suitable entry distribution and balancing strategies, devising efficient algorithms for executing queries across multiple cluster nodes, and the efficient management of a very large number of cluster nodes. From the concurrency perspective, the challenges are the identification of a suitable concurrent access strategy that can maximize the number of concurrent write operations.
 
 \section{Thesis Outline}
 \label{sec:intro-outline}
@@ -150,13 +150,13 @@ This chapter gave an overview of the challenges currently faced by multi-dimensi
 
 \textbf{Chapter \ref{ch:background}} provides additional information about the PH-tree, its characteristics and supported operations. The second part of this chapter describes relevant previous work done in the areas of distributed multi-dimensional indexes and concurrent data structures.
 
-The design of the distributed PH-tree from the point of view of a distributed system is presented in \textbf{Chapter \ref{ch:distindex}}. This chapter presents the chosen data distribution strategy and touches on the possible alternatives and the consequences of this choice. Additionally, we provide an overview of how the queries spanning multiple nodes are executed by the system.
+The design of the distributed PH-tree from the point of view of a distributed system is presented in \textbf{Chapter \ref{ch:distindex}}. This chapter presents the chosen data distribution strategy and touches on the possible alternatives and on the consequences of this choice. Additionally, we provide an overview of how the queries spanning multiple nodes are executed by the system.
 
 The addition of the multi-threaded read and write support for the PH-tree is presented in \textbf{Chapter \ref{ch:concurrency}}. Several concurrent access strategies are discussed, in terms of their advantages, disadvantages and consistency guarantees.
 
 \textbf{Chapter \ref{ch:implementation}} describes the implementation-specific decisions that were taken during the development process. This chapter also presents the technologies that were used and justifies the technological choices.
 
-The distributed PH-tree is evaluated in \textbf{Chapter \ref{ch:evaluation}}. The performance characteristics of the implemented distributed systems as well as those of the implemented concurrency strategy are discussed.
+The distributed PH-tree is evaluated in \textbf{Chapter \ref{ch:evaluation}}. The performance characteristics of the implemented distributed system as well as those of the implemented concurrency strategies are discussed.
 
 \textbf{Chapter \ref{ch:conclusions}} concludes the thesis by presenting the contribution of this work in the context of distributed multi-dimensional indexing systems. We also give an outlook of the potential extensions. 
 
@@ -164,12 +164,12 @@ The distributed PH-tree is evaluated in \textbf{Chapter \ref{ch:evaluation}}. Th
 \label{ch:background}
 The first part of this chapter analyses the single-threaded PH-tree, a multi-dimensional data structure and the starting point of this work. It provides an overview of its specific characteristics and describes the supported operations.
 
-The second part of this chapter presents the relevant related work in the area of distributed multi-dimensional indexes and concurrent data structures. 
+The second part of this chapter presents the relevant related work in the areas of distributed multi-dimensional indexes and concurrent data structures. 
 
 \section{The PH-tree}
 \label{sec:background-phtree}
 
-The PH-tree~\cite{Zaschke2014} is a novel multi-dimensional indexing structure that focuses on fast retrieval, fast update and highly efficient storage. It combines concepts from PATRICIA-tries, quadtrees and hypercubes to encode the multi-dimensional data using bit prefix sharing. Because of this, the storage requirements can sometimes be lower than those of the storage requirements of an array of objects.
+The PH-tree~\cite{Zaschke2014} is a novel multi-dimensional indexing structure that focuses on fast retrieval, fast updates and highly efficient storage. It combines concepts from PATRICIA-tries, quadtrees and hypercubes to encode the multi-dimensional data using bit prefix sharing. Because of this, the storage requirements can sometimes be lower than those of an array of primitive values.
 
 An example PH-tree storing 2-dimensional 4 bit points is shown in Figure \ref{fig:PhTree-example}. The tree illustrated in this figure stores the points: (0, 4), (3, 4) and (3, 6). However, each point is stored as the \textit{bit interleaving} of its values in all dimensions. Therefore, the bit interleaving of point (3, 6), represented in binary as (0011, 1010) is 01001110. By storing the points under the \textit{bit interleaving} form, the PH-tree maps the multi-dimensional points into a 1-dimensional space. The 1-dimensional values will be referred to as \textit{Z-values} as they form the \textit{Z-order space filling curve}. 
 
