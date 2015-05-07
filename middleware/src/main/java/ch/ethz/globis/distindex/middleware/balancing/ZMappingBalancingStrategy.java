@@ -1,7 +1,5 @@
 package ch.ethz.globis.distindex.middleware.balancing;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     private IndexContext indexContext;
 
     /** The request dispatcher */
-    private RequestDispatcher<long[], byte[]> requestDispatcher;
+    private RequestDispatcher requestDispatcher;
 
     private Requests<long[], byte[]> requests;
 
@@ -219,10 +217,11 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         moveEntries(entries, info);
     }
 
-    private void doBalancingAll(BalancingInfo info) {
-        IndexEntryList<long[], byte[]> entries = getAllEntries();
-        moveEntries(entries, info);
-    }
+    //TODO remove? TZ
+//    private void doBalancingAll(BalancingInfo info) {
+//        IndexEntryList<long[], byte[]> entries = getAllEntries();
+//        moveEntries(entries, info);
+//    }
 
     /**
      * Move the entries received as an argument from the current host to the host with the id
@@ -285,14 +284,15 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         return info;
     }
 
-    private void printSizes(String message) {
-        System.out.println(message);
-        ClusterService<long[]> cluster = getClusterService();
-        List<String> hosts = cluster.getMapping().get();
-        for (String host : hosts) {
-            System.out.println(host + ": " + cluster.getSize(host));
-        }
-    }
+    //TODO remove? TZ
+//    private void printSizes(String message) {
+//        System.out.println(message);
+//        ClusterService<long[]> cluster = getClusterService();
+//        List<String> hosts = cluster.getMapping().get();
+//        for (String host : hosts) {
+//            System.out.println(host + ": " + cluster.getSize(host));
+//        }
+//    }
 
     private int updateMapping(String currentHostId, String leftHostId, IndexEntryList<long[], byte[]> entries) {
         long[] newKeyForLeft = entries.get(entries.size() - 1).getKey();

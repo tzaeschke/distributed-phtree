@@ -1,6 +1,5 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
-import java.util.Comparator;
 
 public class HBox implements Comparable<HBox>{
 

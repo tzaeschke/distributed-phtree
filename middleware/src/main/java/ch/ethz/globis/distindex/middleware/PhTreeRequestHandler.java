@@ -318,7 +318,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             return createOutdateVersionResponse(request);
         }
 
-        PhMapper mapper = request.getMapper();
+        PhMapper<?,?> mapper = request.getMapper();
         PhPredicate predicate = request.getFilter();
         long[] start = request.getStart();
         long[] end = request.getEnd();

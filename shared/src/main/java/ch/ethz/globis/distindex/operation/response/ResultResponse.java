@@ -2,7 +2,6 @@ package ch.ethz.globis.distindex.operation.response;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.operation.request.BaseRequest;
 
 public class ResultResponse<K, V> extends BaseResponse {
 
@@ -54,7 +53,7 @@ public class ResultResponse<K, V> extends BaseResponse {
         if (!(o instanceof ResultResponse)) return false;
         if (!super.equals(o)) return false;
 
-        ResultResponse that = (ResultResponse) o;
+        ResultResponse<?,?> that = (ResultResponse<?,?>) o;
 
         if (nrEntries != that.nrEntries) return false;
         if (entries != null ? !entries.equals(that.entries) : that.entries != null) return false;

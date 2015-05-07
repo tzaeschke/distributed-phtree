@@ -1,15 +1,18 @@
 package ch.ethz.globis.disindex.codec;
 
+import java.nio.ByteBuffer;
+
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.operation.response.*;
+import ch.ethz.globis.distindex.operation.response.BaseResponse;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.operation.response.ResponseCode;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-
-import java.nio.ByteBuffer;
 
 /**
  * Decodes response messages sent by the server to the client.

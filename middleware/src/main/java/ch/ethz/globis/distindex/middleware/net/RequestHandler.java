@@ -1,12 +1,17 @@
 package ch.ethz.globis.distindex.middleware.net;
 
-import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.distindex.operation.response.IntegerResponse;
-import ch.ethz.globis.distindex.operation.response.MapResponse;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.ContainsRequest;
+import ch.ethz.globis.distindex.operation.request.DeleteRequest;
+import ch.ethz.globis.distindex.operation.request.GetIteratorBatchRequest;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeFilterMapperRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.GetRequest;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
+import ch.ethz.globis.distindex.operation.request.PutRequest;
+import ch.ethz.globis.distindex.operation.request.UpdateKeyRequest;
 import ch.ethz.globis.distindex.operation.response.Response;
-import ch.ethz.globis.distindex.operation.response.ResultResponse;
-
-import java.util.Map;
 
 public interface RequestHandler<K, V> {
 

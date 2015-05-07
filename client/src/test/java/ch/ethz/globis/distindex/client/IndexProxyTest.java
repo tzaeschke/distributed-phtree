@@ -257,12 +257,13 @@ public class IndexProxyTest {
      * Return a mock response with the same opCode but with a different request id.
      * @return                         Mockito answer containing the response.
      */
-    private Answer<ResultResponse> invalidIdResponse() {
-        return new Answer<ResultResponse>() {
+    private <K, V> Answer<ResultResponse<K, V>> invalidIdResponse() {
+        return new Answer<ResultResponse<K, V>>() {
             @Override
-            public ResultResponse answer(InvocationOnMock invocation) throws Throwable {
+            public ResultResponse<K, V> answer(InvocationOnMock invocation) throws Throwable {
                 BaseRequest request = (BaseRequest) invocation.getArguments()[1];
-                return new ResultResponse(request.getOpCode(), request.getId() + 1, OpStatus.SUCCESS);
+                return new ResultResponse<K, V>(
+                		request.getOpCode(), request.getId() + 1, OpStatus.SUCCESS);
             }
         };
     }
@@ -273,12 +274,13 @@ public class IndexProxyTest {
      * Return a mock response with the same opCode and request id but a failure status.
      * @return                          Mockito answer containing the response.
      */
-    private Answer<ResultResponse> failureResponse() {
-        return new Answer<ResultResponse>() {
+    private <K, V> Answer<ResultResponse<K, V>> failureResponse() {
+        return new Answer<ResultResponse<K, V>>() {
             @Override
-            public ResultResponse answer(InvocationOnMock invocation) throws Throwable {
+            public ResultResponse<K, V> answer(InvocationOnMock invocation) throws Throwable {
                 BaseRequest request = (BaseRequest) invocation.getArguments()[1];
-                return new ResultResponse(request.getOpCode(), request.getId(), OpStatus.FAILURE);
+                return new ResultResponse<K, V>(
+                		request.getOpCode(), request.getId(), OpStatus.FAILURE);
             }
         };
     }

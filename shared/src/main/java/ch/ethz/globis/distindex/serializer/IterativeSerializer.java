@@ -30,10 +30,10 @@ public class IterativeSerializer<T> implements PhTreeSerializer {
     };
 
     @Override
-    public <T> void export(PhTree<T> tree, String filename) throws FileNotFoundException {
+    public <T2> void export(PhTree<T2> tree, String filename) throws FileNotFoundException {
         try (Output output = createOutput(filename)) {
             Kryo kryo = kryos.get();
-            PhIterator<T> it = tree.queryExtent();
+            PhIterator<T2> it = tree.queryExtent();
             while (it.hasNext()) {
                 kryo.writeClassAndObject(output, it.nextEntry());
             }
@@ -45,7 +45,8 @@ public class IterativeSerializer<T> implements PhTreeSerializer {
         return new Output(new BufferedOutputStream(new FileOutputStream(filename)));
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public PhTree<T> load(String filename) throws FileNotFoundException {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();

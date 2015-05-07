@@ -121,7 +121,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
             int mapperLength = buffer.getInt();
             byte[] mapperBytes = new byte[mapperLength];
             buffer.get(mapperBytes);
-            PhMapper mapper;
+            PhMapper<?, ?> mapper;
             mapper = SerializerUtil.getInstance().deserializeDefault(mapperBytes);
 
             int filterLength = buffer.getInt();

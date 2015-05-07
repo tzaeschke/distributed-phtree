@@ -3,6 +3,7 @@ package ch.ethz.globis.distindex.util;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import java.io.*;
@@ -42,7 +43,8 @@ public class SerializerUtil {
         output.flush();
     }
 
-    public <T> T deserialize(byte[] data) {
+    @SuppressWarnings("unchecked")
+	public <T> T deserialize(byte[] data) {
         Kryo kryo = kryos.get();
         Input input = new Input(data);
         T obj = (T) kryo.readClassAndObject(input);
@@ -61,7 +63,8 @@ public class SerializerUtil {
         return data;
     }
 
-    public <T> T deserializeDefault(byte[] data) throws IOException, ClassNotFoundException {
+    @SuppressWarnings("unchecked")
+	public <T> T deserializeDefault(byte[] data) throws IOException, ClassNotFoundException {
         T result;
         try (ObjectInput oi = new ObjectInputStream(new ByteArrayInputStream(data))) {
             result = (T) oi.readObject();

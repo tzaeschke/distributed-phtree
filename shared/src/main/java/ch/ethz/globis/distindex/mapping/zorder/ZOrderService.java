@@ -97,7 +97,8 @@ public class ZOrderService {
         return getRegionsBetweenWithEnvelopes(new HBox(""), alphaBoxCode, betaBoxCode, dim);
     }
 
-    public Set<HBox> getRegionsBetweenWithEnvelopes(HBox space, String alphaBoxCode, String betaBoxCode, int dim) {
+    public Set<HBox> getRegionsBetweenWithEnvelopes(HBox space, String alphaBoxCode, 
+    		String betaBoxCode, int dim) {
         //need upper half envelope of alpha
         Set<HBox> results = new TreeSet<>();
 

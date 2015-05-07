@@ -1,13 +1,11 @@
 package ch.ethz.globis.disindex.codec.io;
 
-import ch.ethz.globis.distindex.operation.request.Request;
-import ch.ethz.globis.distindex.operation.response.Response;
-import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.distindex.operation.response.SimpleResponse;
-
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
+
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.response.Response;
 
 public interface RequestDispatcher<K, V> extends Closeable, AutoCloseable {
 

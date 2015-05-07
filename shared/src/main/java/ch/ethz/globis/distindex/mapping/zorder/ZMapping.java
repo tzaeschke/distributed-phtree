@@ -1,16 +1,23 @@
 package ch.ethz.globis.distindex.mapping.zorder;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
 import ch.ethz.globis.pht.PhTreeSolid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
-import java.util.*;
 
 /**
  * Mapping for the Z-Order curve.
@@ -90,9 +97,9 @@ public class ZMapping implements KeyMapping<long[]>{
      * be mapped to an interval on the z-order curve.
      *
      *
-     * @param hostId                                    The id of the new host.
-     * @return                                          The mapping as a Map object. Each entry contains the prefix
-     *                                                  as the key and the hostId as the value.
+     * @param hostId         The id of the new host.
+     * @return               The mapping as a Map object. Each entry contains the prefix
+     *                       as the key and the hostId as the value.
      */
     public void add(String hostId) {
         checkConsistency();
@@ -166,14 +173,15 @@ public class ZMapping implements KeyMapping<long[]>{
      * @param newHostId
      * @return
      */
-    private BST constructNewMapping(String newHostId) {
-        BST bst = new BST();
-        for (String host : hosts) {
-            bst.add(host);
-        }
-        bst.add(newHostId);
-        return bst;
-    }
+    //TODO remove? TZ
+//    private BST constructNewMapping(String newHostId) {
+//        BST bst = new BST();
+//        for (String host : hosts) {
+//            bst.add(host);
+//        }
+//        bst.add(newHostId);
+//        return bst;
+//    }
 
     /**
      * Reconstruct the set of hquad regions associated with each host

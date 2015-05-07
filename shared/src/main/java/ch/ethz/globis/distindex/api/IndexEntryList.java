@@ -10,7 +10,10 @@ import java.util.ArrayList;
  */
 public class IndexEntryList<K, V> extends ArrayList<IndexEntry<K, V>> {
 
-    public IndexEntryList() {
+    /** */
+	private static final long serialVersionUID = 1L;
+
+	public IndexEntryList() {
         super();
     }
 

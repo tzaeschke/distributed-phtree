@@ -333,7 +333,7 @@ public class ZKClusterService implements ClusterService<long[]> {
     private void ensurePathExists(String path) {
         try {
             if (client.checkExists().forPath(path) == null) {
-                String result = client.create().forPath(path, new byte[0]);
+                client.create().forPath(path, new byte[0]);
             }
         } catch (Exception e) {
             LOG.error("Problem ensuring that the path exists", e);

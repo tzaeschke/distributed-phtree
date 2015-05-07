@@ -1,5 +1,15 @@
 package ch.ethz.globis.distindex.client.pht;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ethz.globis.disindex.codec.ByteRequestEncoder;
 import ch.ethz.globis.disindex.codec.ByteResponseDecoder;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
@@ -7,28 +17,31 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.disindex.codec.api.ResponseDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
-import ch.ethz.globis.disindex.codec.io.*;
+import ch.ethz.globis.disindex.codec.io.AsyncTCPClient;
+import ch.ethz.globis.disindex.codec.io.ClientRequestDispatcher;
+import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
+import ch.ethz.globis.disindex.codec.io.Transport;
 import ch.ethz.globis.distindex.api.IndexEntry;
-import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.PointIndex;
 import ch.ethz.globis.distindex.client.IndexProxy;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
-import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeFilterMapperRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
-import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.PhDimFilter;
+import ch.ethz.globis.pht.PhDistance;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
 import ch.ethz.globis.pht.util.PhTreeQStats;
-
-import org.lwjgl.Sys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
 
 /**
  *  Represents a proxy to a distributed multi-dimensional index. The API implemented is independent of any

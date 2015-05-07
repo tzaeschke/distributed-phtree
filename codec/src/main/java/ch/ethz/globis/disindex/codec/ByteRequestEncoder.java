@@ -1,17 +1,28 @@
 package ch.ethz.globis.disindex.codec;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import ch.ethz.globis.disindex.codec.api.FieldEncoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.OpCode;
-import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.ContainsRequest;
+import ch.ethz.globis.distindex.operation.request.DeleteRequest;
+import ch.ethz.globis.distindex.operation.request.GetIteratorBatchRequest;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeFilterMapperRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.GetRequest;
+import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
+import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.PutRequest;
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.request.UpdateKeyRequest;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhPredicate;
-import ch.ethz.globis.pht.util.PhMapper;
 
 import com.google.common.base.Joiner;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Encodes request messages from the client.
@@ -49,7 +60,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 encodedRequest = encodeGetKNN(gknn);
                 break;
             case OpCode.GET_BATCH:
-                GetIteratorBatchRequest gb = (GetIteratorBatchRequest) request;
+                GetIteratorBatchRequest<K> gb = (GetIteratorBatchRequest<K>) request;
                 encodedRequest = encodeGetBatch(gb);
                 break;
             case OpCode.PUT:
@@ -57,7 +68,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 encodedRequest = encodePut(p);
                 break;
             case OpCode.DELETE:
-                DeleteRequest dr = (DeleteRequest) request;
+                DeleteRequest<K> dr = (DeleteRequest<K>) request;
                 encodedRequest = encodeDelete(dr);
                 break;
             case OpCode.GET_DEPTH:
@@ -76,7 +87,7 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
                 encodedRequest = encodeInitBalancingRequest(ibr);
                 break;
             case OpCode.BALANCE_PUT:
-                PutBalancingRequest<K> pbr = (PutBalancingRequest) request;
+                PutBalancingRequest<K> pbr = (PutBalancingRequest<K>) request;
                 encodedRequest = encodePutBalancingRequest(pbr);
                 break;
             case OpCode.CREATE_INDEX:

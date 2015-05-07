@@ -47,14 +47,16 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
     private EventLoopGroup workerGroup;
 
     /** The cluster service used to notify */
-    private ClusterService clusterService;
+    private ClusterService<K> clusterService;
 
     private IndexContext indexContext;
 
     private BalancingDaemon balancingDaemon;
 
-    public IndexMiddleware(IndexContext indexContext, ClusterService clusterService, IOHandler<K, V> handler,
-                           BalancingDaemon balancingDaemon) {
+    public IndexMiddleware(IndexContext indexContext, 
+    		ClusterService<K> clusterService, 
+    		IOHandler<K, V> handler,
+    		BalancingDaemon balancingDaemon) {
         this.clusterService = clusterService;
         this.indexContext = indexContext;
         this.port = indexContext.getPort();
@@ -142,7 +144,8 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
             String zkHost = strings[0];
             int zkPort = Integer.valueOf(strings[1]);
 
-            IndexMiddleware<long[], byte[]> middleware = PhTreeIndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
+            IndexMiddleware<long[], byte[]> middleware = 
+            		PhTreeIndexMiddlewareFactory.newPhTree(host, port, zkHost, zkPort);
 
             middleware.run();
         } catch (Exception ex) {
@@ -150,7 +153,7 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
         }
     }
 
-    private <K, V> ServerBootstrap initServerBootstrap(final IOHandler<K, V> handler) {
+    private ServerBootstrap initServerBootstrap(final IOHandler<K, V> handler) {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -158,7 +161,8 @@ public class IndexMiddleware<K, V>  implements Middleware, Runnable {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new MiddlewareMessageDecoder(), new MiddlewareChannelHandler<K, V>(handler) {});
+                        ch.pipeline().addLast(new MiddlewareMessageDecoder(), 
+                        		new MiddlewareChannelHandler<K, V>(handler) {});
                     }
                 });
         return b;

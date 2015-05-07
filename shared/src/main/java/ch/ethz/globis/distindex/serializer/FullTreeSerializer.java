@@ -1,9 +1,11 @@
 package ch.ethz.globis.distindex.serializer;
 
 import ch.ethz.globis.pht.PhTree;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import java.io.*;
@@ -28,7 +30,8 @@ public class FullTreeSerializer implements PhTreeSerializer {
         }
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <T> PhTree<T> load(String filename) throws FileNotFoundException {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();

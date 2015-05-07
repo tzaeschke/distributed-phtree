@@ -1,8 +1,6 @@
 package ch.ethz.globis.distindex.mapping;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface KeyMapping<K> {
 

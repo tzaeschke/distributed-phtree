@@ -1,14 +1,11 @@
 package ch.ethz.globis.distindex.middleware;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.v3.PhTree3;
-import ch.ethz.globis.pht.v5.PhOperationsCOW;
-import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
 import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
 import ch.ethz.globis.pht.v5.PhTree5;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The in-memory context associated with the index.

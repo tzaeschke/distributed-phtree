@@ -22,7 +22,7 @@ public class SimpleResponse<T> extends BaseResponse {
         if (!(o instanceof SimpleResponse)) return false;
         if (!super.equals(o)) return false;
 
-        SimpleResponse that = (SimpleResponse) o;
+        SimpleResponse<?> that = (SimpleResponse<?>) o;
 
         if (content != null ? !content.equals(that.content) : that.content != null) return false;
 

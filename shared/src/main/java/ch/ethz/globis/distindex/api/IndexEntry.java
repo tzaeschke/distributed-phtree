@@ -29,7 +29,7 @@ public class IndexEntry<K, V> {
         if (this == o) return true;
         if (!(o instanceof IndexEntry)) return false;
 
-        IndexEntry that = (IndexEntry) o;
+        IndexEntry<?,?> that = (IndexEntry<?,?>) o;
 
         if (key != null ? !key.equals(that.key) : that.key != null) return false;
         if (value != null ? !value.equals(that.value) : that.value != null) return false;
