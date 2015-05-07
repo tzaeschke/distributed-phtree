@@ -7,6 +7,11 @@ import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhMapperK;
+import ch.ethz.globis.pht.util.PhMapperV;
+import ch.ethz.globis.pht.util.PhTreeQStats;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -358,7 +363,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         phTree.put(k(1, -1), "two");
         phTree.put(k(-1, 1), "three");
         phTree.put(k(-1, -1), "four");
-        PhTree.Stats stats = phTree.getStats();
+        PhTreeHelper.Stats stats = phTree.getStats();
         System.out.println(stats);
     }
 
@@ -369,7 +374,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         phTree.put(k(1, -1), "two");
         phTree.put(k(-1, 1), "three");
         phTree.put(k(-1, -1), "four");
-        PhTree.Stats stats = phTree.getStatsIdealNoNode();
+        PhTreeHelper.Stats stats = phTree.getStatsIdealNoNode();
         System.out.println(stats);
     }
 
@@ -426,7 +431,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         phTree.create(2, 64);
         IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
 
-        List<PVEntry<String>> pvEntries = phTree.queryAll(new long[]{9, 9}, new long[]{11, 11});
+        List<PhEntry<String>> pvEntries = phTree.queryAll(new long[]{9, 9}, new long[]{11, 11});
         final IndexEntryList<long[], String> results = new IndexEntryList<>();
         pvEntries.stream().forEach(e -> results.add(e.getKey(), e.getValue()));
 
@@ -441,7 +446,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
         long[] min = {9, 9};
         long[] max = {11, 11};
-        List<PVEntry<String>> pvEntries = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapper.PVENTRY());
+        List<PhEntry<String>> pvEntries = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapper.PVENTRY());
         final IndexEntryList<long[], String> results = new IndexEntryList<>();
         pvEntries.stream().forEach(e -> results.add(e.getKey(), e.getValue()));
 

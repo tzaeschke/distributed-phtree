@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.serialization;
 
 import ch.ethz.globis.distindex.serializer.FullTreeSerializer;
 import ch.ethz.globis.distindex.serializer.IterativeSerializer;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.v5.PhTree5;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -24,7 +24,7 @@ public class SerializationBenchmark {
     private static final String ITERATIVE_TREE_FILE = "iterative_tree.txt";
 
     @Benchmark
-    public PhTreeV<String> serialize_FullTree(BenchmarkState state) throws FileNotFoundException {
+    public PhTree<String> serialize_FullTree(BenchmarkState state) throws FileNotFoundException {
         FullTreeSerializer serializer = new FullTreeSerializer();
 
         serializer.export(state.tree, FULL_TREE_FILE);
@@ -33,7 +33,7 @@ public class SerializationBenchmark {
     }
 
     @Benchmark
-    public PhTreeV<String> serialize_Iterative(BenchmarkState state) throws FileNotFoundException {
+    public PhTree<String> serialize_Iterative(BenchmarkState state) throws FileNotFoundException {
         IterativeSerializer<String> serializer = new IterativeSerializer<String>();
 
         serializer.export(state.tree, ITERATIVE_TREE_FILE);
@@ -42,13 +42,13 @@ public class SerializationBenchmark {
     }
 
     @Benchmark
-    public PhTreeV<String> deserialize_FullTree() throws FileNotFoundException {
+    public PhTree<String> deserialize_FullTree() throws FileNotFoundException {
         FullTreeSerializer serializer = new FullTreeSerializer();
         return serializer.load(FULL_TREE_FILE);
     }
 
     @Benchmark
-    public PhTreeV<String> deserialize_IterativeTree(BenchmarkState state) throws FileNotFoundException {
+    public PhTree<String> deserialize_IterativeTree(BenchmarkState state) throws FileNotFoundException {
         IterativeSerializer<String> serializer = new IterativeSerializer<String>();
 
         serializer.setTree(new PhTree5<String>(state.dim, state.depth));
@@ -57,7 +57,7 @@ public class SerializationBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-        private PhTreeV<String> tree;
+        private PhTree<String> tree;
         int dim = 6;
         int depth = 64;
 

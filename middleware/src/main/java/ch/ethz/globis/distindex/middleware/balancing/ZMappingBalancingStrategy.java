@@ -1,5 +1,10 @@
 package ch.ethz.globis.distindex.middleware.balancing;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ethz.globis.disindex.codec.ByteRequestEncoder;
 import ch.ethz.globis.disindex.codec.ByteResponseDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestEncoder;
@@ -15,19 +20,19 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.mapping.zorder.ZMapping;
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.request.RollbackBalancingRequest;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PVIterator;
-import ch.ethz.globis.pht.PhTreeV;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTree.PhIterator;
 
 public class ZMappingBalancingStrategy implements BalancingStrategy {
 
@@ -346,7 +351,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @param entries
      */
     private void removeEntries(IndexEntryList<long[], byte[]> entries) {
-        PhTreeV<byte[]> tree = indexContext.getTree();
+        PhTree<byte[]> tree = indexContext.getTree();
 
         for (IndexEntry<long[], byte[]> entry : entries) {
             tree.remove(entry.getKey());
@@ -381,7 +386,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      */
     private boolean initBalancing(int entriesToSend, String receiverHostId) {
         String currentHostId = indexContext.getHostId();
-        PhTreeV<byte[]> tree = indexContext.getTree();
+        PhTree<byte[]> tree = indexContext.getTree();
         InitBalancingRequest request = requests.newInitBalancing(entriesToSend, tree.getDIM(), tree.getDEPTH());
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
@@ -433,16 +438,16 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
      * @return
      */
     private IndexEntryList<long[], byte[]> getEntriesForSplitting(boolean movedToRight) {
-        PhTreeV<byte[]> phTree = indexContext.getTree();
+        PhTree<byte[]> phTree = indexContext.getTree();
         int treeSize = phTree.size();
         int entriesToMove = treeSize / 2;
 
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
 
-        PVIterator<byte[]> it = phTree.queryExtent();
+        PhIterator<byte[]> it = phTree.queryExtent();
         if (!movedToRight) {
             for (int i = 0; i < entriesToMove; i++) {
-                PVEntry<byte[]> e = it.nextEntry();
+                PhEntry<byte[]> e = it.nextEntry();
                 entries.add(e.getKey(), e.getValue());
             }
             while (it.hasNext()) {
@@ -455,7 +460,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
                 }
             }
             while (it.hasNext()) {
-                PVEntry<byte[]> e = it.nextEntry();
+                PhEntry<byte[]> e = it.nextEntry();
                 entries.add(e.getKey(), e.getValue());
             }
         }
@@ -464,13 +469,13 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     }
 
     private IndexEntryList<long[], byte[]> getAllEntries() {
-        PhTreeV<byte[]> phTree = indexContext.getTree();
+        PhTree<byte[]> phTree = indexContext.getTree();
 
         IndexEntryList<long[], byte[]> entries = new IndexEntryList<>();
 
-        PVIterator<byte[]> it = phTree.queryExtent();
+        PhIterator<byte[]> it = phTree.queryExtent();
         while (it.hasNext()) {
-            PVEntry<byte[]> e = it.nextEntry();
+            PhEntry<byte[]> e = it.nextEntry();
             entries.add(e.getKey(), e.getValue());
         }
 

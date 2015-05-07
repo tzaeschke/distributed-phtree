@@ -5,8 +5,9 @@ import ch.ethz.globis.disindex.codec.api.RequestEncoder;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhMapper;
 import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.util.PhMapper;
+
 import com.google.common.base.Joiner;
 
 import java.io.IOException;

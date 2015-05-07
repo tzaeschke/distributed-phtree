@@ -1,6 +1,8 @@
 package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhTreeQStats;
 
 import java.util.List;
 
@@ -8,7 +10,7 @@ import java.util.List;
  * Represents a distributed key-value PH Tree. It also conforms to the PH-Tree interfaces.
  * @param <V>                                   The type of the value.
  */
-public class DistributedPhTreeV<V> implements PhTreeV<V> {
+public class DistributedPhTreeV<V> implements PhTree<V> {
 
     /** Proxy to the remote PH tree */
     private PHTreeIndexProxy<V> proxy;
@@ -37,12 +39,12 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public PhTree.Stats getStats() {
+    public PhTreeHelper.Stats getStats() {
         return proxy.getStats();
     }
 
     @Override
-    public PhTree.Stats getStatsIdealNoNode() {
+    public PhTreeHelper.Stats getStatsIdealNoNode() {
         return proxy.getStatsIdealNoNode();
     }
 
@@ -77,12 +79,12 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public PVIterator<V> queryExtent() {
+    public PhIterator<V> queryExtent() {
         return new DistributedPhTreeIterator<>(proxy.iterator());
     }
 
     @Override
-    public PVIterator<V> query(long[] min, long[] max) {
+    public PhIterator<V> query(long[] min, long[] max) {
         return new DistributedPhTreeIterator<V>(proxy.query(min, max));
     }
 
@@ -112,7 +114,7 @@ public class DistributedPhTreeV<V> implements PhTreeV<V> {
     }
 
     @Override
-    public List<PVEntry<V>> queryAll(long[] min, long[] max) {
+    public List<PhEntry<V>> queryAll(long[] min, long[] max) {
         return proxy.queryAll(min, max);
     }
 

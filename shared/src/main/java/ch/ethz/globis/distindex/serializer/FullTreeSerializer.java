@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.serializer;
 
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -20,7 +20,7 @@ public class FullTreeSerializer implements PhTreeSerializer {
     };
 
     @Override
-    public <T> void export(PhTreeV<T> tree, String filename) throws FileNotFoundException {
+    public <T> void export(PhTree<T> tree, String filename) throws FileNotFoundException {
         try (Output output = createOutput(filename)) {
             Kryo kryo = kryos.get();
             kryo.writeClassAndObject(output, tree);
@@ -29,10 +29,10 @@ public class FullTreeSerializer implements PhTreeSerializer {
     }
 
     @Override
-    public <T> PhTreeV<T> load(String filename) throws FileNotFoundException {
+    public <T> PhTree<T> load(String filename) throws FileNotFoundException {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();
-            return (PhTreeV<T>) kryo.readClassAndObject(input);
+            return (PhTree<T>) kryo.readClassAndObject(input);
         }
     }
 

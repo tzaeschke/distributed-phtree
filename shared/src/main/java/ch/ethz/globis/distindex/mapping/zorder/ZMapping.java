@@ -5,7 +5,7 @@ import ch.ethz.globis.distindex.mapping.bst.BST;
 import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhTreeRangeV;
+import ch.ethz.globis.pht.PhTreeSolid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class ZMapping implements KeyMapping<long[]>{
     /** A ranged PhTree containing geometrical zones from the z-mapping mapped to each
      * host*/
 
-    private transient PhTreeRangeV<String> tree;
+    private transient PhTreeSolid<String> tree;
 
     private Map<String, long[]> endKeys;
 
@@ -59,7 +59,7 @@ public class ZMapping implements KeyMapping<long[]>{
         this.depth = depth;
         //FIXME the depth is always set to 64 because the PhTree storing the rectangles only works with 64 bits
         this.service = new ZOrderService(Long.SIZE);
-        this.tree = new PhTreeRangeV<>(dim);
+        this.tree = PhTreeSolid.create(dim);
         this.endKeys = new TreeMap<>();
         this.hosts = hosts;
     }
@@ -110,7 +110,7 @@ public class ZMapping implements KeyMapping<long[]>{
     }
 
     public void updateTree() {
-        this.tree = new PhTreeRangeV<>(dim);
+        this.tree = PhTreeSolid.create(dim);
         long[] start, end;
         String prevHostId = null;
         for (String hostId : hosts) {
@@ -182,7 +182,7 @@ public class ZMapping implements KeyMapping<long[]>{
      * @param mapping
      */
     private void updateRegions(Map<String, String> mapping) {
-        tree = new PhTreeRangeV<>(dim);
+        tree = PhTreeSolid.create(dim);
         String prefix, host;
         for (Map.Entry<String, String> entry : mapping.entrySet()) {
             prefix = entry.getKey();
@@ -215,17 +215,17 @@ public class ZMapping implements KeyMapping<long[]>{
     public String get(long[] k) {
         checkConsistency();
 
-        PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(k, k);
-        PhTreeRangeV.PHREntry<String> entry;
+        PhTreeSolid.PhIteratorS<String> it = tree.queryIntersect(k, k);
+        PhTreeSolid.PhEntryS<String> entry;
 
         String host = null;
         if (it.hasNext()) {
-            entry = it.next();
+            entry = it.nextEntry();
             if (it.hasNext()) {
                 LOG.info("Zmapping: " + this);
                 LOG.info("Lower: " + Arrays.toString(entry.lower()) + " , Upper: " + Arrays.toString(entry.upper()));
                 while (it.hasNext()) {
-                    entry = it.next();
+                    entry = it.nextEntry();
                     LOG.info("Lower: " + Arrays.toString(entry.lower()) + " , Upper: " + Arrays.toString(entry.upper()));
                 }
                 throw new IllegalStateException("Areas overlapping, more intersections returned for " + Arrays.toString(k));
@@ -246,13 +246,13 @@ public class ZMapping implements KeyMapping<long[]>{
     public List<String> get(long[] l, long[] u) {
         checkConsistency();
 
-        PhTreeRangeV<String>.PHREntryIterator it = tree.queryIntersect(l, u);
+        PhTreeSolid.PhIteratorS<String> it = tree.queryIntersect(l, u);
 
         TreeSet<String> unsortedHosts = new TreeSet<>();
         String host;
-        PhTreeRangeV.PHREntry e;
+        PhTreeSolid.PhEntryS<String> e;
         while (it.hasNext()) {
-            e = it.next();
+            e = it.nextEntry();
             host = getValueFromTree(e.lower(), e.upper());
             unsortedHosts.add(host);
         }

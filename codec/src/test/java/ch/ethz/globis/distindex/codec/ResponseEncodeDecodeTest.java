@@ -15,7 +15,7 @@ import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.pht.PVEntry;
+import ch.ethz.globis.pht.PhEntry;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -151,9 +151,9 @@ public class ResponseEncodeDecodeTest {
         int requestId = random.nextInt();
 
         MapResponse response = new MapResponse(opCode, requestId, opStatus);
-        List<PVEntry<String>> pvEntries = new ArrayList<>();
-        pvEntries.add(new PVEntry<>(new long[] { 1, 2}, "Hello, "));
-        pvEntries.add(new PVEntry<>(new long[] { 2, 2}, "world"));
+        List<PhEntry<String>> pvEntries = new ArrayList<>();
+        pvEntries.add(new PhEntry<>(new long[] { 1, 2}, "Hello, "));
+        pvEntries.add(new PhEntry<>(new long[] { 2, 2}, "world"));
 
         response.addParameter("pvEntries", pvEntries);
 

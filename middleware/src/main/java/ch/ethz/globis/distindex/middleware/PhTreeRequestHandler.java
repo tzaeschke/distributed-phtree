@@ -1,23 +1,48 @@
 package ch.ethz.globis.distindex.middleware;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.middleware.balancing.BalancingStrategy;
-import ch.ethz.globis.distindex.middleware.balancing.ZMappingBalancingStrategy;
 import ch.ethz.globis.distindex.middleware.net.RequestHandler;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.ContainsRequest;
+import ch.ethz.globis.distindex.operation.request.DeleteRequest;
+import ch.ethz.globis.distindex.operation.request.GetIteratorBatchRequest;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeFilterMapperRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.GetRequest;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
+import ch.ethz.globis.distindex.operation.request.PutRequest;
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.request.UpdateKeyRequest;
 import ch.ethz.globis.distindex.operation.response.IntegerResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.v3.PhTree3;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
+import ch.ethz.globis.pht.PhDistance;
+import ch.ethz.globis.pht.PhDistanceD;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTree.PhIterator;
+import ch.ethz.globis.pht.PhTreeHelper;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhMapperK;
+import ch.ethz.globis.pht.util.PhMapperV;
+import ch.ethz.globis.pht.util.PhTreeQStats;
 
 /**
  * An implementation of the RequestHandler backed by an in-memory PhTree. *
@@ -33,7 +58,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     /** The index context associated with this handler. */
     private IndexContext indexContext;
 
-    private Map<String, PVIterator<byte[]>> iterators;
+    private Map<String, PhIterator<byte[]>> iterators;
     private Map<String, Set<String>> clientIteratorMapping;
 
     public PhTreeRequestHandler(IndexContext indexContext) {
@@ -126,7 +151,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         String iteratorId = request.getIteratorId();
         int batchSize= request.getBatchSize();
 
-        PVIterator<byte[]> it;
+        PhIterator<byte[]> it;
         if ("".equals(iteratorId)) {
             iteratorId = UUID.randomUUID().toString();
             if (request.isRanged()) {
@@ -143,7 +168,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         while (batchSize > 0 && it.hasNext()) {
-            PVEntry<byte[]> entry = it.nextEntry();
+            PhEntry<byte[]> entry = it.nextEntry();
 
             results.add(entry.getKey(), entry.getValue());
             batchSize--;
@@ -185,7 +210,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         long[] key = request.getKey();
         byte[] value = request.getValue();
 
-        PhTreeV<byte[]> phTree = tree();
+        PhTree<byte[]> phTree = tree();
         byte[] previous;
 
         previous = phTree.put(key, value);
@@ -206,7 +231,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             return createOutdateVersionResponse(request);
         }
 
-        PhTreeV<byte[]> phTree = tree();
+        PhTree<byte[]> phTree = tree();
         long[] key = request.getKey();
         byte[] value;
         value = phTree.remove(key);
@@ -278,7 +303,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
         long[] oldKey = request.getOldKey();
         long[] newKey = request.getNewKey();
-        PhTreeV<byte[]> tree = tree();
+        PhTree<byte[]> tree = tree();
         byte[] value;
 
         value = (byte[]) tree.update(oldKey, newKey);
@@ -297,9 +322,9 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         PhPredicate predicate = request.getFilter();
         long[] start = request.getStart();
         long[] end = request.getEnd();
-        PhTreeV<byte[]> tree = tree();
+        PhTree<byte[]> tree = tree();
         int maxResults = request.getMaxResults();
-        List<PVEntry<byte[]>> results;
+        List<PhEntry<byte[]>> results;
 
         if (tree.size() == 0) {
             results = new ArrayList<>();
@@ -345,7 +370,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTree.Stats stats = (tree().size() == 0) ? new PhTree.Stats() : tree().getStatsIdealNoNode();
+        PhTreeHelper.Stats stats = (tree().size() == 0) ? new PhTreeHelper.Stats() : tree().getStatsIdealNoNode();
         response.addParameter("stats", stats);
         return response;
     }
@@ -368,7 +393,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTree.Stats stats = (tree().size() == 0) ? new PhTree.Stats() : tree().getStats();
+        PhTreeHelper.Stats stats = (tree().size() == 0) ? new PhTreeHelper.Stats() : tree().getStats();
         response.addParameter("stats", stats);
         return response;
     }
@@ -418,20 +443,20 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return results;
     }
 
-    private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it) {
+    private IndexEntryList<long[], byte[]> createList(PhIterator<byte[]> it) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         while (it.hasNext()) {
-            PVEntry<byte[]> entry = it.nextEntry();
+            PhEntry<byte[]> entry = it.nextEntry();
             results.add(entry.getKey(), entry.getValue());
         }
         return results;
     }
 
-    private IndexEntryList<long[], byte[]> createList(PVIterator<byte[]> it, long[] key, double distance) {
+    private IndexEntryList<long[], byte[]> createList(PhIterator<byte[]> it, long[] key, double distance) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
         PhDistance measure = new PhDistanceD();
         while (it.hasNext()) {
-            PVEntry<byte[]> entry = it.nextEntry();
+            PhEntry<byte[]> entry = it.nextEntry();
             if (distance > measure.dist(key, entry.getKey())) {
                 results.add(entry.getKey(), entry.getValue());
             }
@@ -439,26 +464,26 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return results;
     }
 
-    private IndexEntryList<long[], byte[]> createList(List<PVEntry<byte[]>> input) {
+    private IndexEntryList<long[], byte[]> createList(List<PhEntry<byte[]>> input) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
-        for (PVEntry<byte[]> entry : input) {
+        for (PhEntry<byte[]> entry : input) {
             results.add(entry.getKey(), entry.getValue());
         }
         return results;
     }
 
-    private IndexEntryList<long[], byte[]> createList(List<PVEntry<byte[]>> input,
+    private IndexEntryList<long[], byte[]> createList(List<PhEntry<byte[]>> input,
                                                       boolean includeKeys,
                                                       boolean includeValues) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
-        for (PVEntry<byte[]> entry : input) {
+        for (PhEntry<byte[]> entry : input) {
             results.add(includeKeys ? entry.getKey() : null,
                         includeValues ? entry.getValue() : null);
         }
         return results;
     }
 
-    public PhTreeV<byte[]> tree() {
+    public PhTree<byte[]> tree() {
         return indexContext.getTree();
     }
 }

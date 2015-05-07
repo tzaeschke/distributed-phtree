@@ -8,10 +8,11 @@ import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
 import ch.ethz.globis.distindex.operation.*;
 import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PhMapper;
-import ch.ethz.globis.pht.PhMapperK;
+import ch.ethz.globis.pht.PhEntry;
 import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhMapperK;
+
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -222,7 +223,7 @@ public class RequestEncodeDecodeTest {
         assertRequestMetaEqual(request, decoded);
         assertTrue(decoded.getFilter().test(new long[] { 1, 2}));
         PhMapper<long[], long[]> mapper = decoded.getMapper();
-        assertArrayEquals(new long[] {1, 2} , mapper.map(new PVEntry<>(new long[] {1, 2}, new long[] {2, 3})));
+        assertArrayEquals(new long[] {1, 2} , mapper.map(new PhEntry<>(new long[] {1, 2}, new long[] {2, 3})));
     }
 
     private void encodeDecodeBasicRequest(BaseRequest request) {

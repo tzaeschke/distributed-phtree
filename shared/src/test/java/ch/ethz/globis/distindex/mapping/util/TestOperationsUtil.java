@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.mapping.util;
 
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.v5.PhTree5;
 
 import java.util.Arrays;
@@ -38,9 +38,9 @@ public class TestOperationsUtil {
         return result;
     }
 
-    public static PhTreeV<String> createRandomPhTree(int entries, int dim) {
+    public static PhTree<String> createRandomPhTree(int entries, int dim) {
 
-        PhTreeV<String> tree = new PhTree5<>(dim, 64);
+        PhTree<String> tree = new PhTree5<>(dim, 64);
 
         long[] key;
         for (int i = 0; i < entries; i++) {

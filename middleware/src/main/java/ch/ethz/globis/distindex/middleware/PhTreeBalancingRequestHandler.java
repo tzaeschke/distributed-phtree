@@ -7,7 +7,7 @@ import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
 
     @Override
     public Response handleRollback(RollbackBalancingRequest request) {
-        PhTreeV<byte[]> tree = indexContext.getTree();
+        PhTree<byte[]> tree = indexContext.getTree();
         for (IndexEntry<long[], byte[]> entry : buffer) {
             tree.remove(entry.getKey());
         }
@@ -55,14 +55,14 @@ public class PhTreeBalancingRequestHandler implements BalancingRequestHandler<lo
         byte[] value = request.getValue();
 
         buffer.add(key, value);
-        PhTreeV<byte[]> tree = indexContext.getTree();
+        PhTree<byte[]> tree = indexContext.getTree();
         tree.put(key, value);
         return ackResponse(request);
     }
 
     @Override
     public Response handleCommit(CommitBalancingRequest request) {
-        PhTreeV<byte[]> tree = indexContext.getTree();
+        PhTree<byte[]> tree = indexContext.getTree();
         buffer.clear();
         updateBalancingVersion(request);
         String currentHostId = indexContext.getHostId();

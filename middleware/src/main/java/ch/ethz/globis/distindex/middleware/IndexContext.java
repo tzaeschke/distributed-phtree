@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.middleware;
 
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.v3.PhTree3;
 import ch.ethz.globis.pht.v5.PhOperationsCOW;
 import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IndexContext {
 
     /** The current in-memory tree. */
-    private PhTreeV<byte[]> tree;
+    private PhTree<byte[]> tree;
 
     /** The cluster service, connected to the ZooKeeper cluster. */
     private ClusterService<long[]> clusterService;
@@ -51,7 +51,7 @@ public class IndexContext {
     }
 
 
-    public PhTreeV<byte[]> getTree() {
+    public PhTree<byte[]> getTree() {
         return tree;
     }
 

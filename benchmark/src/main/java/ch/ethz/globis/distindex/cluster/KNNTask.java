@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.nv.PhTreeNV;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 public class KNNTask implements Runnable {
-    private PhTree tree;
+    private PhTreeNV tree;
     private int nrEntries;
 
     public KNNTask(PHFactory factory, int nrEntries, int dim, int depth) {
@@ -24,7 +24,7 @@ public class KNNTask implements Runnable {
         work(tree, nrEntries);
     }
 
-    private void work(PhTree tree, int nrEntries) {
+    private void work(PhTreeNV tree, int nrEntries) {
         List<long[]> entries = new ArrayList<>();
         Random random = new Random();
         for (int i = 0; i < nrEntries; i++) {
@@ -41,7 +41,7 @@ public class KNNTask implements Runnable {
         return (long) ((Short.MAX_VALUE - 1) * r);
     }
 
-    private void doWork(PhTree tree, List<long[]> points) {
+    private void doWork(PhTreeNV tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
         int k = 100;

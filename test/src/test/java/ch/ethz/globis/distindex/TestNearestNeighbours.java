@@ -4,6 +4,10 @@ import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.pht.nv.PhTreeVProxy;
+import ch.ethz.globis.pht.util.Bits;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +77,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across1() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
         long[] B = {side, side};
@@ -119,7 +123,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across2() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -165,7 +169,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across3() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -211,7 +215,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across4() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -257,7 +261,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across5() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -304,7 +308,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across6() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -351,7 +355,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across7() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -398,7 +402,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across8() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -420,7 +424,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_NotEnough() {
         phTree.create(2, BIT_WIDTH);
-        PhTree tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
 
         long side = SQUARE_SIDE;
         long[] A = {side * 2, 0};

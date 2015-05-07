@@ -1,21 +1,21 @@
 package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeRangeD;
-import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.PhTreeVD;
+import ch.ethz.globis.pht.PhTreeF;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.pht.nv.PhTreeNVSolidF;
 
 public interface PHFactory {
 
     <V> PHTreeIndexProxy<V> createProxy(int dim, int depth);
 
-    <V> PhTreeV<V> createPHTreeMap(int dim, int depth);
+    <V> PhTree<V> createPHTreeMap(int dim, int depth);
 
-    <V> PhTreeVD<V> createPHTreeVD(int dim);
+    <V> PhTreeF<V> createPHTreeVD(int dim);
 
-    PhTree createPHTreeSet(int dim, int depth);
+    PhTreeNV createPHTreeSet(int dim, int depth);
 
-    PhTreeRangeD createPHTreeRangeSet(int dim, int depth);
+    PhTreeNVSolidF createPHTreeRangeSet(int dim, int depth);
 
     public void close();
 }

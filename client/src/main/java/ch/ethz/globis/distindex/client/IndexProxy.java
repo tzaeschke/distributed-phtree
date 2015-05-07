@@ -13,8 +13,9 @@ import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.*;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PhMapper;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.util.PhMapper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

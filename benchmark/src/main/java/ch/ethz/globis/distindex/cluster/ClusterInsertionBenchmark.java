@@ -2,7 +2,8 @@ package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
 import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+
 import org.lwjgl.Sys;
 
 import java.sql.Time;

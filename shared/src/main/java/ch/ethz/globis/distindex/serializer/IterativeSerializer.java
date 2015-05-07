@@ -1,18 +1,24 @@
 package ch.ethz.globis.distindex.serializer;
 
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PVIterator;
-import ch.ethz.globis.pht.PhTreeV;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
+import org.objenesis.strategy.StdInstantiatorStrategy;
+
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTree.PhIterator;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.objenesis.strategy.StdInstantiatorStrategy;
-
-import java.io.*;
 
 public class IterativeSerializer<T> implements PhTreeSerializer {
 
-    private PhTreeV<T> tree;
+    private PhTree<T> tree;
 
     private ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
         protected Kryo initialValue() {
@@ -24,10 +30,10 @@ public class IterativeSerializer<T> implements PhTreeSerializer {
     };
 
     @Override
-    public <T> void export(PhTreeV<T> tree, String filename) throws FileNotFoundException {
+    public <T> void export(PhTree<T> tree, String filename) throws FileNotFoundException {
         try (Output output = createOutput(filename)) {
             Kryo kryo = kryos.get();
-            PVIterator<T> it = tree.queryExtent();
+            PhIterator<T> it = tree.queryExtent();
             while (it.hasNext()) {
                 kryo.writeClassAndObject(output, it.nextEntry());
             }
@@ -40,23 +46,23 @@ public class IterativeSerializer<T> implements PhTreeSerializer {
     }
 
     @Override
-    public PhTreeV<T> load(String filename) throws FileNotFoundException {
+    public PhTree<T> load(String filename) throws FileNotFoundException {
         try (Input input = new Input(new BufferedInputStream(new FileInputStream(filename)))){
             Kryo kryo = kryos.get();
-            PVEntry<T> e;
+            PhEntry<T> e;
             while (!input.eof()) {
-                e = (PVEntry<T>) kryo.readClassAndObject(input);
+                e = (PhEntry<T>) kryo.readClassAndObject(input);
                 tree.put(e.getKey(), e.getValue());
             }
             return tree;
         }
     }
 
-    public void setTree(PhTreeV<T> tree) {
+    public void setTree(PhTree<T> tree) {
         this.tree = tree;
     }
 
-    public PhTreeV<T> getTree() {
+    public PhTree<T> getTree() {
         return tree;
     }
 }

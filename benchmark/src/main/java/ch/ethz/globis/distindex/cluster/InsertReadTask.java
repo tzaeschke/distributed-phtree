@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.nv.PhTreeNV;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,7 +12,7 @@ import java.util.Random;
 
 public class InsertReadTask implements Runnable {
 
-    private PhTree tree;
+    private PhTreeNV tree;
     private int nrEntries;
 
     public InsertReadTask(PHFactory factory, int nrEntries, int dim, int depth) {
@@ -25,7 +25,7 @@ public class InsertReadTask implements Runnable {
         work(tree, nrEntries);
     }
 
-    private void work(PhTree tree, int nrEntries) {
+    private void work(PhTreeNV tree, int nrEntries) {
         List<long[]> entries = new ArrayList<>();
         Random random = new Random();
         for (int i = 0; i < nrEntries; i++) {
@@ -42,7 +42,7 @@ public class InsertReadTask implements Runnable {
         return (long) ((Long.MAX_VALUE - 1) * r);
     }
 
-    private boolean doWork(PhTree tree, List<long[]> points) {
+    private boolean doWork(PhTreeNV tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
         boolean res = true;

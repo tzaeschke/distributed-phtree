@@ -1,7 +1,7 @@
 package ch.ethz.globis.distindex.operation.request;
 
-import ch.ethz.globis.pht.PhMapper;
 import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.util.PhMapper;
 
 public class GetRangeFilterMapperRequest<K> extends GetRangeRequest<K> {
 

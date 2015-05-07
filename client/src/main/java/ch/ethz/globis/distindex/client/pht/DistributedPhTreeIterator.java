@@ -2,15 +2,15 @@ package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.pht.PVEntry;
-import ch.ethz.globis.pht.PVIterator;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhTree.PhIterator;
 
 /**
  * Main implementation of the PH Tree key-value iterator, backed by a proxy iterator.
  *
  * @param <V>                                   The value class for the iterator.
  */
-public class DistributedPhTreeIterator<V> implements PVIterator<V> {
+public class DistributedPhTreeIterator<V> implements PhIterator<V> {
 
     private IndexIterator<long[], V> proxyIterator;
 
@@ -29,9 +29,9 @@ public class DistributedPhTreeIterator<V> implements PVIterator<V> {
     }
 
     @Override
-    public PVEntry<V> nextEntry() {
+    public PhEntry<V> nextEntry() {
         IndexEntry<long[], V> currentEntry = proxyIterator.next();
-        return new PVEntry<>(currentEntry.getKey(), currentEntry.getValue());
+        return new PhEntry<>(currentEntry.getKey(), currentEntry.getValue());
     }
 
     @Override

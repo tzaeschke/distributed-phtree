@@ -4,7 +4,6 @@ import ch.ethz.globis.pht.v5.PhOperationsCOW;
 import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
 import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
 import ch.ethz.globis.pht.v5.PhTree5;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.List;

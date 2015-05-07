@@ -1,6 +1,9 @@
 package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.pht.nv.PhTreeNVSolidF;
+import ch.ethz.globis.pht.nv.PhTreeVProxy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ public class ZKPHFactory implements PHFactory {
     }
 
     @Override
-    public <V> PhTreeV<V> createPHTreeMap(int dim, int depth) {
+    public <V> PhTree<V> createPHTreeMap(int dim, int depth) {
         PHTreeIndexProxy<V> proxy = new PHTreeIndexProxy<>(zkHost, zkPort);
         proxies.add(proxy);
         proxy.create(dim, depth);
@@ -35,24 +38,24 @@ public class ZKPHFactory implements PHFactory {
     }
 
     @Override
-    public <V> PhTreeVD<V> createPHTreeVD(int dim) {
-        PhTreeV<V> proxy = createPHTreeMap(dim, Double.SIZE);
+    public <V> PhTreeF<V> createPHTreeVD(int dim) {
+        PhTree<V> proxy = createPHTreeMap(dim, Double.SIZE);
 
-        return new PhTreeVD<>(proxy);
+        return new PhTreeF<>(proxy);
     }
 
     @Override
-    public PhTree createPHTreeSet(int dim, int depth) {
-        PhTreeV<Object> proxy = createPHTreeMap(dim, depth);
+    public PhTreeNV createPHTreeSet(int dim, int depth) {
+        PhTree<Object> proxy = createPHTreeMap(dim, depth);
 
         return new PhTreeVProxy(proxy);
     }
 
     @Override
-    public PhTreeRangeD createPHTreeRangeSet(int dim, int depth) {
-        PhTree backingTree = createPHTreeSet(2 * dim, depth);
+    public PhTreeNVSolidF createPHTreeRangeSet(int dim, int depth) {
+        PhTreeNV backingTree = createPHTreeSet(2 * dim, depth);
 
-        return new PhTreeRangeD(backingTree);
+        return new PhTreeNVSolidF(backingTree);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.benchmark;
 
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,10 @@ public abstract class MultiBenchmark implements Benchmark {
 
     private final int nrThreads;
     private final ExecutorService pool;
-    private final PhTreeV<Object> tree;
+    private final PhTree<Object> tree;
     private final List<long[]> entries;
 
-    public MultiBenchmark(int nrThreads, PhTreeV<Object> tree, List<long[]> entries) {
+    public MultiBenchmark(int nrThreads, PhTree<Object> tree, List<long[]> entries) {
         this.nrThreads = nrThreads;
         this.tree = tree;
         this.entries = entries;
@@ -47,7 +47,7 @@ public abstract class MultiBenchmark implements Benchmark {
         return result;
     }
 
-    protected abstract Callable<Result> createTask(int i, int nrEntriesPerThread, PhTreeV<Object> tree, List<long[]> entries);
+    protected abstract Callable<Result> createTask(int i, int nrEntriesPerThread, PhTree<Object> tree, List<long[]> entries);
 
     private Result obtainResult(List<Future<Result>> futures) throws ExecutionException, InterruptedException {
         boolean notFinished;

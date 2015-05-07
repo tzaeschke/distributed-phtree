@@ -7,9 +7,10 @@ import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.PhTreeVProxy;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.pht.nv.PhTreeVProxy;
 import ch.ethz.globis.pht.test.util.TestUtilAPI;
+
 import org.apache.curator.test.TestingServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,25 +58,25 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
     private ZKPHFactory factory = new ZKPHFactory(ZK_HOST, ZK_PORT);
 
     @Override
-    public PhTree newTree(int dim, int depth) {
+    public PhTreeNV newTree(int dim, int depth) {
         return new PhTreeVProxy(newTreeV(dim, depth));
     }
 
     @Override
-    public <T> PhTreeV<T> newTreeV(int dim, int depth) {
+    public <T> PhTree<T> newTreeV(int dim, int depth) {
 
-        PhTreeV<T> tree = factory.createPHTreeMap(dim, depth);
+        PhTree<T> tree = factory.createPHTreeMap(dim, depth);
         trees.add((DistributedPhTreeV) tree);
         return tree;
     }
 
     @Override
-    public void close(PhTree phTree) {
+    public void close(PhTreeNV phTree) {
         //currently not needed
     }
 
     @Override
-    public <T> void close(PhTreeV<T> tPhTreeV) {
+    public <T> void close(PhTree<T> tPhTreeV) {
         //currently not needed
     }
 

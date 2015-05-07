@@ -1,6 +1,8 @@
 package ch.ethz.globis.distindex.benchmark;
 
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhTreeQStats;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -13,19 +15,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Performs an in-memory logging
  * @param <T>
  */
-public class LoggingPhTreeV<T> implements PhTreeV<T> {
+public class LoggingPhTreeV<T> implements PhTree<T> {
 
     /** Concurrent linked-list containing the log messages. */
     private ConcurrentLinkedQueue<String> log = new ConcurrentLinkedQueue<>();
 
     /** The tree on which we're doing the operations. */
-    private PhTreeV<T> tree;
+    private PhTree<T> tree;
 
     private static enum Operation {
         PUT, GET, CONTAINS, DELETE, UPDATE
     }
 
-    public LoggingPhTreeV(PhTreeV<T> tree) {
+    public LoggingPhTreeV(PhTree<T> tree) {
         this.tree = tree;
     }
 
@@ -45,12 +47,12 @@ public class LoggingPhTreeV<T> implements PhTreeV<T> {
     }
 
     @Override
-    public PhTree.Stats getStats() {
+    public PhTreeHelper.Stats getStats() {
         return tree.getStats();
     }
 
     @Override
-    public PhTree.Stats getStatsIdealNoNode() {
+    public PhTreeHelper.Stats getStatsIdealNoNode() {
         return tree.getStatsIdealNoNode();
     }
 
@@ -116,12 +118,12 @@ public class LoggingPhTreeV<T> implements PhTreeV<T> {
     }
 
     @Override
-    public PVIterator<T> queryExtent() {
+    public PhIterator<T> queryExtent() {
         return tree.queryExtent();
     }
 
     @Override
-    public PVIterator<T> query(long[] min, long[] max) {
+    public PhIterator<T> query(long[] min, long[] max) {
         return tree.query(min, max);
     }
 

@@ -21,6 +21,9 @@ import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhTreeQStats;
+
 import org.lwjgl.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +171,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     /**
      * @return                          The combined stats for the tree.
      */
-    public PhTree.Stats getStats() {
+    public PhTreeHelper.Stats getStats() {
         boolean versionOutdated;
         List<MapResponse> responses;
         do {
@@ -183,7 +186,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     /**
      * @return                          The combined stats for the tree.
      */
-    public PhTree.Stats getStatsIdealNoNode() {
+    public PhTreeHelper.Stats getStatsIdealNoNode() {
         boolean versionOutdated;
         List<MapResponse> responses;
         do {
@@ -195,10 +198,10 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return combineStats(responses);
     }
 
-    private PhTree.Stats combineStats(List<MapResponse> responses) {
-        PhTree.Stats global = new PhTree.Stats(), current;
+    private PhTreeHelper.Stats combineStats(List<MapResponse> responses) {
+        PhTreeHelper.Stats global = new PhTreeHelper.Stats(), current;
         for (MapResponse response : responses) {
-            current = (PhTree.Stats) response.getParameter("stats");
+            current = (PhTreeHelper.Stats) response.getParameter("stats");
             global.nChildren += current.nChildren;
             global.nHCP += current.nHCP;
             global.nHCS += current.nHCS;
@@ -298,7 +301,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         throw new UnsupportedOperationException();
     }
 
-    public List<PVEntry<V>> queryAll(long[] min, long[] max) {
+    public List<PhEntry<V>> queryAll(long[] min, long[] max) {
         return queryAll(min, max, Integer.MAX_VALUE, PhPredicate.ACCEPT_ALL, PhMapper.<V>PVENTRY());
     }
 
@@ -356,7 +359,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         List<R> results = new ArrayList<>();
         for (ResultResponse<long[],V> response : responses) {
             for (IndexEntry<long[], V> e : response.getEntries()) {
-                results.add(mapper.map(new PVEntry<>(e.getKey(), e.getValue())));
+                results.add(mapper.map(new PhEntry<>(e.getKey(), e.getValue())));
             }
         }
         return results;

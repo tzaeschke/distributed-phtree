@@ -4,8 +4,9 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhMapper;
 import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.util.PhMapper;
+
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 

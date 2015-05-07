@@ -1,22 +1,21 @@
 package ch.ethz.globis.distindex.phtree;
 
-import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
-import ch.ethz.globis.pht.PVIterator;
-import ch.ethz.globis.pht.PhTreeV;
-import ch.ethz.globis.pht.test.*;
-import ch.ethz.globis.pht.test.util.TestUtil;
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
+import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
+import ch.ethz.globis.pht.test.TestIndexInsertion;
+import ch.ethz.globis.pht.test.TestIndexQueries;
+import ch.ethz.globis.pht.test.TestNearestNeighbour;
+import ch.ethz.globis.pht.test.TestValues;
+import ch.ethz.globis.pht.test.TestValuesD;
+import ch.ethz.globis.pht.test.util.TestUtil;
 
 //ignored to make compilation finish faster
 @Ignore

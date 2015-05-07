@@ -2,7 +2,7 @@ package ch.ethz.globis.distindex.middleware.balancing;
 
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -64,7 +64,7 @@ public class BalancingDaemon implements Runnable {
         }
 
         private void checkBalancing() {
-            PhTreeV<byte[]> tree = indexContext.getTree();
+            PhTree<byte[]> tree = indexContext.getTree();
             if (tree.size() > PhTreeRequestHandler.THRESHOLD) {
                 balancingStrategy.balance();
             }

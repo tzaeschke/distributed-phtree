@@ -1,6 +1,6 @@
 package ch.ethz.globis.distindex.benchmark;
 
-import ch.ethz.globis.pht.PhTreeV;
+import ch.ethz.globis.pht.PhTree;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -9,12 +9,12 @@ public class ThreadedReaderWithInserts implements Callable<Result> {
 
     private final int startIndex;
     private final int endIndex;
-    private final PhTreeV<Object> tree;
+    private final PhTree<Object> tree;
     private final List<long[]> entries;
 
     private int magic = 0;
 
-    ThreadedReaderWithInserts(int startIndex, int endIndex, PhTreeV<Object> tree, List<long[]> entries) {
+    ThreadedReaderWithInserts(int startIndex, int endIndex, PhTree<Object> tree, List<long[]> entries) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.tree = tree;
