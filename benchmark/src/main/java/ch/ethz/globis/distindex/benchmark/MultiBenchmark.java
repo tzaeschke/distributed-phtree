@@ -42,7 +42,7 @@ public abstract class MultiBenchmark implements Benchmark {
             System.out.println("There was an error executing the insertion tasks.");
             e.printStackTrace();
         } finally {
-            if (tree instanceof LoggingPhTreeV) ((LoggingPhTreeV) tree).computeLogStats();
+            if (tree instanceof LoggingPhTreeV) ((LoggingPhTreeV<?>) tree).computeLogStats();
         }
         return result;
     }

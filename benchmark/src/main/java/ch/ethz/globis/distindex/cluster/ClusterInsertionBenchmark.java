@@ -1,18 +1,13 @@
 package ch.ethz.globis.distindex.cluster;
 
-import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-
-import org.lwjgl.Sys;
-
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 
 public class ClusterInsertionBenchmark {
 

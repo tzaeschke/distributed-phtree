@@ -148,7 +148,7 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public <R> List<R> queryAll(long[] min, long[] max) {
+    public List<PhEntry<T>> queryAll(long[] min, long[] max) {
         return tree.queryAll(min, max);
     }
 

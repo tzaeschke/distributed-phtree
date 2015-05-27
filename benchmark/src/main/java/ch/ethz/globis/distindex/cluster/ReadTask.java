@@ -46,11 +46,12 @@ public class ReadTask implements Runnable {
     private void doRead(PhTreeNV tree, List<long[]> points) {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
-        boolean res = true;
+        //boolean res = true;
         for (long[] point : points) {
             tree.insert(point);
             start = System.nanoTime();
-            res &= tree.contains(point);
+            //res &= 
+            tree.contains(point);
             end = System.nanoTime();
             System.out.println(date.format(new Date()) + ",end,get,"+ ((end - start) / 1000000.0));
         }

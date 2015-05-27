@@ -54,7 +54,7 @@ public class CloningBenchmark {
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-        private CritBit64 index;
+        private CritBit64<BigInteger> index;
 
         private ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
             protected Kryo initialValue() {
@@ -74,10 +74,10 @@ public class CloningBenchmark {
             }
         }
 
-        public CritBit64 manualClone(CritBit64 index) {
-            CritBit64 copy = CritBit64.create();
-            CritBit64.CBIterator it = index.iterator();
-            CritBit64.Entry e;
+        public CritBit64<BigInteger> manualClone(CritBit64<BigInteger> index) {
+            CritBit64<BigInteger> copy = CritBit64.create();
+            CritBit64.CBIterator<BigInteger> it = index.iterator();
+            CritBit64.Entry<BigInteger> e;
             while (it.hasNext()) {
                 e = it.nextEntry();
                 copy.put(e.key(), e.value());

@@ -1,16 +1,14 @@
 package ch.ethz.globis.distindex.cluster;
 
-import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-
-import org.lwjgl.Sys;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.pht.nv.PhTreeNV;
 
 public class RangeTask implements Runnable{
 
@@ -77,7 +75,7 @@ public class RangeTask implements Runnable{
             keyEnd = new long[] { key[0] + offsetB, key[1] + offsetB};
 
             start = System.nanoTime();
-            List<Object> objects = tree.queryAll(keyStart, keyEnd);
+            List<?> objects = tree.queryAll(keyStart, keyEnd);
             end = System.nanoTime();
             System.out.println(date.format(new Date()) + ",end,range,"+ ((end - start) / 1000000.0) + "," + objects.size());
         }
