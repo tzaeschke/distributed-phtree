@@ -126,4 +126,10 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     public PHTreeIndexProxy<V> getProxy() {
         return proxy;
     }
+
+	@Override
+	public void clear() {
+		//TODO implement me
+		throw new UnsupportedOperationException();
+	}
 }

@@ -200,4 +200,9 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
         Long l = Long.parseLong(timeString);
         return l / 1000;
     }
+
+	@Override
+	public void clear() {
+		tree.clear();
+	}
 }
