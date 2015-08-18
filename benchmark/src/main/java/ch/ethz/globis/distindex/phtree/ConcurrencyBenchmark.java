@@ -1,12 +1,18 @@
 package ch.ethz.globis.distindex.phtree;
 
 
-import ch.ethz.globis.pht.v5.*;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import ch.ethz.globis.pht.v5.PhOperations;
+import ch.ethz.globis.pht.v5.PhOperationsCOW;
+import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
+import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
+import ch.ethz.globis.pht.v5.PhOperationsSimple;
+import ch.ethz.globis.pht.v5.PhTree5;
 
 import java.util.Arrays;
 import java.util.Random;

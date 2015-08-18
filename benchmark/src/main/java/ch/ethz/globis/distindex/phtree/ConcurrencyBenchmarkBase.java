@@ -1,9 +1,15 @@
 package ch.ethz.globis.distindex.phtree;
 
-import ch.ethz.globis.pht.v5.*;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+
+import ch.ethz.globis.pht.v5.PhOperations;
+import ch.ethz.globis.pht.v5.PhOperationsCOW;
+import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
+import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
+import ch.ethz.globis.pht.v5.PhOperationsSimple;
+import ch.ethz.globis.pht.v5.PhTree5;
 
 import java.util.Arrays;
 import java.util.Random;
