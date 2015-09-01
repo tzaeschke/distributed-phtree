@@ -84,7 +84,7 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     }
 
     @Override
-    public PhIterator<V> query(long[] min, long[] max) {
+    public PhQuery<V> query(long[] min, long[] max) {
         return new DistributedPhTreeIterator<V>(proxy.query(min, max));
     }
 

@@ -123,7 +123,7 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public PhIterator<T> query(long[] min, long[] max) {
+    public PhQuery<T> query(long[] min, long[] max) {
         return tree.query(min, max);
     }
 
