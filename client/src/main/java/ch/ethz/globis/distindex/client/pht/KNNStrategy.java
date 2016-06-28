@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import java.util.List;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 
 public interface KNNStrategy<V> {
 
-    public List<long[]> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy);
+    public PhKnnQuery<V> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy);
 
     public void setRadiusStrategy(KNNRadiusStrategy radiusStrategy);
 }

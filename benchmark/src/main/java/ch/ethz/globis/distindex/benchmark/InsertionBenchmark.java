@@ -24,14 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.benchmark;
 
-import ch.ethz.globis.pht.v5.PhOperationsCOW;
-import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
-import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
-import ch.ethz.globis.pht.v5.PhTree5;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsCOW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsHandOverHand_COW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
+import ch.ethz.globis.pht.PhTree;
 
 public class InsertionBenchmark {
 
@@ -64,7 +65,7 @@ public class InsertionBenchmark {
         return entries;
     }
 
-    public static void performMeasurement(PhTree5<Object> index, List<long[]> entries) {
+    public static void performMeasurement(PhTree<Object> index, List<long[]> entries) {
         long start = System.currentTimeMillis();
 
         for (long[] entry :  entries) {
@@ -79,91 +80,95 @@ public class InsertionBenchmark {
         System.out.println("Inserted " + nrEntries + " entries in " + durationInSeconds + " seconds." );
     }
 
+    private static PhTreeC<Object> createTree(int dim) {
+    	return PhTreeC.create(dim);
+    }
+    
     private static Result benchmarkNoConcurrent(List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTree<Object> tree = createTree(dim);
         Benchmark benchmark = new SingleInsertionBenchmark(tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkCOW(List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsCOW<>(tree));
         Benchmark benchmark = new SingleInsertionBenchmark(tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkCOWMulti(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsCOW<>(tree));
         Benchmark benchmark = new MultiInsertionBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkCOWMultiRead(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsCOW<>(tree));
         Benchmark benchmark = new MultiReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkCOWMultiReadWrite(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsCOW<>(tree));
         Benchmark benchmark = new MultiInsertReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkOL(List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsOL_COW<>(tree));
         Benchmark benchmark = new SingleInsertionBenchmark(tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkOLMulti(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsOL_COW<>(tree));
         Benchmark benchmark = new MultiInsertionBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkOLMultiRead(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsOL_COW<>(tree));
         Benchmark benchmark = new MultiReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkOLMultiReadWrite(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsOL_COW<>(tree));
         Benchmark benchmark = new MultiInsertReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkHoH(List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsHandOverHand_COW<>(tree));
         Benchmark benchmark = new SingleInsertionBenchmark(tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkHoHMulti(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsHandOverHand_COW<>(tree));
         Benchmark benchmark = new MultiInsertionBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkHoHMultiRead(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsHandOverHand_COW<>(tree));
         Benchmark benchmark = new MultiReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();
     }
 
     private static Result benchmarkHoHMultiReadWrite(int nrThreads, List<long[]> entries, int dim, int depth) {
-        PhTree5<Object> tree = new PhTree5<>(dim, depth);
+        PhTreeC<Object> tree = createTree(dim);
         tree.setOperations(new PhOperationsHandOverHand_COW<>(tree));
         Benchmark benchmark = new MultiInsertReadBenchmark(nrThreads, tree, entries);
         return benchmark.run();

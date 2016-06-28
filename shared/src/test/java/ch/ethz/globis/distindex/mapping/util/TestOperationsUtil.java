@@ -24,14 +24,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.mapping.util;
 
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.v5.PhTree5;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import ch.ethz.globis.pht.PhTree;
 
 public class TestOperationsUtil {
 
@@ -64,7 +63,7 @@ public class TestOperationsUtil {
 
     public static PhTree<String> createRandomPhTree(int entries, int dim) {
 
-        PhTree<String> tree = new PhTree5<>(dim, 64);
+        PhTree<String> tree = PhTree.create(dim);
 
         long[] key;
         for (int i = 0; i < entries; i++) {

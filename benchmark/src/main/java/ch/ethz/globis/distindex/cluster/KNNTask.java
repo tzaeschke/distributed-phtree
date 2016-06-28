@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package ch.ethz.globis.distindex.cluster;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 import ch.ethz.globis.pht.nv.PhTreeNV;
 
 import java.text.DateFormat;
@@ -69,7 +70,7 @@ public class KNNTask implements Runnable {
         DateFormat date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start, end;
         int k = 100;
-        List<long[]> neighbours;
+        PhKnnQuery<long[]> neighbours;
         for (long[] point : points) {
             tree.insert(point);
         }
@@ -78,8 +79,14 @@ public class KNNTask implements Runnable {
             point = points.get(i);
             start = System.nanoTime();
             neighbours = tree.nearestNeighbour(k, point);
+            int n = 0;
+            while (neighbours.hasNext()) {
+            	n++;
+            	neighbours.nextKey();
+            }
             end = System.nanoTime();
-            System.out.println(date.format(new Date()) + ",end,knn,"+ ((end - start) / 1000000.0) + "," + neighbours.size());
+            System.out.println(date.format(new Date()) + ",end,knn," + 
+            		((end - start) / 1000000.0) + "," + n);
         }
     }
 }

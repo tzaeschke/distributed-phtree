@@ -65,7 +65,7 @@ public class ZKPHFactory implements PHFactory {
     public <V> PhTreeF<V> createPHTreeVD(int dim) {
         PhTree<V> proxy = createPHTreeMap(dim, Double.SIZE);
 
-        return new PhTreeF<>(proxy);
+        return PhTreeF.wrap(proxy);
     }
 
     @Override

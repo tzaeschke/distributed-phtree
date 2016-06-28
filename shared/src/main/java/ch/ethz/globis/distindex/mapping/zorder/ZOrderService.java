@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.mapping.zorder;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
@@ -85,7 +83,7 @@ public class ZOrderService {
 
         ZAddress alpha = new ZAddress(start, depth);
         ZAddress beta = new ZAddress(end, depth);
-        String common = StringUtils.getCommonPrefix(alpha.getCode(), beta.getCode());
+        String common = getCommonPrefix(alpha.getCode(), beta.getCode());
         String alphaSuffix = alpha.getCode().substring(common.length());
         String betaSuffix = beta.getCode().substring(common.length());
         boolean border = true;
@@ -126,7 +124,7 @@ public class ZOrderService {
         //need upper half envelope of alpha
         Set<HBox> results = new TreeSet<>();
 
-        String commonZone = StringUtils.getCommonPrefix(alphaBoxCode, betaBoxCode);
+        String commonZone = getCommonPrefix(alphaBoxCode, betaBoxCode);
         String currentQuad = alphaBoxCode.substring(commonZone.length());
         HBox actualBox = new HBox(space.getCode() + commonZone);
         for (int j = 0; j < currentQuad.length(); j++) {
@@ -309,4 +307,15 @@ public class ZOrderService {
     public int hashCode() {
         return depth;
     }
+    
+    private static String getCommonPrefix(String s1, String s2) {
+    	int len = s1.length() > s2.length() ? s2.length() : s1.length();
+    	for (int i = 0; i < len; i++) {
+    		if (s1.charAt(i) != s2.charAt(i)) {
+    			return s1.substring(0, i);
+    		}
+    	}
+		return s1.substring(0, len);
+    }
+
 }

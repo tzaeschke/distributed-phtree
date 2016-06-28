@@ -24,28 +24,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
 import ch.ethz.globis.distindex.api.Index;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.exception.InvalidResponseException;
 import ch.ethz.globis.distindex.client.exception.ServerErrorException;
-import ch.ethz.globis.disindex.codec.io.RequestDispatcher;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.operation.OpStatus;
-import ch.ethz.globis.distindex.operation.request.*;
-import ch.ethz.globis.distindex.operation.response.*;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.ContainsRequest;
+import ch.ethz.globis.distindex.operation.request.DeleteRequest;
+import ch.ethz.globis.distindex.operation.request.GetIteratorBatchRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.GetRequest;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
+import ch.ethz.globis.distindex.operation.request.PutRequest;
+import ch.ethz.globis.distindex.operation.request.Request;
+import ch.ethz.globis.distindex.operation.request.Requests;
+import ch.ethz.globis.distindex.operation.request.UpdateKeyRequest;
+import ch.ethz.globis.distindex.operation.response.IntegerResponse;
+import ch.ethz.globis.distindex.operation.response.Response;
+import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.distindex.operation.response.SimpleResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.util.PhMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Proxy class for working with a distributed, remote index.

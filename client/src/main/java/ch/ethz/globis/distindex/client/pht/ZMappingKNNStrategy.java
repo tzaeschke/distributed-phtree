@@ -29,6 +29,8 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +44,12 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
     private KNNRadiusStrategy radiusStrategy = new RangeFilteredKNNRadiusStrategy();
 
     @Override
-    public List<long[]> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
+    public PhKnnQuery<V> getNearestNeighbors(long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
         LOG.debug("KNN request started for key={} and k={}", Arrays.toString(key), k);
         KeyMapping<long[]> keyMapping = indexProxy.getMapping();
         String keyHostId = keyMapping.get(key);
         List<long[]> candidates = getNearestNeighbors(keyHostId, key, k, indexProxy);
-        List<long[]> neighbours;
+        PhKnnQuery<V> neighbours;
         if (candidates.size() < k) {
             neighbours = iterativeExpansion(keyMapping, key, k, indexProxy);
         } else {
@@ -71,11 +73,12 @@ public class ZMappingKNNStrategy<V> implements KNNStrategy<V> {
         return indexProxy.extractKeys(response);
     }
 
-    private List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    private PhKnnQuery<V> radiusSearch(String initialHost, long[] key, int k, 
+    		List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
         return radiusStrategy.radiusSearch(initialHost, key, k, candidates, indexProxy);
     }
 
-    private List<long[]> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
+    private PhKnnQuery<V> iterativeExpansion(KeyMapping<long[]> keyMapping, long[] key, int k, PHTreeIndexProxy<V> indexProxy) {
         List<String> hostIds = keyMapping.get();
         return indexProxy.getNearestNeighbors(hostIds, key, k);
     }

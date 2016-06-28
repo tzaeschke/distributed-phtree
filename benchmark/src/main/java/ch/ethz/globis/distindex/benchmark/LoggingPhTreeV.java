@@ -24,16 +24,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.benchmark;
 
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeQStats;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import ch.ethz.globis.pht.PhDimFilter;
+import ch.ethz.globis.pht.PhDistance;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhRangeQuery;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.PhTreeHelper;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhTreeQStats;
 
 /**
  * Performs an in-memory logging
@@ -142,7 +148,7 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public PhIterator<T> queryExtent() {
+    public PhExtent<T> queryExtent() {
         return tree.queryExtent();
     }
 
@@ -152,22 +158,22 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public int getDIM() {
-        return tree.getDIM();
+    public int getDim() {
+        return tree.getDim();
     }
 
     @Override
-    public int getDEPTH() {
-        return tree.getDEPTH();
+    public int getBitDepth() {
+        return tree.getBitDepth();
     }
 
     @Override
-    public List<long[]> nearestNeighbour(int nMin, long... key) {
+    public PhKnnQuery<T> nearestNeighbour(int nMin, long... key) {
         return tree.nearestNeighbour(nMin, key);
     }
 
     @Override
-    public List<long[]> nearestNeighbour(int nMin, PhDistance dist, PhDimFilter dims, long... key) {
+    public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhDimFilter dims, long... key) {
         return tree.nearestNeighbour(nMin, dist, dims, key);
     }
 
@@ -228,5 +234,15 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
 	@Override
 	public void clear() {
 		tree.clear();
+	}
+
+	@Override
+	public PhRangeQuery<T> rangeQuery(double dist, long... center) {
+		return tree.rangeQuery(dist, center);
+	}
+
+	@Override
+	public PhRangeQuery<T> rangeQuery(double dist, PhDistance optionalDist, long... center) {
+		return tree.rangeQuery(dist, optionalDist, center);
 	}
 }

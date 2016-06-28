@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import org.jboss.netty.handler.codec.replay.UnreplayableOperationException;
-
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.pht.PhEntry;
@@ -75,12 +73,14 @@ public class DistributedPhTreeIterator<V> implements PhQuery<V> {
         throw new UnsupportedOperationException("Remove operation not currently supported.");
     }
 
+	@Deprecated
 	@Override
 	public void reset(long[] min, long[] max) {
 		// TODO Auto-generated method stub
-		throw new UnreplayableOperationException();
+		throw new UnsupportedOperationException();
 	}
 
+	@Deprecated
 	@Override
 	public PhEntry<V> nextEntryReuse() {
 		// TODO Auto-generated method stub

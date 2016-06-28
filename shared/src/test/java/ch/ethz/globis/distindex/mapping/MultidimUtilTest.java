@@ -45,13 +45,13 @@ public class MultidimUtilTest {
             add(new long[]{3, 3});
         }};
         long[] q = {0, 0};
-        List<long[]> result = MultidimUtil.nearestNeighbours(q, 1, points);
+        List<long[]> result = MultidimUtil.nearestNeighboursAsList(q, 1, points);
         List<long[]> resultB = MultidimUtil.nearestNeighboursBruteForce(q, 1, points);
 
         equalsList(result, resultB);
         equalsList(result, points.subList(0, 1));
 
-        result = MultidimUtil.nearestNeighbours(q, 2, points);
+        result = MultidimUtil.nearestNeighboursAsList(q, 2, points);
         resultB = MultidimUtil.nearestNeighboursBruteForce(q, 2, points);
 
         equalsList(result, resultB);
@@ -70,7 +70,7 @@ public class MultidimUtilTest {
         int k = 10;
         for (int i = 0; i < 100; i++) {
             long[] q = {random.nextLong(), random.nextLong() };
-            List<long[]> nearestNeighbors = MultidimUtil.nearestNeighbours(q, k, points);
+            List<long[]> nearestNeighbors = MultidimUtil.nearestNeighboursAsList(q, k, points);
             equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
     }

@@ -57,11 +57,12 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhDistanceD;
+import ch.ethz.globis.pht.PhDistanceF;
 import ch.ethz.globis.pht.PhEntry;
 import ch.ethz.globis.pht.PhPredicate;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTree.PhIterator;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
 import ch.ethz.globis.pht.util.PhMapperK;
@@ -283,7 +284,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             return createOutdateVersionResponse(request);
         }
 
-        int dim = tree().getDIM();
+        int dim = tree().getDim();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, dim);
     }
 
@@ -293,7 +294,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
             return createOutdateVersionResponse(request);
         }
 
-        int depth = tree().getDEPTH();
+        int depth = tree().getBitDepth();
         return new IntegerResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS, depth);
     }
 
@@ -382,7 +383,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTreeQStats quality = (tree().size() == 0) ? new PhTreeQStats(tree().getDEPTH()) : tree().getQuality();
+        PhTreeQStats quality = (tree().size() == 0) ? new PhTreeQStats(tree().getBitDepth()) : tree().getQuality();
         response.addParameter("quality", quality);
         return response;
     }
@@ -459,10 +460,10 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         return new ResultResponse<>(request.getOpCode(), request.getId(), OpStatus.SUCCESS, results);
     }
 
-    private IndexEntryList<long[], byte[]> createKeyList(List<long[]> keyList) {
+    private IndexEntryList<long[], byte[]> createKeyList(PhKnnQuery<byte[]> keyList) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
-        for (long[] key : keyList) {
-            results.add(key, null);
+        while (keyList.hasNext()) {
+            results.add(keyList.nextKey(), null);
         }
         return results;
     }
@@ -478,7 +479,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
 
     private IndexEntryList<long[], byte[]> createList(PhIterator<byte[]> it, long[] key, double distance) {
         IndexEntryList<long[], byte[]> results = new IndexEntryList<>();
-        PhDistance measure = new PhDistanceD();
+        PhDistance measure = new PhDistanceF();
         while (it.hasNext()) {
             PhEntry<byte[]> entry = it.nextEntry();
             if (distance > measure.dist(key, entry.getKey())) {

@@ -26,10 +26,10 @@ package ch.ethz.globis.distindex.middleware;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
-import ch.ethz.globis.pht.v5.PhTree5;
 
 /**
  * The in-memory context associated with the index.
@@ -66,7 +66,7 @@ public class IndexContext {
 //        if (tree != null) {
 //            return;
 //        }
-        PhTree5<byte[]> concurrentTree =  new PhTree5<>(dim, depth);
+        PhTreeC<byte[]> concurrentTree = PhTreeC.create(dim);
         concurrentTree.setOperations(new PhOperationsOL_COW<>(concurrentTree));
         this.tree = concurrentTree;
     }

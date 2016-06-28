@@ -63,6 +63,7 @@ import ch.ethz.globis.pht.PhDimFilter;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhEntry;
 import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
 import ch.ethz.globis.pht.util.PhTreeQStats;
@@ -157,8 +158,8 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @return
      */
     @Override
-    public List<long[]> getNearestNeighbors(long[] key, int k) {
-        return knnStrategy.getNearestNeighbors(key, k, this);
+    public PhKnnQuery<V> getNearestNeighbors(long[] key, int k) {
+    	return knnStrategy.getNearestNeighbors(key, k, PHTreeIndexProxy.this);
     }
 
     /**
@@ -192,7 +193,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
      * @param k                         The number of neighbours to be returned.
      * @return                          The k nearest neighbours on the hosts.
      */
-    List<long[]> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
+    PhKnnQuery<V> getNearestNeighbors(Collection<String> hostIds, long[] key, int k) {
         logKNNRequest(hostIds, key, k);
         boolean versionOutdated;
         List<ResultResponse> responses;
@@ -333,7 +334,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return global;
     }
 
-    public List<long[]> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
+    public PhKnnQuery<V> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
         //ToDo this is currently not supported by the PH Tree, but it will change in the future
         throw new UnsupportedOperationException();
     }

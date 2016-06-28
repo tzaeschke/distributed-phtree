@@ -24,16 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.benchmark;
 
-import ch.ethz.globis.pht.v5.PhTree5;
-
 import java.util.List;
+
+import ch.ethz.globis.pht.PhTree;
 
 public class SingleInsertionBenchmark implements Benchmark {
 
-    private final PhTree5<Object> tree;
+    private final PhTree<Object> tree;
     private final List<long[]> entries;
 
-    public SingleInsertionBenchmark(PhTree5<Object> tree, List<long[]> entries) {
+    public SingleInsertionBenchmark(PhTree<Object> tree, List<long[]> entries) {
         this.tree = tree;
         this.entries = entries;
     }

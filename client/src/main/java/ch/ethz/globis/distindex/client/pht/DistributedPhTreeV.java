@@ -103,32 +103,32 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     }
 
     @Override
-    public PhIterator<V> queryExtent() {
-        return new DistributedPhTreeIterator<>(proxy.iterator());
+    public PhExtent<V> queryExtent() {
+        return new DistributedPhTreeIterator2<>(proxy.iterator());
     }
 
     @Override
     public PhQuery<V> query(long[] min, long[] max) {
-        return new DistributedPhTreeIterator<V>(proxy.query(min, max));
+        return new DistributedPhTreeIterator<>(proxy.query(min, max));
     }
 
     @Override
-    public int getDIM() {
+    public int getDim() {
         return proxy.getDim();
     }
 
     @Override
-    public int getDEPTH() {
+    public int getBitDepth() {
         return proxy.getDepth();
     }
 
     @Override
-    public List<long[]> nearestNeighbour(int k, long... key) {
+    public PhKnnQuery<V> nearestNeighbour(int k, long... key) {
         return proxy.getNearestNeighbors(key, k);
     }
 
     @Override
-    public List<long[]> nearestNeighbour(int i, PhDistance phDistance, PhDimFilter phDimFilter, long... keys) {
+    public PhKnnQuery<V> nearestNeighbour(int i, PhDistance phDistance, PhDimFilter phDimFilter, long... keys) {
         return proxy.getNearestNeighbuor(i, phDistance, phDimFilter, keys);
     }
 
@@ -153,7 +153,16 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
 
 	@Override
 	public void clear() {
-		//TODO implement me
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PhRangeQuery<V> rangeQuery(double dist, long... center) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PhRangeQuery<V> rangeQuery(double dist, PhDistance optionalDist, long... center) {
 		throw new UnsupportedOperationException();
 	}
 }

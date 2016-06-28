@@ -24,27 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.phtree;
 
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 
-import ch.ethz.globis.pht.v5.PhOperations;
-import ch.ethz.globis.pht.v5.PhOperationsCOW;
-import ch.ethz.globis.pht.v5.PhOperationsHandOverHand_COW;
-import ch.ethz.globis.pht.v5.PhOperationsOL_COW;
-import ch.ethz.globis.pht.v5.PhOperationsSimple;
-import ch.ethz.globis.pht.v5.PhTree5;
-
-import java.util.Arrays;
-import java.util.Random;
-import java.util.concurrent.locks.ReentrantLock;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperations;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsCOW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsHandOverHand_COW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
+import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsSimple;
+import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
+import ch.ethz.globis.pht.PhTree;
 
 public class ConcurrencyBenchmarkBase {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-        PhTree5<String> tree;
+        PhTreeC<String> tree;
         final Object lock = new Object();
         final ReentrantLock l = new ReentrantLock();
 
@@ -55,14 +56,14 @@ public class ConcurrencyBenchmarkBase {
 
         @Setup
         public void initTree() {
-            tree = new PhTree5<String>(2, 64);
+            tree = PhTreeC.create(2);
             phOperationsOL = new PhOperationsOL_COW(tree);
             phOperationsCOW = new PhOperationsCOW(tree);
             phOperationsHoH = new PhOperationsHandOverHand_COW(tree);
             phOperationsSimple = new PhOperationsSimple(tree);
         }
 
-        public PhTree5<String> getTree() {
+        public PhTree<String> getTree() {
             return tree;
         }
 
@@ -84,23 +85,23 @@ public class ConcurrencyBenchmarkBase {
     }
 
     protected Object put(BenchmarkState state) {
-        int dim = state.getTree().getDIM();
+        int dim = state.getTree().getDim();
 
         long[] key = createRandomKey(dim);
         return state.getTree().put(key, Arrays.toString(key));
     }
 
     protected boolean contains(BenchmarkState state) {
-        int dim = state.getTree().getDIM();
+        int dim = state.getTree().getDim();
 
         long[] key = createRandomKey(dim);
         return state.getTree().contains(key);
     }
 
     protected String delete(BenchmarkState state) {
-        PhTree5<String> tree = state.getTree();
+        PhTree<String> tree = state.getTree();
 
-        int dim = tree.getDIM();
+        int dim = tree.getDim();
 
         long[] key = createRandomKey(dim);
         return state.tree.remove(key);

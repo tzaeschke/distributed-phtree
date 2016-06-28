@@ -344,7 +344,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
         cluster.setSize(currentHostId, indexContext.getTree().size());
 
         ZMapping zmap = (ZMapping) mapping;
-        int depth = indexContext.getTree().getDEPTH();
+        int depth = indexContext.getTree().getBitDepth();
         long[] key;
         String host;
         if (entriesMoved != 0) {
@@ -411,7 +411,7 @@ public class ZMappingBalancingStrategy implements BalancingStrategy {
     private boolean initBalancing(int entriesToSend, String receiverHostId) {
         String currentHostId = indexContext.getHostId();
         PhTree<byte[]> tree = indexContext.getTree();
-        InitBalancingRequest request = requests.newInitBalancing(entriesToSend, tree.getDIM(), tree.getDEPTH());
+        InitBalancingRequest request = requests.newInitBalancing(entriesToSend, tree.getDim(), tree.getBitDepth());
         Response response = requestDispatcher.send(receiverHostId, request, BaseResponse.class);
         if (response.getStatus() != OpStatus.SUCCESS) {
             LOG.error("[{}] Receiving host {} did not accept balancing initialization.", currentHostId, receiverHostId);

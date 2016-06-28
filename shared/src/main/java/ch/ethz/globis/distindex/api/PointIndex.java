@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.api;
 
-import java.util.List;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 
 /**
  *  Represents a mult-dimensional point index. The key type used by this index is a long array.
@@ -41,5 +41,5 @@ public interface PointIndex<V> extends Index<long[], V> {
      * @param k                         The number of neighbours to be returned.
      * @return                          A list consisting of the k nearest keys to the key received as an argument.
      */
-    public List<long[]> getNearestNeighbors(long[] key, int k);
+    public PhKnnQuery<V> getNearestNeighbors(long[] key, int k);
 }

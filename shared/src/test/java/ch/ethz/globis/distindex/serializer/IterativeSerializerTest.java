@@ -24,14 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.serializer;
 
-import ch.ethz.globis.distindex.mapping.util.TestOperationsUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.v5.PhTree5;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import ch.ethz.globis.distindex.mapping.util.TestOperationsUtil;
+import ch.ethz.globis.pht.PhTree;
 
 public class IterativeSerializerTest {
 
@@ -45,7 +45,7 @@ public class IterativeSerializerTest {
 
         serializer.export(tree, filename);
 
-        PhTree<String> outputTree = new PhTree5<>(dim, 64);
+        PhTree<String> outputTree = PhTree.create(dim);
         serializer.setTree(outputTree);
 
         PhTree<String> newTree = serializer.load(filename);

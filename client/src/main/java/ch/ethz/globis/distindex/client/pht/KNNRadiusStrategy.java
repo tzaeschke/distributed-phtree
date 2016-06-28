@@ -26,8 +26,10 @@ package ch.ethz.globis.distindex.client.pht;
 
 import java.util.List;
 
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+
 public interface KNNRadiusStrategy {
 
-    <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates,
+    <V> PhKnnQuery<V> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates,
                                   PHTreeIndexProxy<V> indexProxy);
 }

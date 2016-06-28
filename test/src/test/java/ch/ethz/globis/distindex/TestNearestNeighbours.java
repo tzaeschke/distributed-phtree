@@ -27,6 +27,7 @@ package ch.ethz.globis.distindex;
 import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
+import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.*;
 import ch.ethz.globis.pht.nv.PhTreeNV;
 import ch.ethz.globis.pht.nv.PhTreeVProxy;
@@ -113,7 +114,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -159,7 +160,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals("Invalid result size", 2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -205,7 +206,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -251,7 +252,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -298,7 +299,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -345,7 +346,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -392,7 +393,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -439,7 +440,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(B);
         tree.insert(C);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, C);
         checkContains(result, A);
@@ -459,7 +460,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         tree.insert(A);
         tree.insert(B);
 
-        List<long[]> result = tree.nearestNeighbour(2, Q);
+        List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
         checkContains(result, B);
         checkContains(result, A);

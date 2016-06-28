@@ -24,20 +24,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.serialization;
 
-import ch.ethz.globis.distindex.serializer.FullTreeSerializer;
-import ch.ethz.globis.distindex.serializer.IterativeSerializer;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.v5.PhTree5;
-import org.openjdk.jmh.annotations.*;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Measurement;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
+import ch.ethz.globis.distindex.serializer.FullTreeSerializer;
+import ch.ethz.globis.distindex.serializer.IterativeSerializer;
+import ch.ethz.globis.pht.PhTree;
 
 @BenchmarkMode({Mode.Throughput})
 @Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -75,7 +82,7 @@ public class SerializationBenchmark {
     public PhTree<String> deserialize_IterativeTree(BenchmarkState state) throws FileNotFoundException {
         IterativeSerializer<String> serializer = new IterativeSerializer<String>();
 
-        serializer.setTree(new PhTree5<String>(state.dim, state.depth));
+        serializer.setTree(PhTree.create(state.dim));
         return serializer.load(ITERATIVE_TREE_FILE);
     }
 
@@ -90,7 +97,7 @@ public class SerializationBenchmark {
 
             //create a tree containing random entries
             int nrEntries = 10000;
-            tree = new PhTree5<String>(dim, depth);
+            tree = PhTree.create(dim);
 
             long[] key = new long[dim];
             Random random = new Random();

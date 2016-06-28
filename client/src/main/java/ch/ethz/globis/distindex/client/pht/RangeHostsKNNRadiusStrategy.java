@@ -26,6 +26,7 @@ package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 
 import java.util.List;
 
@@ -48,7 +49,8 @@ public class RangeHostsKNNRadiusStrategy implements KNNRadiusStrategy {
      * @return                          The k nearest neighbour points.
      */
     @Override
-    public <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
+    public <V> PhKnnQuery<V> radiusSearch(String initialHost, long[] key, int k, 
+    		List<long[]> candidates, PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
         long[] start = MultidimUtil.transpose(key, -distance);
@@ -59,10 +61,11 @@ public class RangeHostsKNNRadiusStrategy implements KNNRadiusStrategy {
         List<String> hostIds = mapping.get(start, end);
         hostIds.remove(initialHost);
         if (hostIds.size() == 0) {
-            return candidates;
+            return new MultidimUtil.KnnFromList<V>(candidates, indexProxy);
         }
 
-        List<long[]> expandedCandidates = indexProxy.getNearestNeighbors(hostIds, key, k);
+        List<long[]> expandedCandidates = 
+        		MultidimUtil.knnToList(indexProxy.getNearestNeighbors(hostIds, key, k));
 
         //add the points we retrieved from the initial call since we didn't query that host again
         expandedCandidates.addAll(candidates);

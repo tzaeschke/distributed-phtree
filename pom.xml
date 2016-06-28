@@ -7,7 +7,7 @@
     <groupId>ch.ethz.globis</groupId>
     <artifactId>distributed-index</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <name>Distributed PH-Tree Multi-Dimension Index</name>
     <description>
         This is a Master's Thesis project. It consists in the distribution and parallelization of the PHTree Multidimensional Index
@@ -28,7 +28,7 @@
         <!--Dependency versions-->
         <netty.version>4.0.23.Final</netty.version>
         <logback.version>1.1.2</logback.version>
-        <phtree.version>0.2.1-SNAPSHOT</phtree.version>
+        <phtree.version>0.3.0-SNAPSHOT</phtree.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
         <curator.version>2.7.0</curator.version>

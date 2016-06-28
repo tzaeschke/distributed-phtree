@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.PhTree.PhKnnQuery;
 
 import java.util.List;
 
@@ -36,8 +37,8 @@ import java.util.List;
 public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
 
     /**
-     * Perform a radius search to check if there are any neighbours nearer to the query point than the
-     * neighbours found on the query host server.
+     * Perform a radius search to check if there are any neighbours nearer to the query point than 
+     * the neighbours found on the query host server.
      *
      * This is done using a knn search on hosts intersecting the range (q - r, q + r) .
      *
@@ -48,7 +49,8 @@ public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
      */
 
     @Override
-    public <V> List<long[]> radiusSearch(String initialHost, long[] key, int k, List<long[]> candidates,
+    public <V> PhKnnQuery<V> radiusSearch(String initialHost, long[] key, int k, 
+    		List<long[]> candidates,
                                          PHTreeIndexProxy<V> indexProxy) {
         long[] farthestNeighbor = candidates.get(k - 1);
         long distance = MultidimUtil.computeDistance(key, farthestNeighbor);
@@ -56,6 +58,7 @@ public class RangeKNNRadiusStrategy implements KNNRadiusStrategy {
         long[] end = MultidimUtil.transpose(key, distance);
 
 
-        return MultidimUtil.nearestNeighbours(key, k, indexProxy.combineKeys(indexProxy.getRange(start, end)));
+        return MultidimUtil.nearestNeighbours(key, k, 
+        		indexProxy.combineKeys(indexProxy.getRange(start, end)));
     }
 }

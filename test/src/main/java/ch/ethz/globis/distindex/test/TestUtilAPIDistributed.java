@@ -24,26 +24,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.test;
 
-import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
-import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
-import ch.ethz.globis.distindex.middleware.api.Middleware;
-import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
-import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-import ch.ethz.globis.pht.nv.PhTreeVProxy;
-import ch.ethz.globis.pht.test.util.TestUtilAPI;
-
-import org.apache.curator.test.TestingServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.curator.test.TestingServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
+import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
+import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
+import ch.ethz.globis.distindex.middleware.api.Middleware;
+import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.pht.nv.PhTreeVProxy;
+import ch.ethz.globis.pht.test.util.TestUtilAPI;
 
 /**
  * Implementation of the TestUtilAPI
@@ -93,6 +92,11 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
         trees.add((DistributedPhTreeV) tree);
         return tree;
     }
+
+	@Override
+	public <T> PhTree<T> newTreeV(int dim) {
+		return newTreeV(dim, 64);
+	}
 
     @Override
     public void close(PhTreeNV phTree) {

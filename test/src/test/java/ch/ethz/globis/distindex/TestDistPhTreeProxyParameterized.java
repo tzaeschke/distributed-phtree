@@ -223,7 +223,8 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
             phTree.put(key, null);
         }
 
-        List<long[]> nearestNeighbors = phTree.getNearestNeighbors(new long[]{0, 0}, 3);
+        List<long[]> nearestNeighbors = 
+        		MultidimUtil.knnToList(phTree.getNearestNeighbors(new long[]{0, 0}, 3));
 
         expected = MultidimUtil.sort(expected);
         nearestNeighbors = MultidimUtil.sort(nearestNeighbors);
@@ -344,7 +345,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         }
         int k = 3;
         long[] q = {-1170105035, 234785527};
-        List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
+        List<long[]> nearestNeighbors = MultidimUtil.knnToList(phTree.getNearestNeighbors(q, k));
         equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
     }
 
@@ -364,7 +365,8 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         for (int i = 0; i < 100; i++) {
             long[] q = randomKey(random);
             System.out.println(Arrays.toString(q));
-            List<long[]> nearestNeighbors = phTree.getNearestNeighbors(q, k);
+            List<long[]> nearestNeighbors = 
+            		MultidimUtil.knnToList(phTree.getNearestNeighbors(q, k));
             equalsList(MultidimUtil.nearestNeighboursBruteForce(q, k, points), nearestNeighbors);
         }
     }
