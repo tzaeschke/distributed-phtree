@@ -34,17 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
-//import ch.ethz.globis.pht.test.TestIndexInsertion;
-//import ch.ethz.globis.pht.test.TestIndexQueries;
-//import ch.ethz.globis.pht.test.TestNearestNeighbour;
-//import ch.ethz.globis.pht.test.TestValues;
-//import ch.ethz.globis.pht.test.TestValuesD;
+import ch.ethz.globis.pht.test.TestIndexInsertion;
+import ch.ethz.globis.pht.test.TestIndexQueries;
+import ch.ethz.globis.pht.test.TestNearestNeighbour;
+import ch.ethz.globis.pht.test.TestValues;
+import ch.ethz.globis.pht.test.TestValuesD;
 import ch.ethz.globis.pht.test.util.TestUtil;
 
 //ignored to make compilation finish faster
 @Ignore
 @RunWith(org.junit.runners.Suite.class)
-//@Suite.SuiteClasses({TestNearestNeighbour.class, TestIndexQueries.class, TestIndexInsertion.class, TestValues.class, TestValuesD.class})
+@Suite.SuiteClasses({TestNearestNeighbour.class, TestIndexQueries.class, TestIndexInsertion.class, TestValues.class, TestValuesD.class})
 public class TestSuiteSelective {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPhtreeSuite.class);

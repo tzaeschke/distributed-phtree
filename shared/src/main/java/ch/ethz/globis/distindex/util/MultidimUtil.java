@@ -41,7 +41,6 @@ import ch.ethz.globis.pht.PhEntry;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTree.PhIterator;
 import ch.ethz.globis.pht.PhTree.PhKnnQuery;
-import ch.ethz.globis.pht.nv.PhTreeNV;
 
 public class MultidimUtil {
 
@@ -72,7 +71,7 @@ public class MultidimUtil {
 		if (points.size() == 0) {
 			return new EmptyPhKnnQuery<>();
 		}
-		PhTreeNV tree = createTree(points);
+		PhTree<long[]> tree = createTree(points);
 		return tree.nearestNeighbour(k, q);
 	}
 
@@ -80,7 +79,7 @@ public class MultidimUtil {
 		if (!points.hasNext()) {
 			return new EmptyPhKnnQuery<>();
 		}
-		PhTreeNV tree = createTree(q.length, points);
+		PhTree<long[]> tree = createTree(q.length, points);
 		return tree.nearestNeighbour(k, q);
 	}
 
@@ -206,10 +205,11 @@ public class MultidimUtil {
 		return tree;
 	}
 
-	private static <V> PhTreeNV createTree(int dim, PhKnnQuery<V> entries) {
-		PhTreeNV tree = PhTreeNV.create(dim, 64);
+	private static <V> PhTree<long[]> createTree(int dim, PhKnnQuery<V> entries) {
+		PhTree<long[]> tree = PhTree.create(dim);
 		while (entries.hasNext()) {
-			tree.insert(entries.nextKey());
+			long[] key = entries.nextKey();
+			tree.put(key, key);
 		}
 		return tree;
 	}
@@ -219,7 +219,7 @@ public class MultidimUtil {
 			return new ArrayList<>();
 		}
 
-		PhTreeNV tree = createTree(points);
+		PhTree<long[]> tree = createTree(points);
 
 		List<long[]> output = new ArrayList<>();
 		Iterator<long[]> it = tree.queryExtent();
@@ -229,12 +229,12 @@ public class MultidimUtil {
 		return output;
 	}
 
-	private static PhTreeNV createTree(List<long[]> points) {
+	private static PhTree<long[]> createTree(List<long[]> points) {
 		int dim = points.get(0).length;
 
-		PhTreeNV tree = PhTreeNV.create(dim, 64);
+		PhTree<long[]> tree = PhTree.create(dim);
 		for (long[] point : points) {
-			tree.insert(point);
+			tree.put(point, point);
 		}
 		return tree;
 	}

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>distributed-index</artifactId>
         <groupId>ch.ethz.globis</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -34,6 +34,11 @@
             <groupId>ch.ethz.globis.pht</groupId>
             <artifactId>phtree</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.ethz.globis.pht</groupId>
+            <artifactId>phtree</artifactId>
+            <type>test-jar</type>
+         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>

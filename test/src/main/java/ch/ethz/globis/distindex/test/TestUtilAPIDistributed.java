@@ -93,11 +93,6 @@ public class TestUtilAPIDistributed implements TestUtilAPI {
         return tree;
     }
 
-	@Override
-	public <T> PhTree<T> newTreeV(int dim) {
-		return newTreeV(dim, 64);
-	}
-
     @Override
     public void close(PhTreeNV phTree) {
         //currently not needed
