@@ -38,7 +38,8 @@
             <groupId>ch.ethz.globis.pht</groupId>
             <artifactId>phtree</artifactId>
             <type>test-jar</type>
-         </dependency>
+ 		    <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>

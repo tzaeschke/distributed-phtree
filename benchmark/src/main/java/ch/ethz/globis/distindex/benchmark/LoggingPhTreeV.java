@@ -31,15 +31,13 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import ch.ethz.globis.pht.PhDimFilter;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.PhRangeQuery;
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeQStats;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 /**
  * Performs an in-memory logging
@@ -67,23 +65,8 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public int getNodeCount() {
-        return tree.getNodeCount();
-    }
-
-    @Override
-    public PhTreeQStats getQuality() {
-        return tree.getQuality();
-    }
-
-    @Override
-    public PhTreeHelper.Stats getStats() {
+    public PhTreeStats getStats() {
         return tree.getStats();
-    }
-
-    @Override
-    public PhTreeHelper.Stats getStatsIdealNoNode() {
-        return tree.getStatsIdealNoNode();
     }
 
     @Override
@@ -173,7 +156,7 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhDimFilter dims, long... key) {
+    public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhFilter dims, long... key) {
         return tree.nearestNeighbour(nMin, dist, dims, key);
     }
 
@@ -183,7 +166,7 @@ public class LoggingPhTreeV<T> implements PhTree<T> {
     }
 
     @Override
-    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<T, R> mapper) {
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhFilter filter, PhMapper<T, R> mapper) {
         return tree.queryAll(min, max, maxResults, filter, mapper);
     }
 

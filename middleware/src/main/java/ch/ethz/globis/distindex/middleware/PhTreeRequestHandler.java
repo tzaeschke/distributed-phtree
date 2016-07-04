@@ -59,15 +59,14 @@ import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhDistanceF;
 import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.PhTree;
 import ch.ethz.globis.pht.PhTree.PhIterator;
 import ch.ethz.globis.pht.PhTree.PhKnnQuery;
-import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
 import ch.ethz.globis.pht.util.PhMapperK;
 import ch.ethz.globis.pht.util.PhMapperV;
-import ch.ethz.globis.pht.util.PhTreeQStats;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 /**
  * An implementation of the RequestHandler backed by an in-memory PhTree. *
@@ -344,7 +343,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         PhMapper<?,?> mapper = request.getMapper();
-        PhPredicate predicate = request.getFilter();
+        PhFilter predicate = request.getFilter();
         long[] start = request.getStart();
         long[] end = request.getEnd();
         PhTree<byte[]> tree = tree();
@@ -366,41 +365,6 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
     }
 
     @Override
-    public Response handleNodeCount(BaseRequest request) {
-        if (isVersionOutDate(request)) {
-            return createOutdateVersionResponse(request);
-        }
-
-        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        response.addParameter("nodeCount", tree().getNodeCount());
-        return response;
-    }
-
-    @Override
-    public Response handleQuality(BaseRequest request) {
-        if (isVersionOutDate(request)) {
-            return createOutdateVersionResponse(request);
-        }
-
-        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTreeQStats quality = (tree().size() == 0) ? new PhTreeQStats(tree().getBitDepth()) : tree().getQuality();
-        response.addParameter("quality", quality);
-        return response;
-    }
-
-    @Override
-    public Response handleStatsNoNode(BaseRequest request) {
-        if (isVersionOutDate(request)) {
-            return createOutdateVersionResponse(request);
-        }
-
-        MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTreeHelper.Stats stats = (tree().size() == 0) ? new PhTreeHelper.Stats() : tree().getStatsIdealNoNode();
-        response.addParameter("stats", stats);
-        return response;
-    }
-
-    @Override
     public Response handleToString(BaseRequest request) {
         if (isVersionOutDate(request)) {
             return createOutdateVersionResponse(request);
@@ -418,7 +382,7 @@ public class PhTreeRequestHandler implements RequestHandler<long[], byte[]> {
         }
 
         MapResponse response = new MapResponse(request.getOpCode(), request.getId(), OpStatus.SUCCESS);
-        PhTreeHelper.Stats stats = (tree().size() == 0) ? new PhTreeHelper.Stats() : tree().getStats();
+        PhTreeStats stats = (tree().size() == 0) ? new PhTreeStats() : tree().getStats();
         response.addParameter("stats", stats);
         return response;
     }

@@ -27,7 +27,7 @@ package ch.ethz.globis.distindex.operation.request;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.util.PhMapper;
 
 import java.util.Map;
@@ -129,18 +129,6 @@ public class Requests<K, V> {
         return new BaseRequest(nextId(), OpCode.STATS, PLACEHOLDER, mappingVersion());
     }
 
-    public BaseRequest newStatsNoNode() {
-        return new BaseRequest(nextId(), OpCode.STATS_NO_NODE, PLACEHOLDER, mappingVersion());
-    }
-
-    public BaseRequest newQuality() {
-        return new BaseRequest(nextId(), OpCode.QUALITY, PLACEHOLDER, mappingVersion());
-    }
-
-    public BaseRequest newNodeCount() {
-        return new BaseRequest(nextId(), OpCode.NODE_COUNT, PLACEHOLDER, mappingVersion());
-    }
-
     public BaseRequest newToString() {
         return new BaseRequest(nextId(), OpCode.TO_STRING, PLACEHOLDER, mappingVersion());
     }
@@ -154,7 +142,7 @@ public class Requests<K, V> {
         return new UpdateKeyRequest<>(nextId(), OpCode.UPDATE_KEY, PLACEHOLDER, mappingVersion(), oldKey, newKey);
     }
 
-    public <R> GetRangeFilterMapperRequest<K> newGetRangeFilterMaper(K min, K max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+    public <R> GetRangeFilterMapperRequest<K> newGetRangeFilterMaper(K min, K max, int maxResults, PhFilter filter, PhMapper<V, R> mapper) {
         return new GetRangeFilterMapperRequest<>(nextId(), OpCode.GET_RANGE_FILTER, PLACEHOLDER, mappingVersion(), min, max, maxResults, filter, mapper);
     }
 }

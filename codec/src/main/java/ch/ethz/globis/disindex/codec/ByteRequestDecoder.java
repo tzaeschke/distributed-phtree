@@ -28,7 +28,7 @@ import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.RequestDecoder;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.util.PhMapper;
 
 import com.google.common.base.Splitter;
@@ -151,7 +151,7 @@ public class ByteRequestDecoder<K> implements RequestDecoder<K, byte[]> {
             int filterLength = buffer.getInt();
             byte[] filterBytes = new byte[filterLength];
             buffer.get(filterBytes);
-            PhPredicate filter = SerializerUtil.getInstance().deserializeDefault(filterBytes);
+            PhFilter filter = SerializerUtil.getInstance().deserializeDefault(filterBytes);
             return new GetRangeFilterMapperRequest<>(requestId, opCode, indexName, mappingVersion, start, end, maxResults, filter, mapper);
         } catch (IOException | ClassNotFoundException e) {
             throw new UnsupportedOperationException("Failed to perform decoding.", e);

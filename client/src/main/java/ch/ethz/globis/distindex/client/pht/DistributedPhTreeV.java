@@ -24,11 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeQStats;
-
 import java.util.List;
+
+import ch.ethz.globis.pht.PhDistance;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.PhFilter;
+import ch.ethz.globis.pht.PhRangeQuery;
+import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 /**
  * Represents a distributed key-value PH Tree. It also conforms to the PH-Tree interfaces.
@@ -53,23 +57,8 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     }
 
     @Override
-    public int getNodeCount() {
-        return proxy.getNodeCount();
-    }
-
-    @Override
-    public PhTreeQStats getQuality() {
-        return proxy.getQuality();
-    }
-
-    @Override
-    public PhTreeHelper.Stats getStats() {
+    public PhTreeStats getStats() {
         return proxy.getStats();
-    }
-
-    @Override
-    public PhTreeHelper.Stats getStatsIdealNoNode() {
-        return proxy.getStatsIdealNoNode();
     }
 
     @Override
@@ -128,7 +117,7 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     }
 
     @Override
-    public PhKnnQuery<V> nearestNeighbour(int i, PhDistance phDistance, PhDimFilter phDimFilter, long... keys) {
+    public PhKnnQuery<V> nearestNeighbour(int i, PhDistance phDistance, PhFilter phDimFilter, long... keys) {
         return proxy.getNearestNeighbuor(i, phDistance, phDimFilter, keys);
     }
 
@@ -143,7 +132,7 @@ public class DistributedPhTreeV<V> implements PhTree<V> {
     }
 
     @Override
-    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhFilter filter, PhMapper<V, R> mapper) {
         return proxy.queryAll(min, max, maxResults, filter, mapper);
     }
 

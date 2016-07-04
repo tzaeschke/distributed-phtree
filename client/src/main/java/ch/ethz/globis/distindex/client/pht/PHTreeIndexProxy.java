@@ -59,14 +59,12 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhDimFilter;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.PhTree.PhKnnQuery;
-import ch.ethz.globis.pht.PhTreeHelper;
 import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeQStats;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 /**
  *  Represents a proxy to a distributed multi-dimensional index. The API implemented is independent of any
@@ -209,7 +207,7 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
     /**
      * @return                          The combined stats for the tree.
      */
-    public PhTreeHelper.Stats getStats() {
+    public PhTreeStats getStats() {
         boolean versionOutdated;
         List<MapResponse> responses;
         do {
@@ -221,94 +219,22 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return combineStats(responses);
     }
 
-    /**
-     * @return                          The combined stats for the tree.
-     */
-    public PhTreeHelper.Stats getStatsIdealNoNode() {
-        boolean versionOutdated;
-        List<MapResponse> responses;
-        do {
-            BaseRequest request = requests.newStatsNoNode();
-            List<String> hostIds = clusterService.getMapping().get();
-            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
-            versionOutdated = check(request, responses);
-        } while (versionOutdated);
-        return combineStats(responses);
-    }
-
-    private PhTreeHelper.Stats combineStats(List<MapResponse> responses) {
-        PhTreeHelper.Stats global = new PhTreeHelper.Stats(), current;
+    private PhTreeStats combineStats(List<MapResponse> responses) {
+        PhTreeStats global = new PhTreeStats(), current;
         for (MapResponse response : responses) {
-            current = (PhTreeHelper.Stats) response.getParameter("stats");
-            global.nChildren += current.nChildren;
-            global.nHCP += current.nHCP;
-            global.nHCS += current.nHCS;
-            global.nInnerNodes += current.nInnerNodes;
-            global.nLeafNodes += current.nLeafNodes;
-            global.nLeafSingle += current.nLeafSingle;
-            global.nLeafSingleNoPrefix += current.nLeafSingleNoPrefix;
-            global.nLonely += current.nLonely;
-            global.nNI += current.nNI;
+            current = (PhTreeStats) response.getParameter("stats");
+            global.nAHC += current.nAHC;
             global.nNodes += current.nNodes;
-            global.nSubOnly += current.nSubOnly;
-            global.nTooLarge += current.nTooLarge;
-            global.nTooLarge2 += current.nTooLarge2;
-            global.nTooLarge4 += current.nTooLarge4;
+            global.nNT += current.nNT;
+            global.nNtNodes += current.nNtNodes;
+            global.nTotalChildren += current.nTotalChildren;
             global.size += current.size;
-        }
-        return global;
-    }
-
-    /**
-     * @return                          The combined quality stats for the tree.
-     */
-    public PhTreeQStats getQuality() {
-        boolean versionOutdated;
-        List<MapResponse> responses;
-        do {
-            BaseRequest request = requests.newQuality();
-            List<String> hostIds = clusterService.getMapping().get();
-            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
-            versionOutdated = check(request, responses);
-        } while (versionOutdated);
-        return combineQualityStats(responses);
-    }
-
-    private PhTreeQStats combineQualityStats(List<MapResponse> responses) {
-        PhTreeQStats global = new PhTreeQStats(depth), current;
-        for (MapResponse response : responses) {
-            current = (PhTreeQStats) response.getParameter("quality");
             for (int i = 0; i < global.q_nPostFixN.length; i++) {
                 global.q_nPostFixN[i] += current.q_nPostFixN[i];
             }
             global.q_totalDepth += current.q_totalDepth;
-            global.nHCP += current.nHCP;
-            global.nHCS += current.nHCS;
-            global.nNI += current.nNI;
-            global.nNodes += current.nNodes;
         }
-        return global;
-    }
-
-    /**
-     * @return                          The combined node count for the tree.
-     */
-    public int getNodeCount() {
-        boolean versionOutdated;
-        List<MapResponse> responses;
-        do {
-            BaseRequest request = requests.newNodeCount();
-            List<String> hostIds = clusterService.getMapping().get();
-
-            responses = requestDispatcher.send(hostIds, request, MapResponse.class);
-            versionOutdated = check(request, responses);
-        } while (versionOutdated);
-
-        Integer global = 0, current;
-        for (MapResponse response : responses) {
-            current = (Integer) response.getParameter("nodeCount");
-            global += current;
-        }
+        global.q_totalDepth /= responses.size();
         return global;
     }
 
@@ -334,16 +260,16 @@ public class PHTreeIndexProxy<V> extends IndexProxy<long[], V> implements PointI
         return global;
     }
 
-    public PhKnnQuery<V> getNearestNeighbuor(int i, PhDistance phDistance, PhDimFilter phDimFilter, long[] keys) {
+    public PhKnnQuery<V> getNearestNeighbuor(int i, PhDistance phDistance, PhFilter phDimFilter, long[] keys) {
         //ToDo this is currently not supported by the PH Tree, but it will change in the future
         throw new UnsupportedOperationException();
     }
 
     public List<PhEntry<V>> queryAll(long[] min, long[] max) {
-        return queryAll(min, max, Integer.MAX_VALUE, PhPredicate.ACCEPT_ALL, PhMapper.<V>PVENTRY());
+        return queryAll(min, max, Integer.MAX_VALUE, null, PhMapper.<V>PVENTRY());
     }
 
-    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhPredicate filter, PhMapper<V, R> mapper) {
+    public <R> List<R> queryAll(long[] min, long[] max, int maxResults, PhFilter filter, PhMapper<V, R> mapper) {
         boolean versionOutdated;
         List<ResultResponse> responses;
         do {

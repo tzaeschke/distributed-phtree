@@ -26,15 +26,13 @@ package ch.ethz.globis.distindex.concurrency.dummies;
 
 import java.util.List;
 
-import ch.ethz.globis.pht.PhDimFilter;
 import ch.ethz.globis.pht.PhDistance;
 import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhPredicate;
+import ch.ethz.globis.pht.PhFilter;
 import ch.ethz.globis.pht.PhRangeQuery;
 import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeHelper.Stats;
 import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeQStats;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 /**
  * A concurrent version of the PHTree
@@ -61,23 +59,8 @@ public class PhTreeC<T> implements PhTree<T> {
 	}
 
 	@Override
-	public int getNodeCount() {
-		return p.getNodeCount();
-	}
-
-	@Override
-	public PhTreeQStats getQuality() {
-		return p.getQuality();
-	}
-
-	@Override
-	public Stats getStats() {
+	public PhTreeStats getStats() {
 		return p.getStats();
-	}
-
-	@Override
-	public Stats getStatsIdealNoNode() {
-		return p.getStatsIdealNoNode();
 	}
 
 	@Override
@@ -136,7 +119,7 @@ public class PhTreeC<T> implements PhTree<T> {
 	}
 
 	@Override
-	public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhDimFilter dims,
+	public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhFilter dims,
 			long... key) {
 		return p.nearestNeighbour(nMin, dist, dims, key);
 	}
@@ -163,7 +146,7 @@ public class PhTreeC<T> implements PhTree<T> {
 
 	@Override
 	public <R> List<R> queryAll(long[] min, long[] max, int maxResults, 
-			PhPredicate filter, PhMapper<T, R> mapper) {
+			PhFilter filter, PhMapper<T, R> mapper) {
 		return p.queryAll(min, max, maxResults, filter, mapper);
 	}
 

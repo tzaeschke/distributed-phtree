@@ -123,15 +123,6 @@ public class IOHandler<K, V> {
                 case OpCode.STATS:
                     response = handleStatsRequest(buffer);
                     break;
-                case OpCode.STATS_NO_NODE:
-                    response = handleStatsNoNodeRequest(buffer);
-                    break;
-                case OpCode.QUALITY:
-                    response = handleQualityRequest(buffer);
-                    break;
-                case OpCode.NODE_COUNT:
-                    response = handleNodeCountRequest(buffer);
-                    break;
                 case OpCode.TO_STRING:
                     response = handleToStringRequest(buffer);
                     break;
@@ -154,24 +145,6 @@ public class IOHandler<K, V> {
     private ByteBuffer handleGetRangeFilter(ByteBuffer buffer) {
         GetRangeFilterMapperRequest<K> request = decoder.decodeGetRangeFilterMapper(buffer);
         Response response = requestHandler.handleGetRangeFilter(request);
-        return encodeResponse(response);
-    }
-
-    private ByteBuffer handleNodeCountRequest(ByteBuffer buffer) {
-        BaseRequest request = decoder.decodeBase(buffer);
-        Response response = requestHandler.handleNodeCount(request);
-        return encodeResponse(response);
-    }
-
-    private ByteBuffer handleQualityRequest(ByteBuffer buffer) {
-        BaseRequest request = decoder.decodeBase(buffer);
-        Response response = requestHandler.handleQuality(request);
-        return encodeResponse(response);
-    }
-
-    private ByteBuffer handleStatsNoNodeRequest(ByteBuffer buffer) {
-        BaseRequest request = decoder.decodeBase(buffer);
-        Response response = requestHandler.handleStatsNoNode(request);
         return encodeResponse(response);
     }
 

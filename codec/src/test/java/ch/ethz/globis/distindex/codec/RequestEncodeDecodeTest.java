@@ -24,28 +24,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.codec;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.Random;
+
+import org.junit.Test;
+
 import ch.ethz.globis.disindex.codec.ByteRequestDecoder;
 import ch.ethz.globis.disindex.codec.ByteRequestEncoder;
 import ch.ethz.globis.disindex.codec.api.FieldDecoder;
 import ch.ethz.globis.disindex.codec.api.FieldEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.MultiLongEncoderDecoder;
 import ch.ethz.globis.disindex.codec.field.SerializingEncoderDecoder;
-import ch.ethz.globis.distindex.operation.*;
-import ch.ethz.globis.distindex.operation.request.*;
+import ch.ethz.globis.distindex.operation.OpCode;
+import ch.ethz.globis.distindex.operation.request.BaseRequest;
+import ch.ethz.globis.distindex.operation.request.CommitBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.DeleteRequest;
+import ch.ethz.globis.distindex.operation.request.GetIteratorBatchRequest;
+import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeFilterMapperRequest;
+import ch.ethz.globis.distindex.operation.request.GetRangeRequest;
+import ch.ethz.globis.distindex.operation.request.GetRequest;
+import ch.ethz.globis.distindex.operation.request.InitBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.MapRequest;
+import ch.ethz.globis.distindex.operation.request.PutBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.PutRequest;
+import ch.ethz.globis.distindex.operation.request.RollbackBalancingRequest;
+import ch.ethz.globis.distindex.operation.request.UpdateKeyRequest;
 import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhPredicate;
 import ch.ethz.globis.pht.util.PhMapper;
 import ch.ethz.globis.pht.util.PhMapperK;
-
-import org.junit.Test;
-
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.Random;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class RequestEncodeDecodeTest {
 
@@ -240,12 +252,12 @@ public class RequestEncodeDecodeTest {
         long[] max = {100, 100, 100};
         GetRangeFilterMapperRequest<long[]> request =
                 new GetRangeFilterMapperRequest<>(1, OpCode.GET_RANGE_FILTER, "", 1,
-                        min, max, 5, PhPredicate.ACCEPT_ALL, PhMapperK.<long[]>LONG_ARRAY());
+                        min, max, 5, null, PhMapperK.<long[]>LONG_ARRAY());
 
         byte[] encodedRequest = requestEncoder.encodeGetRangeFilterMapper(request);
         GetRangeFilterMapperRequest<long[]> decoded = requestDecoder.decodeGetRangeFilterMapper(ByteBuffer.wrap(encodedRequest));
         assertRequestMetaEqual(request, decoded);
-        assertTrue(decoded.getFilter().test(new long[] { 1, 2}));
+        assertTrue(decoded.getFilter().isValid(new long[] { 1, 2}));
         PhMapper<long[], long[]> mapper = decoded.getMapper();
         assertArrayEquals(new long[] {1, 2} , mapper.map(new PhEntry<>(new long[] {1, 2}, new long[] {2, 3})));
     }

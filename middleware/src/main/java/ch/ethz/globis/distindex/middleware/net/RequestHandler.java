@@ -63,12 +63,6 @@ public interface RequestHandler<K, V> {
 
     public Response handleContains(ContainsRequest<K> request);
 
-    public Response handleNodeCount(BaseRequest request);
-
-    public Response handleQuality(BaseRequest request);
-
-    public Response handleStatsNoNode(BaseRequest request);
-
     public Response handleToString(BaseRequest request);
 
     public Response handleStats(BaseRequest request);

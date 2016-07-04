@@ -24,28 +24,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex;
 
-import ch.ethz.globis.distindex.api.IndexEntry;
-import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.test.BaseParameterizedTest;
-import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhMapperK;
-import ch.ethz.globis.pht.util.PhMapperV;
-import ch.ethz.globis.pht.util.PhTreeQStats;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
-
-import static org.junit.Assert.*;
+import ch.ethz.globis.distindex.api.IndexEntry;
+import ch.ethz.globis.distindex.api.IndexEntryList;
+import ch.ethz.globis.distindex.api.IndexIterator;
+import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
+import ch.ethz.globis.distindex.test.BaseParameterizedTest;
+import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.pht.util.PhMapperK;
+import ch.ethz.globis.pht.util.PhMapperV;
+import ch.ethz.globis.pht.util.PhTreeStats;
 
 public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
 
@@ -389,42 +399,10 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         phTree.put(k(1, -1), "two");
         phTree.put(k(-1, 1), "three");
         phTree.put(k(-1, -1), "four");
-        PhTreeHelper.Stats stats = phTree.getStats();
+        PhTreeStats stats = phTree.getStats();
         System.out.println(stats);
     }
 
-    @Test
-    public void testStats_Ideal() {
-        phTree.create(2, 64);
-        phTree.put(k(1, 1), "one");
-        phTree.put(k(1, -1), "two");
-        phTree.put(k(-1, 1), "three");
-        phTree.put(k(-1, -1), "four");
-        PhTreeHelper.Stats stats = phTree.getStatsIdealNoNode();
-        System.out.println(stats);
-    }
-
-    @Test
-    public void testQuality() {
-        phTree.create(2, 64);
-        phTree.put(k(1, 1), "one");
-        phTree.put(k(1, -1), "two");
-        phTree.put(k(-1, 1), "three");
-        phTree.put(k(-1, -1), "four");
-        PhTreeQStats quality = phTree.getQuality();
-        System.out.println(quality);
-    }
-
-    @Test
-    public void testNodeCount() {
-        phTree.create(2, 64);
-        phTree.put(k(1, 1), "one");
-        phTree.put(k(1, -1), "two");
-        phTree.put(k(-1, 1), "three");
-        phTree.put(k(-1, -1), "four");
-        int nodeCount = phTree.getNodeCount();
-        System.out.println(nodeCount);
-    }
 
     @Test
     public void testToString() {
@@ -472,7 +450,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         IndexEntryList<long[], String> expected = setupTestTreeForRangeQueriesAndReturnExpectedResult();
         long[] min = {9, 9};
         long[] max = {11, 11};
-        List<PhEntry<String>> pvEntries = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapper.PVENTRY());
+        List<PhEntry<String>> pvEntries = phTree.queryAll(min, max, 100, null, PhMapper.PVENTRY());
         final IndexEntryList<long[], String> results = new IndexEntryList<>();
         pvEntries.stream().forEach(e -> results.add(e.getKey(), e.getValue()));
 
@@ -488,7 +466,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         IndexEntryList<long[], String> entries = setupTestTreeForRangeQueriesAndReturnExpectedResult();
         long[] min = {9, 9};
         long[] max = {11, 11};
-        List<long[]> results = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapperK.LONG_ARRAY());
+        List<long[]> results = phTree.queryAll(min, max, 100, null, PhMapperK.LONG_ARRAY());
 
         entries = MultidimUtil.sort(entries);
         List<long[]> expected = new ArrayList<>();
@@ -508,7 +486,7 @@ public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
         IndexEntryList<long[], String> entries = setupTestTreeForRangeQueriesAndReturnExpectedResult();
         long[] min = {9, 9};
         long[] max = {11, 11};
-        List<String> results = phTree.queryAll(min, max, 100, PhPredicate.ACCEPT_ALL, PhMapperV.VALUE());
+        List<String> results = phTree.queryAll(min, max, 100, null, PhMapperV.VALUE());
 
         final HashSet<String> expected = new HashSet<>();
         entries.forEach(e -> expected.add(e.getValue()));

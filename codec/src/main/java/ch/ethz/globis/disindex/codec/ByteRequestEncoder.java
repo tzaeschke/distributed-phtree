@@ -99,9 +99,6 @@ public class ByteRequestEncoder<K, V> implements RequestEncoder {
             case OpCode.GET_DIM:
             case OpCode.GET_SIZE:
             case OpCode.STATS:
-            case OpCode.STATS_NO_NODE:
-            case OpCode.QUALITY:
-            case OpCode.NODE_COUNT:
             case OpCode.TO_STRING:
                 BaseRequest br = (BaseRequest) request;
                 encodedRequest = encodeBase(br);

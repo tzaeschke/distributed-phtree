@@ -54,17 +54,17 @@ public class SerializerUtilTest {
     public void testSerializeDefaultNull() throws IOException, ClassNotFoundException {
         SerializerUtil serializer = SerializerUtil.getInstance();
         byte[] data = serializer.serializeDefault(null);
-        PhPredicate deserializedPredicate = serializer.deserializeDefault(data);
+        PhFilter deserializedPredicate = serializer.deserializeDefault(data);
         assertEquals(null, deserializedPredicate);
     }
 
     @Test
-    public void testSerializeDeserializePhPredicate() throws IOException, ClassNotFoundException {
-        PhPredicate pred = getTestPredicate();
+    public void testSerializeDeserializePhFilter() throws IOException, ClassNotFoundException {
+        PhFilter pred = getTestPredicate();
         Map<long[], Boolean> argumentResultMap = getTestPredicateResultMap();
         checkResults(argumentResultMap, pred);
 
-        PhPredicate deserializedPredicate = serializeDeserialize(pred);
+        PhFilter deserializedPredicate = serializeDeserialize(pred);
         checkResults(argumentResultMap, deserializedPredicate);
     }
 
@@ -81,18 +81,31 @@ public class SerializerUtilTest {
         assertEquals(key, serializeDeserialize(PhMapperKey.LONG_ARRAY()).map(key));
     }
 
-    private void checkResults(Map<long[], Boolean> argumentResultMap, PhPredicate predicate) {
+    private void checkResults(Map<long[], Boolean> argumentResultMap, PhFilter predicate) {
         long[] key;
         boolean result;
         for (Map.Entry<long[], Boolean> entry : argumentResultMap.entrySet()) {
             key = entry.getKey();
             result = entry.getValue();
-            assertEquals(result, predicate.test(key));
+            assertEquals(result, predicate.isValid(key));
         }
     }
 
-    private PhPredicate getTestPredicate() {
-        return p -> p.length < 2;
+    private PhFilter getTestPredicate() {
+        return new PhFilter() {
+			
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isValid(int bitsToIgnore, long[] prefix) {
+				return true;
+			}
+			
+			@Override
+			public boolean isValid(long[] key) {
+				return key.length < 2;
+			}
+		};
     }
 
     private <T extends Serializable> T serializeDeserialize(T object) throws IOException, ClassNotFoundException {
