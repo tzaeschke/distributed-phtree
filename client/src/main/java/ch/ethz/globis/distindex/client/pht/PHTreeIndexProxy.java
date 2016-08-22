@@ -59,12 +59,12 @@ import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 /**
  *  Represents a proxy to a distributed multi-dimensional index. The API implemented is independent of any

@@ -26,7 +26,7 @@ package ch.ethz.globis.distindex.client.pht;
 
 import java.util.List;
 
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
 
 public interface KNNRadiusStrategy {
 

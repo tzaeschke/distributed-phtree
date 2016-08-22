@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-import ch.ethz.globis.pht.nv.PhTreeNVSolidF;
-import ch.ethz.globis.pht.nv.PhTreeVProxy;
+import ch.ethz.globis.phtree.*;
+import ch.ethz.globis.phtree.nv.PhTreeNV;
+import ch.ethz.globis.phtree.nv.PhTreeNVSolidF;
+import ch.ethz.globis.phtree.nv.PhTreeVProxy;
 
 import java.io.IOException;
 import java.util.ArrayList;

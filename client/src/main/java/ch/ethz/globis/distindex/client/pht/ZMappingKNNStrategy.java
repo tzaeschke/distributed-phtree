@@ -29,7 +29,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.request.GetKNNRequest;
 import ch.ethz.globis.distindex.operation.request.Requests;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

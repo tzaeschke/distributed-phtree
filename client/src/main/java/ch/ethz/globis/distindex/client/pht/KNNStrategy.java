@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
 
 public interface KNNStrategy<V> {
 

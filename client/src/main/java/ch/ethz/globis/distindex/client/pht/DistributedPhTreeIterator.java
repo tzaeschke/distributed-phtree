@@ -26,8 +26,8 @@ package ch.ethz.globis.distindex.client.pht;
 
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexIterator;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhTree.PhQuery;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhTree.PhQuery;
 
 /**
  * Main implementation of the PH Tree key-value iterator, backed by a proxy iterator.

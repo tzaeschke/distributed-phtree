@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.client.pht;
 
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTreeF;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-import ch.ethz.globis.pht.nv.PhTreeNVSolidF;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.PhTreeF;
+import ch.ethz.globis.phtree.nv.PhTreeNV;
+import ch.ethz.globis.phtree.nv.PhTreeNVSolidF;
 
 public interface PHFactory {
 

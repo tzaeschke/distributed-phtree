@@ -26,13 +26,13 @@ package ch.ethz.globis.distindex.client.pht;
 
 import java.util.List;
 
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.PhRangeQuery;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.PhRangeQuery;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 /**
  * Represents a distributed key-value PH Tree. It also conforms to the PH-Tree interfaces.
