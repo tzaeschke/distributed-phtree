@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.phtree.nv.PhTreeNV;
 
 public class RangeTask implements Runnable{
 

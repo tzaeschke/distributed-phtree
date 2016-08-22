@@ -44,7 +44,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import ch.ethz.globis.distindex.serializer.FullTreeSerializer;
 import ch.ethz.globis.distindex.serializer.IterativeSerializer;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 @BenchmarkMode({Mode.Throughput})
 @Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)

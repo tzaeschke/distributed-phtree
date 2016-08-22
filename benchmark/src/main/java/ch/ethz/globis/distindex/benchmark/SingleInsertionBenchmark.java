@@ -26,7 +26,7 @@ package ch.ethz.globis.distindex.benchmark;
 
 import java.util.List;
 
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 public class SingleInsertionBenchmark implements Benchmark {
 

@@ -26,7 +26,7 @@ package ch.ethz.globis.distindex.cluster;
 
 
 import ch.ethz.globis.distindex.client.pht.PHFactory;
-import ch.ethz.globis.pht.nv.PhTreeNV;
+import ch.ethz.globis.phtree.nv.PhTreeNV;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

@@ -31,13 +31,13 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.PhRangeQuery;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.PhRangeQuery;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 /**
  * Performs an in-memory logging

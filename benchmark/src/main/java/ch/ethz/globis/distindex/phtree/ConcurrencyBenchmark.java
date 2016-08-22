@@ -50,7 +50,7 @@ import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsHandOverHand_COW
 import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
 import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsSimple;
 import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 @BenchmarkMode({Mode.Throughput})
 @Warmup(iterations = 5, time = 100, timeUnit = TimeUnit.MILLISECONDS)

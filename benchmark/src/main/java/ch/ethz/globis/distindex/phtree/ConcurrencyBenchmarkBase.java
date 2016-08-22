@@ -38,7 +38,7 @@ import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsHandOverHand_COW
 import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
 import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsSimple;
 import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 public class ConcurrencyBenchmarkBase {
 
