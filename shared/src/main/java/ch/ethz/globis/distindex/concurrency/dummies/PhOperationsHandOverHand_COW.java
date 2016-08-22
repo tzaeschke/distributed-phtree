@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.concurrency.dummies;
 
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 public class PhOperationsHandOverHand_COW<T> extends PhOperationsSimple<T> {
 

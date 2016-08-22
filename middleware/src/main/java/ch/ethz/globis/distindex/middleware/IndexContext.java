@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import ch.ethz.globis.distindex.concurrency.dummies.PhOperationsOL_COW;
 import ch.ethz.globis.distindex.concurrency.dummies.PhTreeC;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 /**
  * The in-memory context associated with the index.

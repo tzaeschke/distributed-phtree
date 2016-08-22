@@ -51,11 +51,11 @@ import ch.ethz.globis.distindex.api.IndexIterator;
 import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
 import ch.ethz.globis.distindex.test.BaseParameterizedTest;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhMapperK;
-import ch.ethz.globis.pht.util.PhMapperV;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhMapperK;
+import ch.ethz.globis.phtree.util.PhMapperV;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 public class TestDistPhTreeProxyParameterized extends BaseParameterizedTest {
 

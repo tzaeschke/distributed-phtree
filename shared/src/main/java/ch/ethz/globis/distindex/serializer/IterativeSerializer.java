@@ -32,9 +32,9 @@ import java.io.FileOutputStream;
 
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTree.PhIterator;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.PhTree.PhIterator;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

@@ -26,16 +26,20 @@ package ch.ethz.globis.distindex.concurrency.dummies;
 
 import java.util.List;
 
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.PhRangeQuery;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.PhRangeQuery;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 /**
  * A concurrent version of the PHTree
+ * 
+ * NOTE: This is not a proper concurrent version! As a VERY BASIC workaround, all methods
+ * are 'synchronized'. But of course this would also require synchronization of iterators from
+ * queries. 
  * 
  * @author ztilmann
  *
@@ -54,108 +58,108 @@ public class PhTreeC<T> implements PhTree<T> {
 	
 	
 	@Override
-	public int size() {
+	public synchronized int size() {
 		return p.size();
 	}
 
 	@Override
-	public PhTreeStats getStats() {
+	public synchronized PhTreeStats getStats() {
 		return p.getStats();
 	}
 
 	@Override
-	public T put(long[] key, T value) {
+	public synchronized T put(long[] key, T value) {
 		return p.put(key, value);
 	}
 
 	@Override
-	public boolean contains(long... key) {
+	public synchronized boolean contains(long... key) {
 		return p.contains(key);
 	}
 
 	@Override
-	public T get(long... key) {
+	public synchronized T get(long... key) {
 		return p.get(key);
 	}
 
 	@Override
-	public T remove(long... key) {
+	public synchronized T remove(long... key) {
 		return p.remove(key);
 	}
 
 	@Override
-	public String toStringPlain() {
+	public synchronized String toStringPlain() {
 		return p.toStringPlain();
 	}
 
 	@Override
-	public String toStringTree() {
+	public synchronized String toStringTree() {
 		return p.toStringTree();
 	}
 
 	@Override
-	public PhExtent<T> queryExtent() {
+	public synchronized PhExtent<T> queryExtent() {
 		return p.queryExtent();
 	}
 
 	@Override
-	public PhQuery<T> query(long[] min, long[] max) {
+	public synchronized PhQuery<T> query(long[] min, long[] max) {
 		return p.query(min, max);
 	}
 
 	@Override
-	public int getDim() {
+	public synchronized int getDim() {
 		return p.getDim();
 	}
 
 	@Override
-	public int getBitDepth() {
+	public synchronized int getBitDepth() {
 		return p.getBitDepth();
 	}
 
 	@Override
-	public PhKnnQuery<T> nearestNeighbour(int nMin, long... key) {
+	public synchronized PhKnnQuery<T> nearestNeighbour(int nMin, long... key) {
 		return p.nearestNeighbour(nMin, key);
 	}
 
 	@Override
-	public PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhFilter dims,
+	public synchronized PhKnnQuery<T> nearestNeighbour(int nMin, PhDistance dist, PhFilter dims,
 			long... key) {
 		return p.nearestNeighbour(nMin, dist, dims, key);
 	}
 
 	@Override
-	public PhRangeQuery<T> rangeQuery(double dist, long... center) {
+	public synchronized PhRangeQuery<T> rangeQuery(double dist, long... center) {
 		return p.rangeQuery(dist, center);
 	}
 
 	@Override
-	public PhRangeQuery<T> rangeQuery(double dist, PhDistance optionalDist, long... center) {
+	public synchronized PhRangeQuery<T> rangeQuery(double dist, PhDistance optionalDist, long... center) {
 		return p.rangeQuery(dist, optionalDist, center);
 	}
 
 	@Override
-	public T update(long[] oldKey, long[] newKey) {
+	public synchronized T update(long[] oldKey, long[] newKey) {
 		return p.update(oldKey, newKey);
 	}
 
 	@Override
-	public List<PhEntry<T>> queryAll(long[] min, long[] max) {
+	public synchronized List<PhEntry<T>> queryAll(long[] min, long[] max) {
 		return p.queryAll(min, max);
 	}
 
 	@Override
-	public <R> List<R> queryAll(long[] min, long[] max, int maxResults, 
+	public synchronized <R> List<R> queryAll(long[] min, long[] max, int maxResults, 
 			PhFilter filter, PhMapper<T, R> mapper) {
 		return p.queryAll(min, max, maxResults, filter, mapper);
 	}
 
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		p.clear();
 	}
 
-	public void setOperations(PhOperations<T> ops) {
+	public synchronized void setOperations(PhOperations<T> ops) {
 		if (ops instanceof PhOperationsSimple) {
 			System.err.println("WARNING: Setting operation for the PhTree is deprecated.");
 		} else {

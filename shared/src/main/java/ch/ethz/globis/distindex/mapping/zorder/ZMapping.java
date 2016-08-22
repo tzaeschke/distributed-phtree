@@ -41,7 +41,7 @@ import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.util.CollectionUtil;
 import ch.ethz.globis.distindex.util.MultidimUtil;
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.PhTreeSolid;
+import ch.ethz.globis.phtree.PhTreeSolid;
 
 /**
  * Mapping for the Z-Order curve.

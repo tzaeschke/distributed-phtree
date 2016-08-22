@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.operation.request;
 
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.util.PhMapper;
 
 public class GetRangeFilterMapperRequest<K> extends GetRangeRequest<K> {
 

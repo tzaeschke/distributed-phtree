@@ -29,7 +29,7 @@
             <artifactId>netty-all</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.ethz.globis.pht</groupId>
+            <groupId>ch.ethz.globis.phtree</groupId>
             <artifactId>phtree</artifactId>
         </dependency>
     </dependencies>

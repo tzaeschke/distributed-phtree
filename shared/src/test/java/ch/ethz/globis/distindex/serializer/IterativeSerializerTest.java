@@ -31,7 +31,7 @@ import java.io.FileNotFoundException;
 import org.junit.Test;
 
 import ch.ethz.globis.distindex.mapping.util.TestOperationsUtil;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 public class IterativeSerializerTest {
 

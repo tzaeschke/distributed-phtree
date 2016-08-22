@@ -26,7 +26,7 @@ package ch.ethz.globis.distindex.middleware.balancing;
 
 import ch.ethz.globis.distindex.middleware.IndexContext;
 import ch.ethz.globis.distindex.middleware.PhTreeRequestHandler;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

@@ -52,9 +52,9 @@ import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.orchestration.ZKClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTree.PhIterator;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.PhTree.PhIterator;
 
 public class ZMappingBalancingStrategy implements BalancingStrategy {
 

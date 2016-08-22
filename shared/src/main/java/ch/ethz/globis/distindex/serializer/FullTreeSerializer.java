@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex.serializer;
 
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

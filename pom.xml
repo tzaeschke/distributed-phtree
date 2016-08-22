@@ -73,15 +73,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>ch.ethz.globis.pht</groupId>
+                <groupId>ch.ethz.globis.phtree</groupId>
                 <artifactId>phtree</artifactId>
                 <version>${phtree.version}</version>
             </dependency>
             <dependency>
-                <groupId>ch.ethz.globis.pht</groupId>
+                <groupId>ch.ethz.globis.phtree</groupId>
                 <artifactId>phtree</artifactId>
                 <version>${phtree.version}</version>
                 <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>

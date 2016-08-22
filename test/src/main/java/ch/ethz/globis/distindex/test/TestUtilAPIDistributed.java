@@ -39,10 +39,10 @@ import ch.ethz.globis.distindex.client.pht.ZKPHFactory;
 import ch.ethz.globis.distindex.middleware.PhTreeIndexMiddlewareFactory;
 import ch.ethz.globis.distindex.middleware.api.Middleware;
 import ch.ethz.globis.distindex.middleware.util.MiddlewareUtil;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-import ch.ethz.globis.pht.nv.PhTreeVProxy;
-import ch.ethz.globis.pht.test.util.TestUtilAPI;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.nv.PhTreeNV;
+import ch.ethz.globis.phtree.nv.PhTreeVProxy;
+import ch.ethz.globis.phtree.test.util.TestUtilAPI;
 
 /**
  * Implementation of the TestUtilAPI

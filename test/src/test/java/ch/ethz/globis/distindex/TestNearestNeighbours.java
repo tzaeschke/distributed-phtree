@@ -24,26 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 package ch.ethz.globis.distindex;
 
-import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
-import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
-import ch.ethz.globis.distindex.test.BaseParameterizedTest;
-import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.nv.PhTreeNV;
-import ch.ethz.globis.pht.nv.PhTreeVProxy;
-import ch.ethz.globis.pht.util.Bits;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runners.Parameterized;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runners.Parameterized;
+
+import ch.ethz.globis.distindex.client.pht.DistributedPhTreeV;
+import ch.ethz.globis.distindex.client.pht.PHTreeIndexProxy;
+import ch.ethz.globis.distindex.test.BaseParameterizedTest;
+import ch.ethz.globis.distindex.util.MultidimUtil;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhDistanceL;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.util.Bits;
 
 public class TestNearestNeighbours extends BaseParameterizedTest {
 
@@ -102,7 +104,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across1() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
         long[] B = {side, side};
@@ -110,9 +112,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
 
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -148,7 +150,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across2() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -156,9 +158,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {-side - 1, 0};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals("Invalid result size", 2, result.size());
@@ -194,7 +196,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across3() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -202,9 +204,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {0, -side-1};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -240,7 +242,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across4() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -248,9 +250,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {0, side + 1};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -286,7 +288,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across5() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -295,9 +297,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {0, - radius + EPSILON};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -333,7 +335,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across6() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -342,9 +344,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {radius - EPSILON, 0};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -380,7 +382,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across7() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -389,9 +391,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {- radius + EPSILON, 0};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -427,7 +429,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_Across8() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side, 0};
@@ -436,9 +438,9 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
         long[] C = {0, radius - EPSILON};
         long[] Q = {0, 0};
         assertTrue("Configuration not set up properly. C should be closer to Q than B.", metric.dist(Q, B) > metric.dist(Q, C));
-        tree.insert(A);
-        tree.insert(B);
-        tree.insert(C);
+        tree.put(A, A);
+        tree.put(B, B);
+        tree.put(C, C);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());
@@ -449,7 +451,7 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
     @Test
     public void testFind16Hosts_NotEnough() {
         phTree.create(2, BIT_WIDTH);
-        PhTreeNV tree = new PhTreeVProxy(new DistributedPhTreeV<>(phTree));
+        PhTree<Object> tree = new DistributedPhTreeV<>(phTree);
 
         long side = SQUARE_SIDE;
         long[] A = {side * 2, 0};
@@ -457,8 +459,8 @@ public class TestNearestNeighbours extends BaseParameterizedTest {
 
         long[] Q = {0, 0};
 
-        tree.insert(A);
-        tree.insert(B);
+        tree.put(A, A);
+        tree.put(B, B);
 
         List<long[]> result = MultidimUtil.knnToList(tree.nearestNeighbour(2, Q));
         assertEquals(2, result.size());

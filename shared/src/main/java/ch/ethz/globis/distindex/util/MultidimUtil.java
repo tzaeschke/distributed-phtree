@@ -36,11 +36,11 @@ import java.util.NoSuchElementException;
 import ch.ethz.globis.distindex.api.Index;
 import ch.ethz.globis.distindex.api.IndexEntry;
 import ch.ethz.globis.distindex.api.IndexEntryList;
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTree.PhIterator;
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.PhTree.PhIterator;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
 
 public class MultidimUtil {
 

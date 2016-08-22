@@ -34,12 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
-import ch.ethz.globis.pht.test.TestIndexInsertion;
-import ch.ethz.globis.pht.test.TestIndexQueries;
-import ch.ethz.globis.pht.test.TestNearestNeighbour;
-import ch.ethz.globis.pht.test.TestValues;
-import ch.ethz.globis.pht.test.TestValuesD;
-import ch.ethz.globis.pht.test.util.TestUtil;
+import ch.ethz.globis.phtree.test.TestIndexInsertion;
+import ch.ethz.globis.phtree.test.TestIndexQueries;
+import ch.ethz.globis.phtree.test.TestNearestNeighbour;
+import ch.ethz.globis.phtree.test.TestValues;
+import ch.ethz.globis.phtree.test.TestValuesD;
+import ch.ethz.globis.phtree.test.util.TestUtil;
 
 //ignored to make compilation finish faster
 @Ignore

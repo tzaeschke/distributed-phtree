@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 
 public class TestOperationsUtil {
 

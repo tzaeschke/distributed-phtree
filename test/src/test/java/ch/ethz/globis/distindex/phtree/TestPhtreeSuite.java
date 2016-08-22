@@ -25,8 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package ch.ethz.globis.distindex.phtree;
 
 import ch.ethz.globis.distindex.test.TestUtilAPIDistributed;
-import ch.ethz.globis.pht.test.util.TestSuite;
-import ch.ethz.globis.pht.test.util.TestUtil;
+import ch.ethz.globis.phtree.test.util.TestSuite;
+import ch.ethz.globis.phtree.test.util.TestUtil;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.slf4j.Logger;

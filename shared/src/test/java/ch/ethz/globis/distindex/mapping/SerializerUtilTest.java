@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package ch.ethz.globis.distindex.mapping;
 
 import ch.ethz.globis.distindex.util.SerializerUtil;
-import ch.ethz.globis.pht.*;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhMapperK;
-import ch.ethz.globis.pht.util.PhMapperKey;
+import ch.ethz.globis.phtree.*;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhMapperK;
+import ch.ethz.globis.phtree.util.PhMapperKey;
 
 import org.junit.Test;
 
@@ -91,7 +91,7 @@ public class SerializerUtilTest {
         }
     }
 
-    private PhFilter getTestPredicate() {
+    private static PhFilter getTestPredicate() {
         return new PhFilter() {
 			
 			private static final long serialVersionUID = 1L;

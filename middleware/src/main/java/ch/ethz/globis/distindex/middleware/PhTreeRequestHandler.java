@@ -56,17 +56,17 @@ import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
 import ch.ethz.globis.distindex.util.MultidimUtil;
-import ch.ethz.globis.pht.PhDistance;
-import ch.ethz.globis.pht.PhDistanceF;
-import ch.ethz.globis.pht.PhEntry;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.PhTree;
-import ch.ethz.globis.pht.PhTree.PhIterator;
-import ch.ethz.globis.pht.PhTree.PhKnnQuery;
-import ch.ethz.globis.pht.util.PhMapper;
-import ch.ethz.globis.pht.util.PhMapperK;
-import ch.ethz.globis.pht.util.PhMapperV;
-import ch.ethz.globis.pht.util.PhTreeStats;
+import ch.ethz.globis.phtree.PhDistance;
+import ch.ethz.globis.phtree.PhDistanceF;
+import ch.ethz.globis.phtree.PhEntry;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.PhTree;
+import ch.ethz.globis.phtree.PhTree.PhIterator;
+import ch.ethz.globis.phtree.PhTree.PhKnnQuery;
+import ch.ethz.globis.phtree.util.PhMapper;
+import ch.ethz.globis.phtree.util.PhMapperK;
+import ch.ethz.globis.phtree.util.PhMapperV;
+import ch.ethz.globis.phtree.util.PhTreeStats;
 
 /**
  * An implementation of the RequestHandler backed by an in-memory PhTree. *

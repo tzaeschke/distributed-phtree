@@ -31,7 +31,7 @@ import ch.ethz.globis.distindex.operation.OpStatus;
 import ch.ethz.globis.distindex.operation.request.*;
 import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
-import ch.ethz.globis.pht.PhTree;
+import ch.ethz.globis.phtree.PhTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

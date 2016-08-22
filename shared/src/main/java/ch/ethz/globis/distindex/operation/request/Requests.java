@@ -27,8 +27,8 @@ package ch.ethz.globis.distindex.operation.request;
 import ch.ethz.globis.distindex.mapping.KeyMapping;
 import ch.ethz.globis.distindex.operation.OpCode;
 import ch.ethz.globis.distindex.orchestration.ClusterService;
-import ch.ethz.globis.pht.PhFilter;
-import ch.ethz.globis.pht.util.PhMapper;
+import ch.ethz.globis.phtree.PhFilter;
+import ch.ethz.globis.phtree.util.PhMapper;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
