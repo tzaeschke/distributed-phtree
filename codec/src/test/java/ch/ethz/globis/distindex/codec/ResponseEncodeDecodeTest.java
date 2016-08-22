@@ -39,7 +39,7 @@ import ch.ethz.globis.distindex.operation.response.BaseResponse;
 import ch.ethz.globis.distindex.operation.response.MapResponse;
 import ch.ethz.globis.distindex.operation.response.Response;
 import ch.ethz.globis.distindex.operation.response.ResultResponse;
-import ch.ethz.globis.pht.PhEntry;
+import ch.ethz.globis.phtree.PhEntry;
 import org.junit.Test;
 
 import java.math.BigInteger;
