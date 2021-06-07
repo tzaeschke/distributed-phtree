@@ -27,7 +27,7 @@
 
         <!--Dependency versions-->
         <netty.version>4.0.23.Final</netty.version>
-        <logback.version>1.1.2</logback.version>
+        <logback.version>1.2.0</logback.version>
         <phtree.version>0.3.0-SNAPSHOT</phtree.version>
         <junit.version>4.11</junit.version>
         <mockito.version>1.10.8</mockito.version>
