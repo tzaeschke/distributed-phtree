@@ -29,7 +29,7 @@
         <netty.version>4.0.23.Final</netty.version>
         <logback.version>1.2.0</logback.version>
         <phtree.version>0.3.0-SNAPSHOT</phtree.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mockito.version>1.10.8</mockito.version>
         <curator.version>2.7.0</curator.version>
         <guava.version>18.0</guava.version>
