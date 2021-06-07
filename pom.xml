@@ -26,7 +26,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!--Dependency versions-->
-        <netty.version>4.0.23.Final</netty.version>
+        <netty.version>4.1.42.Final</netty.version>
         <logback.version>1.2.0</logback.version>
         <phtree.version>0.3.0-SNAPSHOT</phtree.version>
         <junit.version>4.11</junit.version>
