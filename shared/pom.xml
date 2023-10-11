@@ -14,7 +14,7 @@
     <description>This module contains shared resources between the client library and the middleware</description>
 
     <properties>
-        <zookeeper.version>3.4.14</zookeeper.version>
+        <zookeeper.version>3.7.2</zookeeper.version>
     </properties>
     
     <dependencies>
